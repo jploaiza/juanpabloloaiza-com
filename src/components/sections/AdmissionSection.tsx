@@ -2,8 +2,19 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function AdmissionSection() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    reason: "",
+    medicalHistory: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -15,6 +26,47 @@ export default function AdmissionSection() {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Send form data via email using a service
+      const response = await fetch("https://formspree.io/f/xgvqkeqv", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          reason: "",
+          medicalHistory: "",
+        });
+        setTimeout(() => setSubmitted(false), 5000);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,7 +85,7 @@ export default function AdmissionSection() {
           Admisión a la Terapia
         </motion.h2>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
           <motion.div variants={itemVariants} className="space-y-6">
             <p className="body-text text-lg">
               Para comenzar este viaje transformador, necesitamos que completes un formulario de admisión. Esto nos ayuda a:
@@ -61,33 +113,100 @@ export default function AdmissionSection() {
                 Espacios limitados disponibles. El proceso es personalizado y dedicado a cada cliente. Se requiere entrevista preliminar gratuita antes de comenzar.
               </p>
             </div>
-
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="#admission-form"
-              className="btn-gold inline-block"
-            >
-              Comenzar Formulario de Admisión
-            </motion.a>
           </motion.div>
 
-          <motion.div
-            variants={itemVariants}
-            className="relative aspect-[4/5] rounded-lg overflow-hidden"
-          >
-            <Image
-              src="/assets/images/admission-form.webp"
-              alt="Formulario de Admisión"
-              fill
-              className="object-cover"
-            />
+          <motion.div variants={itemVariants} className="glass-card p-8">
+            {submitted && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded text-center"
+              >
+                <p className="body-text text-green-300 font-semibold">
+                  ¡Solicitud recibida! Me pondré en contacto pronto.
+                </p>
+              </motion.div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="label text-sm block mb-2">Nombre Completo</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Tu nombre"
+                  required
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                />
+              </div>
+
+              <div>
+                <label className="label text-sm block mb-2">Correo Electrónico</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="tu@email.com"
+                  required
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                />
+              </div>
+
+              <div>
+                <label className="label text-sm block mb-2">Teléfono / WhatsApp</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+56 9 6208 1884"
+                  required
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                />
+              </div>
+
+              <div>
+                <label className="label text-sm block mb-2">¿Cuál es tu motivo de consulta?</label>
+                <textarea
+                  name="reason"
+                  value={formData.reason}
+                  onChange={handleChange}
+                  placeholder="Cuéntanos brevemente tu situación..."
+                  required
+                  rows={3}
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                />
+              </div>
+
+              <div>
+                <label className="label text-sm block mb-2">Historial Médico Relevante</label>
+                <textarea
+                  name="medicalHistory"
+                  value={formData.medicalHistory}
+                  onChange={handleChange}
+                  placeholder="¿Tienes algún antecedente médico importante?"
+                  rows={2}
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-gold w-full disabled:opacity-50"
+              >
+                {loading ? "Enviando..." : "Enviar Solicitud"}
+              </button>
+            </form>
           </motion.div>
         </div>
 
         <motion.div
           variants={itemVariants}
-          className="mt-12 bg-gradient-to-r from-[#110f1e] to-[#1a1535] rounded-lg p-8"
+          className="bg-gradient-to-r from-[#110f1e] to-[#1a1535] rounded-lg p-8"
         >
           <h3 className="headline-md text-center mb-6">
             Próximos Pasos
