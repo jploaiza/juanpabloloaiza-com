@@ -1,8 +1,12 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/sections/HeroSection";
-import ServicesSection from "@/components/sections/ServicesSection";
+import ProcessSection from "@/components/sections/ProcessSection";
+import OriginSection from "@/components/sections/OriginSection";
+import TherapySection from "@/components/sections/TherapySection";
+import FAQSection from "@/components/sections/FAQSection";
+import EntityLiberationSection from "@/components/sections/EntityLiberationSection";
+import AdmissionSection from "@/components/sections/AdmissionSection";
 import BlogSection from "@/components/sections/BlogSection";
-import AdmissionForm from "@/components/sections/AdmissionForm";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -13,14 +17,26 @@ export default function Home() {
         <section id="home">
           <HeroSection />
         </section>
-        <section id="services">
-          <ServicesSection />
+        <section id="ComoFunciona">
+          <ProcessSection />
+        </section>
+        <section id="origen">
+          <OriginSection />
+        </section>
+        <section id="QueEsTRVP">
+          <TherapySection />
+        </section>
+        <section id="PreguntasFrecuentes">
+          <FAQSection />
+        </section>
+        <section id="liberacion">
+          <EntityLiberationSection />
+        </section>
+        <section id="ListaDeAdmision">
+          <AdmissionSection />
         </section>
         <section id="blog">
           <BlogSection />
-        </section>
-        <section id="admission">
-          <AdmissionForm />
         </section>
       </div>
       <Footer />

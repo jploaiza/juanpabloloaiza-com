@@ -72,17 +72,17 @@ export default function Footer() {
           <ul className="space-y-3">
             <li className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-[#d4a017]" />
-              <a href="tel:+573001234567" className="body-text text-sm">
-                +57 300 123 4567
+              <a href="https://api.whatsapp.com/send?phone=56962081884" className="body-text text-sm">
+                +56 9 6208 1884
               </a>
             </li>
             <li className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#d4a017]" />
               <a
-                href="mailto:jp@juanpabloloaiza.com"
+                href="mailto:contacto@juanpabloloaiza.com"
                 className="body-text text-sm"
               >
-                jp@juanpabloloaiza.com
+                contacto@juanpabloloaiza.com
               </a>
             </li>
             <li className="flex items-center gap-2">

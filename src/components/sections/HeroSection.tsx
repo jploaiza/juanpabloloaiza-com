@@ -51,22 +51,22 @@ export default function HeroSection() {
           variants={itemVariants}
           className="headline-xl mb-4 text-white"
         >
-          Regresa a tus Vidas Pasadas
+          Regresión a Vidas Pasadas
         </motion.h1>
 
         <motion.p
           variants={itemVariants}
           className="subtitle mb-12 max-w-2xl mx-auto"
         >
-          Hipnoterapia de Regresión + Liberación Espiritual
+          DEVUELVE LA FELICIDAD A TU VIDA
         </motion.p>
 
         <motion.div
           variants={itemVariants}
           className="flex flex-col sm:flex-row gap-6 justify-center"
         >
-          <button className="btn-gold">AGENDAR SESIÓN</button>
-          <button className="btn-gold-outline">VER VIDEOS</button>
+          <button className="btn-gold">Comienza tu Viaje</button>
+          <button className="btn-gold-outline">Conoce más</button>
         </motion.div>
       </motion.div>
     </section>

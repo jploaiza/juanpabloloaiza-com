@@ -3,15 +3,16 @@
 import { useState } from "react";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const navItems = [
   { label: "INICIO", href: "#home" },
-  { label: "SOBRE MI", href: "#about" },
-  { label: "SERVICIOS", href: "#services" },
+  { label: "¿CÓMO FUNCIONA?", href: "#ComoFunciona" },
+  { label: "¿QUÉ SON VIDAS PASADAS?", href: "#QueEsTRVP" },
+  { label: "PREGUNTAS FRECUENTES", href: "#PreguntasFrecuentes" },
+  { label: "ADMISIÓN", href: "#ListaDeAdmision" },
   { label: "BLOG", href: "#blog" },
-  { label: "VIDEOS", href: "#videos" },
-  { label: "AGENDAR", href: "#booking" },
-  { label: "ADMISIÓN", href: "#admission" },
+  { label: "CONTACTO", href: "#contacto" },
 ];
 
 export default function Header() {
@@ -21,8 +22,14 @@ export default function Header() {
     <header className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-sm border-b border-[#d4a017]/20">
       <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
-        <div className="font-cinzel font-bold text-2xl text-[#d4a017]">
-          JP
+        <div className="h-12 w-auto relative">
+          <Image
+            src="/assets/logo.webp"
+            alt="Juan Pablo Loaiza"
+            height={48}
+            width={180}
+            className="object-contain"
+          />
         </div>
 
         {/* Desktop Navigation */}
@@ -40,7 +47,7 @@ export default function Header() {
 
         {/* WhatsApp Button */}
         <a
-          href="https://wa.me/573001234567"
+          href="https://api.whatsapp.com/send?phone=56962081884"
           className="hidden sm:flex items-center gap-2 bg-[#25d366] hover:bg-[#1ead50] text-white px-4 py-2 rounded-lg transition"
         >
           <MessageCircle className="w-4 h-4" />
@@ -76,7 +83,7 @@ export default function Header() {
               </a>
             ))}
             <a
-              href="https://wa.me/573001234567"
+              href="https://api.whatsapp.com/send?phone=56962081884"
               className="flex items-center gap-2 bg-[#25d366] hover:bg-[#1ead50] text-white px-4 py-2 rounded-lg transition mt-4"
             >
               <MessageCircle className="w-4 h-4" />
