@@ -6,30 +6,63 @@ import { Clock, Tag } from "lucide-react";
 const blogPosts = [
   {
     id: 1,
-    title: "Introducción a la Regresión a Vidas Pasadas",
+    title: "Sanación Kármica: Liberándote de Contratos Antiguos para Vivir en Plenitud",
     excerpt:
-      "Descubre cómo la hipnoterapia de regresión puede revelar conexiones de tus vidas anteriores.",
-    readTime: "5 min",
-    category: "Regresión",
+      "Descubre cómo los contratos kármicos del pasado pueden estar limitando tu presente y cómo liberarte de ellos.",
+    readTime: "8 min",
+    category: "Karma",
     image: "bg-gradient-to-br from-indigo-600 to-purple-900",
+    url: "https://www.juanpabloloaiza.com/2024/10/12/sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud/",
   },
   {
     id: 2,
-    title: "Cómo la Hipnosis Transforma tu Vida",
+    title: "Cómo la Regresión a Vidas Pasadas Puede Transformar tus Relaciones Actuales",
     excerpt:
-      "Explora los beneficios científicamente comprobados de la hipnoterapia para el bienestar.",
+      "Explora cómo patrones de vidas pasadas impactan tus relaciones presentes y cómo sanarlos.",
     readTime: "7 min",
-    category: "Hipnosis",
+    category: "Relaciones",
     image: "bg-gradient-to-br from-purple-600 to-pink-900",
+    url: "https://www.juanpabloloaiza.com/2024/10/12/como-la-regresion-a-vidas-pasadas-puede-transformar-tus-relaciones-actuales/",
   },
   {
     id: 3,
-    title: "El Viaje Espiritual Hacia tu Propósito",
+    title: "Descubriendo tu Propósito de Vida a través de la Regresión a Vidas Pasadas",
     excerpt:
-      "Cómo encontrar significado y dirección a través de la exploración espiritual.",
-    readTime: "6 min",
-    category: "Espiritualidad",
+      "Encuentra tu verdadero propósito accediendo a la sabiduría de tus vidas anteriores.",
+    readTime: "10 min",
+    category: "Propósito",
     image: "bg-gradient-to-br from-pink-600 to-rose-900",
+    url: "https://www.juanpabloloaiza.com/2024/10/12/descubriendo-tu-proposito-de-vida-a-traves-de-la-regresion-a-vidas-pasadas/",
+  },
+  {
+    id: 4,
+    title: "Rompiendo Ciclos de Adicción a través de la Sanación de Vidas Pasadas",
+    excerpt:
+      "Comprende cómo las adiciones pueden tener raíces en traumas de vidas anteriores.",
+    readTime: "9 min",
+    category: "Sanación",
+    image: "bg-gradient-to-br from-blue-600 to-indigo-900",
+    url: "https://www.juanpabloloaiza.com/2024/10/10/rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas/",
+  },
+  {
+    id: 5,
+    title: "Entendiendo y Liberando Posesiones Espirituales",
+    excerpt:
+      "Descubre cómo identificar y liberar entidades espirituales que pueden estar afectando tu vida.",
+    readTime: "11 min",
+    category: "Espíritus",
+    image: "bg-gradient-to-br from-amber-600 to-orange-900",
+    url: "https://www.juanpabloloaiza.com/2024/10/10/entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser/",
+  },
+  {
+    id: 6,
+    title: "Sanación de Traumas a través de la Regresión",
+    excerpt:
+      "Explora cómo acceder a traumas originales y sanarlos en su raíz.",
+    readTime: "9 min",
+    category: "Traumas",
+    image: "bg-gradient-to-br from-red-600 to-pink-900",
+    url: "https://www.juanpabloloaiza.com/2024/10/10/sanacion-de-traumas-a-traves-de-la-regresion-descubriendo-el-poder-curativo-de-las-vidas-pasadas/",
   },
 ];
 
@@ -48,7 +81,7 @@ export default function BlogSection() {
   };
 
   return (
-    <section className="py-24 px-4 bg-[#110f1e]">
+    <section className="py-20 px-4 bg-black">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -56,8 +89,8 @@ export default function BlogSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="headline-lg mb-4">BLOG & ARTÍCULOS</h2>
-          <div className="h-1 w-24 bg-[#d4a017] mx-auto"></div>
+          <h2 className="headline-lg mb-4">BLOG</h2>
+          <p className="subtitle">Artículos sobre Regresión a Vidas Pasadas y Sanación</p>
         </motion.div>
 
         <motion.div
@@ -65,29 +98,48 @@ export default function BlogSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid md:grid-cols-3 gap-8"
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
         >
           {blogPosts.map((post) => (
-            <motion.div
+            <motion.a
               key={post.id}
               variants={itemVariants}
-              className="glass-card overflow-hidden hover:scale-105 transition-transform cursor-pointer"
+              href={post.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="glass-card overflow-hidden hover:scale-105 transition-transform cursor-pointer group"
             >
-              <div className={`${post.image} h-48 w-full`}></div>
+              <div className={`${post.image} h-48 w-full group-hover:brightness-110 transition-all`}></div>
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <Tag className="w-4 h-4 text-[#d4a017]" />
                   <span className="label text-xs">{post.category}</span>
                 </div>
-                <h3 className="headline-md mb-3">{post.title}</h3>
-                <p className="body-text mb-4">{post.excerpt}</p>
-                <div className="flex items-center gap-2 text-gray-400">
+                <h3 className="headline-md mb-3 group-hover:text-[#d4a017] transition-colors">{post.title}</h3>
+                <p className="body-text mb-4 text-sm">{post.excerpt}</p>
+                <div className="flex items-center gap-2 text-gray-400 text-xs">
                   <Clock className="w-4 h-4" />
-                  <span className="text-sm">{post.readTime} lectura</span>
+                  <span>{post.readTime} lectura</span>
                 </div>
               </div>
-            </motion.div>
+            </motion.a>
           ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center"
+        >
+          <a
+            href="https://www.juanpabloloaiza.com/blog/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-gold-outline hover:bg-[#d4a017]/10"
+          >
+            Ver Todos los Artículos
+          </a>
         </motion.div>
       </div>
     </section>

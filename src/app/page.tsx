@@ -7,6 +7,7 @@ import FAQSection from "@/components/sections/FAQSection";
 import EntityLiberationSection from "@/components/sections/EntityLiberationSection";
 import AdmissionSection from "@/components/sections/AdmissionSection";
 import BlogSection from "@/components/sections/BlogSection";
+import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -37,6 +38,9 @@ export default function Home() {
         </section>
         <section id="blog">
           <BlogSection />
+        </section>
+        <section id="contacto">
+          <ContactSection />
         </section>
       </div>
       <Footer />
