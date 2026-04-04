@@ -128,68 +128,82 @@ export default function AdmissionSection() {
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div>
-                <label className="label text-sm block mb-2">Nombre Completo</label>
+                <label htmlFor="name" className="label text-sm block mb-2">Nombre Completo</label>
                 <input
                   type="text"
+                  id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Tu nombre"
                   required
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                  aria-required="true"
+                  aria-label="Nombre completo"
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition"
                 />
               </div>
 
               <div>
-                <label className="label text-sm block mb-2">Correo Electrónico</label>
+                <label htmlFor="email" className="label text-sm block mb-2">Correo Electrónico</label>
                 <input
                   type="email"
+                  id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="tu@email.com"
                   required
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                  aria-required="true"
+                  aria-label="Correo electrónico"
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition"
                 />
               </div>
 
               <div>
-                <label className="label text-sm block mb-2">Teléfono / WhatsApp</label>
+                <label htmlFor="phone" className="label text-sm block mb-2">Teléfono / WhatsApp</label>
                 <input
                   type="tel"
+                  id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+56 9 6208 1884"
                   required
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                  aria-required="true"
+                  aria-label="Teléfono o WhatsApp"
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition"
                 />
               </div>
 
               <div>
-                <label className="label text-sm block mb-2">¿Cuál es tu motivo de consulta?</label>
+                <label htmlFor="reason" className="label text-sm block mb-2">¿Cuál es tu motivo de consulta?</label>
                 <textarea
+                  id="reason"
                   name="reason"
                   value={formData.reason}
                   onChange={handleChange}
                   placeholder="Cuéntanos brevemente tu situación..."
                   required
                   rows={3}
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                  aria-required="true"
+                  aria-label="Motivo de consulta"
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition resize-none"
                 />
               </div>
 
               <div>
-                <label className="label text-sm block mb-2">Historial Médico Relevante</label>
+                <label htmlFor="medicalHistory" className="label text-sm block mb-2">Historial Médico Relevante (Opcional)</label>
                 <textarea
+                  id="medicalHistory"
                   name="medicalHistory"
                   value={formData.medicalHistory}
                   onChange={handleChange}
                   placeholder="¿Tienes algún antecedente médico importante?"
                   rows={2}
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none transition"
+                  aria-label="Historial médico relevante"
+                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition resize-none"
                 />
               </div>
 
