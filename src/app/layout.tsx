@@ -23,7 +23,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Regresa a tus Vidas Pasadas - Hipnoterapia de Regresión",
   description: "Hipnoterapia de regresión a vidas pasadas + Liberación Espiritual",
-  language: "es",
 };
 
 export default function RootLayout({
