@@ -20,7 +20,7 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 w-full z-50 bg-black/95 backdrop-blur-md border-b border-[#d4a017]/20">
-      <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="h-12 w-auto relative">
           <Image

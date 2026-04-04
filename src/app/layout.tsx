@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "@/components/ScrollToTop";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -79,6 +80,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-black text-white">
         {children}
+        <WhatsAppButton />
         <ScrollToTop />
       </body>
     </html>
