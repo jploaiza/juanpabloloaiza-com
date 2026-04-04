@@ -25,16 +25,16 @@ export default function HeroSection() {
             key={i}
             className="absolute w-1 h-1 bg-[#d4a017] rounded-full"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              opacity: Math.random() * 0.5,
+              x: `${(i * 3.3) % 100}%`,
+              y: `${(i * 5) % 100}%`,
+              opacity: 0.2 + (i * 0.01),
             }}
             animate={{
-              y: [0, -20, 0],
+              y: ['0%', '-20px', '0%'],
               opacity: [0.2, 0.5, 0.2],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 3 + (i % 2),
               repeat: Infinity,
             }}
           />
