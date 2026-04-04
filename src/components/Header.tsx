@@ -19,7 +19,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-sm border-b border-[#d4a017]/20">
+    <header className="fixed top-0 w-full z-50 bg-black/95 backdrop-blur-md border-b border-[#d4a017]/20">
       <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="h-12 w-auto relative">

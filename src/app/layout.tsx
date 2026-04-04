@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Cinzel, Inter } from "next/font/google";
 import "./globals.css";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -76,7 +77,10 @@ export default function RootLayout({
         />
         <meta name="google-site-verification" content="your-verification-code" />
       </head>
-      <body className="min-h-full flex flex-col bg-black text-white">{children}</body>
+      <body className="min-h-full flex flex-col bg-black text-white">
+        {children}
+        <ScrollToTop />
+      </body>
     </html>
   );
 }
