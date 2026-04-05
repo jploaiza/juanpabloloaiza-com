@@ -19,21 +19,21 @@ export default function ProcessSection() {
   const steps = [
     {
       number: "I",
-      title: "Revelación",
+      title: "Descubrir",
       icon: "fas fa-search",
-      description: "Accedemos con precisión quirúrgica al origen del bloqueo. Nada queda oculto ante la luz de la consciencia.",
+      description: "Accedemos al origen de lo que nos sucedió. Exploramos vidas pasadas, la vida presente, el transgeneracional y la entre vida para descubrir la raíz de tus conflictos.",
     },
     {
       number: "II",
-      title: "Comprensión",
+      title: "Entender",
       icon: "fas fa-balance-scale",
-      description: "Elevamos tu perspectiva. Entendemos el pacto álmico detrás del dolor para disolverlo desde la sabiduría.",
+      description: "Comprendemos el significado y las lecciones detrás de lo descubierto. Esta etapa puede extenderse a dos o tres sesiones según lo que necesites trabajar y el consejo de tu guía espiritual.",
     },
     {
       number: "III",
-      title: "Transmutación",
+      title: "Limpiar",
       icon: "fas fa-gem",
-      description: "Limpieza energética total. Cortamos lazos y reprogramamos tu campo para vibrar en abundancia y paz.",
+      description: "Liberamos y limpiamos todo lo que hemos trabajado para que puedas recuperar la felicidad. Cortamos lazos, liberamos energías y espíritus, y cerramos el proceso terapéutico.",
     },
   ];
 
@@ -55,7 +55,13 @@ export default function ProcessSection() {
           >
             El Proceso de Sanación
           </motion.h2>
-          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
+          <motion.p
+            variants={itemVariants}
+            className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl mx-auto mt-4"
+          >
+            La terapia de regresión a vidas pasadas es un proceso terapéutico que se compone de tres etapas. Tenemos un principio y un final, lo que nos permite asegurar un gran beneficio para tu proceso.
+          </motion.p>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6"></div>
         </motion.div>
 
         {/* Three steps grid */}
@@ -90,16 +96,44 @@ export default function ProcessSection() {
           ))}
         </motion.div>
 
-        {/* Process note */}
-        <motion.p
-          variants={itemVariants}
+        {/* Process details */}
+        <motion.div
+          variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="text-center mt-12 text-gray-500 text-xs uppercase tracking-widest font-light"
+          className="grid md:grid-cols-3 gap-6 mt-12"
         >
-          <i className="fas fa-star text-[#C5A059] mr-2"></i> Proceso exclusivo de 3 a 5 sesiones personalizadas
-        </motion.p>
+          {[
+            {
+              icon: "fas fa-calendar-alt",
+              title: "3 a 5 Sesiones",
+              text: "El proceso básico comprende 3 sesiones. Tu guía espiritual indicará si es necesaria una cuarta o quinta sesión.",
+            },
+            {
+              icon: "fas fa-video",
+              title: "Sesiones por Zoom",
+              text: "Todas las sesiones se realizan en línea vía Zoom. No importa dónde te encuentres, siempre que tengas conexión a Internet.",
+            },
+            {
+              icon: "fas fa-clipboard-list",
+              title: "Entrevista Gratuita",
+              text: "Antes de comenzar, realizamos una entrevista completamente gratuita para conocernos y evaluar tu caso.",
+            },
+          ].map((item, index) => (
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              className="flex items-start gap-4 p-6 bg-[#0f172a]/60 border border-[#C5A059]/10"
+            >
+              <i className={`${item.icon} text-[#C5A059] text-xl mt-1`}></i>
+              <div>
+                <h4 className="text-white font-cinzel text-sm uppercase tracking-widest mb-2">{item.title}</h4>
+                <p className="text-gray-400 text-sm font-[Cormorant_Garamond] leading-relaxed">{item.text}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );

@@ -21,23 +21,23 @@ export default function OriginSection() {
   const explorationAreas = [
     {
       title: "Vidas Pasadas",
-      description: "Memorias de poder y dolor de otras encarnaciones que moldean tu presente.",
+      description: "Las acciones que realizamos en vidas pasadas, las relaciones poco saludables y los karmas no resueltos pueden influir en nuestra vida presente, generando conflictos y desafíos. Es fundamental comprender y sanar estos aspectos para avanzar y encontrar paz y equilibrio en nuestra existencia actual.",
       image: "/assets/doors/past-lives.webp",
     },
     {
       title: "Vida Presente",
-      description: "La niña interior y las memorias uterinas que dictan tus reacciones hoy.",
+      description: "Comprender tu vida presente es tan crucial como entender tus vidas pasadas. En esta vida, podemos encontrar traumas de la infancia e incluso desde el vientre materno, los cuales pueden influir profundamente en nuestro presente. Reconocer y sanar estos traumas es esencial para vivir una vida plena y equilibrada.",
       image: "/assets/doors/present-life.webp",
     },
     {
-      title: "Entre Vidas",
-      description: "El espacio sagrado donde tu alma diseñó su misión antes de nacer.",
-      image: "/assets/doors/between-lives.webp",
+      title: "Transgeneracional",
+      description: "Explora problemas y patrones heredados de generaciones anteriores. Las heridas de nuestros ancestros se transmiten de generación en generación hasta que alguien del clan las sane. Al conectar con estos traumas, liberamos heridas que no son nuestras, pero que nos afectan profundamente.",
+      image: "/assets/doors/transgenerational.webp",
     },
     {
-      title: "Linaje Ancestral",
-      description: "Sanación del clan. Liberamos las lealtades invisibles que heredas de tus ancestros.",
-      image: "/assets/doors/transgenerational.webp",
+      title: "Entre Vidas",
+      description: "En el proceso entre vidas, antes de nuestra última encarnación, decidimos las lecciones que aprenderemos y la vida que viviremos. Esto nos ayuda a entender por qué tenemos ciertos padres, familia y relaciones, y cómo estos aspectos influyen en nuestros desafíos actuales.",
+      image: "/assets/doors/between-lives.webp",
     },
   ];
 
@@ -56,12 +56,12 @@ export default function OriginSection() {
           className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/5 pb-8"
         >
           <div>
-            <h2 className="text-4xl md:text-5xl text-white mb-2 font-cinzel">Los 4 Pilares de la Memoria</h2>
-            <p className="text-[#C5A059] font-[Cormorant_Garamond] text-xl italic">"La llave de tu libertad reside en tu propia historia."</p>
+            <h2 className="text-4xl md:text-5xl text-white mb-2 font-cinzel">Descubre el Origen de tus Conflictos</h2>
+            <p className="text-[#C5A059] font-[Cormorant_Garamond] text-xl italic">Para sanar profundamente, primero debemos descubrir el origen de lo que nos enfermó.</p>
           </div>
           <div className="mt-6 md:mt-0">
             <a href="#ListaDeAdmision" className="text-sm uppercase tracking-widest text-gray-400 hover:text-white transition">
-              Agendar Evaluación →
+              Comienza Ahora →
             </a>
           </div>
         </motion.div>
@@ -93,7 +93,7 @@ export default function OriginSection() {
                 src={area.image}
                 alt={area.title}
                 fill
-                className="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-80 grayscale"
+                className="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-80"
               />
 
               {/* Content */}

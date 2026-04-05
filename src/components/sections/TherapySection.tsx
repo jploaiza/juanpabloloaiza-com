@@ -29,12 +29,12 @@ export default function TherapySection() {
           variants={itemVariants}
           className="text-center mb-16"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Metodología Única</span>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">¿Qué son las Vidas Pasadas?</span>
           <motion.h2
             variants={itemVariants}
             className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
           >
-            La Terapia de Regresión
+            La Terapia de Regresión a Vidas Pasadas
           </motion.h2>
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
         </motion.div>
@@ -48,16 +48,13 @@ export default function TherapySection() {
             <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
 
             <div className="aspect-video bg-[#0f172a] border border-[#C5A059]/20 rounded-sm overflow-hidden relative z-0">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="¿Qué es la terapia de regresión?"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
+              {/* Video placeholder — reemplazar con Cloudinary cuando esté disponible */}
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#050b1a]">
+                <div className="text-center">
+                  <i className="fas fa-play-circle text-[#C5A059] text-6xl opacity-60 mb-4 block"></i>
+                  <span className="text-gray-400 text-xs uppercase tracking-widest">Video próximamente</span>
+                </div>
+              </div>
             </div>
           </motion.div>
 
@@ -66,32 +63,36 @@ export default function TherapySection() {
               Los problemas en nuestra vida presente muchas veces pueden estar vinculados a situaciones que nos han sucedido en los primeros años de esta, pero también podrían estar vinculados directamente a situaciones que hemos vivido en vidas pasadas.
             </p>
 
+            <p className="text-gray-300 font-[Cormorant_Garamond] text-xl leading-relaxed">
+              Somos almas inmortales, hemos vivido innumerables vidas a través de millones de años. Nuestra alma alberga toda esa información y a través de un proceso de meditación guiada e hipnosis clínica podemos acceder a ella para trabajar con ella.
+            </p>
+
             <div className="space-y-6">
               <div>
-                <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Principios Fundamentales</span>
+                <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Lo que trabajamos en el proceso</span>
                 <ul className="space-y-4 mt-4">
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">El alma es inmortal y acumula información de todas tus encarnaciones</span>
+                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Energías, karmas y contratos antiguos que afectan tu vida presente</span>
                   </li>
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Los problemas actuales frecuentemente tienen raíces en vidas pasadas</span>
+                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Situaciones de vidas pasadas que aún no han sido liberadas correctamente</span>
                   </li>
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Mediante meditación guiada e hipnosis clínica accedemos a esa información</span>
+                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Energías y espíritus que podrían estar impidiéndote vivir la mejor versión de ti</span>
                   </li>
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Tu guía espiritual colabora activamente en el proceso de sanación</span>
+                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Con la ayuda de tu guía espiritual, entendemos, analizamos y liberamos cada situación</span>
                   </li>
                 </ul>
               </div>
 
               <div className="bg-[#0f172a] border border-[#C5A059]/20 p-6">
                 <p className="text-gray-300 italic font-[Cormorant_Garamond] text-lg leading-relaxed text-center">
-                  "Usando las herramientas correctas y con la ayuda de tu guía espiritual podemos entender, analizar y liberar cada una de estas situaciones."
+                  "Este potente proceso terapéutico es un viaje a tu vida actual, a tus vidas pasadas y a tu vida espiritual, en el cual te guiaré para que encuentres tu verdad y vivas la mejor versión de ti."
                 </p>
               </div>
             </div>

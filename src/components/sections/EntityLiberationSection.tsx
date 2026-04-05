@@ -17,114 +17,136 @@ export default function EntityLiberationSection() {
   };
 
   const symptoms = [
-    "Eliminación de drenajes energéticos.",
-    "Corte de lazos tóxicos.",
-    "Restauración del aura.",
-    "Reprogramación del campo energético.",
+    "Fatiga inexplicable",
+    "Pensamientos negativos recurrentes",
+    "Cambios bruscos de humor",
+    "Miedos irracionales",
+    "Pesadillas frecuentes o problemas para dormir",
+    "Dolores físicos sin causa aparente",
+    "Desconexión espiritual o pérdida de propósito",
+    "Problemas en las relaciones personales",
+    "Sensación de opresión o peso en el cuerpo",
+    "Falta de motivación o apatía",
+    "Inseguridades repentinas e inexplicables",
   ];
 
   const benefits = [
     { icon: "fas fa-lightbulb", title: "Claridad Mental" },
     { icon: "fas fa-heart", title: "Paz Interior" },
     { icon: "fas fa-bolt", title: "Energía Renovada" },
-    { icon: "fas fa-handshake", title: "Mejora Relacional" },
+    { icon: "fas fa-handshake", title: "Mejora en las Relaciones" },
+    { icon: "fas fa-star", title: "Reconexión Espiritual" },
   ];
 
   return (
-    <section id="liberacion" className="py-28 bg-[#020617] border-y border-[#C5A059]/5 relative">
-      <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-20 items-center">
+    <section id="liberacion" className="py-28 bg-[#050b1a] border-y border-[#C5A059]/5 relative">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="order-2 md:order-1"
+          className="text-center mb-16"
         >
-          <motion.div variants={itemVariants} className="flex items-center space-x-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center justify-center space-x-4 mb-6">
             <span className="h-[1px] w-10 bg-[#C5A059]"></span>
-            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-bold">Liberación de Entidades</span>
+            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-bold">Liberación de Entidades Espirituales</span>
+            <span className="h-[1px] w-10 bg-[#C5A059]"></span>
           </motion.div>
-
           <motion.h2
             variants={itemVariants}
-            className="text-4xl md:text-5xl text-white mb-8 font-cinzel leading-tight"
+            className="text-4xl md:text-5xl text-white mb-6 font-cinzel leading-tight"
           >
-            Liberación de <br/>Entidades Espirituales
+            Terapia de Liberación de<br />Entidades Espirituales
           </motion.h2>
-
-          <motion.div
+          <motion.p
             variants={itemVariants}
-            className="prose prose-invert text-gray-400 mb-10 font-[Cormorant_Garamond] text-xl leading-relaxed font-light"
+            className="text-gray-300 font-[Cormorant_Garamond] text-xl max-w-3xl mx-auto leading-relaxed"
           >
-            <p>La excelencia requiere pureza energética. Muchas veces, el agotamiento o el bloqueo mental no son tuyos, sino interferencias externas adheridas a tu campo.</p>
-            <p>Realizamos un barrido profundo para que recuperes el 100% de tu vitalidad y soberanía.</p>
-          </motion.div>
-
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-1 gap-4 border-l border-[#C5A059]/20 pl-6"
-          >
-            {symptoms.map((symptom, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="flex items-center text-gray-300"
-              >
-                <i className="fas fa-check text-[#C5A059] mr-4 text-xs"></i>
-                <span>{symptom}</span>
-              </motion.div>
-            ))}
-          </motion.div>
+            Esta terapia tiene sus raíces en los estudios del Dr. Carl Wickland y fue perfeccionada por el Dr. William Baldwin, quienes desarrollaron métodos eficaces para identificar y liberar influencias espirituales o energéticas que interfieren en el bienestar de las personas.
+          </motion.p>
         </motion.div>
 
-        {/* Right side - Image/Video area */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="relative order-1 md:order-2"
-        >
-          {/* Ornate frame border */}
+        <div className="grid md:grid-cols-2 gap-16 items-start mb-16">
+          {/* Left: Description */}
           <motion.div
-            variants={itemVariants}
-            className="absolute -top-4 -right-4 w-full h-full border-2 border-[#C5A059]/30 rounded-sm z-0"
-          ></motion.div>
-
-          <motion.div
-            variants={itemVariants}
-            className="relative z-10 bg-[#0f172a] p-2 shadow-2xl"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
           >
-            <div className="aspect-video bg-black flex items-center justify-center relative group cursor-pointer overflow-hidden border border-[#C5A059]/20">
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#312e81]/40 via-transparent to-[#C5A059]/10 mix-blend-overlay"></div>
+            <motion.div variants={itemVariants} className="space-y-5 text-gray-300 font-[Cormorant_Garamond] text-lg leading-relaxed">
+              <p>
+                Esta terapia aborda la presencia de energías externas o entidades espirituales que pueden adherirse al campo energético de una persona, afectando su salud mental, emocional y física.
+              </p>
+              <p>
+                Estas entidades pueden ser espíritus de personas fallecidas que no han trascendido, o energías no humanas que se adhieren a través de estados de baja vibración emocional como el miedo, la ira o la tristeza profunda.
+              </p>
+              <p>
+                A través de la hipnosis profunda, se accede a los planos energéticos de la persona para detectar y liberar estas influencias, guiando tanto a la entidad como al paciente hacia un estado de equilibrio energético.
+              </p>
+            </motion.div>
 
-              {/* Decorative corner frames */}
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#C5A059]/50"></div>
-              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#C5A059]/50"></div>
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#C5A059]/50"></div>
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#C5A059]/50"></div>
-
-              {/* Play button */}
-              <motion.div
-                whileHover={{ scale: 1.15 }}
-                className="z-10 flex flex-col items-center"
-              >
-                <div className="w-24 h-24 rounded-full border-2 border-white/30 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:bg-[#C5A059] group-hover:border-[#C5A059] transition duration-500 relative">
-                  {/* Outer ring */}
-                  <div className="absolute inset-0 rounded-full border border-white/10"></div>
-                  {/* Play icon */}
-                  <i className="fas fa-play text-white ml-1 text-2xl group-hover:text-[#020617] transition duration-500"></i>
-                </div>
-                <span className="text-white text-xs uppercase tracking-widest border-b border-transparent group-hover:border-white transition">
-                  Ver Explicación
-                </span>
-              </motion.div>
-            </div>
+            {/* Benefits */}
+            <motion.div variants={itemVariants} className="mt-10">
+              <p className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold mb-6">Beneficios de la Terapia</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {benefits.map((benefit, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 p-4 bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition"
+                  >
+                    <i className={`${benefit.icon} text-[#C5A059] text-sm`}></i>
+                    <span className="text-gray-300 text-sm font-[Cormorant_Garamond]">{benefit.title}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
+
+          {/* Right: Symptoms */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <motion.div
+              variants={itemVariants}
+              className="bg-[#0f172a] border border-[#C5A059]/30 p-8 relative"
+            >
+              {/* Ornate corner frames */}
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
+
+              <p className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold mb-6">Síntomas que pueden indicar presencia de entidades</p>
+              <ul className="space-y-3">
+                {symptoms.map((symptom, index) => (
+                  <motion.li
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.06 }}
+                    className="flex items-start gap-3 text-gray-300 font-[Cormorant_Garamond] text-lg"
+                  >
+                    <i className="fas fa-chevron-right text-[#C5A059] text-xs mt-1.5 flex-shrink-0"></i>
+                    <span>{symptom}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
+
+            <motion.p
+              variants={itemVariants}
+              className="mt-6 text-gray-400 text-sm font-[Cormorant_Garamond] italic leading-relaxed"
+            >
+              Estos síntomas pueden dificultar la vida diaria generando confusión y un sentimiento constante de estar fuera de control. Muchas veces no se identifican como influencias externas, lo que hace que la persona busque soluciones sin resultados duraderos.
+            </motion.p>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
