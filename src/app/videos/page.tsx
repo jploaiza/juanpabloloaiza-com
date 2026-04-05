@@ -2,113 +2,145 @@
 
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
-import { Play } from "lucide-react";
+import { useState } from "react";
+
+const R2_BASE = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev";
 
 interface Video {
   id: string;
   title: string;
   description: string;
-  cloudinaryId?: string; // Para integración con Cloudinary
-  duration?: string;
-  category: "liberation" | "qa";
+  src: string;
+  category: "liberation" | "rvp" | "qa";
 }
 
 const videos: Video[] = [
-  // Sección: Liberación de Entidades
+  // Sección: Liberación de Entidades Espirituales
   {
     id: "liberation-1",
     title: "Liberación de Entidades Espirituales",
     description:
-      "Descubre el proceso completo de liberación de entidades espirituales y cómo esta práctica ancestral puede transformar tu vida.",
-    category: "liberation",
-    duration: "12:45",
-    cloudinaryId: "", // Se llenará cuando subas a Cloudinary
+      "Conoce en qué consiste la Terapia de Liberación de Entidades Espirituales, sus raíces en los estudios del Dr. Carl Wickland y el Dr. William Baldwin, y cómo puede ayudarte a recuperar tu bienestar energético.",
+    src: `${R2_BASE}/SRT1-2.mp4`,
+    category: "liberation" as const,
+  },
+
+  // Sección: ¿Qué es la Regresión a Vidas Pasadas?
+  {
+    id: "rvp-1",
+    title: "¿Cómo funciona el proceso?",
+    description:
+      "Juan Pablo explica el proceso terapéutico de la regresión a vidas pasadas: las tres etapas de Descubrir, Entender y Limpiar, y cómo funciona cada sesión.",
+    src: `${R2_BASE}/RVP1.m4v`,
+    category: "rvp",
+  },
+  {
+    id: "rvp-2",
+    title: "¿Qué es la Terapia de Regresión a Vidas Pasadas?",
+    description:
+      "Conoce en qué consiste esta terapia, cómo el alma acumula información de vidas pasadas y cómo la hipnosis clínica permite acceder a ella para sanar.",
+    src: `${R2_BASE}/Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4`,
+    category: "rvp",
   },
 
   // Sección: Preguntas Frecuentes
   {
+    id: "qa-1",
+    title: "¿Se puede realizar en línea?",
+    description:
+      "Por supuesto. La terapia es completamente segura en línea. Más de 200 procesos terapéuticos se han realizado via Zoom con resultados maravillosos.",
+    src: `${R2_BASE}/QA1.m4v`,
+    category: "qa",
+  },
+  {
+    id: "qa-2",
+    title: "¿Puedo tomar solo una sesión?",
+    description:
+      "No es recomendable. Una sola sesión deja más preguntas que respuestas. El proceso básico siempre comprende tres sesiones: descubrir, entender y limpiar.",
+    src: `${R2_BASE}/QA2.m4v`,
+    category: "qa",
+  },
+  {
     id: "qa-3",
     title: "¿Existen contraindicaciones?",
-    description: "Conoce si hay contraindicaciones para la regresión a vidas pasadas.",
+    description:
+      "La única contraindicación es para personas con enfermedades mentales diagnosticadas bajo tratamiento farmacológico. Esta terapia es siempre complementaria.",
+    src: `${R2_BASE}/QA3.m4v`,
     category: "qa",
-    duration: "4:32",
-    cloudinaryId: "", // QA3
   },
   {
     id: "qa-4",
     title: "¿Podré entrar en hipnosis?",
-    description: "Descubre si tienes la capacidad de entrar en estado hipnótico.",
+    description:
+      "Si puedes dormir en la noche, podrás entrar en hipnosis. Es el mismo proceso natural de relajación profunda, guiado conscientemente.",
+    src: `${R2_BASE}/QA4.m4v`,
     category: "qa",
-    duration: "5:18",
-    cloudinaryId: "", // QA4
   },
   {
     id: "qa-5",
     title: "¿Qué pasa si se corta la llamada?",
-    description: "Conoce qué ocurre si pierdes conexión durante una sesión.",
+    description:
+      "Podemos reconectarnos y retomar la sesión desde donde la dejamos. Puedes salir de hipnosis solo, igual que al despertar en la mañana.",
+    src: `${R2_BASE}/QA5.m4v`,
     category: "qa",
-    duration: "3:45",
-    cloudinaryId: "", // QA5
   },
   {
     id: "qa-6",
     title: "¿Qué pasa si no veo nada?",
-    description: "Entiende qué hacer si no experimentas visualizaciones en la sesión.",
+    description:
+      "Ver imágenes no es el objetivo. Lo que define una terapia exitosa es conectar con la emoción atrapada y liberarla, independiente de las imágenes.",
+    src: `${R2_BASE}/QA6.m4v`,
     category: "qa",
-    duration: "6:12",
-    cloudinaryId: "", // QA6
   },
   {
     id: "qa-7",
     title: "¿Y si me lo estuviera imaginando todo?",
-    description: "Explora la diferencia entre imaginación y memoria de vidas pasadas.",
+    description:
+      "La imaginación no tiene emoción. Los recuerdos de vidas pasadas vienen siempre acompañados de una emoción real que no puede ser fabricada.",
+    src: `${R2_BASE}/QA7.m4v`,
     category: "qa",
-    duration: "7:03",
-    cloudinaryId: "", // QA7
   },
   {
     id: "qa-8",
     title: "¿Voy a estar consciente durante la hipnosis?",
-    description: "Conoce el estado de consciencia durante la regresión.",
+    description:
+      "Siempre estarás consciente. Tu mente consciente se queda presente, mirando y entendiendo todo lo que sucede durante el proceso.",
+    src: `${R2_BASE}/QA8.m4v`,
     category: "qa",
-    duration: "5:54",
-    cloudinaryId: "", // QA8
   },
   {
     id: "qa-9",
     title: "¿Me acordaré de lo que viví en hipnosis?",
-    description: "Descubre si recordarás los detalles de tu experiencia de regresión.",
+    description:
+      "Sí. Nunca perderás la conciencia. Todo lo que aprendes y vives en estas sesiones quedará integrado en ti como un conocimiento adquirido.",
+    src: `${R2_BASE}/QA9.m4v`,
     category: "qa",
-    duration: "4:28",
-    cloudinaryId: "", // QA9
   },
   {
     id: "qa-10",
-    title: "Las sesiones son grabadas",
-    description: "Información sobre la grabación de tus sesiones personales.",
+    title: "¿Las sesiones se graban?",
+    description:
+      "Sí. Todas las sesiones se graban en audio y video por Zoom, para mantener registros y para que puedas acceder a tu grabación si la necesitas.",
+    src: `${R2_BASE}/QA10.m4v`,
     category: "qa",
-    duration: "3:15",
-    cloudinaryId: "", // QA10
   },
   {
     id: "qa-11",
     title: "¿Quién puede tomar esta terapia?",
-    description: "Aprende quiénes son los candidatos ideales para la regresión a vidas pasadas.",
+    description:
+      "Todas las personas pueden tomar esta terapia, excepto menores de edad o personas con enfermedades mentales diagnosticadas bajo tratamiento farmacológico.",
+    src: `${R2_BASE}/QA11.m4v`,
     category: "qa",
-    duration: "6:41",
-    cloudinaryId: "", // QA11
   },
 ];
 
 const liberationVideos = videos.filter((v) => v.category === "liberation");
+const rvpVideos = videos.filter((v) => v.category === "rvp");
 const qaVideos = videos.filter((v) => v.category === "qa");
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 
 const itemVariants = {
@@ -117,11 +149,10 @@ const itemVariants = {
 };
 
 function VideoCard({ video }: { video: Video }) {
+  const [playing, setPlaying] = useState(false);
+
   return (
-    <motion.div
-      variants={itemVariants}
-      className="group relative overflow-hidden cursor-pointer"
-    >
+    <motion.div variants={itemVariants} className="group relative overflow-hidden">
       <div className="relative bg-[#0f172a] border-2 border-[#C5A059]/30 hover:border-[#C5A059]/60 transition duration-300 overflow-hidden h-full">
         {/* Ornate corner frames */}
         <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
@@ -129,33 +160,41 @@ function VideoCard({ video }: { video: Video }) {
         <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
         <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
 
-        {/* Video Placeholder / Thumbnail */}
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-900 flex items-center justify-center group-hover:from-indigo-500 group-hover:to-purple-800 transition duration-500">
-          <Play className="w-16 h-16 text-white opacity-60 group-hover:opacity-100 transition" />
+        {/* Video Player */}
+        <div className="relative bg-black aspect-video">
+          {playing ? (
+            <video
+              src={video.src}
+              controls
+              autoPlay
+              className="w-full h-full object-contain"
+              controlsList="nodownload"
+              disablePictureInPicture
+            />
+          ) : (
+            <button
+              onClick={() => setPlaying(true)}
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#050b1a] group/play"
+              aria-label={`Reproducir: ${video.title}`}
+            >
+              <div className="w-16 h-16 rounded-full border-2 border-[#C5A059]/60 flex items-center justify-center group-hover/play:bg-[#C5A059] group-hover/play:border-[#C5A059] transition duration-300">
+                <svg className="w-6 h-6 text-[#C5A059] group-hover/play:text-[#020617] ml-1 transition duration-300" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </button>
+          )}
         </div>
 
-        {/* Content Section */}
-        <div className="p-6">
-          {/* Title */}
-          <h3 className="text-lg font-cinzel text-white mb-3 leading-tight group-hover:text-[#C5A059] transition-colors line-clamp-3">
+        {/* Content */}
+        <div className="p-5">
+          <h3 className="text-base font-cinzel text-white mb-2 leading-snug group-hover:text-[#C5A059] transition-colors">
             {video.title}
           </h3>
-
-          {/* Description */}
-          <p className="text-gray-300 text-sm font-[Cormorant_Garamond] leading-relaxed mb-4 line-clamp-2">
+          <div className="h-px bg-[#C5A059]/20 mb-3"></div>
+          <p className="text-gray-300 text-sm font-[Cormorant_Garamond] leading-relaxed">
             {video.description}
           </p>
-
-          {/* Divider */}
-          <div className="h-px bg-[#C5A059]/20 mb-3"></div>
-
-          {/* Duration and CTA */}
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400 text-xs">{video.duration || "N/A"}</span>
-            <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold group-hover:translate-x-1 transition-transform">
-              Ver Video
-            </span>
-          </div>
         </div>
       </div>
     </motion.div>
@@ -181,13 +220,13 @@ export default function VideosPage() {
             Explora tu Camino
           </h1>
           <p className="font-[Cormorant_Garamond] text-xl text-gray-300 max-w-3xl leading-relaxed">
-            Accede a contenido educativo y transformador sobre regresión a vidas pasadas,
-            sanación espiritual y liberación del ser.
+            Accede a videos informativos sobre la terapia de regresión a vidas pasadas
+            y resuelve todas tus dudas antes de comenzar tu proceso.
           </p>
           <div className="w-16 h-[1px] bg-[#C5A059] mt-6"></div>
         </motion.div>
 
-        {/* Liberación Section */}
+        {/* Liberation Section */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -195,24 +234,43 @@ export default function VideosPage() {
           viewport={{ once: true }}
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
+          <motion.div variants={itemVariants} className="mb-10">
             <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
               Liberación de Entidades Espirituales
             </h2>
-            <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-6"></div>
+            <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
             <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl">
-              Descubre el poder transformador de la liberación espiritual y cómo sanar
-              las conexiones energéticas que afectan tu vida.
+              Descubre cómo la terapia de liberación espiritual puede ayudarte a recuperar tu bienestar y paz interior.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
             {liberationVideos.map((video) => (
+              <VideoCard key={video.id} video={video} />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* RVP Section */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
+        >
+          <motion.div variants={itemVariants} className="mb-10">
+            <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
+              La Terapia de Regresión a Vidas Pasadas
+            </h2>
+            <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
+            <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl">
+              Conoce en detalle cómo funciona el proceso y qué puedes esperar de cada sesión.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {rvpVideos.map((video) => (
               <VideoCard key={video.id} video={video} />
             ))}
           </div>
@@ -226,19 +284,13 @@ export default function VideosPage() {
           viewport={{ once: true }}
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
+          <motion.div variants={itemVariants} className="mb-10">
             <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
-              Preguntas Frecuentes (Q&A)
+              Preguntas Frecuentes
             </h2>
-            <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-6"></div>
+            <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
             <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl">
-              Resuelve tus dudas sobre la hipnoterapia de regresión a través de videos
-              informativos que abordan las preguntas más comunes.
+              Resuelve tus dudas sobre la hipnoterapia de regresión a vidas pasadas.
             </p>
           </motion.div>
 
@@ -246,6 +298,24 @@ export default function VideosPage() {
             {qaVideos.map((video) => (
               <VideoCard key={video.id} video={video} />
             ))}
+          </div>
+        </motion.div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-6xl mx-auto px-4 sm:px-6 mb-20 text-center"
+        >
+          <div className="border border-[#C5A059]/20 p-12 bg-[#0f172a]">
+            <h3 className="text-3xl font-cinzel text-white mb-4">¿Listo para comenzar?</h3>
+            <p className="text-gray-300 font-[Cormorant_Garamond] text-lg mb-8 max-w-xl mx-auto">
+              Si ya resolviste tus dudas, da el primer paso y completa el formulario de admisión.
+            </p>
+            <a href="/#ListaDeAdmision" className="btn-gold">
+              Iniciar Proceso
+            </a>
           </div>
         </motion.div>
       </main>

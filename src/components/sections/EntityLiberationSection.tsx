@@ -68,6 +68,26 @@ export default function EntityLiberationSection() {
           </motion.p>
         </motion.div>
 
+        {/* Video */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative max-w-3xl mx-auto mb-16"
+        >
+          <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
+          <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
+          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
+          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
+          <video
+            src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/SRT1-2.mp4"
+            controls
+            className="w-full aspect-video object-contain bg-black border border-[#C5A059]/30"
+            controlsList="nodownload"
+            disablePictureInPicture
+          />
+        </motion.div>
+
         <div className="grid md:grid-cols-2 gap-16 items-start mb-16">
           {/* Left: Description */}
           <motion.div

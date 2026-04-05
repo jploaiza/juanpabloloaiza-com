@@ -64,6 +64,26 @@ export default function ProcessSection() {
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6"></div>
         </motion.div>
 
+        {/* Video */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative max-w-3xl mx-auto mb-20"
+        >
+          <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
+          <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
+          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
+          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
+          <video
+            src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/RVP1.m4v"
+            controls
+            className="w-full aspect-video object-contain bg-black border border-[#C5A059]/30"
+            controlsList="nodownload"
+            disablePictureInPicture
+          />
+        </motion.div>
+
         {/* Three steps grid */}
         <motion.div
           variants={containerVariants}

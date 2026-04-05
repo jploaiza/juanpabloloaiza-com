@@ -48,13 +48,13 @@ export default function TherapySection() {
             <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
 
             <div className="aspect-video bg-[#0f172a] border border-[#C5A059]/20 rounded-sm overflow-hidden relative z-0">
-              {/* Video placeholder — reemplazar con Cloudinary cuando esté disponible */}
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#050b1a]">
-                <div className="text-center">
-                  <i className="fas fa-play-circle text-[#C5A059] text-6xl opacity-60 mb-4 block"></i>
-                  <span className="text-gray-400 text-xs uppercase tracking-widest">Video próximamente</span>
-                </div>
-              </div>
+              <video
+                src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4"
+                controls
+                className="w-full h-full object-contain"
+                controlsList="nodownload"
+                disablePictureInPicture
+              />
             </div>
           </motion.div>
 
