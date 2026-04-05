@@ -27,9 +27,9 @@ export default function Header() {
           </div>
           <div className="flex items-center space-x-4">
             <span>SÍGUEME:</span>
-            <a href="#" className="hover:text-[#C5A059] transition">Instagram</a>
-            <a href="#" className="hover:text-[#C5A059] transition">YouTube</a>
-            <a href="#" className="hover:text-[#C5A059] transition">LinkedIn</a>
+            <a href="https://www.instagram.com/jploaizao" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A059] transition">Instagram</a>
+            <a href="https://www.youtube.com/@jploaizao" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A059] transition">YouTube</a>
+            <a href="https://www.tiktok.com/@jploaizao" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A059] transition">TikTok</a>
           </div>
         </div>
       </div>
