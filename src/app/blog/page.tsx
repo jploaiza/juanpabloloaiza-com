@@ -35,7 +35,7 @@ function BlogContent() {
           transition={{ duration: 0.8 }}
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Sabiduría Compartida</span>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Sabiduría Compartida</span>
           <h1 className="text-5xl md:text-6xl text-white mt-4 mb-6 font-cinzel font-bold">
             Blog
           </h1>
@@ -94,7 +94,7 @@ function BlogContent() {
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-lg font-almendra text-white mb-2 leading-tight group-hover:text-[#C5A059] transition-colors line-clamp-3">
+                      <h3 className="text-lg font-cinzel text-white mb-2 leading-tight group-hover:text-[#C5A059] transition-colors line-clamp-3">
                         {post.title}
                       </h3>
 

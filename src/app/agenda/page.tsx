@@ -28,7 +28,7 @@ export default function AgendaPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Reserva tu Espacio</span>
+            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Reserva tu Espacio</span>
             <h1 className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
               Agenda tu Sesión
             </h1>

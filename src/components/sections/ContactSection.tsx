@@ -51,7 +51,7 @@ export default function ContactSection() {
           variants={itemVariants}
           className="text-center mb-16"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Comunicación Directa</span>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Comunicación Directa</span>
           <motion.h2
             variants={itemVariants}
             className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
@@ -88,7 +88,7 @@ export default function ContactSection() {
                 <div className="flex justify-center mb-6">
                   <Icon className="w-8 h-8 text-[#C5A059] group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="font-almendra text-white mb-2 uppercase text-sm tracking-widest">
+                <h3 className="font-cinzel text-white mb-2 uppercase text-sm tracking-widest">
                   {method.title}
                 </h3>
                 <p className="text-[#C5A059] font-light font-crimson text-lg">

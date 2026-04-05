@@ -51,7 +51,7 @@ export default function EntityLiberationSection() {
         >
           <motion.div variants={itemVariants} className="flex items-center justify-center space-x-4 mb-6">
             <span className="h-[1px] w-10 bg-[#C5A059]"></span>
-            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-bold">Liberación de Entidades Espirituales</span>
+            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-bold font-cinzel">Liberación de Entidades Espirituales</span>
             <span className="h-[1px] w-10 bg-[#C5A059]"></span>
           </motion.div>
           <motion.h2

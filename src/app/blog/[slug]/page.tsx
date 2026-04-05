@@ -106,7 +106,7 @@ export default async function ArticlePage({
             {post.content.split("\n\n").map((paragraph, index) => {
               if (paragraph.startsWith("##")) {
                 return (
-                  <h2 key={index} className="text-3xl font-almendra text-white mt-10 mb-4 font-bold">
+                  <h2 key={index} className="text-3xl font-cinzel text-white mt-10 mb-4 font-bold">
                     {paragraph.replace("## ", "")}
                   </h2>
                 );
@@ -177,7 +177,7 @@ export default async function ArticlePage({
                 <Link href={`/blog/${previousPost.slug}`}>
                   <div className="group p-6 border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition cursor-pointer">
                     <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-2">Artículo Anterior</p>
-                    <h3 className="text-lg text-white font-almendra group-hover:text-[#C5A059] transition line-clamp-2">
+                    <h3 className="text-lg text-white font-cinzel group-hover:text-[#C5A059] transition line-clamp-2">
                       {previousPost.title}
                     </h3>
                   </div>
@@ -187,7 +187,7 @@ export default async function ArticlePage({
                 <Link href={`/blog/${nextPost.slug}`}>
                   <div className="group p-6 border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition cursor-pointer">
                     <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-2">Próximo Artículo</p>
-                    <h3 className="text-lg text-white font-almendra group-hover:text-[#C5A059] transition line-clamp-2">
+                    <h3 className="text-lg text-white font-cinzel group-hover:text-[#C5A059] transition line-clamp-2">
                       {nextPost.title}
                     </h3>
                   </div>

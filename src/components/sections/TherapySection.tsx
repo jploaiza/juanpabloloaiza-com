@@ -29,7 +29,7 @@ export default function TherapySection() {
           variants={itemVariants}
           className="text-center mb-16"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">¿Qué son las Vidas Pasadas?</span>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">¿Qué son las Vidas Pasadas?</span>
           <motion.h2
             variants={itemVariants}
             className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
@@ -69,7 +69,7 @@ export default function TherapySection() {
 
             <div className="space-y-6">
               <div>
-                <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Lo que trabajamos en el proceso</span>
+                <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Lo que trabajamos en el proceso</span>
                 <ul className="space-y-4 mt-4">
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>

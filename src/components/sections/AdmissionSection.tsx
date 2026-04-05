@@ -79,7 +79,7 @@ export default function AdmissionSection() {
           variants={itemVariants}
           className="text-center mb-16"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Tu Transformación Comienza</span>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Tu Transformación Comienza</span>
           <motion.h2
             variants={itemVariants}
             className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
@@ -220,7 +220,7 @@ export default function AdmissionSection() {
           variants={itemVariants}
           className="bg-[#0f172a] border border-[#C5A059]/20 p-12"
         >
-          <h3 className="text-3xl font-almendra text-center mb-10 text-white">
+          <h3 className="text-3xl font-cinzel text-center mb-10 text-white">
             Próximos Pasos
           </h3>
 

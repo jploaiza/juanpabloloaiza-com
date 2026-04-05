@@ -99,8 +99,8 @@ export default function FAQSection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Tus Dudas</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-almendra">
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Tus Dudas</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
             Preguntas Frecuentes
           </h2>
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto" />

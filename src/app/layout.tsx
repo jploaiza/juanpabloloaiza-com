@@ -11,7 +11,7 @@ const cinzel = Cinzel({
 });
 
 const almendra = Almendra_SC({
-  variable: "--font-almendra",
+  variable: "--font-cinzel",
   subsets: ["latin"],
   weight: ["400"],
 });

@@ -188,7 +188,7 @@ function VideoCard({ video }: { video: Video }) {
 
         {/* Content */}
         <div className="p-5">
-          <h3 className="text-base font-almendra text-white mb-2 leading-snug group-hover:text-[#C5A059] transition-colors">
+          <h3 className="text-base font-cinzel text-white mb-2 leading-snug group-hover:text-[#C5A059] transition-colors">
             {video.title}
           </h3>
           <div className="h-px bg-[#C5A059]/20 mb-3"></div>
@@ -213,7 +213,7 @@ export default function VideosPage() {
           transition={{ duration: 0.8 }}
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">
             Biblioteca de Videos
           </span>
           <h1 className="text-5xl md:text-6xl text-white mt-4 mb-6 font-cinzel font-bold">
@@ -235,7 +235,7 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
           <motion.div variants={itemVariants} className="mb-10">
-            <h2 className="text-3xl md:text-4xl text-white mb-3 font-almendra">
+            <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
               Liberación de Entidades Espirituales
             </h2>
             <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
@@ -260,7 +260,7 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
           <motion.div variants={itemVariants} className="mb-10">
-            <h2 className="text-3xl md:text-4xl text-white mb-3 font-almendra">
+            <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
               La Terapia de Regresión a Vidas Pasadas
             </h2>
             <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
@@ -285,7 +285,7 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
           <motion.div variants={itemVariants} className="mb-10">
-            <h2 className="text-3xl md:text-4xl text-white mb-3 font-almendra">
+            <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
               Preguntas Frecuentes
             </h2>
             <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
@@ -309,7 +309,7 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20 text-center"
         >
           <div className="border border-[#C5A059]/20 p-12 bg-[#0f172a]">
-            <h3 className="text-3xl font-almendra text-white mb-4">¿Listo para comenzar?</h3>
+            <h3 className="text-3xl font-cinzel text-white mb-4">¿Listo para comenzar?</h3>
             <p className="text-gray-300 font-crimson text-lg mb-8 max-w-xl mx-auto">
               Si ya resolviste tus dudas, da el primer paso y completa el formulario de admisión.
             </p>
