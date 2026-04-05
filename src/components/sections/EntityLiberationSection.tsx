@@ -62,7 +62,7 @@ export default function EntityLiberationSection() {
           </motion.h2>
           <motion.p
             variants={itemVariants}
-            className="text-gray-300 font-[Cormorant_Garamond] text-xl max-w-3xl mx-auto leading-relaxed"
+            className="text-gray-300 font-crimson text-xl max-w-3xl mx-auto leading-relaxed"
           >
             Esta terapia tiene sus raíces en los estudios del Dr. Carl Wickland y fue perfeccionada por el Dr. William Baldwin, quienes desarrollaron métodos eficaces para identificar y liberar influencias espirituales o energéticas que interfieren en el bienestar de las personas.
           </motion.p>
@@ -96,7 +96,7 @@ export default function EntityLiberationSection() {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <motion.div variants={itemVariants} className="space-y-5 text-gray-300 font-[Cormorant_Garamond] text-lg leading-relaxed">
+            <motion.div variants={itemVariants} className="space-y-5 text-gray-300 font-crimson text-lg leading-relaxed">
               <p>
                 Esta terapia aborda la presencia de energías externas o entidades espirituales que pueden adherirse al campo energético de una persona, afectando su salud mental, emocional y física.
               </p>
@@ -118,7 +118,7 @@ export default function EntityLiberationSection() {
                     className="flex items-center gap-3 p-4 bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition"
                   >
                     <i className={`${benefit.icon} text-[#C5A059] text-sm`}></i>
-                    <span className="text-gray-300 text-sm font-[Cormorant_Garamond]">{benefit.title}</span>
+                    <span className="text-gray-300 text-sm font-crimson">{benefit.title}</span>
                   </div>
                 ))}
               </div>
@@ -150,7 +150,7 @@ export default function EntityLiberationSection() {
                     initial={{ opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.06 }}
-                    className="flex items-start gap-3 text-gray-300 font-[Cormorant_Garamond] text-lg"
+                    className="flex items-start gap-3 text-gray-300 font-crimson text-lg"
                   >
                     <i className="fas fa-chevron-right text-[#C5A059] text-xs mt-1.5 flex-shrink-0"></i>
                     <span>{symptom}</span>
@@ -161,7 +161,7 @@ export default function EntityLiberationSection() {
 
             <motion.p
               variants={itemVariants}
-              className="mt-6 text-gray-400 text-sm font-[Cormorant_Garamond] italic leading-relaxed"
+              className="mt-6 text-gray-400 text-sm font-crimson italic leading-relaxed"
             >
               Estos síntomas pueden dificultar la vida diaria generando confusión y un sentimiento constante de estar fuera de control. Muchas veces no se identifican como influencias externas, lo que hace que la persona busque soluciones sin resultados duraderos.
             </motion.p>

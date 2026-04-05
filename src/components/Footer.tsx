@@ -20,7 +20,7 @@ export default function Footer() {
               className="w-auto h-16 object-contain opacity-90"
             />
           </div>
-          <p className="text-gray-300 font-[Cormorant_Garamond] text-sm leading-relaxed">
+          <p className="text-gray-300 font-crimson text-sm leading-relaxed">
             Hipnoterapia especializada en regresión a vidas pasadas y liberación espiritual para quienes están listos a sanar.
           </p>
         </div>

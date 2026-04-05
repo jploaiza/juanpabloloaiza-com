@@ -32,7 +32,7 @@ export default function AgendaPage() {
             <h1 className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
               Agenda tu Sesión
             </h1>
-            <p className="font-[Cormorant_Garamond] text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="font-crimson text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Selecciona la fecha y hora que mejor te convenga para tu sesión. Las sesiones se realizan vía Zoom en privacidad total.
             </p>
             <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6"></div>
@@ -75,7 +75,7 @@ export default function AgendaPage() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="mt-12 p-6 bg-[#0f172a] border border-[#C5A059]/20 rounded-sm"
           >
-            <p className="font-[Cormorant_Garamond] text-sm text-gray-300 leading-relaxed">
+            <p className="font-crimson text-sm text-gray-300 leading-relaxed">
               <span className="text-[#C5A059] font-semibold">Privacidad:</span> Este calendario es privado y solo para clientes admitidos. Cada sesión es personalizada y confidencial. Si necesitas ayuda, contacta vía WhatsApp.
             </p>
           </motion.div>

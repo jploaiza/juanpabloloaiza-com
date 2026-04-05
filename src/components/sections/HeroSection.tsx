@@ -51,7 +51,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut", delay: 1 }}
-          className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto font-light font-[Cormorant_Garamond] mb-12 leading-relaxed"
+          className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto font-light font-crimson mb-12 leading-relaxed"
         >
           Un proceso terapéutico integral para quienes están decididos a sanar su pasado, liberar cargas ancestrales y vivir con plenitud y propósito.
         </motion.p>

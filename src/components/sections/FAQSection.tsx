@@ -100,7 +100,7 @@ export default function FAQSection() {
           className="text-center mb-14"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Tus Dudas</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-almendra">
             Preguntas Frecuentes
           </h2>
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto" />
@@ -137,12 +137,12 @@ export default function FAQSection() {
             {/* Current question label */}
             <div className="mt-4 px-1">
               <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-1">Reproduciendo</p>
-              <p className="text-white font-[Cormorant_Garamond] text-lg leading-snug">{active.question}</p>
+              <p className="text-white font-crimson text-lg leading-snug">{active.question}</p>
             </div>
 
             {/* Answer text */}
             <div className="mt-4 p-5 bg-[#0f172a] border border-[#C5A059]/20">
-              <p className="text-gray-300 font-[Cormorant_Garamond] text-base leading-relaxed">
+              <p className="text-gray-300 font-crimson text-base leading-relaxed">
                 {active.answer}
               </p>
             </div>
@@ -171,7 +171,7 @@ export default function FAQSection() {
                   }`}>
                     {index + 1}
                   </span>
-                  <span className={`font-[Cormorant_Garamond] text-base leading-snug transition-colors ${
+                  <span className={`font-crimson text-base leading-snug transition-colors ${
                     activeIndex === index ? "text-white" : "text-gray-400 group-hover:text-gray-200"
                   }`}>
                     {faq.question}
@@ -191,7 +191,7 @@ export default function FAQSection() {
           viewport={{ once: true }}
           className="mt-16 text-center"
         >
-          <p className="text-gray-300 font-[Cormorant_Garamond] text-lg">
+          <p className="text-gray-300 font-crimson text-lg">
             ¿Tienes más preguntas?{" "}
             <a
               href="https://api.whatsapp.com/send?phone=56962081884"

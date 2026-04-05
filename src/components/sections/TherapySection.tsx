@@ -59,11 +59,11 @@ export default function TherapySection() {
           </motion.div>
 
           <motion.div variants={itemVariants} className="space-y-6">
-            <p className="text-gray-300 font-[Cormorant_Garamond] text-xl leading-relaxed">
+            <p className="text-gray-300 font-crimson text-xl leading-relaxed">
               Los problemas en nuestra vida presente muchas veces pueden estar vinculados a situaciones que nos han sucedido en los primeros años de esta, pero también podrían estar vinculados directamente a situaciones que hemos vivido en vidas pasadas.
             </p>
 
-            <p className="text-gray-300 font-[Cormorant_Garamond] text-xl leading-relaxed">
+            <p className="text-gray-300 font-crimson text-xl leading-relaxed">
               Somos almas inmortales, hemos vivido innumerables vidas a través de millones de años. Nuestra alma alberga toda esa información y a través de un proceso de meditación guiada e hipnosis clínica podemos acceder a ella para trabajar con ella.
             </p>
 
@@ -73,25 +73,25 @@ export default function TherapySection() {
                 <ul className="space-y-4 mt-4">
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Energías, karmas y contratos antiguos que afectan tu vida presente</span>
+                    <span className="font-crimson text-lg leading-relaxed">Energías, karmas y contratos antiguos que afectan tu vida presente</span>
                   </li>
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Situaciones de vidas pasadas que aún no han sido liberadas correctamente</span>
+                    <span className="font-crimson text-lg leading-relaxed">Situaciones de vidas pasadas que aún no han sido liberadas correctamente</span>
                   </li>
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Energías y espíritus que podrían estar impidiéndote vivir la mejor versión de ti</span>
+                    <span className="font-crimson text-lg leading-relaxed">Energías y espíritus que podrían estar impidiéndote vivir la mejor versión de ti</span>
                   </li>
                   <li className="flex gap-3 text-gray-300">
                     <span className="text-[#C5A059] min-w-fit font-bold text-lg">✓</span>
-                    <span className="font-[Cormorant_Garamond] text-lg leading-relaxed">Con la ayuda de tu guía espiritual, entendemos, analizamos y liberamos cada situación</span>
+                    <span className="font-crimson text-lg leading-relaxed">Con la ayuda de tu guía espiritual, entendemos, analizamos y liberamos cada situación</span>
                   </li>
                 </ul>
               </div>
 
               <div className="bg-[#0f172a] border border-[#C5A059]/20 p-6">
-                <p className="text-gray-300 italic font-[Cormorant_Garamond] text-lg leading-relaxed text-center">
+                <p className="text-gray-300 italic font-crimson text-lg leading-relaxed text-center">
                   "Este potente proceso terapéutico es un viaje a tu vida actual, a tus vidas pasadas y a tu vida espiritual, en el cual te guiaré para que encuentres tu verdad y vivas la mejor versión de ti."
                 </p>
               </div>

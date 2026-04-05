@@ -49,10 +49,10 @@ export default function ProcessSection() {
           className="text-center mb-16"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Cómo Funciona</span>
-          <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
+          <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-almendra">
             El Proceso de Sanación
           </motion.h2>
-          <motion.p variants={itemVariants} className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl mx-auto mt-4 leading-relaxed">
+          <motion.p variants={itemVariants} className="text-gray-300 font-crimson text-lg max-w-2xl mx-auto mt-4 leading-relaxed">
             Un proceso terapéutico de hasta 10 sesiones, dividido en tres etapas. Tenemos un principio y un final, lo que nos permite asegurar un resultado real para ti.
           </motion.p>
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6" />
@@ -100,8 +100,8 @@ export default function ProcessSection() {
               <div className="mb-6 mt-4">
                 <i className={`${step.icon} text-3xl text-[#C5A059] opacity-80`} />
               </div>
-              <h3 className="text-xl sm:text-2xl text-white mb-4 font-cinzel">{step.title}</h3>
-              <p className="font-[Cormorant_Garamond] text-lg text-gray-300 leading-relaxed">{step.description}</p>
+              <h3 className="text-xl sm:text-2xl text-white mb-4 font-almendra">{step.title}</h3>
+              <p className="font-crimson text-lg text-gray-300 leading-relaxed">{step.description}</p>
             </motion.div>
           ))}
         </motion.div>

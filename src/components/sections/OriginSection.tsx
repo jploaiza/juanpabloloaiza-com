@@ -58,8 +58,8 @@ export default function OriginSection() {
           className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/5 pb-8"
         >
           <div>
-            <h2 className="text-4xl md:text-5xl text-white mb-2 font-cinzel">Descubre el Origen de tus Conflictos</h2>
-            <p className="text-[#C5A059] font-[Cormorant_Garamond] text-xl italic">Para sanar profundamente, primero debemos descubrir el origen de lo que nos enfermó.</p>
+            <h2 className="text-4xl md:text-5xl text-white mb-2 font-almendra">Descubre el Origen de tus Conflictos</h2>
+            <p className="text-[#C5A059] font-crimson text-xl italic">Para sanar profundamente, primero debemos descubrir el origen de lo que nos enfermó.</p>
           </div>
           <div className="mt-6 md:mt-0">
             <a href="#ListaDeAdmision" className="text-sm uppercase tracking-widest text-gray-400 hover:text-white transition">
@@ -97,10 +97,10 @@ export default function OriginSection() {
               {/* Title and description below the door */}
               <div className="mt-5 text-center px-2">
                 <div className="w-8 h-[1px] bg-[#C5A059] mx-auto mb-3 group-hover:w-16 transition-all duration-500" />
-                <h3 className="text-lg font-cinzel text-white group-hover:text-[#C5A059] transition-colors duration-300 mb-3">
+                <h3 className="text-lg font-almendra text-white group-hover:text-[#C5A059] transition-colors duration-300 mb-3">
                   {area.title}
                 </h3>
-                <p className="text-gray-400 font-[Cormorant_Garamond] text-base italic leading-relaxed">
+                <p className="text-gray-400 font-crimson text-base italic leading-relaxed">
                   {area.description}
                 </p>
               </div>

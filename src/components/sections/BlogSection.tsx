@@ -35,8 +35,8 @@ export default function BlogSection() {
           className="text-center mb-14"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Sabiduría Compartida</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog</h2>
-          <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-almendra">Blog</h2>
+          <p className="text-gray-300 font-crimson text-lg max-w-2xl mx-auto">
             Artículos sobre Regresión a Vidas Pasadas y Sanación
           </p>
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6" />
@@ -81,11 +81,11 @@ export default function BlogSection() {
                       <span className="text-[#C5A059] text-[10px] uppercase tracking-widest font-semibold">{post.category}</span>
                     </div>
 
-                    <h3 className="text-base font-cinzel text-white mb-2 leading-snug line-clamp-2 group-hover:text-[#C5A059] transition-colors">
+                    <h3 className="text-base font-almendra text-white mb-2 leading-snug line-clamp-2 group-hover:text-[#C5A059] transition-colors">
                       {post.title}
                     </h3>
 
-                    <p className="text-gray-400 text-sm font-[Cormorant_Garamond] leading-relaxed mb-4 line-clamp-2">
+                    <p className="text-gray-400 text-sm font-crimson leading-relaxed mb-4 line-clamp-2">
                       {post.excerpt}
                     </p>
 

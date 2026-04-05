@@ -188,11 +188,11 @@ function VideoCard({ video }: { video: Video }) {
 
         {/* Content */}
         <div className="p-5">
-          <h3 className="text-base font-cinzel text-white mb-2 leading-snug group-hover:text-[#C5A059] transition-colors">
+          <h3 className="text-base font-almendra text-white mb-2 leading-snug group-hover:text-[#C5A059] transition-colors">
             {video.title}
           </h3>
           <div className="h-px bg-[#C5A059]/20 mb-3"></div>
-          <p className="text-gray-300 text-sm font-[Cormorant_Garamond] leading-relaxed">
+          <p className="text-gray-300 text-sm font-crimson leading-relaxed">
             {video.description}
           </p>
         </div>
@@ -219,7 +219,7 @@ export default function VideosPage() {
           <h1 className="text-5xl md:text-6xl text-white mt-4 mb-6 font-cinzel font-bold">
             Explora tu Camino
           </h1>
-          <p className="font-[Cormorant_Garamond] text-xl text-gray-300 max-w-3xl leading-relaxed">
+          <p className="font-crimson text-xl text-gray-300 max-w-3xl leading-relaxed">
             Accede a videos informativos sobre la terapia de regresión a vidas pasadas
             y resuelve todas tus dudas antes de comenzar tu proceso.
           </p>
@@ -235,11 +235,11 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
           <motion.div variants={itemVariants} className="mb-10">
-            <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
+            <h2 className="text-3xl md:text-4xl text-white mb-3 font-almendra">
               Liberación de Entidades Espirituales
             </h2>
             <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
-            <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl">
+            <p className="text-gray-300 font-crimson text-lg max-w-2xl">
               Descubre cómo la terapia de liberación espiritual puede ayudarte a recuperar tu bienestar y paz interior.
             </p>
           </motion.div>
@@ -260,11 +260,11 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
           <motion.div variants={itemVariants} className="mb-10">
-            <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
+            <h2 className="text-3xl md:text-4xl text-white mb-3 font-almendra">
               La Terapia de Regresión a Vidas Pasadas
             </h2>
             <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
-            <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl">
+            <p className="text-gray-300 font-crimson text-lg max-w-2xl">
               Conoce en detalle cómo funciona el proceso y qué puedes esperar de cada sesión.
             </p>
           </motion.div>
@@ -285,11 +285,11 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
         >
           <motion.div variants={itemVariants} className="mb-10">
-            <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">
+            <h2 className="text-3xl md:text-4xl text-white mb-3 font-almendra">
               Preguntas Frecuentes
             </h2>
             <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
-            <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl">
+            <p className="text-gray-300 font-crimson text-lg max-w-2xl">
               Resuelve tus dudas sobre la hipnoterapia de regresión a vidas pasadas.
             </p>
           </motion.div>
@@ -309,8 +309,8 @@ export default function VideosPage() {
           className="max-w-6xl mx-auto px-4 sm:px-6 mb-20 text-center"
         >
           <div className="border border-[#C5A059]/20 p-12 bg-[#0f172a]">
-            <h3 className="text-3xl font-cinzel text-white mb-4">¿Listo para comenzar?</h3>
-            <p className="text-gray-300 font-[Cormorant_Garamond] text-lg mb-8 max-w-xl mx-auto">
+            <h3 className="text-3xl font-almendra text-white mb-4">¿Listo para comenzar?</h3>
+            <p className="text-gray-300 font-crimson text-lg mb-8 max-w-xl mx-auto">
               Si ya resolviste tus dudas, da el primer paso y completa el formulario de admisión.
             </p>
             <a href="/#ListaDeAdmision" className="btn-gold">

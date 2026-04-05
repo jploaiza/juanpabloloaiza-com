@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Cinzel, Inter } from "next/font/google";
+import { Cinzel, Almendra_SC, Crimson_Text } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
 const cinzel = Cinzel({
   variable: "--font-cinzel",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["700"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const almendra = Almendra_SC({
+  variable: "--font-almendra",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400"],
+});
+
+const crimson = Crimson_Text({
+  variable: "--font-crimson",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -69,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${cormorant.variable} ${cinzel.variable} ${inter.variable} h-full antialiased scroll-smooth`}
+      className={`${cinzel.variable} ${almendra.variable} ${crimson.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         <script

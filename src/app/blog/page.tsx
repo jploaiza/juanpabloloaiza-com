@@ -39,7 +39,7 @@ function BlogContent() {
           <h1 className="text-5xl md:text-6xl text-white mt-4 mb-6 font-cinzel font-bold">
             Blog
           </h1>
-          <p className="font-[Cormorant_Garamond] text-xl text-gray-300 max-w-3xl leading-relaxed">
+          <p className="font-crimson text-xl text-gray-300 max-w-3xl leading-relaxed">
             Artículos sobre Regresión a Vidas Pasadas, Sanación Espiritual y Transformación Personal
           </p>
           <div className="w-16 h-[1px] bg-[#C5A059] mt-6"></div>
@@ -94,12 +94,12 @@ function BlogContent() {
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-lg font-cinzel text-white mb-2 leading-tight group-hover:text-[#C5A059] transition-colors line-clamp-3">
+                      <h3 className="text-lg font-almendra text-white mb-2 leading-tight group-hover:text-[#C5A059] transition-colors line-clamp-3">
                         {post.title}
                       </h3>
 
                       {/* Excerpt */}
-                      <p className="text-gray-300 text-sm leading-relaxed font-[Cormorant_Garamond] mb-4 line-clamp-2">
+                      <p className="text-gray-300 text-sm leading-relaxed font-crimson mb-4 line-clamp-2">
                         {post.excerpt}
                       </p>
 

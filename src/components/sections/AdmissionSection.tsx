@@ -91,7 +91,7 @@ export default function AdmissionSection() {
 
         <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
           <motion.div variants={itemVariants} className="space-y-6">
-            <p className="text-gray-300 font-[Cormorant_Garamond] text-xl leading-relaxed">
+            <p className="text-gray-300 font-crimson text-xl leading-relaxed">
               Para comenzar este viaje transformador, necesitamos que completes un formulario de admisión. Esto nos ayuda a:
             </p>
 
@@ -104,7 +104,7 @@ export default function AdmissionSection() {
               ].map((item, index) => (
                 <li key={index} className="flex gap-3 text-gray-300">
                   <span className="text-[#C5A059] min-w-fit font-bold">✓</span>
-                  <span className="font-[Cormorant_Garamond] text-lg">{item}</span>
+                  <span className="font-crimson text-lg">{item}</span>
                 </li>
               ))}
             </ul>
@@ -113,7 +113,7 @@ export default function AdmissionSection() {
               <p className="font-cinzel font-semibold text-[#C5A059] mb-3 uppercase text-sm tracking-widest">
                 Nota Importante
               </p>
-              <p className="text-gray-300 text-sm leading-relaxed font-[Cormorant_Garamond]">
+              <p className="text-gray-300 text-sm leading-relaxed font-crimson">
                 Espacios limitados disponibles. El proceso es personalizado y dedicado a cada cliente. Se requiere entrevista preliminar gratuita antes de comenzar.
               </p>
             </div>
@@ -220,7 +220,7 @@ export default function AdmissionSection() {
           variants={itemVariants}
           className="bg-[#0f172a] border border-[#C5A059]/20 p-12"
         >
-          <h3 className="text-3xl font-cinzel text-center mb-10 text-white">
+          <h3 className="text-3xl font-almendra text-center mb-10 text-white">
             Próximos Pasos
           </h3>
 
@@ -257,7 +257,7 @@ export default function AdmissionSection() {
                 <h4 className="font-cinzel text-white mb-2 text-sm uppercase tracking-widest">
                   {step.title}
                 </h4>
-                <p className="text-gray-400 text-xs font-[Cormorant_Garamond]">
+                <p className="text-gray-400 text-xs font-crimson">
                   {step.description}
                 </p>
               </div>

@@ -60,7 +60,7 @@ export default function ContactSection() {
           </motion.h2>
           <motion.p
             variants={itemVariants}
-            className="text-gray-300 font-[Cormorant_Garamond] text-xl max-w-2xl mx-auto"
+            className="text-gray-300 font-crimson text-xl max-w-2xl mx-auto"
           >
             Ponte en contacto para una entrevista preliminar gratuita
           </motion.p>
@@ -88,10 +88,10 @@ export default function ContactSection() {
                 <div className="flex justify-center mb-6">
                   <Icon className="w-8 h-8 text-[#C5A059] group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="font-cinzel text-white mb-2 uppercase text-sm tracking-widest">
+                <h3 className="font-almendra text-white mb-2 uppercase text-sm tracking-widest">
                   {method.title}
                 </h3>
-                <p className="text-[#C5A059] font-light font-[Cormorant_Garamond] text-lg">
+                <p className="text-[#C5A059] font-light font-crimson text-lg">
                   {method.value}
                 </p>
               </motion.a>
@@ -103,7 +103,7 @@ export default function ContactSection() {
           variants={itemVariants}
           className="bg-[#0f172a] border border-[#C5A059]/20 p-12 text-center"
         >
-          <p className="text-gray-300 font-[Cormorant_Garamond] text-lg mb-8">
+          <p className="text-gray-300 font-crimson text-lg mb-8">
             ✨ Disponible para sesiones vía Zoom en todo el mundo
           </p>
           <a
