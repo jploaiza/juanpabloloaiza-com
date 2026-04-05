@@ -161,7 +161,7 @@ export default function EntityLiberationSection() {
 
             <motion.p
               variants={itemVariants}
-              className="mt-6 text-gray-400 text-base font-crimson italic leading-relaxed"
+              className="mt-6 text-gray-400 text-xl font-crimson italic leading-relaxed"
             >
               Estos síntomas pueden dificultar la vida diaria generando confusión y un sentimiento constante de estar fuera de control. Muchas veces no se identifican como influencias externas, lo que hace que la persona busque soluciones sin resultados duraderos.
             </motion.p>

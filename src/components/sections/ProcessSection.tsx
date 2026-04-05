@@ -101,8 +101,8 @@ export default function ProcessSection() {
               <div className="mb-6 mt-4">
                 <i className={`${step.icon} text-3xl text-[#C5A059] opacity-80`} />
               </div>
-              <h3 className="text-xl sm:text-2xl text-white mb-4 font-cinzel">{step.title}</h3>
-              <p className="font-crimson text-lg text-gray-300 leading-relaxed">{step.description}</p>
+              <h3 className="text-2xl sm:text-3xl text-white mb-4 font-cinzel font-bold">{step.title}</h3>
+              <p className="font-crimson text-xl text-gray-300 leading-relaxed">{step.description}</p>
             </motion.div>
           ))}
         </motion.div>
