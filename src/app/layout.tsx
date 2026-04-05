@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Crimson_Text } from "next/font/google";
 import "./globals.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -67,6 +68,15 @@ export default function RootLayout({
       className={`${cinzel.variable} ${crimson.variable} h-full antialiased scroll-smooth`}
     >
       <head>
+        {/* Preconnect to external asset hosts */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev" />
+        {/* Preload LCP hero image so browser discovers it early */}
+        <link
+          rel="preload"
+          as="image"
+          href="https://res.cloudinary.com/dvudfdhoi/image/upload/f_auto,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
