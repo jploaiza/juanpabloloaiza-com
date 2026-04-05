@@ -244,8 +244,8 @@ export default function AdmissionSection() {
                 description: "Primera sesión vía Zoom",
               },
             ].map((step, index) => (
-              <HeraldFrame key={index} size={40}>
-                <div className="text-center p-6 bg-[#050b1a] border border-[#C5A059]/20 group hover:border-[#C5A059]/40 transition duration-300">
+              <HeraldFrame key={index} size={40} className="h-full">
+                <div className="h-full text-center p-6 bg-[#050b1a] border border-[#C5A059]/20 group hover:border-[#C5A059]/40 transition duration-300">
                   <div className="text-4xl font-cinzel text-[#C5A059] mb-3 opacity-80 group-hover:opacity-100 transition">
                     {step.number}
                   </div>

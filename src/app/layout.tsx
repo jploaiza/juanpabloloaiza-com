@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Cinzel, Crimson_Text } from "next/font/google";
 import "./globals.css";
-import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
 const cinzel = Cinzel({
@@ -103,7 +102,6 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-black text-white">
         {children}
         <WhatsAppButton />
-        <ScrollToTop />
       </body>
     </html>
   );

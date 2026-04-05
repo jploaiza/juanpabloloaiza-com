@@ -1,8 +1,9 @@
 "use client";
 import ScrollDivider from "@/components/ScrollDivider";
+import HeraldFrame from "@/components/HeraldFrame";
 
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, Globe } from "lucide-react";
 
 export default function ContactSection() {
   const containerVariants = {
@@ -32,9 +33,9 @@ export default function ContactSection() {
       href: "mailto:contacto@juanpabloloaiza.com",
     },
     {
-      icon: MapPin,
-      title: "Cobertura",
-      value: "Sesiones en todo el mundo",
+      icon: Globe,
+      title: "Cobertura Mundial",
+      value: "Sana donde sea que estés",
       href: "#",
     },
   ];
@@ -72,30 +73,26 @@ export default function ContactSection() {
           {contactMethods.map((method, index) => {
             const Icon = method.icon;
             return (
-              <motion.a
-                key={index}
-                variants={itemVariants}
-                href={method.href}
-                target={method.href.startsWith("http") ? "_blank" : "_self"}
-                rel={method.href.startsWith("http") ? "noopener noreferrer" : ""}
-                className="group relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 p-8 text-center transition duration-300"
-              >
-                {/* Ornate corner frames */}
-                <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-
-                <div className="flex justify-center mb-6">
-                  <Icon className="w-8 h-8 text-[#C5A059] group-hover:scale-110 transition-transform" />
-                </div>
-                <h3 className="font-cinzel text-white mb-2 uppercase text-sm tracking-widest">
-                  {method.title}
-                </h3>
-                <p className="text-[#C5A059] font-light font-crimson text-lg">
-                  {method.value}
-                </p>
-              </motion.a>
+              <motion.div key={index} variants={itemVariants}>
+                <HeraldFrame size={48} className="h-full">
+                  <a
+                    href={method.href}
+                    target={method.href.startsWith("http") ? "_blank" : "_self"}
+                    rel={method.href.startsWith("http") ? "noopener noreferrer" : ""}
+                    className="group flex flex-col items-center bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 p-8 text-center transition duration-300 h-full"
+                  >
+                    <div className="flex justify-center mb-6">
+                      <Icon className="w-8 h-8 text-[#C5A059] group-hover:scale-110 transition-transform" />
+                    </div>
+                    <h3 className="font-cinzel text-white mb-2 uppercase text-sm tracking-widest">
+                      {method.title}
+                    </h3>
+                    <p className="text-[#C5A059] font-light font-crimson text-lg">
+                      {method.value}
+                    </p>
+                  </a>
+                </HeraldFrame>
+              </motion.div>
             );
           })}
         </div>
