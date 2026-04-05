@@ -16,88 +16,91 @@ export default function ProcessSection() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
   };
 
+  const steps = [
+    {
+      number: "I",
+      title: "Revelación",
+      icon: "fas fa-search",
+      description: "Accedemos con precisión quirúrgica al origen del bloqueo. Nada queda oculto ante la luz de la consciencia.",
+    },
+    {
+      number: "II",
+      title: "Comprensión",
+      icon: "fas fa-balance-scale",
+      description: "Elevamos tu perspectiva. Entendemos el pacto álmico detrás del dolor para disolverlo desde la sabiduría.",
+    },
+    {
+      number: "III",
+      title: "Transmutación",
+      icon: "fas fa-gem",
+      description: "Limpieza energética total. Cortamos lazos y reprogramamos tu campo para vibrar en abundancia y paz.",
+    },
+  ];
+
   return (
-    <section className="py-20 px-4 bg-black">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="max-w-6xl mx-auto"
-      >
-        <motion.h2
-          variants={itemVariants}
-          className="headline-lg text-center mb-12"
+    <section id="ComoFunciona" className="py-28 bg-[#020617] relative border-t border-[#C5A059]/5">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="text-center mb-20"
         >
-          ¿CÓMO FUNCIONA EL PROCESO?
-        </motion.h2>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Excelencia Terapéutica</span>
+          <motion.h2
+            variants={itemVariants}
+            className="text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
+          >
+            El Camino de la Maestría
+          </motion.h2>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
+        </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-8">
-          <motion.div variants={itemVariants}>
-            <div className="aspect-video bg-[#110f1e] rounded-lg overflow-hidden">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="¿Cómo funciona el proceso?"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
-          </motion.div>
+        {/* Three steps grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid md:grid-cols-3 gap-10 relative mb-16"
+        >
+          {/* Timeline line */}
+          <div className="hidden md:block absolute top-12 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C5A059]/30 to-transparent z-0"></div>
 
-          <motion.div variants={itemVariants} className="space-y-6">
-            <p className="body-text text-lg">
-              Mi nombre es Juan Pablo Loaiza, soy terapeuta holístico especialista en terapia de regresión a vidas pasadas, y te doy la bienvenida a este viaje para encontrar y devolver la felicidad a tu vida.
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <h3 className="headline-md text-[#d4a017] mb-2">
-                  Tres Etapas Fundamentales
-                </h3>
-                <ul className="space-y-2 body-text">
-                  <li className="flex gap-3">
-                    <span className="text-[#d4a017]">•</span>
-                    <span><strong>Descubrir:</strong> Identificar el origen de tus conflictos</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#d4a017]">•</span>
-                    <span><strong>Entender:</strong> Comprender las causas profundas</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#d4a017]">•</span>
-                    <span><strong>Liberar:</strong> Sanar y transformar tu realidad</span>
-                  </li>
-                </ul>
+          {steps.map((step, index) => (
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              className="glass-card p-10 relative z-10 text-center group bg-[#0f172a]"
+            >
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#020617] border border-[#C5A059] rounded-full flex items-center justify-center text-[#C5A059] text-xs font-bold">
+                {step.number}
               </div>
 
-              <p className="body-text">
-                <strong>Duración:</strong> Típicamente 3-5 sesiones, dependiendo de tu guía espiritual y necesidades personales.
+              <div className="mb-6 mt-4">
+                <i className={`${step.icon} text-3xl text-[#C5A059] opacity-80`}></i>
+              </div>
+              <h3 className="text-2xl text-white mb-4 font-cinzel">{step.title}</h3>
+              <p className="font-[Cormorant_Garamond] text-lg text-gray-400 leading-relaxed">
+                {step.description}
               </p>
-
-              <p className="body-text">
-                <strong>Próximos pasos:</strong> Para comenzar este proceso, deberás llenar un formulario de admisión y responder varias preguntas que nos ayudarán a entender tu problema.
-              </p>
-            </div>
-
-            <button className="btn-gold mt-4">
-              Comienza tu Viaje
-            </button>
-          </motion.div>
-        </div>
-
-        <motion.div
-          variants={itemVariants}
-          className="bg-[#110f1e] border border-[#d4a017]/20 rounded-lg p-6 mt-12"
-        >
-          <p className="body-text text-center">
-            ✨ Incluye una entrevista preliminar gratuita para evaluar tu caso • Sesiones vía Zoom para máxima comodidad • Acceso global
-          </p>
+            </motion.div>
+          ))}
         </motion.div>
-      </motion.div>
+
+        {/* Process note */}
+        <motion.p
+          variants={itemVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="text-center mt-12 text-gray-500 text-xs uppercase tracking-widest font-light"
+        >
+          <i className="fas fa-star text-[#C5A059] mr-2"></i> Proceso exclusivo de 3 a 5 sesiones personalizadas
+        </motion.p>
+      </div>
     </section>
   );
 }

@@ -6,61 +6,80 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const navItems = [
-  { label: "INICIO", href: "#home" },
-  { label: "¿CÓMO FUNCIONA?", href: "#ComoFunciona" },
-  { label: "¿QUÉ SON VIDAS PASADAS?", href: "#QueEsTRVP" },
-  { label: "PREGUNTAS FRECUENTES", href: "#PreguntasFrecuentes" },
-  { label: "ADMISIÓN", href: "#ListaDeAdmision" },
-  { label: "BLOG", href: "#blog" },
-  { label: "CONTACTO", href: "#contacto" },
+  { label: "EL PROCESO", href: "#ComoFunciona" },
+  { label: "EL ORIGEN", href: "#QueEsTRVP" },
+  { label: "SANACIÓN", href: "#ListaDeAdmision" },
+  { label: "DUDAS", href: "#PreguntasFrecuentes" },
 ];
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-black/95 backdrop-blur-md border-b border-[#d4a017]/20">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-        {/* Logo */}
-        <div className="h-12 w-auto relative">
-          <Image
-            src="/assets/logo.webp"
-            alt="Juan Pablo Loaiza"
-            height={48}
-            width={180}
-            className="object-contain"
-          />
+    <header className="fixed top-0 w-full z-50 bg-[#020617]/95 backdrop-blur-xl border-b border-[#C5A059]/10 transition-all duration-300">
+      {/* Top Bar - Hidden on mobile */}
+      <div className="hidden lg:block bg-[#050b1a] border-b border-white/5 py-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-[10px] uppercase tracking-widest text-gray-400">
+          <div className="flex items-center space-x-6">
+            <span className="flex items-center"><MessageCircle className="w-3 h-3 text-[#C5A059] mr-2" /> +56 9 6208 1884</span>
+            <span className="flex items-center"><span className="text-[#C5A059] mr-2">✉</span> contacto@juanpabloloaiza.com</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span>SÍGUEME:</span>
+            <a href="#" className="hover:text-[#C5A059] transition">Instagram</a>
+            <a href="#" className="hover:text-[#C5A059] transition">YouTube</a>
+            <a href="#" className="hover:text-[#C5A059] transition">LinkedIn</a>
+          </div>
         </div>
+      </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
+      {/* Main Navbar */}
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-24">
+          {/* Logo */}
+          <div className="flex items-center gap-4 group cursor-pointer">
+            <Image
+              src="/assets/logo.webp"
+              alt="Juan Pablo Loaiza"
+              height={48}
+              width={150}
+              className="h-12 w-auto object-contain opacity-90 group-hover:opacity-100 transition"
+            />
+            <div className="flex flex-col text-left border-l border-[#C5A059]/30 pl-4">
+              <span className="font-cinzel text-xl text-white tracking-widest group-hover:text-[#C5A059] transition duration-500">
+                Juan Pablo Loaiza
+              </span>
+              <span className="text-[9px] uppercase tracking-[0.3em] text-[#C5A059]">Excelencia Espiritual</span>
+            </div>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex space-x-10 items-center">
+            {navItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="text-xs uppercase tracking-widest text-gray-400 hover:text-[#C5A059] transition duration-300"
+              >
+                {item.label}
+              </a>
+            ))}
             <a
-              key={item.label}
-              href={item.href}
-              className="font-cinzel text-sm text-gray-300 hover:text-[#d4a017] transition"
+              href="#ListaDeAdmision"
+              className="border border-[#C5A059] text-[#C5A059] px-8 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:bg-[#C5A059] hover:text-[#020617] transition duration-500 shadow-[0_0_15px_rgba(197,160,89,0.1)]"
             >
-              {item.label}
+              Admisión VIP
             </a>
-          ))}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden text-[#C5A059]"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-
-        {/* WhatsApp Button */}
-        <a
-          href="https://api.whatsapp.com/send?phone=56962081884"
-          className="hidden sm:flex items-center gap-2 bg-[#25d366] hover:bg-[#1ead50] text-white px-4 py-2 rounded-lg transition"
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span className="font-cinzel text-sm">WhatsApp</span>
-        </a>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-[#d4a017]"
-        >
-          {isOpen ? <X /> : <Menu />}
-        </button>
       </nav>
 
       {/* Mobile Navigation */}
@@ -69,25 +88,25 @@ export default function Header() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="md:hidden bg-black/95 border-t border-[#d4a017]/20 p-4"
+          className="md:hidden bg-[#020617]/95 border-t border-[#C5A059]/10 p-4"
         >
           <div className="flex flex-col gap-4">
             {navItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className="font-cinzel text-sm text-gray-300 hover:text-[#d4a017] transition"
+                className="font-cinzel text-sm text-gray-300 hover:text-[#C5A059] transition"
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}
               </a>
             ))}
             <a
-              href="https://api.whatsapp.com/send?phone=56962081884"
-              className="flex items-center gap-2 bg-[#25d366] hover:bg-[#1ead50] text-white px-4 py-2 rounded-lg transition mt-4"
+              href="#ListaDeAdmision"
+              className="border border-[#C5A059] text-[#C5A059] px-4 py-2 rounded-sm text-xs uppercase tracking-widest hover:bg-[#C5A059] hover:text-[#020617] transition mt-4"
+              onClick={() => setIsOpen(false)}
             >
-              <MessageCircle className="w-4 h-4" />
-              <span className="font-cinzel text-sm">WhatsApp</span>
+              Admisión VIP
             </a>
           </div>
         </motion.div>

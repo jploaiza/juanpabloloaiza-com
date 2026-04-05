@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --color-void: #0a0812;
-  --color-dark-indigo: #110f1e;
-  --color-nebula: #1a1535;
-  --color-gold: #d4a017;
-  --color-indigo-glow: #6366f1;
-  --color-light-indigo: #a8adff;
+  --color-void: #020617;
+  --color-navy: #0f172a;
+  --color-indigo: #312e81;
+  --color-gold: #C5A059;
+  --color-champagne: #F3E5AB;
+  --color-white: #F8FAFC;
 }
 
 * {
@@ -19,58 +19,69 @@ html {
 }
 
 body {
-  background-color: #0a0812;
-  color: white;
+  background-color: #020617;
+  color: #E2E8F0;
 }
 
 /* Hero Section */
 .hero-gradient {
-  background: linear-gradient(to bottom, #0a0812, #110f1e, #1a1535);
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 70%);
 }
 
 /* Glassmorphism Cards */
 .glass-card {
   position: relative;
-  background-color: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
+  background: rgba(2, 6, 23, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(197, 160, 89, 0.15);
+  border-radius: 0.25rem;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .glass-card:hover {
-  border-color: rgba(212, 160, 23, 0.5);
-  box-shadow: 0 0 30px rgba(212, 160, 23, 0.3);
+  background: rgba(30, 27, 75, 0.4);
+  border-color: rgba(197, 160, 89, 0.5);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 40px rgba(197, 160, 89, 0.1);
 }
 
 /* Buttons */
 .btn-gold {
-  background-color: #d4a017;
-  color: black;
+  background-color: #C5A059;
+  color: #020617;
   font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
+  padding: 1rem 2rem;
+  border-radius: 0.25rem;
+  transition: all 0.5s ease;
   font-family: var(--font-cinzel);
+  box-shadow: 0 0 25px rgba(197, 160, 89, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .btn-gold:hover {
-  opacity: 0.9;
+  background-color: white;
+  box-shadow: 0 0 30px rgba(197, 160, 89, 0.5);
 }
 
 .btn-gold-outline {
-  border: 1px solid #d4a017;
-  color: #d4a017;
+  border: 1px solid #C5A059;
+  color: #C5A059;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   transition: all 0.3s ease;
   font-family: var(--font-cinzel);
   background-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 15px rgba(197, 160, 89, 0.1);
 }
 
 .btn-gold-outline:hover {
-  background-color: rgba(212, 160, 23, 0.1);
+  background-color: #C5A059;
+  color: #020617;
 }
 
 .btn-gold-outline:disabled {
@@ -149,7 +160,7 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.05em;
-  color: #d4a017;
+  color: #C5A059;
 }
 
 @media (max-width: 768px) {
@@ -170,10 +181,10 @@ body {
 
 @keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(212, 160, 23, 0.3);
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
   }
   50% {
-    box-shadow: 0 0 40px rgba(212, 160, 23, 0.6);
+    box-shadow: 0 0 40px rgba(197, 160, 89, 0.6);
   }
 }
 
