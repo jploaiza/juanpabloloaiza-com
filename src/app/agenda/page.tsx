@@ -76,7 +76,7 @@ export default function AgendaPage() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="mt-12 p-6 bg-[#0f172a] border border-[#C5A059]/20 rounded-sm"
           >
-            <p className="font-crimson text-sm text-gray-300 leading-relaxed">
+            <p className="font-crimson text-base text-gray-300 leading-relaxed">
               <span className="text-[#C5A059] font-semibold">Privacidad:</span> Este calendario es privado y solo para clientes admitidos. Cada sesión es personalizada y confidencial. Si necesitas ayuda, contacta vía WhatsApp.
             </p>
           </motion.div>

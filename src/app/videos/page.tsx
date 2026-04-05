@@ -192,7 +192,7 @@ function VideoCard({ video }: { video: Video }) {
             {video.title}
           </h3>
           <div className="h-px bg-[#C5A059]/20 mb-3"></div>
-          <p className="text-gray-300 text-sm font-crimson leading-relaxed">
+          <p className="text-gray-300 text-base font-crimson leading-relaxed">
             {video.description}
           </p>
         </div>

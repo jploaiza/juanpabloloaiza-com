@@ -97,10 +97,10 @@ export default function OriginSection() {
               {/* Title and description below the door */}
               <div className="mt-5 text-center px-2">
                 <div className="w-8 h-[1px] bg-[#C5A059] mx-auto mb-3 group-hover:w-16 transition-all duration-500" />
-                <h3 className="text-lg font-cinzel text-white group-hover:text-[#C5A059] transition-colors duration-300 mb-3">
+                <h3 className="text-xl font-cinzel text-white group-hover:text-[#C5A059] transition-colors duration-300 mb-3">
                   {area.title}
                 </h3>
-                <p className="text-gray-400 font-crimson text-base italic leading-relaxed">
+                <p className="text-gray-300 font-crimson text-lg italic leading-relaxed">
                   {area.description}
                 </p>
               </div>

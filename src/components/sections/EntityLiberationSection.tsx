@@ -118,7 +118,7 @@ export default function EntityLiberationSection() {
                     className="flex items-center gap-3 p-4 bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition"
                   >
                     <i className={`${benefit.icon} text-[#C5A059] text-sm`}></i>
-                    <span className="text-gray-300 text-sm font-crimson">{benefit.title}</span>
+                    <span className="text-gray-300 text-base font-crimson">{benefit.title}</span>
                   </div>
                 ))}
               </div>
@@ -161,7 +161,7 @@ export default function EntityLiberationSection() {
 
             <motion.p
               variants={itemVariants}
-              className="mt-6 text-gray-400 text-sm font-crimson italic leading-relaxed"
+              className="mt-6 text-gray-400 text-base font-crimson italic leading-relaxed"
             >
               Estos síntomas pueden dificultar la vida diaria generando confusión y un sentimiento constante de estar fuera de control. Muchas veces no se identifican como influencias externas, lo que hace que la persona busque soluciones sin resultados duraderos.
             </motion.p>

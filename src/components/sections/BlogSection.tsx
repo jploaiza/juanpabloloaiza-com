@@ -36,7 +36,7 @@ export default function BlogSection() {
           className="text-center mb-14"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Sabiduría Compartida</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog</h2>
           <p className="text-gray-300 font-crimson text-lg max-w-2xl mx-auto">
             Artículos sobre Regresión a Vidas Pasadas y Sanación
           </p>
@@ -86,7 +86,7 @@ export default function BlogSection() {
                       {post.title}
                     </h3>
 
-                    <p className="text-gray-400 text-sm font-crimson leading-relaxed mb-4 line-clamp-2">
+                    <p className="text-gray-400 text-base font-crimson leading-relaxed mb-4 line-clamp-2">
                       {post.excerpt}
                     </p>
 

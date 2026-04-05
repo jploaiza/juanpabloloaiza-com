@@ -102,7 +102,7 @@ export default function FAQSection() {
           className="text-center mb-14"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Tus Dudas</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
             Preguntas Frecuentes
           </h2>
           <ScrollDivider className="mt-6" />

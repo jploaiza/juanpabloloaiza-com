@@ -50,7 +50,7 @@ export default function ProcessSection() {
           className="text-center mb-16"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Cómo Funciona</span>
-          <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
+          <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
             El Proceso de Sanación
           </motion.h2>
           <motion.p variants={itemVariants} className="text-gray-300 font-crimson text-lg max-w-2xl mx-auto mt-4 leading-relaxed">
