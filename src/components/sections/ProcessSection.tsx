@@ -1,4 +1,5 @@
 "use client";
+import ScrollDivider from "@/components/ScrollDivider";
 
 import { motion } from "framer-motion";
 
@@ -55,7 +56,7 @@ export default function ProcessSection() {
           <motion.p variants={itemVariants} className="text-gray-300 font-crimson text-lg max-w-2xl mx-auto mt-4 leading-relaxed">
             Un proceso terapéutico de hasta 10 sesiones, dividido en tres etapas. Tenemos un principio y un final, lo que nos permite asegurar un resultado real para ti.
           </motion.p>
-          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6" />
+          <ScrollDivider className="mt-6" />
         </motion.div>
 
         {/* Video */}

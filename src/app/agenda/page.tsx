@@ -1,4 +1,5 @@
 "use client";
+import ScrollDivider from "@/components/ScrollDivider";
 
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
@@ -35,7 +36,7 @@ export default function AgendaPage() {
             <p className="font-crimson text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Selecciona la fecha y hora que mejor te convenga para tu sesión. Las sesiones se realizan vía Zoom en privacidad total.
             </p>
-            <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6"></div>
+            <ScrollDivider className="mt-6" />
           </motion.div>
 
           <motion.div

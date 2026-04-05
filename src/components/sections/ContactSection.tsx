@@ -1,4 +1,5 @@
 "use client";
+import ScrollDivider from "@/components/ScrollDivider";
 
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
@@ -64,7 +65,7 @@ export default function ContactSection() {
           >
             Ponte en contacto para una entrevista preliminar gratuita
           </motion.p>
-          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6"></div>
+          <ScrollDivider className="mt-6" />
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">

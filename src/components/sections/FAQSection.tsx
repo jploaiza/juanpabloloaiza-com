@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { useState, useRef } from "react";
+import ScrollDivider from "@/components/ScrollDivider";
+import HeraldFrame from "@/components/HeraldFrame";
 
 const R2 = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev";
 
@@ -103,7 +105,7 @@ export default function FAQSection() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
             Preguntas Frecuentes
           </h2>
-          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto" />
+          <ScrollDivider className="mt-6" />
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8 items-start">
@@ -114,12 +116,7 @@ export default function FAQSection() {
             viewport={{ once: true }}
             className="lg:sticky lg:top-32"
           >
-            <div className="relative">
-              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-10" />
-              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-10" />
-              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-10" />
-              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-10" />
-
+            <HeraldFrame variant="eagle" size={72}>
               {/* 9:16 vertical video */}
               <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16", maxHeight: "70vh" }}>
                 <video
@@ -132,7 +129,7 @@ export default function FAQSection() {
                   disablePictureInPicture
                 />
               </div>
-            </div>
+            </HeraldFrame>
 
             {/* Current question label */}
             <div className="mt-4 px-1">

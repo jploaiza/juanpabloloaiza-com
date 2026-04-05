@@ -1,4 +1,5 @@
 "use client";
+import ScrollDivider from "@/components/ScrollDivider";
 
 import { motion } from "framer-motion";
 
@@ -36,7 +37,7 @@ export default function TherapySection() {
           >
             La Terapia de Regresión a Vidas Pasadas
           </motion.h2>
-          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
+          <ScrollDivider className="mt-6" />
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">

@@ -1,4 +1,5 @@
 "use client";
+import ScrollDivider from "@/components/ScrollDivider";
 
 import { motion } from "framer-motion";
 import { Clock, Tag, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
@@ -39,7 +40,7 @@ export default function BlogSection() {
           <p className="text-gray-300 font-crimson text-lg max-w-2xl mx-auto">
             Artículos sobre Regresión a Vidas Pasadas y Sanación
           </p>
-          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6" />
+          <ScrollDivider className="mt-6" />
         </motion.div>
 
         {/* Carousel */}
