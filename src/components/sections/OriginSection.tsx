@@ -18,26 +18,28 @@ export default function OriginSection() {
     hover: { y: -15, transition: { duration: 0.3 } },
   };
 
+  const R2 = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/jplweb/images";
+
   const explorationAreas = [
     {
       title: "Vidas Pasadas",
       description: "Las acciones que realizamos en vidas pasadas, las relaciones poco saludables y los karmas no resueltos pueden influir en nuestra vida presente, generando conflictos y desafíos. Es fundamental comprender y sanar estos aspectos para avanzar y encontrar paz y equilibrio en nuestra existencia actual.",
-      image: "/assets/doors/past-lives.webp",
+      image: `${R2}/doorpast1.png`,
     },
     {
       title: "Vida Presente",
       description: "Comprender tu vida presente es tan crucial como entender tus vidas pasadas. En esta vida, podemos encontrar traumas de la infancia e incluso desde el vientre materno, los cuales pueden influir profundamente en nuestro presente. Reconocer y sanar estos traumas es esencial para vivir una vida plena y equilibrada.",
-      image: "/assets/doors/present-life.webp",
+      image: `${R2}/doorpresent1.png`,
     },
     {
       title: "Transgeneracional",
       description: "Explora problemas y patrones heredados de generaciones anteriores. Las heridas de nuestros ancestros se transmiten de generación en generación hasta que alguien del clan las sane. Al conectar con estos traumas, liberamos heridas que no son nuestras, pero que nos afectan profundamente.",
-      image: "/assets/doors/transgenerational.webp",
+      image: `${R2}/doorclan.png`,
     },
     {
       title: "Entre Vidas",
       description: "En el proceso entre vidas, antes de nuestra última encarnación, decidimos las lecciones que aprenderemos y la vida que viviremos. Esto nos ayuda a entender por qué tenemos ciertos padres, familia y relaciones, y cómo estos aspectos influyen en nuestros desafíos actuales.",
-      image: "/assets/doors/between-lives.webp",
+      image: `${R2}/doorentrevidas.png`,
     },
   ];
 

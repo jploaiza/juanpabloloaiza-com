@@ -40,10 +40,10 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center gap-4 group cursor-pointer">
             <Image
-              src="/assets/logo.webp"
+              src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/jplweb/images/Logo%20transparente%20blanco.png"
               alt="Juan Pablo Loaiza"
               height={48}
-              width={150}
+              width={200}
               className="h-12 w-auto object-contain opacity-90 group-hover:opacity-100 transition"
             />
           </div>

@@ -13,10 +13,10 @@ export default function Footer() {
         <div className="space-y-4">
           <div>
             <Image
-              src="/assets/logo.webp"
+              src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/jplweb/images/Logo%20transparente%20blanco.png"
               alt="Juan Pablo Loaiza — Terapeuta Holístico"
-              width={200}
-              height={70}
+              width={220}
+              height={80}
               className="w-auto h-16 object-contain opacity-90"
             />
           </div>
