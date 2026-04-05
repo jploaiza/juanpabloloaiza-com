@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import HeraldFrame from "@/components/HeraldFrame";
 
 export default function EntityLiberationSection() {
   const containerVariants = {
@@ -73,19 +74,19 @@ export default function EntityLiberationSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative max-w-3xl mx-auto mb-16"
+          className="flex justify-center mb-16"
         >
-          <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
-          <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
-          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
-          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
-          <video
-            src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/SRT1-2.mp4"
-            controls
-            className="w-full aspect-video object-contain bg-black border border-[#C5A059]/30"
-            controlsList="nodownload"
-            disablePictureInPicture
-          />
+          <HeraldFrame size={64} className="w-full max-w-xs">
+            <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16" }}>
+              <video
+                src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/SRT1-2.mp4"
+                controls
+                className="w-full h-full object-contain"
+                controlsList="nodownload"
+                disablePictureInPicture
+              />
+            </div>
+          </HeraldFrame>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-16 items-start mb-16">
@@ -132,16 +133,9 @@ export default function EntityLiberationSection() {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <motion.div
-              variants={itemVariants}
-              className="bg-[#0f172a] border border-[#C5A059]/30 p-8 relative"
-            >
-              {/* Ornate corner frames */}
-              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
-              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
-              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
-              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
-
+            <motion.div variants={itemVariants}>
+            <HeraldFrame size={48}>
+            <div className="bg-[#0f172a] border border-[#C5A059]/30 p-8">
               <p className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold mb-6">Síntomas que pueden indicar presencia de entidades</p>
               <ul className="space-y-3">
                 {symptoms.map((symptom, index) => (
@@ -157,6 +151,8 @@ export default function EntityLiberationSection() {
                   </motion.li>
                 ))}
               </ul>
+            </div>
+            </HeraldFrame>
             </motion.div>
 
             <motion.p

@@ -114,9 +114,9 @@ export default function FAQSection() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="lg:sticky lg:top-32"
+            className="lg:sticky lg:top-32 flex justify-center"
           >
-            <HeraldFrame size={72}>
+            <HeraldFrame size={72} className="w-full max-w-xs">
               {/* 9:16 vertical video */}
               <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16", maxHeight: "70vh" }}>
                 <video

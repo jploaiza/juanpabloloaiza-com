@@ -41,22 +41,18 @@ export default function TherapySection() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <motion.div variants={itemVariants} className="relative">
-            {/* Ornate frame borders */}
-            <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
-
-            <div className="aspect-video bg-[#0f172a] border border-[#C5A059]/20 rounded-sm overflow-hidden relative z-0">
-              <video
-                src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4"
-                controls
-                className="w-full h-full object-contain"
-                controlsList="nodownload"
-                disablePictureInPicture
-              />
-            </div>
+          <motion.div variants={itemVariants} className="flex justify-center">
+            <HeraldFrame size={64} className="w-full max-w-xs">
+              <div className="bg-black border border-[#C5A059]/20 overflow-hidden" style={{ aspectRatio: "9/16" }}>
+                <video
+                  src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4"
+                  controls
+                  className="w-full h-full object-contain"
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                />
+              </div>
+            </HeraldFrame>
           </motion.div>
 
           <motion.div variants={itemVariants} className="space-y-6">
