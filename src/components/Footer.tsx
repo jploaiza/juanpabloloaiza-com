@@ -12,7 +12,7 @@ export default function Footer() {
         {/* Brand */}
         <div className="space-y-4">
           <Image
-            src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/images/Logo%20transparente%20blanco.png"
+            src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png"
             alt="Juan Pablo Loaiza — Terapeuta Holístico"
             width={220}
             height={80}

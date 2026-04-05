@@ -46,7 +46,7 @@ export default function Header() {
           {/* Logo */}
           <a href="#" className="flex items-center gap-4 group cursor-pointer">
             <Image
-              src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/images/Logo%20transparente%20blanco.png"
+              src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png"
               alt="Juan Pablo Loaiza"
               height={48}
               width={200}

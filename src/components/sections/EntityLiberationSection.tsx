@@ -80,7 +80,7 @@ export default function EntityLiberationSection() {
           <HeraldFrame size={64} className="w-full max-w-xs">
             <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16" }}>
               <video
-                src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/SRT1-2.mp4"
+                src="https://media.juanpabloloaiza.com/SRT1-2.mp4"
                 controls
                 className="w-full h-full object-contain"
                 controlsList="nodownload"

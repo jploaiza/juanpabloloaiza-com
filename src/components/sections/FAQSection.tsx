@@ -6,7 +6,7 @@ import { Play } from "lucide-react";
 import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
 
-const R2 = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev";
+const R2 = "https://media.juanpabloloaiza.com";
 
 const faqs = [
   {

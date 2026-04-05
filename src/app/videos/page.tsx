@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { useState } from "react";
 
-const R2_BASE = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev";
+const R2_BASE = "https://media.juanpabloloaiza.com";
 
 interface Video {
   id: string;

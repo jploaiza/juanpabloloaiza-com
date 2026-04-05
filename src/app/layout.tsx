@@ -69,7 +69,7 @@ export default function RootLayout({
       <head>
         {/* Preconnect to external asset hosts */}
         <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="preconnect" href="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev" />
+        <link rel="preconnect" href="https://media.juanpabloloaiza.com" />
         {/* Preload LCP hero image — fetchpriority=high so browser fetches it first */}
         <link
           rel="preload"
