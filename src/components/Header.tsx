@@ -6,11 +6,12 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const navItems = [
-  { label: "EL PROCESO", href: "#ComoFunciona" },
-  { label: "VIDAS PASADAS", href: "#QueEsTRVP" },
-  { label: "DUDAS", href: "#PreguntasFrecuentes" },
-  { label: "BLOG", href: "#blog" },
-  { label: "VIDEOS", href: "/videos" },
+  { label: "EL PROCESO", href: "/#ComoFunciona" },
+  { label: "EL ORIGEN", href: "/#origen" },
+  { label: "VIDAS PASADAS", href: "/#QueEsTRVP" },
+  { label: "PREGUNTAS", href: "/#PreguntasFrecuentes" },
+  { label: "BLOG", href: "/#blog" },
+  { label: "ENTIDADES ESPIRITUALES", href: "/#liberacion" },
 ];
 
 export default function Header() {
@@ -66,7 +67,7 @@ export default function Header() {
               </a>
             ))}
             <a
-              href="#ListaDeAdmision"
+              href="/#ListaDeAdmision"
               className="font-cinzel font-bold border border-[#C5A059] text-[#C5A059] px-6 py-2.5 text-[12px] uppercase tracking-widest hover:bg-[#C5A059] hover:text-[#020617] transition duration-500 shadow-[0_0_15px_rgba(197,160,89,0.1)]"
             >
               Comienza Ahora
@@ -104,7 +105,7 @@ export default function Header() {
               </a>
             ))}
             <a
-              href="#ListaDeAdmision"
+              href="/#ListaDeAdmision"
               className="font-cinzel mt-2 border border-[#C5A059] text-[#C5A059] px-4 py-3 text-sm uppercase tracking-widest text-center hover:bg-[#C5A059] hover:text-[#020617] transition"
               onClick={() => setIsOpen(false)}
             >

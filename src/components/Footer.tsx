@@ -30,11 +30,13 @@ export default function Footer() {
           </h4>
           <ul className="space-y-3">
             {[
-              { label: "Inicio", href: "#" },
-              { label: "El Proceso", href: "#ComoFunciona" },
-              { label: "Preguntas Frecuentes", href: "#PreguntasFrecuentes" },
-              { label: "Blog", href: "#blog" },
-              { label: "Videos", href: "/videos" },
+              { label: "Inicio", href: "/" },
+              { label: "El Proceso", href: "/#ComoFunciona" },
+              { label: "El Origen", href: "/#origen" },
+              { label: "Vidas Pasadas", href: "/#QueEsTRVP" },
+              { label: "Preguntas Frecuentes", href: "/#PreguntasFrecuentes" },
+              { label: "Blog", href: "/#blog" },
+              { label: "Entidades Espirituales", href: "/#liberacion" },
               { label: "Políticas de Servicio", href: "/politicas-de-servicio" },
             ].map((link) => (
               <li key={link.label}>
@@ -58,7 +60,7 @@ export default function Footer() {
               "Liberación de Entidades",
             ].map((service) => (
               <li key={service}>
-                <a href="#ListaDeAdmision" className="font-crimson text-base text-gray-400 hover:text-[#C5A059] transition">
+                <a href="/#ListaDeAdmision" className="font-crimson text-base text-gray-400 hover:text-[#C5A059] transition">
                   {service}
                 </a>
               </li>
