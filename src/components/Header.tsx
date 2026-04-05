@@ -7,10 +7,10 @@ import Image from "next/image";
 
 const navItems = [
   { label: "EL PROCESO", href: "#ComoFunciona" },
-  { label: "EL ORIGEN", href: "#QueEsTRVP" },
-  { label: "SANACIÓN", href: "#ListaDeAdmision" },
-  { label: "VIDEOS", href: "/videos" },
+  { label: "VIDAS PASADAS", href: "#QueEsTRVP" },
   { label: "DUDAS", href: "#PreguntasFrecuentes" },
+  { label: "BLOG", href: "#blog" },
+  { label: "VIDEOS", href: "/videos" },
 ];
 
 export default function Header() {

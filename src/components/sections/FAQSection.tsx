@@ -1,155 +1,194 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState, useRef } from "react";
+
+const R2 = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev";
+
+const faqs = [
+  {
+    question: "¿Se puede realizar en línea?",
+    answer:
+      "Por supuesto. La terapia de regresión a vidas pasadas es completamente segura para realizar en línea. Me he certificado internacionalmente para realizar estos procesos vía Zoom. Más de 200 procesos terapéuticos se han realizado de esta manera con resultados maravillosos, sin que nadie haya experimentado algún problema durante las sesiones.",
+    src: `${R2}/QA1.m4v`,
+  },
+  {
+    question: "¿Puedo tomar solo una sesión?",
+    answer:
+      "No es recomendable. Una sola sesión muchas veces deja más preguntas que respuestas. En el proceso de regresión a vidas pasadas se trabaja en tres etapas: descubrir, entender y limpiar. Tenemos un principio y un final, por lo cual podemos asegurar que habrá un gran beneficio para ti.",
+    src: `${R2}/QA2.m4v`,
+  },
+  {
+    question: "¿Existen contraindicaciones?",
+    answer:
+      "La única contraindicación es para personas con enfermedades mentales diagnosticadas bajo tratamiento farmacológico, ya que los medicamentos podrían alterar el estado natural de conciencia. Esta terapia es siempre complementaria y jamás se abandona ningún tratamiento médico previamente establecido.",
+    src: `${R2}/QA3.m4v`,
+  },
+  {
+    question: "¿Podré entrar en hipnosis?",
+    answer:
+      "Si puedes dormir en la noche, podrás entrar en hipnosis. La hipnosis ocupa el mismo proceso donde en la noche te relajas y te puedes quedar dormido. Se realiza a través de una relajación consciente, un proceso de meditación guiado por mí para que alcances ese nivel de relajación profunda.",
+    src: `${R2}/QA4.m4v`,
+  },
+  {
+    question: "¿Qué pasa si se corta la llamada?",
+    answer:
+      "Utilizamos Zoom para evitar este tipo de situaciones. Si la llamada se corta, podemos volver a conectarnos sin necesidad de que hagas nada en tu dispositivo. Y si no hay posibilidad de reconectarnos, simplemente puedes levantarte y seguir con tu vida, ya que puedes salir de hipnosis solo, igual que cuando te despiertas en la mañana.",
+    src: `${R2}/QA5.m4v`,
+  },
+  {
+    question: "¿Qué pasa si no veo nada?",
+    answer:
+      "Ver imágenes no es nuestro enfoque ni nuestra meta. Lo que define una terapia exitosa es cuando logramos conectar con la emoción y liberamos esa emoción que está atrapada. Si logramos este resultado viendo ninguna imagen o viéndolas todas, el resultado se logra y el proceso es exitoso.",
+    src: `${R2}/QA6.m4v`,
+  },
+  {
+    question: "¿Y si me lo estuviera imaginando todo?",
+    answer:
+      "La imaginación es la imagen que no tiene ninguna emoción adjunta a ella. Los recuerdos de vidas pasadas van a estar siempre presentes junto a una emoción real. Vamos a sentir lo que nos está pasando, cómo nuestro corazón se agita, y lo que nos sucedió en ese momento. Esa emoción no puede ser fabricada.",
+    src: `${R2}/QA7.m4v`,
+  },
+  {
+    question: "¿Voy a estar consciente durante la hipnosis?",
+    answer:
+      "Siempre vas a estar consciente. Tu mente consciente se queda presente, mirándolo todo y entendiendo todo lo que está sucediendo. Jamás vas a perder la conciencia. La hipnosis clínica permite que tu mente inconsciente acceda a toda la información de tus vidas pasadas, mientras tú observas conscientemente este viaje.",
+    src: `${R2}/QA8.m4v`,
+  },
+  {
+    question: "¿Me acordaré de lo que viví en hipnosis?",
+    answer:
+      "Sí. Recordarás todo lo que experimentaste, ya que nunca perderás la conciencia. Todo lo que vives y aprendes en estas sesiones quedará tan integrado dentro de ti que en todo momento podrás acceder a él como un conocimiento adquirido a través de la experiencia.",
+    src: `${R2}/QA9.m4v`,
+  },
+  {
+    question: "¿Las sesiones se graban?",
+    answer:
+      "Todas las sesiones se realizan a través de Zoom y se graban tanto en audio como en video. Esto se hace para mantener registros y porque hay muchos aprendizajes espirituales importantes que los guías espirituales y maestros nos entregan. Si necesitas tu grabación, con gusto te la hago llegar.",
+    src: `${R2}/QA10.m4v`,
+  },
+  {
+    question: "¿Quién puede tomar esta terapia?",
+    answer:
+      "Todas las personas pueden tomar esta terapia. Las únicas contraindicaciones son personas con algún tipo de enfermedad mental diagnosticada por un profesional de la salud o bajo tratamiento farmacológico. Los menores de edad no son elegibles, aunque sí se puede trabajar junto con su padre o madre.",
+    src: `${R2}/QA11.m4v`,
+  },
+];
 
 export default function FAQSection() {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
+  const handleSelect = (index: number) => {
+    setActiveIndex(index);
+    // Reset and reload video
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.load();
+    }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  };
-
-  const faqs = [
-    {
-      question: "¿Se puede realizar en línea?",
-      answer:
-        "Sí, completamente segura vía Zoom. Se han completado más de 200 sesiones exitosas en línea sin ningún problema.",
-    },
-    {
-      question: "¿Puedo tomar solo una sesión?",
-      answer:
-        "No es recomendado. Una sola sesión deja muchas preguntas sin responder. El proceso típicamente requiere 3-5 sesiones.",
-    },
-    {
-      question: "¿Existen contraindicaciones?",
-      answer:
-        "Solo para personas diagnosticadas con condiciones de salud mental bajo medicación. En esos casos, consulta con tu médico primero.",
-    },
-    {
-      question: "¿Podré entrar en hipnosis?",
-      answer:
-        "Sí. Si puedes dormir, puedes entrar en hipnosis. Es un estado natural y cómodo de relajación profunda.",
-    },
-    {
-      question: "¿Qué pasa si se corta la llamada?",
-      answer:
-        "Puedes reconectarte vía Zoom fácilmente. También puedes auto-salir de la hipnosis como lo harías al despertar naturalmente.",
-    },
-    {
-      question: "¿Qué pasa si no veo nada?",
-      answer:
-        "Ver imágenes claras no es el objetivo. La conexión emocional es lo más importante. Algunos ven imágenes vívidas, otros sienten y saben.",
-    },
-    {
-      question: "¿Y si me lo estuviera imaginando?",
-      answer:
-        "La imaginación carece de emoción real. Los recuerdos auténticos llevan intensidad emocional genuina que no puede ser fabricada.",
-    },
-    {
-      question: "¿Voy a estar inconsciente?",
-      answer:
-        "No. Tu mente consciente permanece presente observando todo. Estás en control total durante toda la sesión.",
-    },
-    {
-      question: "¿Me acordaré de algo?",
-      answer:
-        "Sí, tienes recuerdo completo de las experiencias. El conocimiento adquirido se integra naturalmente en tu consciencia.",
-    },
-    {
-      question: "¿Las sesiones se graban?",
-      answer:
-        "Sí, se graban automáticamente vía Zoom en audio y video. Están disponibles a tu solicitud para que puedas revisar.",
-    },
-    {
-      question: "¿Quién puede tomar esta terapia?",
-      answer:
-        "Prácticamente todos, excepto personas con diagnóstico de enfermedad mental que requiera medicación. El bienestar es para todos.",
-    },
-  ];
+  const active = faqs[activeIndex];
 
   return (
-    <section id="PreguntasFrecuentes" className="py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="max-w-4xl mx-auto px-4"
-      >
+    <section id="PreguntasFrecuentes" className="py-20 sm:py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        {/* Header */}
         <motion.div
-          variants={itemVariants}
-          className="text-center mb-16"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-14"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Claridad Total</span>
-          <motion.h2
-            variants={itemVariants}
-            className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
-          >
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Tus Dudas</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
             Preguntas Frecuentes
-          </motion.h2>
-          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
+          </h2>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto" />
         </motion.div>
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <motion.div
-              key={index}
-              variants={itemVariants}
-              className="group relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition duration-300 overflow-hidden"
-            >
-              {/* Ornate corner accent */}
-              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
+          {/* Left: Central video player */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="lg:sticky lg:top-32"
+          >
+            <div className="relative">
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-10" />
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-10" />
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-10" />
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-10" />
 
+              {/* 9:16 vertical video */}
+              <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16", maxHeight: "70vh" }}>
+                <video
+                  ref={videoRef}
+                  key={active.src}
+                  src={active.src}
+                  controls
+                  className="w-full h-full object-contain"
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                />
+              </div>
+            </div>
+
+            {/* Current question label */}
+            <div className="mt-4 px-1">
+              <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-1">Reproduciendo</p>
+              <p className="text-white font-[Cormorant_Garamond] text-lg leading-snug">{active.question}</p>
+            </div>
+
+            {/* Answer text */}
+            <div className="mt-4 p-5 bg-[#0f172a] border border-[#C5A059]/20">
+              <p className="text-gray-300 font-[Cormorant_Garamond] text-base leading-relaxed">
+                {active.answer}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Right: Question list */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="space-y-2"
+          >
+            {faqs.map((faq, index) => (
               <button
-                onClick={() =>
-                  setExpandedIndex(expandedIndex === index ? null : index)
-                }
-                className="w-full p-6 flex items-center justify-between hover:bg-[#C5A059]/5 transition"
+                key={index}
+                onClick={() => handleSelect(index)}
+                className={`w-full text-left p-4 sm:p-5 border transition-all duration-300 group ${
+                  activeIndex === index
+                    ? "border-[#C5A059]/60 bg-[#0f172a]"
+                    : "border-[#C5A059]/15 bg-[#0f172a]/50 hover:border-[#C5A059]/40"
+                }`}
               >
-                <h3 className="text-white font-light text-left font-[Cormorant_Garamond] text-lg">
-                  {faq.question}
-                </h3>
-                <motion.div
-                  animate={{ rotate: expandedIndex === index ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex-shrink-0 ml-4"
-                >
-                  <ChevronDown className="w-5 h-5 text-[#C5A059]" />
-                </motion.div>
-              </button>
-
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{
-                  height: expandedIndex === index ? "auto" : 0,
-                  opacity: expandedIndex === index ? 1 : 0,
-                }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="px-6 pb-6 border-t border-[#C5A059]/20">
-                  <p className="text-gray-300 text-sm leading-relaxed font-light font-[Cormorant_Garamond]">
-                    {faq.answer}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <span className={`flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-cinzel font-bold transition-colors ${
+                    activeIndex === index ? "border-[#C5A059] text-[#C5A059] bg-[#C5A059]/10" : "border-gray-600 text-gray-500"
+                  }`}>
+                    {index + 1}
+                  </span>
+                  <span className={`font-[Cormorant_Garamond] text-base leading-snug transition-colors ${
+                    activeIndex === index ? "text-white" : "text-gray-400 group-hover:text-gray-200"
+                  }`}>
+                    {faq.question}
+                  </span>
+                  {activeIndex === index && (
+                    <i className="fas fa-play text-[#C5A059] text-xs ml-auto flex-shrink-0" />
+                  )}
                 </div>
-              </motion.div>
-            </motion.div>
-          ))}
+              </button>
+            ))}
+          </motion.div>
         </div>
 
         <motion.div
-          variants={itemVariants}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           className="mt-16 text-center"
         >
           <p className="text-gray-300 font-[Cormorant_Garamond] text-lg">
@@ -162,16 +201,9 @@ export default function FAQSection() {
             >
               Contáctame por WhatsApp
             </a>
-            {" "}o{" "}
-            <a
-              href="mailto:contacto@juanpabloloaiza.com"
-              className="text-[#C5A059] hover:text-[#F3E5AB] transition"
-            >
-              correo
-            </a>
           </p>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

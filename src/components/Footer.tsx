@@ -1,6 +1,7 @@
 "use client";
 
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, Globe } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -11,13 +12,16 @@ export default function Footer() {
         {/* Brand */}
         <div className="space-y-4">
           <div>
-            <h3 className="font-cinzel font-bold text-2xl text-[#C5A059] mb-2 tracking-widest">
-              Juan Pablo Loaiza
-            </h3>
-            <p className="text-[#C5A059] text-xs uppercase tracking-[0.3em]">Excelencia Espiritual</p>
+            <Image
+              src="/assets/logo.webp"
+              alt="Juan Pablo Loaiza — Terapeuta Holístico"
+              width={200}
+              height={70}
+              className="w-auto h-16 object-contain opacity-90"
+            />
           </div>
           <p className="text-gray-300 font-[Cormorant_Garamond] text-sm leading-relaxed">
-            Hipnoterapia especializada en regresión a vidas pasadas y liberación espiritual para mujeres decididas.
+            Hipnoterapia especializada en regresión a vidas pasadas y liberación espiritual para quienes están listos a sanar.
           </p>
         </div>
 
@@ -30,8 +34,10 @@ export default function Footer() {
             {[
               { label: "Inicio", href: "#" },
               { label: "El Proceso", href: "#ComoFunciona" },
-              { label: "Blog", href: "#" },
-              { label: "Contacto", href: "#contacto" },
+              { label: "Preguntas Frecuentes", href: "#PreguntasFrecuentes" },
+              { label: "Blog", href: "#blog" },
+              { label: "Videos", href: "/videos" },
+              { label: "Políticas de Servicio", href: "/politicas-de-servicio" },
             ].map((link) => (
               <li key={link.label}>
                 <a
@@ -54,11 +60,11 @@ export default function Footer() {
             {[
               "Regresión a Vidas Pasadas",
               "Hipnoterapia Transformacional",
-              "Liberación Espiritual",
+              "Liberación de Entidades",
             ].map((service) => (
               <li key={service}>
                 <a
-                  href="#"
+                  href="#ListaDeAdmision"
                   className="text-gray-400 hover:text-[#C5A059] transition text-sm font-light"
                 >
                   {service}
@@ -90,8 +96,8 @@ export default function Footer() {
               </a>
             </li>
             <li className="flex items-start gap-3">
-              <MapPin className="w-4 h-4 text-[#C5A059] mt-0.5 flex-shrink-0" />
-              <span className="text-gray-400 text-sm font-light">Medellín, Colombia</span>
+              <Globe className="w-4 h-4 text-[#C5A059] mt-0.5 flex-shrink-0" />
+              <span className="text-gray-400 text-sm font-light">Sesiones en todo el mundo vía Zoom</span>
             </li>
           </ul>
         </div>
@@ -104,13 +110,15 @@ export default function Footer() {
       <div className="text-center">
         <div className="flex justify-center gap-8 mb-8">
           {[
-            { label: "Instagram", href: "#" },
-            { label: "YouTube", href: "#" },
-            { label: "LinkedIn", href: "#" },
+            { label: "Instagram", href: "https://www.instagram.com/jploaizao" },
+            { label: "YouTube", href: "https://www.youtube.com/@jploaizao" },
+            { label: "TikTok", href: "https://www.tiktok.com/@jploaizao" },
           ].map(({ label, href }, i) => (
             <a
               key={i}
               href={href}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-400 hover:text-[#C5A059] transition text-xs uppercase tracking-widest font-light"
             >
               {label}

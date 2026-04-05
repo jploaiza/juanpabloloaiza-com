@@ -10,7 +10,6 @@ export default function AdmissionSection() {
     email: "",
     phone: "",
     reason: "",
-    medicalHistory: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,8 +41,7 @@ export default function AdmissionSection() {
     setLoading(true);
 
     try {
-      // Send form data via email using a service
-      const response = await fetch("https://formspree.io/f/xgvqkeqv", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +56,6 @@ export default function AdmissionSection() {
           email: "",
           phone: "",
           reason: "",
-          medicalHistory: "",
         });
         setTimeout(() => setSubmitted(false), 5000);
       }
@@ -203,20 +200,6 @@ export default function AdmissionSection() {
                   rows={3}
                   aria-required="true"
                   aria-label="Motivo de consulta"
-                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition resize-none"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="medicalHistory" className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold block mb-2">Historial Médico Relevante (Opcional)</label>
-                <textarea
-                  id="medicalHistory"
-                  name="medicalHistory"
-                  value={formData.medicalHistory}
-                  onChange={handleChange}
-                  placeholder="¿Tienes algún antecedente médico importante?"
-                  rows={2}
-                  aria-label="Historial médico relevante"
                   className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition resize-none"
                 />
               </div>

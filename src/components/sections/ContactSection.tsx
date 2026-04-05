@@ -32,8 +32,8 @@ export default function ContactSection() {
     },
     {
       icon: MapPin,
-      title: "Ubicación",
-      value: "Medellín, Colombia",
+      title: "Cobertura",
+      value: "Sesiones en todo el mundo",
       href: "#",
     },
   ];

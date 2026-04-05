@@ -1,116 +1,146 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, Tag, ArrowRight } from "lucide-react";
+import { Clock, Tag, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { getFeaturedPosts } from "@/lib/blog-data";
-import OrnateFrame from "@/components/OrnateFrame";
-import GoldenDivider from "@/components/GoldenDivider";
 
 export default function BlogSection() {
-  const featuredPosts = getFeaturedPosts(6);
+  const allPosts = getFeaturedPosts(9);
+  const [current, setCurrent] = useState(0);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2 },
-    },
+  const prev = () => setCurrent((c) => (c === 0 ? allPosts.length - 1 : c - 1));
+  const next = () => setCurrent((c) => (c === allPosts.length - 1 ? 0 : c + 1));
+
+  const getVisible = () => {
+    const indices = [
+      current % allPosts.length,
+      (current + 1) % allPosts.length,
+      (current + 2) % allPosts.length,
+    ];
+    return indices.map((i) => allPosts[i]);
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  };
+  const visiblePosts = getVisible();
 
   return (
-    <section className="py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
-      <div className="max-w-6xl mx-auto px-4">
+    <section id="blog" className="py-20 sm:py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-14"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Sabiduría Compartida</span>
-          <h2 className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog</h2>
-          <p className="text-gray-300 font-[Cormorant_Garamond] text-xl max-w-2xl mx-auto">Artículos sobre Regresión a Vidas Pasadas y Sanación</p>
-          <GoldenDivider variant="ornate" className="mt-6 max-w-xs mx-auto" />
+          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog</h2>
+          <p className="text-gray-300 font-[Cormorant_Garamond] text-lg max-w-2xl mx-auto">
+            Artículos sobre Regresión a Vidas Pasadas y Sanación
+          </p>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6" />
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
-        >
-          {featuredPosts.map((post) => (
-            <motion.div
-              key={post.id}
-              variants={itemVariants}
-              className="group relative overflow-hidden cursor-pointer"
-            >
-              <Link href={`/blog/${post.slug}`} className="block">
-                <OrnateFrame variant="light" className="h-full">
-                  <div className="relative bg-[#0f172a] border-2 border-[#C5A059]/30 hover:border-[#C5A059]/60 transition duration-300 overflow-hidden h-full">
-                    {/* Featured Image */}
-                    <div className="relative h-48 overflow-hidden bg-black/20">
-                      {post.imageUrl ? (
-                        <img
-                          src={post.imageUrl}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                        />
-                      ) : (
-                        <div className={`${post.image} w-full h-full group-hover:scale-105 transition duration-500`}></div>
-                      )}
-                      {/* Dark overlay */}
-                      <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition duration-300"></div>
+        {/* Carousel */}
+        <div className="relative">
+          <motion.div
+            key={current}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {visiblePosts.map((post, idx) => (
+              <Link key={`${post.id}-${idx}`} href={`/blog/${post.slug}`} className="group block">
+                <div className="relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition duration-300 overflow-hidden h-full">
+                  {/* Corners */}
+                  <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/40 z-10" />
+                  <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/40 z-10" />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#C5A059]/40 z-10" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#C5A059]/40 z-10" />
+
+                  {/* Image */}
+                  <div className="relative h-44 overflow-hidden bg-black/20">
+                    {post.imageUrl ? (
+                      <img
+                        src={post.imageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      />
+                    ) : (
+                      <div className={`${post.image} w-full h-full`} />
+                    )}
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition duration-300" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Tag className="w-3 h-3 text-[#C5A059]" />
+                      <span className="text-[#C5A059] text-[10px] uppercase tracking-widest font-semibold">{post.category}</span>
                     </div>
 
-                    {/* Content Section */}
-                    <div className="p-5">
-                      {/* Category Badge */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <Tag className="w-3 h-3 text-[#C5A059]" />
-                        <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
+                    <h3 className="text-base font-cinzel text-white mb-2 leading-snug line-clamp-2 group-hover:text-[#C5A059] transition-colors">
+                      {post.title}
+                    </h3>
+
+                    <p className="text-gray-400 text-sm font-[Cormorant_Garamond] leading-relaxed mb-4 line-clamp-2">
+                      {post.excerpt}
+                    </p>
+
+                    <div className="flex items-center justify-between border-t border-[#C5A059]/10 pt-3">
+                      <div className="flex items-center gap-2 text-gray-500 text-xs">
+                        <Clock className="w-3 h-3" />
+                        <span>{post.readTime}</span>
                       </div>
-
-                      {/* Title */}
-                      <h3 className="text-lg font-cinzel text-white mb-2 leading-snug line-clamp-3 group-hover:text-[#C5A059] transition-colors">
-                        {post.title}
-                      </h3>
-
-                      {/* Excerpt */}
-                      <p className="text-gray-300 text-sm font-[Cormorant_Garamond] leading-relaxed mb-4 line-clamp-2">
-                        {post.excerpt}
-                      </p>
-
-                      {/* Divider */}
-                      <GoldenDivider className="mb-3" />
-
-                      {/* Read Time and Link */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-gray-400 text-xs">
-                          <Clock className="w-3 h-3" />
-                          <span>{post.readTime}</span>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-[#C5A059] group-hover:translate-x-1 transition-transform" />
-                      </div>
+                      <ArrowRight className="w-4 h-4 text-[#C5A059] group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
-                </OrnateFrame>
+                </div>
               </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
 
+          {/* Navigation */}
+          <div className="flex items-center justify-center gap-6 mt-10">
+            <button
+              onClick={prev}
+              className="w-10 h-10 border border-[#C5A059]/30 hover:border-[#C5A059] text-[#C5A059] flex items-center justify-center transition"
+              aria-label="Anterior"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            <div className="flex gap-2">
+              {allPosts.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    i === current ? "bg-[#C5A059] w-4" : "bg-[#C5A059]/30"
+                  }`}
+                  aria-label={`Ir al artículo ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={next}
+              className="w-10 h-10 border border-[#C5A059]/30 hover:border-[#C5A059] text-[#C5A059] flex items-center justify-center transition"
+              aria-label="Siguiente"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center"
+          className="text-center mt-12"
         >
           <Link href="/blog" className="btn-gold">
             Ver Todos los Artículos
