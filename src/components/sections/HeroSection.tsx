@@ -38,7 +38,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white leading-tight font-cinzel font-bold"
+          className="text-[1.75rem] sm:text-5xl md:text-7xl lg:text-8xl text-white leading-tight font-cinzel font-bold"
         >
           <span className="block">Devuelve la Felicidad</span>
           <span className="block text-[#C5A059]">de tu Vida</span>
