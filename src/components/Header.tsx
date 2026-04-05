@@ -9,6 +9,7 @@ const navItems = [
   { label: "EL PROCESO", href: "#ComoFunciona" },
   { label: "EL ORIGEN", href: "#QueEsTRVP" },
   { label: "SANACIÓN", href: "#ListaDeAdmision" },
+  { label: "VIDEOS", href: "/videos" },
   { label: "DUDAS", href: "#PreguntasFrecuentes" },
 ];
 
