@@ -76,14 +76,22 @@ export default async function ArticlePage({
           transition={{ duration: 0.8, delay: 0.2 }}
           className="max-w-4xl mx-auto px-4 sm:px-6 mb-12"
         >
-          <div className="relative h-96 bg-[#0f172a] border border-[#C5A059]/20 overflow-hidden">
+          <div className="relative h-96 bg-[#0f172a] border-2 border-[#C5A059]/30 overflow-hidden">
             {/* Ornate corner frames */}
-            <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-[#C5A059]/50 z-20"></div>
-            <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-[#C5A059]/50 z-20"></div>
-            <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-[#C5A059]/50 z-20"></div>
-            <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-[#C5A059]/50 z-20"></div>
+            <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
+            <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
 
-            <div className={`${post.image} absolute inset-0 w-full h-full`}></div>
+            {post.imageUrl ? (
+              <img
+                src={post.imageUrl}
+                alt={post.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className={`${post.image} absolute inset-0 w-full h-full`}></div>
+            )}
           </div>
         </motion.div>
 

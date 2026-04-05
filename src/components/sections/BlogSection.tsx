@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Clock, Tag, ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { getFeaturedPosts } from "@/lib/blog-data";
 
@@ -47,37 +48,61 @@ export default function BlogSection() {
             <motion.div
               key={post.id}
               variants={itemVariants}
-              className="group relative h-[450px] overflow-hidden bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition duration-300"
+              className="group relative overflow-hidden cursor-pointer"
             >
-              {/* Ornate corner frames */}
-              <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-              <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-              <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-              <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <Link href={`/blog/${post.slug}`} className="block">
+                {/* Card Container with ornate frame */}
+                <div className="relative bg-[#0f172a] border-2 border-[#C5A059]/30 hover:border-[#C5A059]/60 transition duration-300 overflow-hidden">
+                  {/* Ornate gold corner frames - top corners */}
+                  <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
+                  <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
 
-              {/* Image overlay */}
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition duration-700 z-10"></div>
-              <div className={`${post.image} absolute inset-0 w-full h-full group-hover:scale-110 transition duration-1000`}></div>
+                  {/* Ornate gold corner frames - bottom corners */}
+                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
+                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
 
-              {/* Content */}
-              <Link href={`/blog/${post.slug}`} className="absolute bottom-0 left-0 w-full p-6 z-20 bg-gradient-to-t from-black to-transparent h-full flex flex-col justify-end cursor-pointer">
-                <div className="flex items-center gap-2 mb-3 opacity-0 group-hover:opacity-100 transition duration-300">
-                  <Tag className="w-4 h-4 text-[#C5A059]" />
-                  <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
-                </div>
-                <h3 className="text-xl text-white mb-2 font-cinzel leading-tight group-hover:text-[#C5A059] transition-colors">{post.title}</h3>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileHover={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-gray-300 text-sm leading-relaxed font-[Cormorant_Garamond] opacity-0 group-hover:opacity-100 transition duration-300 mb-3"
-                >{post.excerpt}</motion.p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-gray-400 text-xs">
-                    <Clock className="w-4 h-4" />
-                    <span>{post.readTime} lectura</span>
+                  {/* Featured Image - Fixed Height */}
+                  <div className="relative h-48 overflow-hidden bg-black/20">
+                    {post.imageUrl ? (
+                      <img
+                        src={post.imageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      />
+                    ) : (
+                      <div className={`${post.image} w-full h-full group-hover:scale-105 transition duration-500`}></div>
+                    )}
+                    {/* Dark overlay */}
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition duration-300"></div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#C5A059] opacity-0 group-hover:opacity-100 transition" />
+
+                  {/* Content Section - Always Visible */}
+                  <div className="p-5">
+                    {/* Category Badge */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <Tag className="w-3 h-3 text-[#C5A059]" />
+                      <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
+                    </div>
+
+                    {/* Title - Always Visible */}
+                    <h3 className="text-lg font-cinzel text-white mb-2 leading-snug line-clamp-3 group-hover:text-[#C5A059] transition-colors">
+                      {post.title}
+                    </h3>
+
+                    {/* Excerpt - Always Visible */}
+                    <p className="text-gray-300 text-sm font-[Cormorant_Garamond] leading-relaxed mb-4 line-clamp-2">
+                      {post.excerpt}
+                    </p>
+
+                    {/* Divider */}
+                    <div className="border-t border-[#C5A059]/20 pt-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-gray-400 text-xs">
+                        <Clock className="w-3 h-3" />
+                        <span>{post.readTime}</span>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-[#C5A059] group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
                 </div>
               </Link>
             </motion.div>

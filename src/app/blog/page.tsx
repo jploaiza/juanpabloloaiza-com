@@ -57,44 +57,65 @@ function BlogContent() {
               <motion.div
                 key={post.id}
                 variants={itemVariants}
-                className="group relative overflow-hidden bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition duration-300"
+                className="group relative overflow-hidden cursor-pointer"
               >
-                {/* Ornate corner frames */}
-                <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                <Link href={`/blog/${post.slug}`}>
+                  {/* Card Container with ornate frame */}
+                  <div className="relative bg-[#0f172a] border-2 border-[#C5A059]/30 hover:border-[#C5A059]/60 transition duration-300 overflow-hidden">
+                    {/* Ornate gold corner frames - top corners */}
+                    <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
+                    <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
 
-                {/* Image overlay */}
-                <div className="h-48 bg-black/40 group-hover:bg-black/20 transition duration-700 overflow-hidden">
-                  <div className={`${post.image} absolute inset-0 w-full h-full group-hover:scale-110 transition duration-1000`}></div>
-                </div>
+                    {/* Ornate gold corner frames - bottom corners */}
+                    <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
+                    <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tag className="w-4 h-4 text-[#C5A059]" />
-                    <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
-                  </div>
-                  <h3 className="text-xl text-white mb-2 font-cinzel leading-tight group-hover:text-[#C5A059] transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-300 text-sm leading-relaxed font-[Cormorant_Garamond] mb-4">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-[#C5A059]/10">
-                    <div className="flex items-center gap-2 text-gray-400 text-xs">
-                      <Clock className="w-4 h-4" />
-                      <span>{post.readTime} lectura</span>
+                    {/* Featured Image */}
+                    <div className="relative h-56 overflow-hidden bg-black/20">
+                      {post.imageUrl ? (
+                        <img
+                          src={post.imageUrl}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        />
+                      ) : (
+                        <div className={`${post.image} w-full h-full group-hover:scale-105 transition duration-500`}></div>
+                      )}
+                      {/* Dark overlay */}
+                      <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition duration-300"></div>
                     </div>
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="text-[#C5A059] hover:text-[#F3E5AB] transition flex items-center gap-2 text-xs uppercase tracking-widest font-semibold"
-                    >
-                      Leer <ArrowRight className="w-3 h-3" />
-                    </Link>
+
+                    {/* Content Section */}
+                    <div className="p-6">
+                      {/* Category Badge */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <Tag className="w-4 h-4 text-[#C5A059]" />
+                        <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-lg font-cinzel text-white mb-2 leading-tight group-hover:text-[#C5A059] transition-colors line-clamp-3">
+                        {post.title}
+                      </h3>
+
+                      {/* Excerpt */}
+                      <p className="text-gray-300 text-sm leading-relaxed font-[Cormorant_Garamond] mb-4 line-clamp-2">
+                        {post.excerpt}
+                      </p>
+
+                      {/* Divider and Read More */}
+                      <div className="flex items-center justify-between pt-4 border-t border-[#C5A059]/10">
+                        <div className="flex items-center gap-2 text-gray-400 text-xs">
+                          <Clock className="w-4 h-4" />
+                          <span>{post.readTime}</span>
+                        </div>
+                        <div className="text-[#C5A059] hover:text-[#F3E5AB] transition flex items-center gap-2 text-xs uppercase tracking-widest font-semibold group-hover:translate-x-1 transition-transform">
+                          Leer <ArrowRight className="w-3 h-3" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </div>
