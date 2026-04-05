@@ -5,12 +5,16 @@ import { motion } from "framer-motion";
 export default function HeroSection() {
   return (
     <section className="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden pt-32">
+      {/* Background image with overlay */}
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{backgroundImage: "url('/assets/hero-bg.jpg')"}}></div>
+
       {/* Decorative elements */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width=%22100%22%20height=%22100%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern%20id=%22stardust%22%20x=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22%20patternUnits=%22userSpaceOnUse%22%3E%3Ccircle%20cx=%2210%22%20cy=%2210%22%20r=%221%22%20fill=%22%23C5A059%22%20opacity=%220.2%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect%20width=%22100%22%20height=%22100%22%20fill=%22url(%23stardust)%22/%3E%3C/svg%3E')] opacity-20"></div>
 
       {/* Gradient overlays */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#312e81]/20 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-gradient-to-t from-[#312e81]/20 to-transparent"></div>
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#312e81]/30 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-gradient-to-t from-[#312e81]/30 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/40 via-[#020617]/30 to-[#020617]/50"></div>
 
       {/* Central indigo light */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#312e81] rounded-full filter blur-[150px] opacity-20"></div>
@@ -24,7 +28,7 @@ export default function HeroSection() {
           className="mb-8 inline-block"
         >
           <span className="text-[#C5A059] uppercase tracking-[0.3em] text-[10px] md:text-xs border border-[#C5A059]/30 py-2 px-6 rounded-sm">
-            Sanación Exclusiva para la Mujer
+            Hipnoterapia y Regresión a Vidas Pasadas
           </span>
         </motion.div>
 
@@ -33,11 +37,11 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-          className="text-5xl md:text-7xl lg:text-8xl text-white mb-8 leading-tight font-cinzel"
+          className="text-5xl md:text-7xl lg:text-8xl text-white mb-8 leading-tight font-cinzel font-bold"
         >
-          Recupera tu <br/>
-          <span className="bg-gradient-to-r from-[#C5A059] to-[#F3E5AB] bg-clip-text text-transparent italic font-light">
-            Soberanía Energética
+          Devuelve la Felicidad <br/>
+          <span className="text-[#C5A059]">
+            de tu Vida
           </span>
         </motion.h1>
 
@@ -48,7 +52,7 @@ export default function HeroSection() {
           transition={{ duration: 1, ease: "easeOut", delay: 1 }}
           className="text-lg md:text-2xl text-gray-300 max-w-3xl mx-auto font-light font-[Cormorant_Garamond] mb-12 leading-relaxed"
         >
-          Un acompañamiento de alto nivel para mujeres decididas a limpiar su linaje, liberar cargas ancestrales y liderar su vida desde la plenitud del alma.
+          Un acompañamiento de alto nivel para quienes están decididos a sanar su pasado, liberar cargas ancestrales y vivir con plenitud y propósito.
         </motion.p>
 
         {/* CTA Buttons */}
