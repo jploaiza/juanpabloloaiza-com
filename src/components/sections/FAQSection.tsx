@@ -116,7 +116,7 @@ export default function FAQSection() {
             viewport={{ once: true }}
             className="lg:sticky lg:top-32"
           >
-            <HeraldFrame variant="eagle" size={72}>
+            <HeraldFrame size={72}>
               {/* 9:16 vertical video */}
               <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16", maxHeight: "70vh" }}>
                 <video

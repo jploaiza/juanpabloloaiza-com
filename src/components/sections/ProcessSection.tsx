@@ -1,6 +1,6 @@
 "use client";
 import ScrollDivider from "@/components/ScrollDivider";
-
+import HeraldFrame from "@/components/HeraldFrame";
 import { motion } from "framer-motion";
 
 export default function ProcessSection() {
@@ -66,17 +66,15 @@ export default function ProcessSection() {
           viewport={{ once: true }}
           className="relative max-w-3xl mx-auto mb-20"
         >
-          <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20" />
-          <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20" />
-          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20" />
-          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20" />
-          <video
-            src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/RVP1.m4v"
-            controls
-            className="w-full aspect-video object-contain bg-black border border-[#C5A059]/30"
-            controlsList="nodownload"
-            disablePictureInPicture
-          />
+          <HeraldFrame size={64}>
+            <video
+              src="https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/RVP1.m4v"
+              controls
+              className="w-full aspect-video object-contain bg-black border border-[#C5A059]/30"
+              controlsList="nodownload"
+              disablePictureInPicture
+            />
+          </HeraldFrame>
         </motion.div>
 
         {/* Three steps grid */}

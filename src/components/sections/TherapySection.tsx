@@ -1,6 +1,6 @@
 "use client";
 import ScrollDivider from "@/components/ScrollDivider";
-
+import HeraldFrame from "@/components/HeraldFrame";
 import { motion } from "framer-motion";
 
 export default function TherapySection() {
@@ -91,11 +91,13 @@ export default function TherapySection() {
                 </ul>
               </div>
 
-              <div className="bg-[#0f172a] border border-[#C5A059]/20 p-6">
-                <p className="text-gray-300 italic font-crimson text-xl leading-relaxed text-center">
-                  "Este potente proceso terapéutico es un viaje a tu vida actual, a tus vidas pasadas y a tu vida espiritual, en el cual te guiaré para que encuentres tu verdad y vivas la mejor versión de ti."
-                </p>
-              </div>
+              <HeraldFrame size={56}>
+                <div className="bg-[#0f172a] border border-[#C5A059]/20 p-6">
+                  <p className="text-gray-300 italic font-crimson text-xl leading-relaxed text-center">
+                    "Este potente proceso terapéutico es un viaje a tu vida actual, a tus vidas pasadas y a tu vida espiritual, en el cual te guiaré para que encuentres tu verdad y vivas la mejor versión de ti."
+                  </p>
+                </div>
+              </HeraldFrame>
             </div>
           </motion.div>
         </div>
