@@ -18,7 +18,7 @@ export default function OriginSection() {
     hover: { y: -15, transition: { duration: 0.3 } },
   };
 
-  const R2 = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/jplweb/images";
+  const R2 = "https://pub-60ec8d051cfb4b658728c606968895bb.r2.dev/images";
 
   const explorationAreas = [
     {
