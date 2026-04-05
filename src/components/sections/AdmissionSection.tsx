@@ -1,6 +1,6 @@
 "use client";
 import ScrollDivider from "@/components/ScrollDivider";
-
+import HeraldFrame from "@/components/HeraldFrame";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
@@ -120,13 +120,8 @@ export default function AdmissionSection() {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="relative">
-            {/* Ornate frame borders */}
-            <div className="absolute -top-4 -left-4 w-12 h-12 border-t-2 border-l-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -top-4 -right-4 w-12 h-12 border-t-2 border-r-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -bottom-4 -left-4 w-12 h-12 border-b-2 border-l-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -bottom-4 -right-4 w-12 h-12 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
-
+          <motion.div variants={itemVariants}>
+            <HeraldFrame size={60}>
             <div className="bg-[#0f172a] border border-[#C5A059]/30 p-8">
             {submitted && (
               <motion.div
@@ -214,6 +209,7 @@ export default function AdmissionSection() {
               </button>
             </form>
             </div>
+            </HeraldFrame>
           </motion.div>
         </div>
 
@@ -248,20 +244,19 @@ export default function AdmissionSection() {
                 description: "Primera sesión vía Zoom",
               },
             ].map((step, index) => (
-              <div
-                key={index}
-                className="text-center p-6 bg-[#050b1a] border border-[#C5A059]/20 group hover:border-[#C5A059]/40 transition duration-300"
-              >
-                <div className="text-4xl font-cinzel text-[#C5A059] mb-3 opacity-80 group-hover:opacity-100 transition">
-                  {step.number}
+              <HeraldFrame key={index} size={40}>
+                <div className="text-center p-6 bg-[#050b1a] border border-[#C5A059]/20 group hover:border-[#C5A059]/40 transition duration-300">
+                  <div className="text-4xl font-cinzel text-[#C5A059] mb-3 opacity-80 group-hover:opacity-100 transition">
+                    {step.number}
+                  </div>
+                  <h4 className="font-cinzel font-semibold text-white mb-2 text-sm uppercase tracking-widest">
+                    {step.title}
+                  </h4>
+                  <p className="text-gray-400 text-base font-crimson">
+                    {step.description}
+                  </p>
                 </div>
-                <h4 className="font-cinzel text-white mb-2 text-sm uppercase tracking-widest">
-                  {step.title}
-                </h4>
-                <p className="text-gray-400 text-xs font-crimson">
-                  {step.description}
-                </p>
-              </div>
+              </HeraldFrame>
             ))}
           </div>
         </motion.div>
