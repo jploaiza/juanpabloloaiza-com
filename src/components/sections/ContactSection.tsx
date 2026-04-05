@@ -39,27 +39,33 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contacto" className="py-20 px-4 bg-black border-t border-[#d4a017]/20">
+    <section id="contacto" className="py-28 bg-[#020617] relative border-t border-[#C5A059]/5">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="max-w-6xl mx-auto"
+        className="max-w-6xl mx-auto px-4"
       >
-        <motion.h2
+        <motion.div
           variants={itemVariants}
-          className="headline-lg text-center mb-4"
+          className="text-center mb-16"
         >
-          Contacto
-        </motion.h2>
-
-        <motion.p
-          variants={itemVariants}
-          className="subtitle text-center mb-12 max-w-3xl mx-auto"
-        >
-          Ponte en contacto conmigo para una entrevista preliminar gratuita
-        </motion.p>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Comunicación Directa</span>
+          <motion.h2
+            variants={itemVariants}
+            className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
+          >
+            Conectemos
+          </motion.h2>
+          <motion.p
+            variants={itemVariants}
+            className="text-gray-300 font-[Cormorant_Garamond] text-xl max-w-2xl mx-auto"
+          >
+            Ponte en contacto para una entrevista preliminar gratuita
+          </motion.p>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6"></div>
+        </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {contactMethods.map((method, index) => {
@@ -71,15 +77,18 @@ export default function ContactSection() {
                 href={method.href}
                 target={method.href.startsWith("http") ? "_blank" : "_self"}
                 rel={method.href.startsWith("http") ? "noopener noreferrer" : ""}
-                className="glass-card p-8 text-center hover:border-[#d4a017]/50 transition group"
+                className="group relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 p-8 text-center transition duration-300"
               >
-                <div className="flex justify-center mb-4">
-                  <Icon className="w-8 h-8 text-[#d4a017] group-hover:scale-110 transition-transform" />
+                {/* Corner accent */}
+                <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+
+                <div className="flex justify-center mb-6">
+                  <Icon className="w-8 h-8 text-[#C5A059] group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="headline-md mb-2 text-white">
+                <h3 className="font-cinzel text-white mb-2 uppercase text-sm tracking-widest">
                   {method.title}
                 </h3>
-                <p className="body-text text-[#d4a017] font-semibold">
+                <p className="text-[#C5A059] font-light font-[Cormorant_Garamond] text-lg">
                   {method.value}
                 </p>
               </motion.a>
@@ -89,9 +98,9 @@ export default function ContactSection() {
 
         <motion.div
           variants={itemVariants}
-          className="bg-gradient-to-r from-[#110f1e] to-[#1a1535] rounded-lg p-8 text-center border border-[#d4a017]/20"
+          className="bg-[#0f172a] border border-[#C5A059]/20 p-12 text-center"
         >
-          <p className="body-text mb-6">
+          <p className="text-gray-300 font-[Cormorant_Garamond] text-lg mb-8">
             ✨ Disponible para sesiones vía Zoom en todo el mundo
           </p>
           <a

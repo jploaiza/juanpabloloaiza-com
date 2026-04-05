@@ -15,90 +15,103 @@ export default function OriginSection() {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-    hover: { y: -10, transition: { duration: 0.3 } },
+    hover: { y: -15, transition: { duration: 0.3 } },
   };
 
   const explorationAreas = [
     {
       title: "Vidas Pasadas",
-      description: "Karma no resuelto de encarnaciones anteriores que afecta tu presente",
+      description: "Memorias de poder y dolor de otras encarnaciones que moldean tu presente.",
       image: "/assets/doors/past-lives.webp",
     },
     {
       title: "Vida Presente",
-      description: "Traumas de infancia y vientre que influyen en tu bienestar actual",
+      description: "La niña interior y las memorias uterinas que dictan tus reacciones hoy.",
       image: "/assets/doors/present-life.webp",
     },
     {
-      title: "Transgeneracional",
-      description: "Patrones familiares heredados que necesitan sanación ancestral",
-      image: "/assets/doors/transgenerational.webp",
+      title: "Entre Vidas",
+      description: "El espacio sagrado donde tu alma diseñó su misión antes de nacer.",
+      image: "/assets/doors/between-lives.webp",
     },
     {
-      title: "Entre Vidas",
-      description: "Decisiones pre-encarnación que moldean tus circunstancias actuales",
-      image: "/assets/doors/between-lives.webp",
+      title: "Linaje Ancestral",
+      description: "Sanación del clan. Liberamos las lealtades invisibles que heredas de tus ancestros.",
+      image: "/assets/doors/transgenerational.webp",
     },
   ];
 
   return (
-    <section className="py-20 px-4 bg-black">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="max-w-6xl mx-auto"
-      >
-        <motion.h2
-          variants={cardVariants}
-          className="headline-lg text-center mb-16"
-        >
-          DESCUBRE EL ORIGEN DE TUS CONFLICTOS
-        </motion.h2>
+    <section id="QueEsTRVP" className="py-28 bg-[#050b1a] relative overflow-hidden">
+      {/* Decorative background gradient */}
+      <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-[#312e81]/5 to-transparent"></div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
+        {/* Header */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/5 pb-8"
+        >
+          <div>
+            <h2 className="text-4xl md:text-5xl text-white mb-2 font-cinzel">Los 4 Pilares de la Memoria</h2>
+            <p className="text-[#C5A059] font-[Cormorant_Garamond] text-xl italic">"La llave de tu libertad reside en tu propia historia."</p>
+          </div>
+          <div className="mt-6 md:mt-0">
+            <a href="#ListaDeAdmision" className="text-sm uppercase tracking-widest text-gray-400 hover:text-white transition">
+              Agendar Evaluación →
+            </a>
+          </div>
+        </motion.div>
+
+        {/* 4 doors grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
           {explorationAreas.map((area, index) => (
             <motion.div
               key={index}
               variants={cardVariants}
               whileHover="hover"
-              className="group"
+              className="group relative h-[500px] overflow-hidden bg-[#0f172a] border border-white/5 hover:border-[#C5A059]/40 transition duration-700"
             >
-              <div className="glass-card p-6 h-full flex flex-col relative overflow-hidden">
-                <div className="relative h-40 mb-6 -mx-6 -mt-6">
-                  <Image
-                    src={area.image}
-                    alt={area.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
+              {/* Image with overlay */}
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition duration-700 z-10"></div>
+              <Image
+                src={area.image}
+                alt={area.title}
+                fill
+                className="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-80 grayscale"
+              />
 
-                <h3 className="headline-md text-[#d4a017] mb-3">
-                  {area.title}
-                </h3>
-                <p className="body-text text-sm flex-grow">
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 w-full p-8 z-20">
+                <motion.div
+                  initial={{ width: 40 }}
+                  whileHover={{ width: 80 }}
+                  transition={{ duration: 0.5 }}
+                  className="h-[1px] bg-[#C5A059] mb-4"
+                ></motion.div>
+                <h3 className="text-2xl text-white mb-2 font-cinzel">{area.title}</h3>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  whileHover={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-sm text-gray-300 leading-relaxed font-light"
+                >
                   {area.description}
-                </p>
-
-                <div className="mt-4 text-[#d4a017] text-sm font-semibold">
-                  Explorar →
-                </div>
+                </motion.p>
               </div>
             </motion.div>
           ))}
-        </div>
-
-        <motion.div
-          variants={cardVariants}
-          className="mt-16 bg-gradient-to-r from-[#110f1e] to-[#1a1535] border border-[#d4a017]/20 rounded-lg p-8"
-        >
-          <p className="body-text text-center text-lg">
-            Cada área representa una dimensión profunda de tu ser. Juntos exploraremos cuál es la raíz real de tus conflictos y cómo transformarlos.
-          </p>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

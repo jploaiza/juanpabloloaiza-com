@@ -70,24 +70,31 @@ export default function AdmissionSection() {
   };
 
   return (
-    <section className="py-20 px-4 bg-black">
+    <section id="ListaDeAdmision" className="py-28 bg-[#020617] relative border-t border-[#C5A059]/5">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="max-w-6xl mx-auto"
+        className="max-w-6xl mx-auto px-4"
       >
-        <motion.h2
+        <motion.div
           variants={itemVariants}
-          className="headline-lg text-center mb-12"
+          className="text-center mb-16"
         >
-          Admisión a la Terapia
-        </motion.h2>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Acceso Exclusivo</span>
+          <motion.h2
+            variants={itemVariants}
+            className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
+          >
+            Admisión VIP
+          </motion.h2>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
           <motion.div variants={itemVariants} className="space-y-6">
-            <p className="body-text text-lg">
+            <p className="text-gray-300 font-[Cormorant_Garamond] text-xl leading-relaxed">
               Para comenzar este viaje transformador, necesitamos que completes un formulario de admisión. Esto nos ayuda a:
             </p>
 
@@ -98,24 +105,31 @@ export default function AdmissionSection() {
                 "Preparar una sesión personalizada",
                 "Establecer objetivos claros para tu terapia",
               ].map((item, index) => (
-                <li key={index} className="flex gap-3 body-text">
-                  <span className="text-[#d4a017] min-w-fit">✓</span>
-                  <span>{item}</span>
+                <li key={index} className="flex gap-3 text-gray-300">
+                  <span className="text-[#C5A059] min-w-fit font-bold">✓</span>
+                  <span className="font-[Cormorant_Garamond] text-lg">{item}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="bg-[#110f1e] border-l-4 border-[#d4a017] p-6 rounded">
-              <p className="body-text font-semibold text-[#d4a017] mb-2">
-                Nota importante:
+            <div className="bg-[#0f172a]/60 border border-[#C5A059]/30 p-6 backdrop-blur-sm">
+              <p className="font-cinzel font-semibold text-[#C5A059] mb-3 uppercase text-sm tracking-widest">
+                Nota Importante
               </p>
-              <p className="body-text text-sm">
+              <p className="text-gray-300 text-sm leading-relaxed font-[Cormorant_Garamond]">
                 Espacios limitados disponibles. El proceso es personalizado y dedicado a cada cliente. Se requiere entrevista preliminar gratuita antes de comenzar.
               </p>
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="glass-card p-8">
+          <motion.div variants={itemVariants} className="relative">
+            {/* Ornate frame borders */}
+            <div className="absolute -top-4 -left-4 w-12 h-12 border-t-2 border-l-2 border-[#C5A059]/50 z-10"></div>
+            <div className="absolute -top-4 -right-4 w-12 h-12 border-t-2 border-r-2 border-[#C5A059]/50 z-10"></div>
+            <div className="absolute -bottom-4 -left-4 w-12 h-12 border-b-2 border-l-2 border-[#C5A059]/50 z-10"></div>
+            <div className="absolute -bottom-4 -right-4 w-12 h-12 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
+
+            <div className="bg-[#0f172a] border border-[#C5A059]/30 p-8">
             {submitted && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -128,9 +142,9 @@ export default function AdmissionSection() {
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               <div>
-                <label htmlFor="name" className="label text-sm block mb-2">Nombre Completo</label>
+                <label htmlFor="name" className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold block mb-2">Nombre Completo</label>
                 <input
                   type="text"
                   id="name"
@@ -141,12 +155,12 @@ export default function AdmissionSection() {
                   required
                   aria-required="true"
                   aria-label="Nombre completo"
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition"
+                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="label text-sm block mb-2">Correo Electrónico</label>
+                <label htmlFor="email" className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold block mb-2">Correo Electrónico</label>
                 <input
                   type="email"
                   id="email"
@@ -157,12 +171,12 @@ export default function AdmissionSection() {
                   required
                   aria-required="true"
                   aria-label="Correo electrónico"
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition"
+                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
                 />
               </div>
 
               <div>
-                <label htmlFor="phone" className="label text-sm block mb-2">Teléfono / WhatsApp</label>
+                <label htmlFor="phone" className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold block mb-2">Teléfono / WhatsApp</label>
                 <input
                   type="tel"
                   id="phone"
@@ -173,12 +187,12 @@ export default function AdmissionSection() {
                   required
                   aria-required="true"
                   aria-label="Teléfono o WhatsApp"
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition"
+                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
                 />
               </div>
 
               <div>
-                <label htmlFor="reason" className="label text-sm block mb-2">¿Cuál es tu motivo de consulta?</label>
+                <label htmlFor="reason" className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold block mb-2">¿Cuál es tu motivo de consulta?</label>
                 <textarea
                   id="reason"
                   name="reason"
@@ -189,12 +203,12 @@ export default function AdmissionSection() {
                   rows={3}
                   aria-required="true"
                   aria-label="Motivo de consulta"
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition resize-none"
+                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition resize-none"
                 />
               </div>
 
               <div>
-                <label htmlFor="medicalHistory" className="label text-sm block mb-2">Historial Médico Relevante (Opcional)</label>
+                <label htmlFor="medicalHistory" className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold block mb-2">Historial Médico Relevante (Opcional)</label>
                 <textarea
                   id="medicalHistory"
                   name="medicalHistory"
@@ -203,7 +217,7 @@ export default function AdmissionSection() {
                   placeholder="¿Tienes algún antecedente médico importante?"
                   rows={2}
                   aria-label="Historial médico relevante"
-                  className="w-full px-4 py-2 bg-[#1a1535] border border-[#d4a017]/30 rounded text-white placeholder-gray-500 focus:border-[#d4a017] focus:outline-none focus:ring-2 focus:ring-[#d4a017]/30 transition resize-none"
+                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition resize-none"
                 />
               </div>
 
@@ -215,51 +229,52 @@ export default function AdmissionSection() {
                 {loading ? "Enviando..." : "Enviar Solicitud"}
               </button>
             </form>
+            </div>
           </motion.div>
         </div>
 
         <motion.div
           variants={itemVariants}
-          className="bg-gradient-to-r from-[#110f1e] to-[#1a1535] rounded-lg p-8"
+          className="bg-[#0f172a] border border-[#C5A059]/20 p-12"
         >
-          <h3 className="headline-md text-center mb-6">
+          <h3 className="text-3xl font-cinzel text-center mb-10 text-white">
             Próximos Pasos
           </h3>
 
           <div className="grid md:grid-cols-4 gap-6">
             {[
               {
-                number: "1",
+                number: "I",
                 title: "Completa el Formulario",
                 description: "Responde con honestidad sobre tu situación",
               },
               {
-                number: "2",
+                number: "II",
                 title: "Entrevista Gratuita",
                 description: "Nos conocemos y evaluamos tu caso",
               },
               {
-                number: "3",
+                number: "III",
                 title: "Plan Personalizado",
                 description: "Diseñamos tu proceso terapéutico",
               },
               {
-                number: "4",
+                number: "IV",
                 title: "Comienza tu Viaje",
                 description: "Primera sesión vía Zoom",
               },
             ].map((step, index) => (
               <div
                 key={index}
-                className="text-center p-4 glass-card"
+                className="text-center p-6 bg-[#050b1a] border border-[#C5A059]/20 group hover:border-[#C5A059]/40 transition duration-300"
               >
-                <div className="text-3xl font-bold text-[#d4a017] mb-2">
+                <div className="text-4xl font-cinzel text-[#C5A059] mb-3 opacity-80 group-hover:opacity-100 transition">
                   {step.number}
                 </div>
-                <h4 className="body-text font-semibold mb-2">
+                <h4 className="font-cinzel text-white mb-2 text-sm uppercase tracking-widest">
                   {step.title}
                 </h4>
-                <p className="body-text text-sm text-gray-400">
+                <p className="text-gray-400 text-xs font-[Cormorant_Garamond]">
                   {step.description}
                 </p>
               </div>

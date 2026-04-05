@@ -79,35 +79,45 @@ export default function FAQSection() {
   ];
 
   return (
-    <section className="py-20 px-4 bg-black">
+    <section id="PreguntasFrecuentes" className="py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="max-w-4xl mx-auto"
+        className="max-w-4xl mx-auto px-4"
       >
-        <motion.h2
+        <motion.div
           variants={itemVariants}
-          className="headline-lg text-center mb-12"
+          className="text-center mb-16"
         >
-          Preguntas Frecuentes
-        </motion.h2>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Claridad Total</span>
+          <motion.h2
+            variants={itemVariants}
+            className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
+          >
+            Preguntas Frecuentes
+          </motion.h2>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
+        </motion.div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {faqs.map((faq, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
-              className="glass-card overflow-hidden"
+              className="group relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition duration-300 overflow-hidden"
             >
+              {/* Ornate corner accent */}
+              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+
               <button
                 onClick={() =>
                   setExpandedIndex(expandedIndex === index ? null : index)
                 }
-                className="w-full p-6 flex items-center justify-between hover:bg-white/10 transition"
+                className="w-full p-6 flex items-center justify-between hover:bg-[#C5A059]/5 transition"
               >
-                <h3 className="body-text font-semibold text-left">
+                <h3 className="text-white font-light text-left font-[Cormorant_Garamond] text-lg">
                   {faq.question}
                 </h3>
                 <motion.div
@@ -115,7 +125,7 @@ export default function FAQSection() {
                   transition={{ duration: 0.3 }}
                   className="flex-shrink-0 ml-4"
                 >
-                  <ChevronDown className="w-5 h-5 text-[#d4a017]" />
+                  <ChevronDown className="w-5 h-5 text-[#C5A059]" />
                 </motion.div>
               </button>
 
@@ -128,8 +138,8 @@ export default function FAQSection() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="px-6 pb-6 border-t border-[#d4a017]/20">
-                  <p className="body-text text-sm leading-relaxed">
+                <div className="px-6 pb-6 border-t border-[#C5A059]/20">
+                  <p className="text-gray-300 text-sm leading-relaxed font-light font-[Cormorant_Garamond]">
                     {faq.answer}
                   </p>
                 </div>
@@ -140,24 +150,24 @@ export default function FAQSection() {
 
         <motion.div
           variants={itemVariants}
-          className="mt-12 text-center"
+          className="mt-16 text-center"
         >
-          <p className="body-text">
-            ¿Tienes más preguntas? Contáctame directamente por{" "}
+          <p className="text-gray-300 font-[Cormorant_Garamond] text-lg">
+            ¿Tienes más preguntas?{" "}
             <a
               href="https://api.whatsapp.com/send?phone=56962081884"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#d4a017] hover:underline"
+              className="text-[#C5A059] hover:text-[#F3E5AB] transition"
             >
-              WhatsApp
+              Contáctame por WhatsApp
             </a>
             {" "}o{" "}
             <a
               href="mailto:contacto@juanpabloloaiza.com"
-              className="text-[#d4a017] hover:underline"
+              className="text-[#C5A059] hover:text-[#F3E5AB] transition"
             >
-              correo electrónico
+              correo
             </a>
           </p>
         </motion.div>

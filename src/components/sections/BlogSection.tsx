@@ -81,16 +81,18 @@ export default function BlogSection() {
   };
 
   return (
-    <section className="py-20 px-4 bg-black">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
+      <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="headline-lg mb-4">BLOG</h2>
-          <p className="subtitle">Artículos sobre Regresión a Vidas Pasadas y Sanación</p>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Sabiduría Compartida</span>
+          <h2 className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog</h2>
+          <p className="text-gray-300 font-[Cormorant_Garamond] text-xl max-w-2xl mx-auto">Artículos sobre Regresión a Vidas Pasadas y Sanación</p>
+          <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mt-6"></div>
         </motion.div>
 
         <motion.div
@@ -107,16 +109,25 @@ export default function BlogSection() {
               href={post.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="glass-card overflow-hidden hover:scale-105 transition-transform cursor-pointer group"
+              className="group relative h-[450px] overflow-hidden bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition duration-300 cursor-pointer"
             >
-              <div className={`${post.image} h-48 w-full group-hover:brightness-110 transition-all`}></div>
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Tag className="w-4 h-4 text-[#d4a017]" />
-                  <span className="label text-xs">{post.category}</span>
+              {/* Image overlay */}
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition duration-700 z-10"></div>
+              <div className={`${post.image} absolute inset-0 w-full h-full group-hover:scale-110 transition duration-1000`}></div>
+
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 w-full p-6 z-20 bg-gradient-to-t from-black to-transparent">
+                <div className="flex items-center gap-2 mb-3 opacity-0 group-hover:opacity-100 transition duration-300">
+                  <Tag className="w-4 h-4 text-[#C5A059]" />
+                  <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
                 </div>
-                <h3 className="headline-md mb-3 group-hover:text-[#d4a017] transition-colors">{post.title}</h3>
-                <p className="body-text mb-4 text-sm">{post.excerpt}</p>
+                <h3 className="text-xl text-white mb-2 font-cinzel leading-tight group-hover:text-[#C5A059] transition-colors">{post.title}</h3>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  whileHover={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-gray-300 text-sm leading-relaxed font-[Cormorant_Garamond] opacity-0 group-hover:opacity-100 transition duration-300 mb-3"
+                >{post.excerpt}</motion.p>
                 <div className="flex items-center gap-2 text-gray-400 text-xs">
                   <Clock className="w-4 h-4" />
                   <span>{post.readTime} lectura</span>
@@ -136,7 +147,7 @@ export default function BlogSection() {
             href="https://www.juanpabloloaiza.com/blog/"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-gold-outline hover:bg-[#d4a017]/10"
+            className="btn-gold"
           >
             Ver Todos los Artículos
           </a>
