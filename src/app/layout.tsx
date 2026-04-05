@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, Almendra_SC, Crimson_Text } from "next/font/google";
+import { Cinzel, Crimson_Text } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -7,13 +7,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 const cinzel = Cinzel({
   variable: "--font-cinzel",
   subsets: ["latin"],
-  weight: ["700"],
-});
-
-const almendra = Almendra_SC({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-  weight: ["400"],
+  weight: ["400", "600", "700", "900"],
 });
 
 const crimson = Crimson_Text({
@@ -70,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${cinzel.variable} ${almendra.variable} ${crimson.variable} h-full antialiased scroll-smooth`}
+      className={`${cinzel.variable} ${crimson.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         <script
