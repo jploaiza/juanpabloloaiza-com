@@ -59,7 +59,7 @@ export default function OriginSection() {
         >
           <div>
             <h2 className="text-4xl md:text-5xl text-white mb-2 font-cinzel">Descubre el Origen de tus Conflictos</h2>
-            <p className="text-[#C5A059] font-cinzel text-xl italic">Para sanar profundamente, primero debemos descubrir el origen de lo que nos enfermó.</p>
+            <p className="text-[#C5A059] font-crimson text-xl">Para sanar profundamente, primero debemos descubrir el origen de lo que nos enfermó.</p>
           </div>
           <div className="mt-6 md:mt-0">
             <a href="#ListaDeAdmision" className="text-sm uppercase tracking-widest text-gray-400 hover:text-white transition">
@@ -100,7 +100,7 @@ export default function OriginSection() {
                 <h3 className="text-xl font-cinzel text-white group-hover:text-[#C5A059] transition-colors duration-300 mb-3">
                   {area.title}
                 </h3>
-                <p className="text-gray-300 font-crimson text-lg italic leading-relaxed">
+                <p className="text-gray-300 font-crimson text-lg leading-relaxed">
                   {area.description}
                 </p>
               </div>

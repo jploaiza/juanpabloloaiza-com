@@ -28,7 +28,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
         >
-          <span className="text-[#C5A059] font-cinzel uppercase tracking-[0.2em] text-[9px] sm:text-[10px] md:text-xs border border-[#C5A059]/30 py-2 px-4 sm:px-6 rounded-sm">
+          <span className="text-[#C5A059] font-cinzel font-semibold uppercase tracking-[0.2em] text-[10px] sm:text-[11px] md:text-[13px] border border-[#C5A059]/30 py-2 px-4 sm:px-6 rounded-sm">
             Hipnoterapia · Regresión a Vidas Pasadas
           </span>
         </motion.div>
@@ -69,7 +69,7 @@ export default function HeroSection() {
             className="flex items-center justify-center text-gray-400 hover:text-[#C5A059] transition font-cinzel uppercase tracking-widest text-xs group"
           >
             <span className="border-b border-transparent group-hover:border-[#C5A059] pb-1 transition-all">
-              Descubrir la Metodología
+              Descubre la Metodología
             </span>
             <i className="fas fa-arrow-right ml-3 text-[#C5A059] transform group-hover:translate-x-1 transition" />
           </a>
@@ -83,7 +83,7 @@ export default function HeroSection() {
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-60"
       >
         <div className="w-[1px] h-16 bg-gradient-to-b from-[#C5A059] to-transparent mb-2" />
-        <span className="text-[10px] font-cinzel uppercase tracking-widest text-[#C5A059]">Scroll</span>
+        <span className="text-[10px] font-cinzel font-semibold uppercase tracking-widest text-[#C5A059]">Scroll</span>
       </motion.div>
     </section>
   );
