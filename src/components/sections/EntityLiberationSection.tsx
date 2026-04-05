@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import HeraldFrame from "@/components/HeraldFrame";
+import { Lightbulb, Heart, Zap, Handshake, Star, ChevronRight } from "lucide-react";
 
 export default function EntityLiberationSection() {
   const containerVariants = {
@@ -32,11 +33,11 @@ export default function EntityLiberationSection() {
   ];
 
   const benefits = [
-    { icon: "fas fa-lightbulb", title: "Claridad Mental" },
-    { icon: "fas fa-heart", title: "Paz Interior" },
-    { icon: "fas fa-bolt", title: "Energía Renovada" },
-    { icon: "fas fa-handshake", title: "Mejora en las Relaciones" },
-    { icon: "fas fa-star", title: "Reconexión Espiritual" },
+    { icon: "lightbulb", title: "Claridad Mental" },
+    { icon: "heart", title: "Paz Interior" },
+    { icon: "zap", title: "Energía Renovada" },
+    { icon: "handshake", title: "Mejora en las Relaciones" },
+    { icon: "star", title: "Reconexión Espiritual" },
   ];
 
   return (
@@ -118,7 +119,11 @@ export default function EntityLiberationSection() {
                     key={index}
                     className="flex items-center gap-3 p-4 bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition"
                   >
-                    <i className={`${benefit.icon} text-[#C5A059] text-sm`}></i>
+                    {benefit.icon === "lightbulb" && <Lightbulb size={16} className="text-[#C5A059]" />}
+                  {benefit.icon === "heart" && <Heart size={16} className="text-[#C5A059]" />}
+                  {benefit.icon === "zap" && <Zap size={16} className="text-[#C5A059]" />}
+                  {benefit.icon === "handshake" && <Handshake size={16} className="text-[#C5A059]" />}
+                  {benefit.icon === "star" && <Star size={16} className="text-[#C5A059]" />}
                     <span className="text-gray-300 text-base font-crimson">{benefit.title}</span>
                   </div>
                 ))}
@@ -146,7 +151,7 @@ export default function EntityLiberationSection() {
                     transition={{ duration: 0.4, delay: index * 0.06 }}
                     className="flex items-start gap-3 text-gray-300 font-crimson text-lg"
                   >
-                    <i className="fas fa-chevron-right text-[#C5A059] text-xs mt-1.5 flex-shrink-0"></i>
+                    <ChevronRight size={14} className="text-[#C5A059] mt-1 flex-shrink-0" />
                     <span>{symptom}</span>
                   </motion.li>
                 ))}

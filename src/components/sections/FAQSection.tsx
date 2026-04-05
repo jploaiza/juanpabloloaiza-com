@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import { Play } from "lucide-react";
 import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
 
@@ -221,7 +222,7 @@ export default function FAQSection() {
                     {faq.question}
                   </span>
                   {activeIndex === index && (
-                    <i className="fas fa-play text-[#C5A059] text-xs ml-auto flex-shrink-0" />
+                    <Play size={11} className="text-[#C5A059] ml-auto flex-shrink-0" />
                   )}
                 </div>
               </button>
@@ -278,7 +279,7 @@ export default function FAQSection() {
                     {faq.question}
                   </span>
                   {activeIndex === index && (
-                    <i className="fas fa-play text-[#C5A059] text-xs ml-auto flex-shrink-0" />
+                    <Play size={11} className="text-[#C5A059] ml-auto flex-shrink-0" />
                   )}
                 </div>
               </button>

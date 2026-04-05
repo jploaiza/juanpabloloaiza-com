@@ -79,7 +79,7 @@ export default function BlogSection() {
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <Tag className="w-3 h-3 text-[#C5A059]" />
-                      <span className="text-[#C5A059] text-[10px] uppercase tracking-widest font-semibold">{post.category}</span>
+                      <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
                     </div>
 
                     <h3 className="text-base font-cinzel text-white mb-2 leading-snug line-clamp-2 group-hover:text-[#C5A059] transition-colors">
@@ -118,8 +118,8 @@ export default function BlogSection() {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    i === current ? "bg-[#C5A059] w-4" : "bg-[#C5A059]/30"
+                  className={`h-4 rounded-full transition-all ${
+                    i === current ? "bg-[#C5A059] w-6" : "bg-[#C5A059]/40 w-4"
                   }`}
                   aria-label={`Ir al artículo ${i + 1}`}
                 />

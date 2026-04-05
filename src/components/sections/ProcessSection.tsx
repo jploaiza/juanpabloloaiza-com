@@ -2,6 +2,7 @@
 import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
 import { motion } from "framer-motion";
+import { Search, Scale, Gem, Star } from "lucide-react";
 
 export default function ProcessSection() {
   const containerVariants = {
@@ -18,21 +19,21 @@ export default function ProcessSection() {
     {
       number: "I",
       title: "Descubrir",
-      icon: "fas fa-search",
+      icon: "search",
       description:
         "Accedemos al origen de lo que nos sucedió. Exploramos vidas pasadas, la vida presente, el transgeneracional y la entre vida para descubrir la raíz de tus conflictos.",
     },
     {
       number: "II",
       title: "Entender",
-      icon: "fas fa-balance-scale",
+      icon: "scale",
       description:
         "Comprendemos el significado y las lecciones detrás de lo descubierto. Esta etapa puede extenderse según lo que necesites trabajar y el consejo de tu guía espiritual.",
     },
     {
       number: "III",
       title: "Limpiar",
-      icon: "fas fa-gem",
+      icon: "gem",
       description:
         "Liberamos y limpiamos todo lo trabajado para que puedas recuperar la felicidad. Cortamos lazos, liberamos energías y cerramos el proceso terapéutico.",
     },
@@ -98,8 +99,10 @@ export default function ProcessSection() {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#020617] border border-[#C5A059] rounded-full flex items-center justify-center text-[#C5A059] text-xs font-bold font-cinzel">
                 {step.number}
               </div>
-              <div className="mb-6 mt-4">
-                <i className={`${step.icon} text-3xl text-[#C5A059] opacity-80`} />
+              <div className="mb-6 mt-4 flex justify-center text-[#C5A059] opacity-80">
+                {step.icon === "search" && <Search size={32} />}
+                {step.icon === "scale" && <Scale size={32} />}
+                {step.icon === "gem" && <Gem size={32} />}
               </div>
               <h3 className="text-2xl sm:text-3xl text-white mb-4 font-cinzel font-bold">{step.title}</h3>
               <p className="font-crimson text-xl text-gray-300 leading-relaxed">{step.description}</p>
@@ -111,9 +114,9 @@ export default function ProcessSection() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center mt-12 text-gray-500 text-xs uppercase tracking-widest"
+          className="text-center mt-12 text-gray-500 text-xs uppercase tracking-widest flex items-center justify-center gap-2"
         >
-          <i className="fas fa-star text-[#C5A059] mr-2" /> Proceso de hasta 10 sesiones vía Zoom · Entrevista preliminar gratuita
+          <Star size={12} className="text-[#C5A059]" /> Proceso de hasta 10 sesiones vía Zoom · Entrevista preliminar gratuita
         </motion.p>
       </div>
     </section>

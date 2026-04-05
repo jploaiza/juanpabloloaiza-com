@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -71,7 +72,7 @@ export default function HeroSection() {
             <span className="border-b border-transparent group-hover:border-[#C5A059] pb-1 transition-all">
               Descubre la Metodología
             </span>
-            <i className="fas fa-arrow-right ml-3 text-[#C5A059] transform group-hover:translate-x-1 transition" />
+            <ArrowRight size={14} className="ml-3 text-[#C5A059] transform group-hover:translate-x-1 transition" />
           </a>
         </motion.div>
       </div>

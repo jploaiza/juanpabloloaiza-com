@@ -112,7 +112,7 @@ export default function Footer() {
             </a>
           ))}
         </div>
-        <p className="font-cinzel text-xs text-gray-600 uppercase tracking-widest">
+        <p className="font-cinzel text-xs text-gray-400 uppercase tracking-widest">
           © 2026 Juan Pablo Loaiza · Todos los derechos reservados
         </p>
       </div>
