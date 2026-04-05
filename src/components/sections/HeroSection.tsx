@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
-    <section className="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden pt-32">
-      {/* Background image with overlay */}
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{backgroundImage: "url('/assets/hero-bg.jpg')"}}></div>
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-32 bg-gradient-to-b from-[#020617] via-[#0f172a] to-[#020617]">
+      {/* Background image with overlay (ready for custom image) */}
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style={{backgroundImage: "url('/assets/hero-bg.jpg')"}}></div>
 
       {/* Decorative elements */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width=%22100%22%20height=%22100%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3Cpattern%20id=%22stardust%22%20x=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22%20patternUnits=%22userSpaceOnUse%22%3E%3Ccircle%20cx=%2210%22%20cy=%2210%22%20r=%221%22%20fill=%22%23C5A059%22%20opacity=%220.2%22/%3E%3C/pattern%3E%3C/defs%3E%3Crect%20width=%22100%22%20height=%22100%22%20fill=%22url(%23stardust)%22/%3E%3C/svg%3E')] opacity-20"></div>

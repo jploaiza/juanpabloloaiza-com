@@ -111,6 +111,12 @@ export default function BlogSection() {
               rel="noopener noreferrer"
               className="group relative h-[450px] overflow-hidden bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition duration-300 cursor-pointer"
             >
+              {/* Ornate corner frames */}
+              <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/30 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+
               {/* Image overlay */}
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition duration-700 z-10"></div>
               <div className={`${post.image} absolute inset-0 w-full h-full group-hover:scale-110 transition duration-1000`}></div>

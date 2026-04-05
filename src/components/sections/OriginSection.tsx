@@ -81,6 +81,12 @@ export default function OriginSection() {
               whileHover="hover"
               className="group relative h-[500px] overflow-hidden bg-[#0f172a] border border-white/5 hover:border-[#C5A059]/40 transition duration-700"
             >
+              {/* Ornate corner frames */}
+              <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-[#C5A059]/40 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-[#C5A059]/40 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-[#C5A059]/40 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-[#C5A059]/40 z-20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+
               {/* Image with overlay */}
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition duration-700 z-10"></div>
               <Image

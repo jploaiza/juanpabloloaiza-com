@@ -40,8 +40,14 @@ export default function TherapySection() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <motion.div variants={itemVariants}>
-            <div className="aspect-video bg-[#0f172a] border border-[#C5A059]/20 rounded-sm overflow-hidden">
+          <motion.div variants={itemVariants} className="relative">
+            {/* Ornate frame borders */}
+            <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-[#C5A059]/50 z-10"></div>
+            <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-[#C5A059]/50 z-10"></div>
+            <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-[#C5A059]/50 z-10"></div>
+            <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
+
+            <div className="aspect-video bg-[#0f172a] border border-[#C5A059]/20 rounded-sm overflow-hidden relative z-0">
               <iframe
                 width="100%"
                 height="100%"

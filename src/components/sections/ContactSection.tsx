@@ -79,8 +79,11 @@ export default function ContactSection() {
                 rel={method.href.startsWith("http") ? "noopener noreferrer" : ""}
                 className="group relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 p-8 text-center transition duration-300"
               >
-                {/* Corner accent */}
-                <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                {/* Ornate corner frames */}
+                <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/30 opacity-0 group-hover:opacity-100 transition duration-300"></div>
 
                 <div className="flex justify-center mb-6">
                   <Icon className="w-8 h-8 text-[#C5A059] group-hover:scale-110 transition-transform" />

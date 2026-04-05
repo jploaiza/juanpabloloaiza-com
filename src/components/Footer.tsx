@@ -4,7 +4,9 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#020617] border-t border-[#C5A059]/10 py-16 px-4">
+    <footer className="bg-[#020617] border-t border-[#C5A059]/10 py-16 px-4 relative">
+      {/* Decorative top border accent */}
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-[2px] bg-gradient-to-r from-transparent via-[#C5A059]/50 to-transparent"></div>
       <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-12 mb-12">
         {/* Brand */}
         <div className="space-y-4">
