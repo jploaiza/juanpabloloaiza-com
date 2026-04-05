@@ -18,16 +18,32 @@ const crimson = Crimson_Text({
 });
 
 export const metadata: Metadata = {
-  title: "Regresa a tus Vidas Pasadas - Hipnoterapia de Regresión | Juan Pablo Loaiza",
+  metadataBase: new URL("https://juanpabloloaiza.com"),
+  title: "Regresa a tus Vidas Pasadas — Hipnoterapia de Regresión | Juan Pablo Loaiza",
   description: "Hipnoterapia de regresión a vidas pasadas y liberación de entidades espirituales. Descubre el origen de tus conflictos y transforma tu vida. Sesiones vía Zoom en todo el mundo.",
-  keywords: "regresión a vidas pasadas, hipnoterapia, liberación espiritual, traumas, sanación",
+  keywords: "regresión a vidas pasadas, hipnoterapia, liberación espiritual, traumas, sanación, hipnoterapia online, hipnoterapeuta, vidas pasadas zoom",
+  alternates: { canonical: "https://juanpabloloaiza.com" },
   openGraph: {
-    title: "Regresa a tus Vidas Pasadas - Hipnoterapia de Regresión",
-    description: "Hipnoterapia especializada en regresión a vidas pasadas y liberación de entidades espirituales",
-    url: "https://juanpabloloaiza-com.vercel.app",
+    title: "Regresa a tus Vidas Pasadas — Hipnoterapia de Regresión | Juan Pablo Loaiza",
+    description: "Hipnoterapia especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones vía Zoom en todo el mundo.",
+    url: "https://juanpabloloaiza.com",
     siteName: "Juan Pablo Loaiza",
     locale: "es_ES",
     type: "website",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu",
+        width: 1200,
+        height: 630,
+        alt: "Juan Pablo Loaiza — Hipnoterapia de Regresión a Vidas Pasadas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Regresa a tus Vidas Pasadas — Hipnoterapia de Regresión | Juan Pablo Loaiza",
+    description: "Hipnoterapia especializada en regresión a vidas pasadas y liberación de entidades espirituales.",
+    images: ["https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"],
   },
   icons: {
     icon: "/assets/logo.webp",
@@ -44,7 +60,7 @@ export default function RootLayout({
     "@type": "ProfessionalService",
     name: "Juan Pablo Loaiza - Hipnoterapia de Regresión a Vidas Pasadas",
     description: "Hipnoterapia especializada en regresión a vidas pasadas y liberación de entidades espirituales",
-    url: "https://juanpabloloaiza-com.vercel.app",
+    url: "https://juanpabloloaiza.com",
     telephone: "+56962081884",
     email: "contacto@juanpabloloaiza.com",
     address: {

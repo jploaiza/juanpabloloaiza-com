@@ -3,4 +3,4 @@ Allow: /
 Disallow: /.next/
 Disallow: /api/
 
-Sitemap: https://juanpabloloaiza-com.vercel.app/sitemap.xml
+Sitemap: https://juanpabloloaiza.com/sitemap.xml
