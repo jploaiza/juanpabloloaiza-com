@@ -45,12 +45,6 @@ export default function Header() {
               width={150}
               className="h-12 w-auto object-contain opacity-90 group-hover:opacity-100 transition"
             />
-            <div className="flex flex-col text-left border-l border-[#C5A059]/30 pl-4">
-              <span className="font-cinzel text-xl text-white tracking-widest group-hover:text-[#C5A059] transition duration-500">
-                Juan Pablo Loaiza
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.3em] text-[#C5A059]">Excelencia Espiritual</span>
-            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -68,7 +62,7 @@ export default function Header() {
               href="#ListaDeAdmision"
               className="border border-[#C5A059] text-[#C5A059] px-8 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:bg-[#C5A059] hover:text-[#020617] transition duration-500 shadow-[0_0_15px_rgba(197,160,89,0.1)]"
             >
-              Admisión VIP
+              Comienza Ahora
             </a>
           </div>
 
@@ -106,7 +100,7 @@ export default function Header() {
               className="border border-[#C5A059] text-[#C5A059] px-4 py-2 rounded-sm text-xs uppercase tracking-widest hover:bg-[#C5A059] hover:text-[#020617] transition mt-4"
               onClick={() => setIsOpen(false)}
             >
-              Admisión VIP
+              Comienza Ahora
             </a>
           </div>
         </motion.div>

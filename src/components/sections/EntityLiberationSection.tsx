@@ -42,14 +42,14 @@ export default function EntityLiberationSection() {
         >
           <motion.div variants={itemVariants} className="flex items-center space-x-4 mb-6">
             <span className="h-[1px] w-10 bg-[#C5A059]"></span>
-            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-bold">Limpieza Energética Avanzada</span>
+            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-bold">Liberación de Entidades</span>
           </motion.div>
 
           <motion.h2
             variants={itemVariants}
             className="text-4xl md:text-5xl text-white mb-8 font-cinzel leading-tight"
           >
-            Liberación de <br/>Interferencias
+            Liberación de <br/>Entidades Espirituales
           </motion.h2>
 
           <motion.div

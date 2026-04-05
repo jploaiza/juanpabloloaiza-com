@@ -82,12 +82,12 @@ export default function AdmissionSection() {
           variants={itemVariants}
           className="text-center mb-16"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Acceso Exclusivo</span>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Tu Transformación Comienza</span>
           <motion.h2
             variants={itemVariants}
             className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
           >
-            Admisión VIP
+            Comienza Ahora
           </motion.h2>
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
         </motion.div>

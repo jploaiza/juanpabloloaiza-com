@@ -48,12 +48,12 @@ export default function ProcessSection() {
           viewport={{ once: true }}
           className="text-center mb-20"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Excelencia Terapéutica</span>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold">Cómo Funciona</span>
           <motion.h2
             variants={itemVariants}
             className="text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
           >
-            El Camino de la Maestría
+            El Proceso de Sanación
           </motion.h2>
           <div className="w-16 h-[1px] bg-[#C5A059] mx-auto"></div>
         </motion.div>
