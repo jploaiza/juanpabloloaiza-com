@@ -45,7 +45,8 @@ export const metadata: Metadata = {
     images: ["https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"],
   },
   icons: {
-    icon: "/assets/logo.webp",
+    icon: "/assets/icon.png",
+    apple: "/assets/icon.png",
   },
 };
 
