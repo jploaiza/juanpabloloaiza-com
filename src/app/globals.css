@@ -130,14 +130,13 @@ body {
    ───────────────────────────────────────────────────────────── */
 @layer base {
 
-  /* IM Fell English — títulos, labels, nav, UI chrome */
-  /* Solo tiene weight 400: forzar siempre 400 para evitar síntesis artificial */
+  /* Playfair Display — títulos, labels, nav, UI chrome */
   .font-cinzel {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-weight: 400 !important; /* IM Fell English no tiene bold — evitar faux-bold */
-    letter-spacing: 0.03em;      /* las utilidades tracking-* lo sobreescriben */
+    font-weight: 400;
+    letter-spacing: 0.03em; /* las utilidades tracking-* lo sobreescriben */
   }
 
   /* Source Serif 4 — párrafos, subtítulos, texto largo */

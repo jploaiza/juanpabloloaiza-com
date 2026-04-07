@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { IM_Fell_English, Source_Serif_4 } from "next/font/google";
+import { Playfair_Display, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
-// IM Fell English solo existe en weight 400 (normal + italic)
-const imFellEnglish = IM_Fell_English({
+const playfairDisplay = Playfair_Display({
   variable: "--font-cinzel",
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["400", "600", "700", "900"],
   style: ["normal", "italic"],
 });
 
@@ -86,7 +85,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${imFellEnglish.variable} ${sourceSerif4.variable} h-full antialiased scroll-smooth`}
+      className={`${playfairDisplay.variable} ${sourceSerif4.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         {/* Preconnect to external asset hosts */}
