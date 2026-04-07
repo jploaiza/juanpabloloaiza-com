@@ -46,6 +46,7 @@ interface ProgressEntry {
   watch_seconds: number;
   duration_seconds: number;
   is_completed: boolean;
+  real_play_seconds?: number;
 }
 
 interface Props {
@@ -114,12 +115,18 @@ export default function LessonPlayer({
   useEffect(() => { autoPlayRef.current = autoPlay; }, [autoPlay]);
 
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [courseCompleted, setCourseCompleted] = useState(false);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Refs so video event handlers always see latest values
   const autoAdvanceRef = useRef(autoAdvance);
   const nextLessonRef = useRef(nextLesson);
   useEffect(() => { autoAdvanceRef.current = autoAdvance; }, [autoAdvance]);
   useEffect(() => { nextLessonRef.current = nextLesson; }, [nextLesson]);
+
+  // ── Watch integrity refs ───────────────────────────────────────────────────
+  // Tracks real accumulated play time (not seeked position) to detect skipping
+  const playStartTimeRef = useRef<number | null>(null);
+  const realPlaySecondsRef = useRef<number>(progressMap[lesson.id]?.real_play_seconds ?? 0);
 
   // ── Autoplay on arrival (from autonext navigation) ────────────────────────
   useEffect(() => {
@@ -145,13 +152,21 @@ export default function LessonPlayer({
   const triggerCourseComplete = useCallback(async () => {
     if (!nextLesson) {
       // This is the last lesson — fire completion
-      await fetch("/api/academy/complete", {
+      const res = await fetch("/api/academy/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lessonId: lesson.id, courseId: lesson.course_id }),
       });
+      const data = await res.json();
+      if (data.success) {
+        setCourseCompleted(true);
+        const dest = data.certificateToken
+          ? `/academy/completado?token=${data.certificateToken}`
+          : "/academy/completado";
+        setTimeout(() => router.push(dest), 2500);
+      }
     }
-  }, [lesson.id, lesson.course_id, nextLesson]);
+  }, [lesson.id, lesson.course_id, nextLesson, router]);
 
   // ── Auto-advance helpers ───────────────────────────────────────────────────
 
@@ -219,6 +234,7 @@ export default function LessonPlayer({
           is_completed: completed,
           completed_at: completed ? new Date().toISOString() : null,
           last_watched_at: new Date().toISOString(),
+          real_play_seconds: Math.round(realPlaySecondsRef.current),
         },
         { onConflict: "user_id,lesson_id" }
       );
@@ -240,13 +256,33 @@ export default function LessonPlayer({
 
     let saveTimer: ReturnType<typeof setInterval>;
 
+    // ── Real play time accumulation ──────────────────────────────────────────
+    const WATCH_INTEGRITY = 0.65; // 65% real watch time required for auto-complete
+
+    const accumulatePlay = () => {
+      if (playStartTimeRef.current !== null) {
+        realPlaySecondsRef.current += (Date.now() - playStartTimeRef.current) / 1000;
+        playStartTimeRef.current = null;
+      }
+    };
+
+    const onPlay = () => {
+      playStartTimeRef.current = Date.now();
+    };
+
+    const onSeeking = () => {
+      // Pause accumulation when user seeks (may be skipping)
+      accumulatePlay();
+    };
+
     const onTimeUpdate = () => {
       saveProgressRef.current.watchSeconds = Math.floor(video.currentTime);
-      // Auto-complete
+      // Auto-complete only if enough real watch time (not just seeked)
       if (
         !isCompleted &&
         video.duration > 0 &&
-        video.currentTime / video.duration >= COMPLETE_THRESHOLD
+        video.currentTime / video.duration >= COMPLETE_THRESHOLD &&
+        realPlaySecondsRef.current / video.duration >= WATCH_INTEGRITY
       ) {
         setIsCompleted(true);
         saveProgress(Math.floor(video.currentTime), true);
@@ -254,10 +290,12 @@ export default function LessonPlayer({
     };
 
     const onPause = () => {
+      accumulatePlay();
       saveProgress(Math.floor(video.currentTime), isCompleted);
     };
 
     const onEnded = () => {
+      accumulatePlay(); // capture final segment
       setIsCompleted(true);
       saveProgress(Math.floor(video.duration), true);
       triggerCourseComplete();
@@ -267,6 +305,8 @@ export default function LessonPlayer({
       }
     };
 
+    video.addEventListener("play", onPlay);
+    video.addEventListener("seeking", onSeeking);
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("pause", onPause);
     video.addEventListener("ended", onEnded);
@@ -279,6 +319,8 @@ export default function LessonPlayer({
     }, SAVE_INTERVAL_MS);
 
     return () => {
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("seeking", onSeeking);
       video.removeEventListener("timeupdate", onTimeUpdate);
       video.removeEventListener("pause", onPause);
       video.removeEventListener("ended", onEnded);
@@ -387,6 +429,22 @@ export default function LessonPlayer({
                   <p className="font-cinzel text-xs uppercase tracking-widest text-gray-600">
                     Video próximamente
                   </p>
+                </div>
+              )}
+
+              {/* ── Course completed overlay ── */}
+              {courseCompleted && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm z-10 gap-4">
+                  <div className="w-16 h-16 border border-[#C5A059]/40 flex items-center justify-center mb-2">
+                    <span className="text-[#C5A059] text-2xl">✦</span>
+                  </div>
+                  <p className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059]">¡Curso completado!</p>
+                  <p className="font-crimson text-gray-400 text-sm">Preparando tu certificado...</p>
+                  <div className="flex gap-1 mt-2">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="w-1.5 h-1.5 bg-[#C5A059]/40 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                    ))}
+                  </div>
                 </div>
               )}
 
