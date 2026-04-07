@@ -16,6 +16,7 @@ import {
   Check,
   LayoutDashboard,
   Loader2,
+  SkipForward,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatDuration } from "@/lib/academy-data";
@@ -96,6 +97,20 @@ export default function LessonPlayer({
   // Progress save ref (avoid stale closure)
   const saveProgressRef = useRef({ watchSeconds: 0, saved: false });
 
+  // ── Auto-advance state ─────────────────────────────────────────────────────
+  const [autoAdvance, setAutoAdvance] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem("academy_autoadvance");
+    return stored === null ? true : stored === "true";
+  });
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Refs so video event handlers always see latest values
+  const autoAdvanceRef = useRef(autoAdvance);
+  const nextLessonRef = useRef(nextLesson);
+  useEffect(() => { autoAdvanceRef.current = autoAdvance; }, [autoAdvance]);
+  useEffect(() => { nextLessonRef.current = nextLesson; }, [nextLesson]);
+
   // ── Trigger course completion (email + certificate) ────────────────────────
 
   const triggerCourseComplete = useCallback(async () => {
@@ -108,6 +123,50 @@ export default function LessonPlayer({
       });
     }
   }, [lesson.id, lesson.course_id, nextLesson]);
+
+  // ── Auto-advance helpers ───────────────────────────────────────────────────
+
+  const cancelCountdown = useCallback(() => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setCountdown(null);
+  }, []);
+
+  const startCountdown = useCallback(() => {
+    if (!nextLessonRef.current) return;
+    setCountdown(5);
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(countdownIntervalRef.current!);
+          countdownIntervalRef.current = null;
+          if (autoAdvanceRef.current && nextLessonRef.current) {
+            router.push(`/academy/lesson/${nextLessonRef.current.slug}`);
+          }
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [router]);
+
+  const toggleAutoAdvance = useCallback(() => {
+    setAutoAdvance((prev) => {
+      const next = !prev;
+      localStorage.setItem("academy_autoadvance", String(next));
+      if (!next) {
+        // Turn off — cancel any running countdown
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = null;
+        }
+        setCountdown(null);
+      }
+      return next;
+    });
+  }, []);
 
   // ── Save video progress ────────────────────────────────────────────────────
 
@@ -165,6 +224,10 @@ export default function LessonPlayer({
       setIsCompleted(true);
       saveProgress(Math.floor(video.duration), true);
       triggerCourseComplete();
+      // Auto-advance to next lesson if enabled
+      if (autoAdvanceRef.current && nextLessonRef.current) {
+        startCountdown();
+      }
     };
 
     video.addEventListener("timeupdate", onTimeUpdate);
@@ -183,6 +246,7 @@ export default function LessonPlayer({
       video.removeEventListener("pause", onPause);
       video.removeEventListener("ended", onEnded);
       clearInterval(saveTimer);
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id, isCompleted]);
@@ -269,7 +333,7 @@ export default function LessonPlayer({
           {/* ── Left: video column ── */}
           <div className="flex-1 min-w-0 flex flex-col">
             {/* Video */}
-            <div className="w-full bg-black aspect-video">
+            <div className="relative w-full bg-black aspect-video">
               {lesson.video_url ? (
                 <video
                   ref={videoRef}
@@ -285,6 +349,63 @@ export default function LessonPlayer({
                   <p className="font-cinzel text-xs uppercase tracking-widest text-gray-600">
                     Video próximamente
                   </p>
+                </div>
+              )}
+
+              {/* ── Auto-advance countdown overlay ── */}
+              {countdown !== null && nextLesson && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-10">
+                  {/* Countdown ring */}
+                  <div className="relative w-24 h-24 mb-6">
+                    <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
+                      {/* Track */}
+                      <circle
+                        cx="48" cy="48" r="42"
+                        fill="none"
+                        stroke="rgba(197,160,89,0.15)"
+                        strokeWidth="4"
+                      />
+                      {/* Progress — animates from full to empty over the second */}
+                      <circle
+                        cx="48" cy="48" r="42"
+                        fill="none"
+                        stroke="#C5A059"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeDasharray={`${2 * Math.PI * 42}`}
+                        strokeDashoffset={`${2 * Math.PI * 42 * (1 - countdown / 5)}`}
+                        style={{ transition: "stroke-dashoffset 0.9s linear" }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="font-cinzel text-3xl text-white">{countdown}</span>
+                    </div>
+                  </div>
+
+                  {/* Labels */}
+                  <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-2">
+                    Siguiente lección
+                  </p>
+                  <p className="font-crimson text-white text-lg text-center max-w-xs px-4 mb-8 leading-tight">
+                    {nextLesson.title}
+                  </p>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => router.push(`/academy/lesson/${nextLesson.slug}`)}
+                      className="flex items-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-6 py-3 hover:bg-[#d4b06a] transition"
+                    >
+                      <SkipForward className="w-4 h-4" />
+                      Continuar ahora
+                    </button>
+                    <button
+                      onClick={cancelCountdown}
+                      className="font-cinzel text-[10px] uppercase tracking-widest text-gray-400 hover:text-white transition px-4 py-3 border border-white/10 hover:border-white/30"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -331,26 +452,56 @@ export default function LessonPlayer({
                 </div>
               </div>
 
-              {/* Prev / Next navigation */}
-              <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/5">
-                {prevLesson ? (
-                  <Link
-                    href={`/academy/lesson/${prevLesson.slug}`}
-                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest text-gray-400 hover:text-[#C5A059] transition group"
+              {/* Prev / Next navigation + auto-advance toggle */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-5 pt-4 border-t border-white/5">
+                {/* Prev */}
+                <div className="flex-1">
+                  {prevLesson ? (
+                    <Link
+                      href={`/academy/lesson/${prevLesson.slug}`}
+                      className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest text-gray-400 hover:text-[#C5A059] transition group"
+                    >
+                      <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                      <span className="hidden sm:block max-w-[160px] truncate">
+                        {prevLesson.title}
+                      </span>
+                      <span className="sm:hidden">Anterior</span>
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
+                </div>
+
+                {/* Auto-advance toggle */}
+                {nextLesson && (
+                  <button
+                    onClick={toggleAutoAdvance}
+                    className="flex items-center gap-2 flex-shrink-0 group"
+                    title={autoAdvance ? "Reproducción automática activada" : "Reproducción automática desactivada"}
                   >
-                    <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                    <span className="hidden sm:block max-w-[160px] truncate">
-                      {prevLesson.title}
+                    <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition hidden sm:block">
+                      Autoplay
                     </span>
-                    <span className="sm:hidden">Anterior</span>
-                  </Link>
-                ) : (
-                  <div />
+                    {/* Toggle pill */}
+                    <div
+                      className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${
+                        autoAdvance ? "bg-[#C5A059]" : "bg-white/10"
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
+                          autoAdvance ? "translate-x-4" : "translate-x-0.5"
+                        }`}
+                      />
+                    </div>
+                  </button>
                 )}
+
+                {/* Next / Finish */}
                 {nextLesson ? (
                   <button
                     onClick={goToNext}
-                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-5 py-2.5 hover:bg-[#d4b06a] transition group"
+                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-5 py-2.5 hover:bg-[#d4b06a] transition group flex-shrink-0"
                   >
                     <span className="hidden sm:block max-w-[160px] truncate">
                       {nextLesson.title}
@@ -361,7 +512,7 @@ export default function LessonPlayer({
                 ) : (
                   <Link
                     href="/academy/dashboard"
-                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-5 py-2.5 hover:bg-[#d4b06a] transition"
+                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-5 py-2.5 hover:bg-[#d4b06a] transition flex-shrink-0"
                   >
                     Finalizar curso →
                   </Link>

@@ -82,27 +82,81 @@ export default function AcademyLandingPage() {
             </div>
           </div>
 
-          {/* Instructor card */}
+          {/* Course image card with scrollwork corners */}
           <div className="relative">
-            <div className="relative bg-[#0a1628] border border-[#C5A059]/20 overflow-hidden">
-              <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-[#C5A059]/60" />
-              <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-[#C5A059]/60" />
-              <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-[#C5A059]/60" />
-              <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-[#C5A059]/60" />
-              <div className="relative h-64 overflow-hidden">
-                <img
-                  src="https://media.juanpabloloaiza.com/images/jpl-newwsp.jpeg"
-                  alt="Juan Pablo Loaiza"
-                  className="w-full h-full object-cover object-top"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-transparent to-transparent" />
+            {/* Ambient glow */}
+            <div className="pointer-events-none absolute -inset-4 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(197,160,89,0.06),transparent)]" />
+
+            <div className="relative bg-[#0a1628] border border-[#C5A059]/20">
+
+              {/* ── Scrollwork corners ── */}
+              {/* Top-left */}
+              <div className="absolute -top-px -left-px">
+                <div className="absolute top-0 left-0 w-14 h-[2px] bg-gradient-to-r from-[#C5A059] to-transparent" />
+                <div className="absolute top-0 left-0 w-[2px] h-14 bg-gradient-to-b from-[#C5A059] to-transparent" />
+                <div className="absolute top-[7px] left-[7px] w-7 h-px bg-[#C5A059]/35" />
+                <div className="absolute top-[7px] left-[7px] w-px h-7 bg-[#C5A059]/35" />
+                <div className="absolute top-[3px] left-[3px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
               </div>
-              <div className="p-6">
-                <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Tu instructor</p>
-                <h3 className="font-cinzel text-lg text-white mb-2">Juan Pablo Loaiza</h3>
-                <p className="font-crimson text-gray-400 text-sm leading-relaxed">
-                  Terapeuta Holístico con más de 18 años de experiencia en Hipnosis Clínica y Regresión a Vidas Pasadas. Ha acompañado a miles de personas en su proceso de sanación espiritual en todo el mundo.
-                </p>
+              {/* Top-right */}
+              <div className="absolute -top-px -right-px">
+                <div className="absolute top-0 right-0 w-14 h-[2px] bg-gradient-to-l from-[#C5A059] to-transparent" />
+                <div className="absolute top-0 right-0 w-[2px] h-14 bg-gradient-to-b from-[#C5A059] to-transparent" />
+                <div className="absolute top-[7px] right-[7px] w-7 h-px bg-[#C5A059]/35" />
+                <div className="absolute top-[7px] right-[7px] w-px h-7 bg-[#C5A059]/35" />
+                <div className="absolute top-[3px] right-[3px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
+              </div>
+              {/* Bottom-left */}
+              <div className="absolute -bottom-px -left-px">
+                <div className="absolute bottom-0 left-0 w-14 h-[2px] bg-gradient-to-r from-[#C5A059] to-transparent" />
+                <div className="absolute bottom-0 left-0 w-[2px] h-14 bg-gradient-to-t from-[#C5A059] to-transparent" />
+                <div className="absolute bottom-[7px] left-[7px] w-7 h-px bg-[#C5A059]/35" />
+                <div className="absolute bottom-[7px] left-[7px] w-px h-7 bg-[#C5A059]/35" />
+                <div className="absolute bottom-[3px] left-[3px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
+              </div>
+              {/* Bottom-right */}
+              <div className="absolute -bottom-px -right-px">
+                <div className="absolute bottom-0 right-0 w-14 h-[2px] bg-gradient-to-l from-[#C5A059] to-transparent" />
+                <div className="absolute bottom-0 right-0 w-[2px] h-14 bg-gradient-to-t from-[#C5A059] to-transparent" />
+                <div className="absolute bottom-[7px] right-[7px] w-7 h-px bg-[#C5A059]/35" />
+                <div className="absolute bottom-[7px] right-[7px] w-px h-7 bg-[#C5A059]/35" />
+                <div className="absolute bottom-[3px] right-[3px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
+              </div>
+
+              {/* Course image */}
+              <div className="relative overflow-hidden aspect-[4/3]">
+                <img
+                  src="https://media.juanpabloloaiza.com/images/CursoHipnosis.jpg"
+                  alt="Curso de Hipnosis Regresiva"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/20 to-transparent" />
+              </div>
+
+              {/* Scrollwork divider */}
+              <div className="flex items-center gap-2 px-6 py-3 border-t border-[#C5A059]/10">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#C5A059]/40" />
+                <div className="w-1 h-1 bg-[#C5A059]/50 rotate-45" />
+                <div className="w-2 h-2 border border-[#C5A059]/60 rotate-45" />
+                <div className="w-1 h-1 bg-[#C5A059]/50 rotate-45" />
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#C5A059]/40" />
+              </div>
+
+              {/* Course info */}
+              <div className="px-6 pb-6">
+                <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Curso de preparación</p>
+                <h3 className="font-cinzel text-lg text-white mb-3">Regresión a Vidas Pasadas</h3>
+                <div className="flex flex-wrap gap-5 text-xs font-cinzel text-gray-500 uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[#C5A059]">✦</span> {TOTAL_LESSONS} lecciones
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[#C5A059]">✦</span> ~{totalMinutes} minutos
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[#C5A059]">✦</span> Gratuito
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -151,33 +205,77 @@ export default function AcademyLandingPage() {
 
       {/* ── Instructor full bio ── */}
       <section className="py-20 border-t border-[#C5A059]/10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 grid md:grid-cols-3 gap-12 items-start">
-          <div className="md:col-span-1">
-            <div className="relative overflow-hidden border border-[#C5A059]/20">
-              <img
-                src="https://media.juanpabloloaiza.com/images/jpl-newwsp.jpeg"
-                alt="Juan Pablo Loaiza"
-                className="w-full aspect-square object-cover object-top"
-              />
-            </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          {/* Section label */}
+          <div className="text-center mb-12">
+            <span className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]">Tu instructor</span>
           </div>
-          <div className="md:col-span-2">
-            <span className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]">Instructor</span>
-            <h2 className="font-cinzel text-2xl text-white mt-2 mb-4">Juan Pablo Loaiza</h2>
-            <div className="w-12 h-px bg-[#C5A059] mb-6" />
-            <p className="font-crimson text-gray-300 text-base leading-relaxed mb-4">
-              {COURSE_META.instructor_bio}
-            </p>
-            <p className="font-crimson text-gray-400 text-base leading-relaxed mb-6">
-              Este curso gratuito es el punto de partida para todos sus pacientes, diseñado para eliminar el miedo, responder las preguntas más frecuentes y preparar la mente y el espíritu para una experiencia de regresión profunda y transformadora.
-            </p>
-            <Link
-              href="https://www.juanpabloloaiza.com"
-              target="_blank"
-              className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 px-4 py-2 hover:bg-[#C5A059]/10 transition"
-            >
-              Ver sitio oficial
-            </Link>
+
+          <div className="grid md:grid-cols-3 gap-12 items-start">
+            {/* Instructor photo with scrollwork */}
+            <div className="md:col-span-1 relative">
+              <div className="relative bg-[#0a1628] border border-[#C5A059]/20">
+                {/* Scrollwork corners */}
+                <div className="absolute -top-px -left-px">
+                  <div className="absolute top-0 left-0 w-10 h-[2px] bg-gradient-to-r from-[#C5A059] to-transparent" />
+                  <div className="absolute top-0 left-0 w-[2px] h-10 bg-gradient-to-b from-[#C5A059] to-transparent" />
+                  <div className="absolute top-[5px] left-[5px] w-5 h-px bg-[#C5A059]/35" />
+                  <div className="absolute top-[5px] left-[5px] w-px h-5 bg-[#C5A059]/35" />
+                  <div className="absolute top-[2px] left-[2px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
+                </div>
+                <div className="absolute -top-px -right-px">
+                  <div className="absolute top-0 right-0 w-10 h-[2px] bg-gradient-to-l from-[#C5A059] to-transparent" />
+                  <div className="absolute top-0 right-0 w-[2px] h-10 bg-gradient-to-b from-[#C5A059] to-transparent" />
+                  <div className="absolute top-[5px] right-[5px] w-5 h-px bg-[#C5A059]/35" />
+                  <div className="absolute top-[5px] right-[5px] w-px h-5 bg-[#C5A059]/35" />
+                  <div className="absolute top-[2px] right-[2px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
+                </div>
+                <div className="absolute -bottom-px -left-px">
+                  <div className="absolute bottom-0 left-0 w-10 h-[2px] bg-gradient-to-r from-[#C5A059] to-transparent" />
+                  <div className="absolute bottom-0 left-0 w-[2px] h-10 bg-gradient-to-t from-[#C5A059] to-transparent" />
+                  <div className="absolute bottom-[5px] left-[5px] w-5 h-px bg-[#C5A059]/35" />
+                  <div className="absolute bottom-[5px] left-[5px] w-px h-5 bg-[#C5A059]/35" />
+                  <div className="absolute bottom-[2px] left-[2px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
+                </div>
+                <div className="absolute -bottom-px -right-px">
+                  <div className="absolute bottom-0 right-0 w-10 h-[2px] bg-gradient-to-l from-[#C5A059] to-transparent" />
+                  <div className="absolute bottom-0 right-0 w-[2px] h-10 bg-gradient-to-t from-[#C5A059] to-transparent" />
+                  <div className="absolute bottom-[5px] right-[5px] w-5 h-px bg-[#C5A059]/35" />
+                  <div className="absolute bottom-[5px] right-[5px] w-px h-5 bg-[#C5A059]/35" />
+                  <div className="absolute bottom-[2px] right-[2px] w-[5px] h-[5px] rotate-45 border border-[#C5A059]/70" />
+                </div>
+                <img
+                  src="https://media.juanpabloloaiza.com/images/jpl-newwsp.jpeg"
+                  alt="Juan Pablo Loaiza"
+                  className="w-full aspect-square object-cover object-top"
+                />
+              </div>
+            </div>
+
+            {/* Bio text */}
+            <div className="md:col-span-2">
+              <h2 className="font-cinzel text-2xl text-white mb-2">Juan Pablo Loaiza</h2>
+              {/* Scrollwork divider */}
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-1 h-1 bg-[#C5A059] rotate-45" />
+                <div className="w-2 h-2 border border-[#C5A059]/70 rotate-45" />
+                <div className="w-1 h-1 bg-[#C5A059] rotate-45" />
+                <div className="flex-1 h-px bg-gradient-to-r from-[#C5A059]/60 to-transparent" />
+              </div>
+              <p className="font-crimson text-gray-300 text-base leading-relaxed mb-4">
+                {COURSE_META.instructor_bio}
+              </p>
+              <p className="font-crimson text-gray-400 text-base leading-relaxed mb-6">
+                Este curso gratuito es el punto de partida para todos sus pacientes, diseñado para eliminar el miedo, responder las preguntas más frecuentes y preparar la mente y el espíritu para una experiencia de regresión profunda y transformadora.
+              </p>
+              <Link
+                href="https://www.juanpabloloaiza.com"
+                target="_blank"
+                className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 px-4 py-2 hover:bg-[#C5A059]/10 transition"
+              >
+                Ver sitio oficial
+              </Link>
+            </div>
           </div>
         </div>
       </section>

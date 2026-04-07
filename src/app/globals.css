@@ -17,6 +17,7 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 html {
@@ -120,4 +121,53 @@ body {
 
 .animate-glow {
   animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Font rendering — pantallas no-retina (Samsung y similares)
+   En @layer base para que las utilidades de Tailwind sigan
+   teniendo mayor prioridad donde ya están definidas.
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+
+  /* Cinzel — títulos, labels, nav, UI chrome */
+  .font-cinzel {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-weight: 400;       /* nunca inferior a 400 */
+    letter-spacing: 0.04em; /* las utilidades tracking-* lo sobreescriben */
+  }
+
+  /* Crimson Text — párrafos, subtítulos, texto largo */
+  .font-crimson {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.65;
+    font-size: 1rem;        /* base 16 px; las utilidades text-* lo sobreescriben */
+  }
+
+  /* Textos pequeños de Crimson sobre fondo oscuro — mínimo 14 px legible */
+  .font-crimson.text-xs,
+  .font-crimson.text-[0\.6rem],
+  .font-crimson.text-[0\.65rem],
+  .font-crimson.text-[0\.7rem],
+  .font-crimson.text-[0\.75rem] {
+    font-size: 0.875rem;    /* sube a 14 px como mínimo */
+  }
+
+  /* Colores de texto sobre fondos oscuros — mínimo #C8C8C8 */
+  /* Aplica solo a las clases de color gris más tenue que se usan sobre dark */
+  .font-crimson.text-gray-600,
+  .font-cinzel.text-gray-600 {
+    color: #a3a3a3; /* sube de gray-600 (#4B5563) a un tono legible */
+  }
+
+  .font-crimson.text-gray-500,
+  .font-cinzel.text-gray-500 {
+    color: #c8c8c8; /* mínimo requerido sobre fondos < #1a1a1a */
+  }
 }
