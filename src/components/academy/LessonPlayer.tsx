@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -76,6 +76,7 @@ export default function LessonPlayer({
   initialNote,
 }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -98,12 +99,20 @@ export default function LessonPlayer({
   // Progress save ref (avoid stale closure)
   const saveProgressRef = useRef({ watchSeconds: 0, saved: false });
 
-  // ── Auto-advance state ─────────────────────────────────────────────────────
+  // ── Auto-advance + autoplay state ─────────────────────────────────────────
   const [autoAdvance, setAutoAdvance] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const stored = localStorage.getItem("academy_autoadvance");
     return stored === null ? true : stored === "true";
   });
+  const [autoPlay, setAutoPlay] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem("academy_autoplay");
+    return stored === null ? true : stored === "true";
+  });
+  const autoPlayRef = useRef(autoPlay);
+  useEffect(() => { autoPlayRef.current = autoPlay; }, [autoPlay]);
+
   const [countdown, setCountdown] = useState<number | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Refs so video event handlers always see latest values
@@ -111,6 +120,25 @@ export default function LessonPlayer({
   const nextLessonRef = useRef(nextLesson);
   useEffect(() => { autoAdvanceRef.current = autoAdvance; }, [autoAdvance]);
   useEffect(() => { nextLessonRef.current = nextLesson; }, [nextLesson]);
+
+  // ── Autoplay on arrival (from autonext navigation) ────────────────────────
+  useEffect(() => {
+    if (searchParams.get("autoplay") !== "1") return;
+    const video = videoRef.current;
+    if (!video) return;
+    // Wait for enough metadata to be loaded before playing
+    const tryPlay = () => {
+      video.play().catch(() => {
+        // Browser still blocked — user will need to press play manually
+      });
+    };
+    if (video.readyState >= 1) {
+      tryPlay();
+    } else {
+      video.addEventListener("loadedmetadata", tryPlay, { once: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Trigger course completion (email + certificate) ────────────────────────
 
@@ -144,7 +172,8 @@ export default function LessonPlayer({
           clearInterval(countdownIntervalRef.current!);
           countdownIntervalRef.current = null;
           if (autoAdvanceRef.current && nextLessonRef.current) {
-            router.push(`/academy/lesson/${nextLessonRef.current.slug}`);
+            const url = `/academy/lesson/${nextLessonRef.current.slug}${autoPlayRef.current ? "?autoplay=1" : ""}`;
+            router.push(url);
           }
           return null;
         }
@@ -158,13 +187,20 @@ export default function LessonPlayer({
       const next = !prev;
       localStorage.setItem("academy_autoadvance", String(next));
       if (!next) {
-        // Turn off — cancel any running countdown
         if (countdownIntervalRef.current) {
           clearInterval(countdownIntervalRef.current);
           countdownIntervalRef.current = null;
         }
         setCountdown(null);
       }
+      return next;
+    });
+  }, []);
+
+  const toggleAutoPlay = useCallback(() => {
+    setAutoPlay((prev) => {
+      const next = !prev;
+      localStorage.setItem("academy_autoplay", String(next));
       return next;
     });
   }, []);
@@ -394,7 +430,10 @@ export default function LessonPlayer({
                   {/* Actions */}
                   <div className="flex items-center gap-4">
                     <button
-                      onClick={() => router.push(`/academy/lesson/${nextLesson.slug}`)}
+                      onClick={() => {
+                        cancelCountdown();
+                        router.push(`/academy/lesson/${nextLesson.slug}${autoPlay ? "?autoplay=1" : ""}`);
+                      }}
                       className="flex items-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-6 py-3 hover:bg-[#d4b06a] transition"
                     >
                       <SkipForward className="w-4 h-4" />
@@ -474,29 +513,38 @@ export default function LessonPlayer({
                   )}
                 </div>
 
-                {/* Auto-advance toggle */}
+                {/* Toggles: Autonext + Autoplay */}
                 {nextLesson && (
-                  <button
-                    onClick={toggleAutoAdvance}
-                    className="flex items-center gap-2 flex-shrink-0 group"
-                    title={autoAdvance ? "Reproducción automática activada" : "Reproducción automática desactivada"}
-                  >
-                    <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition hidden sm:block">
-                      Autoplay
-                    </span>
-                    {/* Toggle pill */}
-                    <div
-                      className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${
-                        autoAdvance ? "bg-[#C5A059]" : "bg-white/10"
-                      }`}
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    {/* Autonext */}
+                    <button
+                      onClick={toggleAutoAdvance}
+                      className="flex items-center gap-1.5 group"
+                      title={autoAdvance ? "Siguiente automático: activado" : "Siguiente automático: desactivado"}
                     >
-                      <div
-                        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
-                          autoAdvance ? "translate-x-4" : "translate-x-0.5"
-                        }`}
-                      />
-                    </div>
-                  </button>
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition hidden sm:block">
+                        Autonext
+                      </span>
+                      <div className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${autoAdvance ? "bg-[#C5A059]" : "bg-white/10"}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${autoAdvance ? "translate-x-4" : "translate-x-0.5"}`} />
+                      </div>
+                    </button>
+
+                    {/* Autoplay — solo relevante si autonext está activo */}
+                    <button
+                      onClick={toggleAutoPlay}
+                      disabled={!autoAdvance}
+                      className="flex items-center gap-1.5 group disabled:opacity-30"
+                      title={autoPlay ? "Autoplay: activado" : "Autoplay: desactivado"}
+                    >
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition hidden sm:block">
+                        Autoplay
+                      </span>
+                      <div className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${autoPlay && autoAdvance ? "bg-[#C5A059]" : "bg-white/10"}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${autoPlay && autoAdvance ? "translate-x-4" : "translate-x-0.5"}`} />
+                      </div>
+                    </button>
+                  </div>
                 )}
 
                 {/* Next / Finish */}
