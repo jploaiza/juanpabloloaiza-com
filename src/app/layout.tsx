@@ -18,13 +18,13 @@ const crimson = Crimson_Text({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://juanpabloloaiza.com"),
-  title: "Regresa a tus Vidas Pasadas — Hipnoterapia de Regresión | Juan Pablo Loaiza",
-  description: "Hipnoterapia de regresión a vidas pasadas y liberación de entidades espirituales. Descubre el origen de tus conflictos y transforma tu vida. Sesiones vía Zoom en todo el mundo.",
-  keywords: "regresión a vidas pasadas, hipnoterapia, liberación espiritual, traumas, sanación, hipnoterapia online, hipnoterapeuta, vidas pasadas zoom",
+  title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
+  description: "Hipnosis Terapéutica de regresión a vidas pasadas y liberación de entidades espirituales. Descubre el origen de tus conflictos y transforma tu vida. Sesiones vía Zoom en todo el mundo.",
+  keywords: "regresión a vidas pasadas, hipnosis terapéutica, liberación espiritual, traumas, sanación, hipnosis terapéutica online, hipnoterapeuta, vidas pasadas zoom",
   alternates: { canonical: "https://juanpabloloaiza.com" },
   openGraph: {
-    title: "Regresa a tus Vidas Pasadas — Hipnoterapia de Regresión | Juan Pablo Loaiza",
-    description: "Hipnoterapia especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones vía Zoom en todo el mundo.",
+    title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
+    description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones vía Zoom en todo el mundo.",
     url: "https://juanpabloloaiza.com",
     siteName: "Juan Pablo Loaiza",
     locale: "es_ES",
@@ -34,19 +34,23 @@ export const metadata: Metadata = {
         url: "https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu",
         width: 1200,
         height: 630,
-        alt: "Juan Pablo Loaiza — Hipnoterapia de Regresión a Vidas Pasadas",
+        alt: "Juan Pablo Loaiza — Hipnosis Terapéutica de Regresión a Vidas Pasadas",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Regresa a tus Vidas Pasadas — Hipnoterapia de Regresión | Juan Pablo Loaiza",
-    description: "Hipnoterapia especializada en regresión a vidas pasadas y liberación de entidades espirituales.",
+    title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
+    description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales.",
     images: ["https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"],
   },
   icons: {
-    icon: "/assets/icon.png",
-    apple: "/assets/icon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }],
+    shortcut: "/favicon.ico",
   },
 };
 
@@ -58,8 +62,8 @@ export default function RootLayout({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    name: "Juan Pablo Loaiza - Hipnoterapia de Regresión a Vidas Pasadas",
-    description: "Hipnoterapia especializada en regresión a vidas pasadas y liberación de entidades espirituales",
+    name: "Juan Pablo Loaiza - Hipnosis Terapéutica de Regresión a Vidas Pasadas",
+    description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales",
     url: "https://juanpabloloaiza.com",
     telephone: "+56962081884",
     email: "contacto@juanpabloloaiza.com",
@@ -98,7 +102,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <meta name="google-site-verification" content="your-verification-code" />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
       </head>
       <body className="min-h-full flex flex-col bg-black text-white">
         {children}

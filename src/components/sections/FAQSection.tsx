@@ -80,10 +80,11 @@ const faqs = [
 export default function FAQSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hasInteracted = useRef(false);
 
   // Stop every video on the page, then auto-play the selected one
   const handleSelect = (index: number) => {
-    // Pause all videos on the page
+    hasInteracted.current = true;
     if (typeof document !== "undefined") {
       document.querySelectorAll("video").forEach((v) => {
         v.pause();
@@ -93,13 +94,14 @@ export default function FAQSection() {
     setActiveIndex(index);
   };
 
-  // Auto-play after the video element re-mounts with the new src
+  // Auto-play only when user has explicitly clicked a question
   useEffect(() => {
+    if (!hasInteracted.current) return;
     const timer = setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.play().catch(() => {});
       }
-    }, 80); // small delay to let the video element settle
+    }, 80);
     return () => clearTimeout(timer);
   }, [activeIndex]);
 

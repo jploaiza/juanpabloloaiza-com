@@ -19,7 +19,7 @@ export default function Footer() {
             className="w-auto h-16 object-contain opacity-90"
           />
           <p className="text-gray-400 font-crimson text-base leading-relaxed">
-            Hipnoterapia especializada en regresión a vidas pasadas y liberación espiritual para quienes están listos a sanar.
+            Hipnosis terapéutica especializada en regresión a vidas pasadas y liberación espiritual para quienes están listos a sanar.
           </p>
         </div>
 
@@ -56,7 +56,7 @@ export default function Footer() {
           <ul className="space-y-3">
             {[
               "Regresión a Vidas Pasadas",
-              "Hipnoterapia Transformacional",
+              "Hipnosis Terapéutica",
               "Liberación de Entidades",
             ].map((service) => (
               <li key={service}>

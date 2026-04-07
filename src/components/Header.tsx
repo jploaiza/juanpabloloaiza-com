@@ -9,9 +9,9 @@ const navItems = [
   { label: "EL PROCESO", href: "/#ComoFunciona" },
   { label: "EL ORIGEN", href: "/#origen" },
   { label: "VIDAS PASADAS", href: "/#QueEsTRVP" },
+  { label: "ENTIDADES ESPIRITUALES", href: "/#liberacion" },
   { label: "PREGUNTAS", href: "/#PreguntasFrecuentes" },
   { label: "BLOG", href: "/#blog" },
-  { label: "ENTIDADES ESPIRITUALES", href: "/#liberacion" },
 ];
 
 export default function Header() {
@@ -45,7 +45,7 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 md:h-24">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-4 group cursor-pointer">
+          <a href="https://www.juanpabloloaiza.com/" className="flex items-center gap-4 group cursor-pointer">
             <Image
               src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png"
               alt="Juan Pablo Loaiza"

@@ -138,7 +138,7 @@ export default function VideosContent() {
         <motion.div variants={itemVariants} className="mb-10">
           <h2 className="text-3xl md:text-4xl text-white mb-3 font-cinzel">Preguntas Frecuentes</h2>
           <div className="w-12 h-[1px] bg-[#C5A059]/50 mb-4"></div>
-          <p className="text-gray-300 font-crimson text-lg max-w-2xl">Resuelve tus dudas sobre la hipnoterapia de regresión a vidas pasadas.</p>
+          <p className="text-gray-300 font-crimson text-lg max-w-2xl">Resuelve tus dudas sobre la hipnosis terapéutica de regresión a vidas pasadas.</p>
         </motion.div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {qaVideos.map((v) => <VideoCard key={v.id} video={v} />)}

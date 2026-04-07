@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import HeraldFrame from "@/components/HeraldFrame";
-import { Lightbulb, Heart, Zap, Handshake, Star, ChevronRight } from "lucide-react";
+import { Lightbulb, Heart, Zap, Handshake, Star, ChevronRight, Shield } from "lucide-react";
 
 export default function EntityLiberationSection() {
   const containerVariants = {
@@ -38,6 +38,7 @@ export default function EntityLiberationSection() {
     { icon: "zap", title: "Energía Renovada" },
     { icon: "handshake", title: "Mejora en las Relaciones" },
     { icon: "star", title: "Reconexión Espiritual" },
+    { icon: "shield", title: "Protección Energética" },
   ];
 
   return (
@@ -124,6 +125,7 @@ export default function EntityLiberationSection() {
                   {benefit.icon === "zap" && <Zap size={16} className="text-[#C5A059]" />}
                   {benefit.icon === "handshake" && <Handshake size={16} className="text-[#C5A059]" />}
                   {benefit.icon === "star" && <Star size={16} className="text-[#C5A059]" />}
+                  {benefit.icon === "shield" && <Shield size={16} className="text-[#C5A059]" />}
                     <span className="text-gray-300 text-base font-crimson">{benefit.title}</span>
                   </div>
                 ))}

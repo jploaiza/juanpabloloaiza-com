@@ -11,7 +11,7 @@ export default function HeroSection() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: "url('https://res.cloudinary.com/dvudfdhoi/image/upload/f_auto,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu')",
-          opacity: 0.25,
+          opacity: 0.45,
         }}
       />
 
@@ -30,7 +30,7 @@ export default function HeroSection() {
           transition={{ duration: 1.5, ease: "easeOut" }}
         >
           <span className="text-[#C5A059] font-cinzel font-semibold uppercase tracking-[0.2em] text-[10px] sm:text-[11px] md:text-[13px] border border-[#C5A059]/30 py-2 px-4 sm:px-6 rounded-sm">
-            Hipnoterapia · Regresión a Vidas Pasadas
+            Hipnosis Terapéutica · Regresión a Vidas Pasadas
           </span>
         </motion.div>
 

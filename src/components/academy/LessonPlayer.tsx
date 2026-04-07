@@ -1,0 +1,660 @@
+"use client";
+
+import { useRef, useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  Circle,
+  PlayCircle,
+  Menu,
+  X,
+  BookOpen,
+  MessageCircle,
+  Check,
+  LayoutDashboard,
+  Loader2,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { formatDuration } from "@/lib/academy-data";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface LessonRow {
+  id: string;
+  slug: string;
+  title: string;
+  duration_seconds: number;
+  video_url: string | null;
+  order_index: number;
+  is_published: boolean;
+}
+
+interface SectionRow {
+  id: string;
+  title: string;
+  order_index: number;
+  lessons: LessonRow[];
+}
+
+interface ProgressEntry {
+  lesson_id: string;
+  watch_seconds: number;
+  duration_seconds: number;
+  is_completed: boolean;
+}
+
+interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  lesson: any;
+  sections: SectionRow[];
+  progressMap: Record<string, ProgressEntry>;
+  prevLesson: LessonRow | null;
+  nextLesson: LessonRow | null;
+  userId: string;
+  initialNote: string;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const SAVE_INTERVAL_MS = 5000;
+const COMPLETE_THRESHOLD = 0.9; // 90% watched → auto-complete
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+export default function LessonPlayer({
+  lesson,
+  sections,
+  progressMap,
+  prevLesson,
+  nextLesson,
+  userId,
+  initialNote,
+}: Props) {
+  const router = useRouter();
+  const supabase = createClient();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // UI state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"notes" | "qa">("notes");
+
+  // Progress state
+  const [isCompleted, setIsCompleted] = useState(
+    progressMap[lesson.id]?.is_completed ?? false
+  );
+  const [markingComplete, setMarkingComplete] = useState(false);
+
+  // Notes state
+  const [note, setNote] = useState(initialNote);
+  const [noteSaved, setNoteSaved] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
+  const noteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Progress save ref (avoid stale closure)
+  const saveProgressRef = useRef({ watchSeconds: 0, saved: false });
+
+  // ── Trigger course completion (email + certificate) ────────────────────────
+
+  const triggerCourseComplete = useCallback(async () => {
+    if (!nextLesson) {
+      // This is the last lesson — fire completion
+      await fetch("/api/academy/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId: lesson.id, courseId: lesson.course_id }),
+      });
+    }
+  }, [lesson.id, lesson.course_id, nextLesson]);
+
+  // ── Save video progress ────────────────────────────────────────────────────
+
+  const saveProgress = useCallback(
+    async (watchSeconds: number, completed: boolean) => {
+      await supabase.from("lesson_progress").upsert(
+        {
+          user_id: userId,
+          lesson_id: lesson.id,
+          course_id: lesson.course_id,
+          watch_seconds: watchSeconds,
+          duration_seconds: lesson.duration_seconds,
+          is_completed: completed,
+          completed_at: completed ? new Date().toISOString() : null,
+          last_watched_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,lesson_id" }
+      );
+    },
+    [supabase, userId, lesson.id, lesson.course_id, lesson.duration_seconds]
+  );
+
+  // ── Video event handlers ───────────────────────────────────────────────────
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Restore last position
+    const lastSeconds = progressMap[lesson.id]?.watch_seconds ?? 0;
+    if (lastSeconds > 5) {
+      video.currentTime = lastSeconds;
+    }
+
+    let saveTimer: ReturnType<typeof setInterval>;
+
+    const onTimeUpdate = () => {
+      saveProgressRef.current.watchSeconds = Math.floor(video.currentTime);
+      // Auto-complete
+      if (
+        !isCompleted &&
+        video.duration > 0 &&
+        video.currentTime / video.duration >= COMPLETE_THRESHOLD
+      ) {
+        setIsCompleted(true);
+        saveProgress(Math.floor(video.currentTime), true);
+      }
+    };
+
+    const onPause = () => {
+      saveProgress(Math.floor(video.currentTime), isCompleted);
+    };
+
+    const onEnded = () => {
+      setIsCompleted(true);
+      saveProgress(Math.floor(video.duration), true);
+      triggerCourseComplete();
+    };
+
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("ended", onEnded);
+
+    // Periodic save every 5s during playback
+    saveTimer = setInterval(() => {
+      if (!video.paused && !video.ended) {
+        saveProgress(Math.floor(video.currentTime), isCompleted);
+      }
+    }, SAVE_INTERVAL_MS);
+
+    return () => {
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("ended", onEnded);
+      clearInterval(saveTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson.id, isCompleted]);
+
+  // ── Manual mark complete ───────────────────────────────────────────────────
+
+  const handleMarkComplete = async () => {
+    setMarkingComplete(true);
+    const watchSeconds = videoRef.current
+      ? Math.floor(videoRef.current.currentTime)
+      : lesson.duration_seconds;
+    await saveProgress(watchSeconds, true);
+    setIsCompleted(true);
+    await triggerCourseComplete();
+    setMarkingComplete(false);
+  };
+
+  // ── Notes auto-save ────────────────────────────────────────────────────────
+
+  const handleNoteChange = (value: string) => {
+    setNote(value);
+    setNoteSaved(false);
+    if (noteTimerRef.current) clearTimeout(noteTimerRef.current);
+    noteTimerRef.current = setTimeout(async () => {
+      setSavingNote(true);
+      await supabase.from("notes").upsert(
+        { user_id: userId, lesson_id: lesson.id, content: value, updated_at: new Date().toISOString() },
+        { onConflict: "user_id,lesson_id" }
+      );
+      setSavingNote(false);
+      setNoteSaved(true);
+      setTimeout(() => setNoteSaved(false), 2000);
+    }, 1200);
+  };
+
+  // ── Navigate to next lesson ────────────────────────────────────────────────
+
+  const goToNext = () => {
+    if (nextLesson) router.push(`/academy/lesson/${nextLesson.slug}`);
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  return (
+    <>
+      {/* Sidebar overlay (mobile) */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <main className="pt-16 min-h-screen flex flex-col">
+        {/* ── Top breadcrumb bar ── */}
+        <div className="border-b border-white/5 bg-[#020617]/80 backdrop-blur-sm">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-10 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link
+                href="/academy/dashboard"
+                className="text-gray-500 hover:text-[#C5A059] transition flex-shrink-0"
+                aria-label="Dashboard"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+              </Link>
+              <span className="text-gray-600 text-xs">/</span>
+              <span className="font-cinzel text-[10px] uppercase tracking-widest text-gray-400 truncate">
+                {lesson.title}
+              </span>
+            </div>
+            {/* Mobile sidebar toggle */}
+            <button
+              className="lg:hidden text-[#C5A059] p-1"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Ver lecciones"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* ── Main layout: video + sidebar ── */}
+        <div className="flex flex-1 max-w-[1400px] mx-auto w-full">
+          {/* ── Left: video column ── */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            {/* Video */}
+            <div className="w-full bg-black aspect-video">
+              {lesson.video_url ? (
+                <video
+                  ref={videoRef}
+                  src={lesson.video_url}
+                  controls
+                  playsInline
+                  className="w-full h-full"
+                  preload="metadata"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-4">
+                  <PlayCircle className="w-16 h-16 text-[#C5A059]/30" />
+                  <p className="font-cinzel text-xs uppercase tracking-widest text-gray-600">
+                    Video próximamente
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* ── Lesson info + navigation ── */}
+            <div className="px-4 sm:px-6 py-5 border-b border-white/5">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                <div className="flex-1 min-w-0">
+                  {/* Section label */}
+                  {lesson.section && (
+                    <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/70 mb-1">
+                      {lesson.section.title}
+                    </p>
+                  )}
+                  <h1 className="font-cinzel text-lg sm:text-xl text-white leading-snug">
+                    {lesson.title}
+                  </h1>
+                  <p className="font-crimson text-sm text-gray-500 mt-1">
+                    {formatDuration(lesson.duration_seconds)} min
+                  </p>
+                </div>
+
+                {/* Completion badge + button */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  {isCompleted ? (
+                    <span className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest text-emerald-400">
+                      <CheckCircle className="w-4 h-4" />
+                      Completada
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleMarkComplete}
+                      disabled={markingComplete}
+                      className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest border border-[#C5A059]/40 text-[#C5A059] px-4 py-2 hover:bg-[#C5A059]/10 transition disabled:opacity-50"
+                    >
+                      {markingComplete ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5" />
+                      )}
+                      Marcar completa
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Prev / Next navigation */}
+              <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/5">
+                {prevLesson ? (
+                  <Link
+                    href={`/academy/lesson/${prevLesson.slug}`}
+                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest text-gray-400 hover:text-[#C5A059] transition group"
+                  >
+                    <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                    <span className="hidden sm:block max-w-[160px] truncate">
+                      {prevLesson.title}
+                    </span>
+                    <span className="sm:hidden">Anterior</span>
+                  </Link>
+                ) : (
+                  <div />
+                )}
+                {nextLesson ? (
+                  <button
+                    onClick={goToNext}
+                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-5 py-2.5 hover:bg-[#d4b06a] transition group"
+                  >
+                    <span className="hidden sm:block max-w-[160px] truncate">
+                      {nextLesson.title}
+                    </span>
+                    <span className="sm:hidden">Siguiente</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                ) : (
+                  <Link
+                    href="/academy/dashboard"
+                    className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-5 py-2.5 hover:bg-[#d4b06a] transition"
+                  >
+                    Finalizar curso →
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* ── Tabs: Notes & Q&A ── */}
+            <div className="flex-1 px-4 sm:px-6 py-5">
+              <div className="flex gap-6 mb-5 border-b border-white/5">
+                {(["notes", "qa"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest pb-3 border-b-2 transition -mb-px ${
+                      activeTab === tab
+                        ? "border-[#C5A059] text-[#C5A059]"
+                        : "border-transparent text-gray-500 hover:text-gray-300"
+                    }`}
+                  >
+                    {tab === "notes" ? (
+                      <>
+                        <BookOpen className="w-3.5 h-3.5" /> Mis notas
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="w-3.5 h-3.5" /> Preguntas
+                      </>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {activeTab === "notes" && (
+                <div className="relative">
+                  <textarea
+                    value={note}
+                    onChange={(e) => handleNoteChange(e.target.value)}
+                    placeholder="Escribe tus notas sobre esta lección..."
+                    rows={8}
+                    className="w-full bg-[#0a1628] border border-white/5 focus:border-[#C5A059]/30 text-gray-300 font-crimson text-sm p-4 resize-none outline-none transition placeholder:text-gray-600"
+                  />
+                  <div className="flex justify-end mt-2 h-4">
+                    {savingNote && (
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Guardando...
+                      </span>
+                    )}
+                    {noteSaved && (
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-emerald-500 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Guardado
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "qa" && (
+                <QAPanel
+                  supabase={supabase}
+                  userId={userId}
+                  lessonId={lesson.id}
+                  courseId={lesson.course_id}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* ── Right: sidebar (desktop) ── */}
+          <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-white/5 bg-[#020617] overflow-y-auto max-h-[calc(100vh-64px)] sticky top-16">
+            <CourseSidebar
+              sections={sections}
+              currentLessonId={lesson.id}
+              progressMap={progressMap}
+              onClose={() => setSidebarOpen(false)}
+            />
+          </aside>
+        </div>
+      </main>
+
+      {/* ── Mobile sidebar drawer ── */}
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-[#020617] border-l border-white/5 z-50 overflow-y-auto transition-transform duration-300 lg:hidden ${
+          sidebarOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-white/5">
+          <span className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059]">
+            Contenido del curso
+          </span>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="text-gray-400 hover:text-white p-1"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <CourseSidebar
+          sections={sections}
+          currentLessonId={lesson.id}
+          progressMap={progressMap}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </div>
+    </>
+  );
+}
+
+// ── Course Sidebar ─────────────────────────────────────────────────────────────
+
+function CourseSidebar({
+  sections,
+  currentLessonId,
+  progressMap,
+  onClose,
+}: {
+  sections: SectionRow[];
+  currentLessonId: string;
+  progressMap: Record<string, ProgressEntry>;
+  onClose: () => void;
+}) {
+  return (
+    <div className="py-4">
+      {sections.map((section) => {
+        const lessons = [...(section.lessons ?? [])]
+          .filter((l) => l.is_published)
+          .sort((a, b) => a.order_index - b.order_index);
+        const sectionCompleted = lessons.filter(
+          (l) => progressMap[l.id]?.is_completed
+        ).length;
+
+        return (
+          <div key={section.id} className="mb-2">
+            {/* Section header */}
+            <div className="px-5 py-2.5 flex items-center justify-between">
+              <h3 className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/80 leading-tight">
+                {section.title}
+              </h3>
+              <span className="font-crimson text-[10px] text-gray-600 flex-shrink-0 ml-2">
+                {sectionCompleted}/{lessons.length}
+              </span>
+            </div>
+
+            {/* Lessons */}
+            {lessons.map((lesson) => {
+              const progress = progressMap[lesson.id];
+              const completed = progress?.is_completed ?? false;
+              const isCurrent = lesson.id === currentLessonId;
+
+              return (
+                <Link
+                  key={lesson.id}
+                  href={`/academy/lesson/${lesson.slug}`}
+                  onClick={onClose}
+                  className={`flex items-center gap-3 px-5 py-3 text-left transition border-l-2 ${
+                    isCurrent
+                      ? "border-[#C5A059] bg-[#C5A059]/5"
+                      : "border-transparent hover:bg-white/[0.02]"
+                  }`}
+                >
+                  {/* Status icon */}
+                  <span className="flex-shrink-0 mt-0.5">
+                    {completed ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    ) : isCurrent ? (
+                      <PlayCircle className="w-4 h-4 text-[#C5A059]" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-gray-700" />
+                    )}
+                  </span>
+                  {/* Title + duration */}
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`font-crimson text-sm leading-tight ${
+                        isCurrent
+                          ? "text-white"
+                          : completed
+                          ? "text-gray-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      {lesson.title}
+                    </p>
+                    <p className="font-cinzel text-[9px] text-gray-600 mt-0.5">
+                      {formatDuration(lesson.duration_seconds)} min
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Q&A Panel ─────────────────────────────────────────────────────────────────
+
+function QAPanel({
+  supabase,
+  userId,
+  lessonId,
+  courseId,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any;
+  userId: string;
+  lessonId: string;
+  courseId: string;
+}) {
+  const [questions, setQuestions] = useState<
+    { id: string; content: string; answer: string | null; created_at: string }[]
+  >([]);
+  const [newQuestion, setNewQuestion] = useState("");
+  const [sending, setSending] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("questions")
+      .select("id, content, answer, created_at")
+      .eq("lesson_id", lessonId)
+      .order("created_at", { ascending: false })
+      .then(({ data }: { data: typeof questions | null }) => {
+        setQuestions(data ?? []);
+        setLoaded(true);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId]);
+
+  const handleSubmit = async () => {
+    const trimmed = newQuestion.trim();
+    if (!trimmed) return;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("questions")
+      .insert({ user_id: userId, lesson_id: lessonId, course_id: courseId, content: trimmed })
+      .select("id, content, answer, created_at")
+      .single();
+    if (!error && data) {
+      setQuestions((prev) => [data, ...prev]);
+      setNewQuestion("");
+    }
+    setSending(false);
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* Submit question */}
+      <div>
+        <textarea
+          value={newQuestion}
+          onChange={(e) => setNewQuestion(e.target.value)}
+          placeholder="Escribe tu pregunta sobre esta lección..."
+          rows={3}
+          className="w-full bg-[#0a1628] border border-white/5 focus:border-[#C5A059]/30 text-gray-300 font-crimson text-sm p-4 resize-none outline-none transition placeholder:text-gray-600"
+        />
+        <button
+          onClick={handleSubmit}
+          disabled={sending || !newQuestion.trim()}
+          className="mt-2 font-cinzel text-[10px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-5 py-2 hover:bg-[#d4b06a] transition disabled:opacity-40"
+        >
+          {sending ? "Enviando..." : "Enviar pregunta"}
+        </button>
+      </div>
+
+      {/* Questions list */}
+      {!loaded ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="w-5 h-5 animate-spin text-[#C5A059]/40" />
+        </div>
+      ) : questions.length === 0 ? (
+        <p className="font-crimson text-gray-600 text-sm text-center py-8">
+          Sé el primero en hacer una pregunta sobre esta lección.
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {questions.map((q) => (
+            <div key={q.id} className="bg-[#0a1628] border border-white/5 p-4">
+              <p className="font-crimson text-sm text-gray-300">{q.content}</p>
+              {q.answer && (
+                <div className="mt-3 pt-3 border-t border-[#C5A059]/10">
+                  <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">
+                    Respuesta
+                  </p>
+                  <p className="font-crimson text-sm text-gray-400">{q.answer}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

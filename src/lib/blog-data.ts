@@ -21,7 +21,7 @@ export const blogPosts: BlogPost[] = [
     readTime: "8 min",
     category: "Karma",
     image: "bg-gradient-to-br from-indigo-600 to-purple-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/10/A-human-figure-breaking-free-from-chains-or-bindings-that-dissolve-into-light-symbolizing-the-release-of-karmic-contracts-and-past-burdens.-The-backg-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/la-conexion-entre-miedos-actuales-y-vidas-pasadas.webp",
     slug: "sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud",
     date: "2024-10-12",
     author: "Juan Pablo Loaiza",
@@ -59,7 +59,7 @@ La sanación kármica es más que un proceso de autoconocimiento; es una transfo
     readTime: "7 min",
     category: "Relaciones",
     image: "bg-gradient-to-br from-purple-600 to-pink-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/10/Two-people-facing-each-other-or-interacting-representing-a-current-relationship.-Their-silhouettes-are-partially-transparent-revealing-scenes-or-fig-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/como-las-regresiones-pueden-mejorar-tus-relaciones-actuales.webp",
     slug: "como-la-regresion-a-vidas-pasadas-puede-transformar-tus-relaciones-actuales",
     date: "2024-10-12",
     author: "Juan Pablo Loaiza",
@@ -92,7 +92,7 @@ Trabajar con un profesional experimentado es crucial. Un terapeuta certificado t
     readTime: "10 min",
     category: "Propósito",
     image: "bg-gradient-to-br from-pink-600 to-rose-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/10/DALL·E-2024-10-12-01.25.03-A-human-figure-seen-from-behind-stands-in-the-center-of-the-image-contemplating-a-path-that-stretches-toward-the-horizon.-Along-the-path-there-are-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/descubriendo-tu-proposito-de-vida-con-la-regresion-a-vidas-pasadas.webp",
     slug: "descubriendo-tu-proposito-de-vida-a-traves-de-la-regresion-a-vidas-pasadas",
     date: "2024-10-12",
     author: "Juan Pablo Loaiza",
@@ -125,7 +125,7 @@ Tu propósito no es algo que debas buscar desesperadamente afuera; ya vive dentr
     readTime: "9 min",
     category: "Sanación",
     image: "bg-gradient-to-br from-blue-600 to-indigo-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/10/rompiendo-ciclos-de-adiccion-con-ayuda-del-pasado-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/rompiendo-ciclos-de-adiccion-con-ayuda-del-pasado.webp",
     slug: "rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
@@ -157,7 +157,7 @@ Este enfoque ha mostrado resultados extraordinarios en muchos casos donde los tr
     readTime: "11 min",
     category: "Espíritus",
     image: "bg-gradient-to-br from-amber-600 to-orange-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/10/entendiendo-y-liberando-posesiones-espirituales-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/entendiendo-y-liberando-posesiones-espirituales.webp",
     slug: "entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
@@ -179,7 +179,7 @@ Este enfoque ha mostrado resultados extraordinarios en muchos casos donde los tr
 
 ## El Proceso de Liberación
 
-A través de la regresión y técnicas especializadas de hipnoterapia, podemos:
+A través de la regresión y técnicas especializadas de hipnosis terapéutica, podemos:
 
 1. Identificar la entidad y entender su historia
 2. Comunicarnos con ella para entender por qué está atrapada
@@ -195,7 +195,7 @@ Este proceso es compasivo tanto para ti como para la entidad, permitiendo que am
     readTime: "9 min",
     category: "Traumas",
     image: "bg-gradient-to-br from-red-600 to-pink-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/10/sanacion-de-traumas-a-traves-de-la-regresion-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/sanacion-de-traumas-a-traves-de-la-regresion.webp",
     slug: "sanacion-de-traumas-a-traves-de-la-regresion-descubriendo-el-poder-curativo-de-las-vidas-pasadas",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
@@ -234,7 +234,7 @@ La regresión ofrece acceso a una sanación que la terapia convencional a menudo
     readTime: "8 min",
     category: "Miedos",
     image: "bg-gradient-to-br from-slate-700 to-slate-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/10/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores.webp",
     slug: "la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
@@ -272,7 +272,7 @@ La mayoría de las personas experimentan alivio inmediato después de la regresi
     readTime: "7 min",
     category: "Salud Mental",
     image: "bg-gradient-to-br from-teal-600 to-cyan-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/07/superando-depresion-terapia-regresion-a-vidas-pasadas-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/superando-depresion-terapia-regresion-a-vidas-pasadas.webp",
     slug: "superando-la-depresion-con-terapia-de-regresion-a-vidas-pasadas",
     date: "2024-07-15",
     author: "Juan Pablo Loaiza",
@@ -308,7 +308,7 @@ Muchos pacientes reportan una mejora significativa en su estado de ánimo despu�
     readTime: "12 min",
     category: "Ciencia",
     image: "bg-gradient-to-br from-green-600 to-emerald-900",
-    imageUrl: "https://www.juanpabloloaiza.com/wp-content/uploads/2024/07/ciencia-detras-de-la-regresion-a-vidas-pasadas-1024x585.webp",
+    imageUrl: "https://media.juanpabloloaiza.com/blog/ciencia-detras-de-la-regresion-a-vidas-pasadas.webp",
     slug: "la-ciencia-detras-de-la-regresion-a-vidas-pasadas-explorando-evidencias-y-estudios",
     date: "2024-07-15",
     author: "Juan Pablo Loaiza",

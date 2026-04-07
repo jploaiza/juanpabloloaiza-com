@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Clock, Tag, ArrowLeft, Share2 } from "lucide-react";
+import { Clock, ArrowLeft } from "lucide-react";
 import type { BlogPost } from "@/lib/blog-data";
+import { getAllBlogPosts } from "@/lib/blog-data";
 
 interface Props {
   post: BlogPost;
@@ -12,148 +13,274 @@ interface Props {
 }
 
 export default function ArticleContent({ post, previousPost, nextPost }: Props) {
+  const relatedPosts = getAllBlogPosts()
+    .filter((p) => p.id !== post.id)
+    .slice(0, 3);
+
+  const shareUrl = `https://juanpabloloaiza.com/blog/${post.slug}`;
+
   return (
-    <main className="min-h-screen bg-[#020617] pt-32">
-      {/* Article Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-4xl mx-auto px-4 sm:px-6 mb-12"
-      >
-        <Link href="/blog" className="flex items-center gap-2 text-[#C5A059] hover:text-[#F3E5AB] transition mb-8 uppercase text-xs tracking-widest font-semibold">
-          <ArrowLeft className="w-4 h-4" /> Volver al Blog
-        </Link>
-
-        <div className="flex items-center gap-3 mb-4">
-          <Tag className="w-4 h-4 text-[#C5A059]" />
-          <span className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold">{post.category}</span>
-        </div>
-
-        <h1 className="text-5xl md:text-6xl text-white mb-6 font-cinzel font-bold leading-tight">{post.title}</h1>
-
-        <div className="flex flex-wrap items-center gap-6 text-sm text-gray-400 border-b border-[#C5A059]/20 pb-6">
-          <div className="flex items-center gap-2">
-            <span className="text-[#C5A059]">{post.author}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            <span>{post.readTime} lectura</span>
-          </div>
-          <div>
-            {new Date(post.date).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Featured Image */}
+    <main className="min-h-screen bg-[#020617] pt-28">
+      {/* ── Full-width hero image ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-        className="max-w-4xl mx-auto px-4 sm:px-6 mb-12"
+        transition={{ duration: 0.8 }}
+        className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden"
       >
-        <div className="relative h-96 bg-[#0f172a] border-2 border-[#C5A059]/30 overflow-hidden">
-          <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
-          <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
-          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
-          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#C5A059] z-20"></div>
-          {post.imageUrl ? (
-            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className={`${post.image} absolute inset-0 w-full h-full`}></div>
+        {post.imageUrl ? (
+          <img
+            src={post.imageUrl}
+            alt={post.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className={`${post.image} w-full h-full`} />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/10 to-[#020617]" />
+      </motion.div>
+
+      {/* ── Two-column layout ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 lg:grid lg:grid-cols-3 lg:gap-14">
+
+        {/* Main content */}
+        <div className="lg:col-span-2">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-[#C5A059] hover:text-[#F3E5AB] transition mb-6 font-cinzel text-xs uppercase tracking-widest"
+            >
+              <ArrowLeft className="w-3 h-3" /> Volver al Blog
+            </Link>
+
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="font-cinzel text-[9px] uppercase tracking-widest text-[#020617] bg-[#C5A059] px-2.5 py-1 font-bold">
+                {post.category}
+              </span>
+              <span className="text-gray-500 font-crimson text-sm">
+                {new Date(post.date).toLocaleDateString("es-ES", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl text-white mb-5 font-cinzel font-bold leading-tight">
+              {post.title}
+            </h1>
+
+            <div className="flex items-center gap-4 pb-6 border-b border-[#C5A059]/15 mb-8">
+              <span className="text-gray-400 font-crimson text-sm">{post.author}</span>
+              <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                <Clock className="w-3 h-3" />
+                <span>{post.readTime} de lectura</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Article body */}
+          <motion.article
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.12 }}
+            className="font-crimson text-lg text-gray-300 leading-relaxed"
+          >
+            {post.content.split("\n\n").map((paragraph, index) => {
+              if (paragraph.startsWith("##")) {
+                return (
+                  <h2
+                    key={index}
+                    className="text-2xl font-cinzel text-white mt-10 mb-4 font-bold border-l-2 border-[#C5A059] pl-4"
+                  >
+                    {paragraph.replace(/^##\s*/, "")}
+                  </h2>
+                );
+              }
+              if (paragraph.trim().startsWith("-") || paragraph.trim().match(/^\d+\./)) {
+                return (
+                  <ul key={index} className="list-none space-y-2 mb-6 pl-2">
+                    {paragraph
+                      .split("\n")
+                      .filter((line) => line.trim())
+                      .map((line, i) => (
+                        <li key={i} className="flex items-start gap-2 text-gray-300">
+                          <span className="text-[#C5A059] mt-1.5 flex-shrink-0 text-xs">▸</span>
+                          <span>{line.replace(/^[-\d+\.]\s*/, "")}</span>
+                        </li>
+                      ))}
+                  </ul>
+                );
+              }
+              return (
+                <p key={index} className="mb-6 text-gray-300">
+                  {paragraph}
+                </p>
+              );
+            })}
+          </motion.article>
+
+          {/* Share — mobile/below content */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.22 }}
+            className="mt-12 pt-8 border-t border-[#C5A059]/15"
+          >
+            <p className="font-cinzel text-xs uppercase tracking-widest text-gray-400 mb-4">
+              Compartir
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/25 text-gray-400 hover:border-[#C5A059]/60 hover:text-[#C5A059] transition"
+              >
+                Facebook
+              </a>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/25 text-gray-400 hover:border-[#C5A059]/60 hover:text-[#C5A059] transition"
+              >
+                X / Twitter
+              </a>
+              <a
+                href={`https://www.instagram.com/jploaizao`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/25 text-gray-400 hover:border-[#C5A059]/60 hover:text-[#C5A059] transition"
+              >
+                Instagram
+              </a>
+            </div>
+          </motion.div>
+
+          {/* Prev / Next navigation */}
+          {(previousPost || nextPost) && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.28 }}
+              className="mt-10 grid grid-cols-2 gap-4"
+            >
+              {previousPost ? (
+                <Link
+                  href={`/blog/${previousPost.slug}`}
+                  className="group p-4 border border-[#C5A059]/15 hover:border-[#C5A059]/40 transition"
+                >
+                  <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/60 mb-1">
+                    ← Anterior
+                  </p>
+                  <h4 className="font-cinzel text-xs text-white group-hover:text-[#C5A059] transition line-clamp-2">
+                    {previousPost.title}
+                  </h4>
+                </Link>
+              ) : (
+                <div />
+              )}
+              {nextPost && (
+                <Link
+                  href={`/blog/${nextPost.slug}`}
+                  className="group p-4 border border-[#C5A059]/15 hover:border-[#C5A059]/40 transition text-right"
+                >
+                  <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/60 mb-1">
+                    Siguiente →
+                  </p>
+                  <h4 className="font-cinzel text-xs text-white group-hover:text-[#C5A059] transition line-clamp-2">
+                    {nextPost.title}
+                  </h4>
+                </Link>
+              )}
+            </motion.div>
           )}
         </div>
-      </motion.div>
 
-      {/* Article Content */}
-      <motion.article
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        className="max-w-4xl mx-auto px-4 sm:px-6 mb-20"
-      >
-        <div className="prose prose-invert max-w-none font-crimson text-lg text-gray-300 leading-relaxed">
-          {post.content.split("\n\n").map((paragraph, index) => {
-            if (paragraph.startsWith("##")) {
-              return (
-                <h2 key={index} className="text-3xl font-cinzel text-white mt-10 mb-4 font-bold">
-                  {paragraph.replace("## ", "")}
-                </h2>
-              );
-            }
-            if (paragraph.startsWith("-")) {
-              return (
-                <ul key={index} className="list-disc list-inside space-y-2 mb-6">
-                  {paragraph.split("\n").filter((line) => line.startsWith("-")).map((line, i) => (
-                    <li key={i} className="text-gray-300">{line.replace("- ", "")}</li>
-                  ))}
-                </ul>
-              );
-            }
-            return <p key={index} className="mb-6">{paragraph}</p>;
-          })}
-        </div>
-      </motion.article>
-
-      {/* Share */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="max-w-4xl mx-auto px-4 sm:px-6 mb-20"
-      >
-        <div className="border-t border-[#C5A059]/20 pt-8">
-          <p className="text-gray-400 mb-4 text-sm uppercase tracking-widest">Compartir este artículo</p>
-          <div className="flex gap-4">
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://juanpabloloaiza.com/blog/${post.slug}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 border border-[#C5A059]/30 hover:border-[#C5A059] text-[#C5A059] hover:bg-[#C5A059]/10 transition"
-            >
-              <Share2 className="w-4 h-4" />
-            </a>
-            <a
-              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://juanpabloloaiza.com/blog/${post.slug}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 border border-[#C5A059]/30 hover:border-[#C5A059] text-[#C5A059] hover:bg-[#C5A059]/10 transition"
-            >
-              <Share2 className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Navigation */}
-      {(previousPost || nextPost) && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="max-w-6xl mx-auto px-4 sm:px-6 mb-20"
+        {/* ── Sidebar ── */}
+        <motion.aside
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.18 }}
+          className="mt-14 lg:mt-0 lg:col-span-1"
         >
-          <div className="grid md:grid-cols-2 gap-8">
-            {previousPost && (
-              <Link href={`/blog/${previousPost.slug}`}>
-                <div className="group p-6 border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition cursor-pointer">
-                  <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-2">Artículo Anterior</p>
-                  <h3 className="text-lg text-white font-cinzel group-hover:text-[#C5A059] transition line-clamp-2">{previousPost.title}</h3>
-                </div>
-              </Link>
-            )}
-            {nextPost && (
-              <Link href={`/blog/${nextPost.slug}`}>
-                <div className="group p-6 border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition cursor-pointer">
-                  <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-2">Próximo Artículo</p>
-                  <h3 className="text-lg text-white font-cinzel group-hover:text-[#C5A059] transition line-clamp-2">{nextPost.title}</h3>
-                </div>
-              </Link>
-            )}
+          <div className="sticky top-32 space-y-10">
+            {/* Related Articles */}
+            <div>
+              <h3 className="font-cinzel text-xs uppercase tracking-widest text-[#C5A059] mb-5 pb-3 border-b border-[#C5A059]/15">
+                Artículos Relacionados
+              </h3>
+              <div className="space-y-5">
+                {relatedPosts.map((related) => (
+                  <Link
+                    key={related.id}
+                    href={`/blog/${related.slug}`}
+                    className="group flex gap-3 items-start"
+                  >
+                    <div className="relative w-20 h-14 flex-shrink-0 overflow-hidden bg-[#0f172a]">
+                      {related.imageUrl ? (
+                        <img
+                          src={related.imageUrl}
+                          alt={related.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        />
+                      ) : (
+                        <div className={`${related.image} w-full h-full`} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/70">
+                        {related.category}
+                      </span>
+                      <h4 className="font-cinzel text-xs text-gray-300 group-hover:text-[#C5A059] transition leading-snug mt-0.5 line-clamp-2">
+                        {related.title}
+                      </h4>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Share in sidebar */}
+            <div className="pt-6 border-t border-[#C5A059]/10">
+              <h3 className="font-cinzel text-xs uppercase tracking-widest text-[#C5A059] mb-4">
+                Compartir
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/20 text-gray-500 hover:text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                >
+                  Facebook
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/20 text-gray-500 hover:text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                >
+                  Twitter
+                </a>
+                <a
+                  href="https://www.instagram.com/jploaizao"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/20 text-gray-500 hover:text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                >
+                  Instagram
+                </a>
+              </div>
+            </div>
           </div>
-        </motion.div>
-      )}
+        </motion.aside>
+      </div>
     </main>
   );
 }

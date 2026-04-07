@@ -24,14 +24,18 @@ export async function generateMetadata({
   return {
     title: `${post.title} | Juan Pablo Loaiza`,
     description: post.excerpt,
+    keywords: `${post.category}, regresión a vidas pasadas, hipnosis terapéutica, ${post.title.toLowerCase()}`,
     alternates: { canonical: `https://juanpabloloaiza.com/blog/${slug}` },
     openGraph: {
       title: post.title,
       description: post.excerpt,
       url: `https://juanpabloloaiza.com/blog/${slug}`,
+      siteName: "Juan Pablo Loaiza",
+      locale: "es_ES",
       type: "article",
       publishedTime: post.date,
       authors: [post.author],
+      tags: [post.category, "hipnosis terapéutica", "vidas pasadas"],
       images: [{ url: image, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
@@ -39,6 +43,7 @@ export async function generateMetadata({
       title: post.title,
       description: post.excerpt,
       images: [image],
+      creator: "@jploaizao",
     },
   };
 }
@@ -57,8 +62,33 @@ export default async function ArticlePage({
   const previousPost = idx > 0 ? allPosts[idx - 1] : null;
   const nextPost = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
 
+  const image = post.imageUrl || OG_FALLBACK;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    image: image,
+    author: { "@type": "Person", name: post.author, url: "https://juanpabloloaiza.com" },
+    publisher: {
+      "@type": "Organization",
+      name: "Juan Pablo Loaiza",
+      logo: { "@type": "ImageObject", url: "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png" },
+    },
+    datePublished: post.date,
+    dateModified: post.date,
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://juanpabloloaiza.com/blog/${slug}` },
+    url: `https://juanpabloloaiza.com/blog/${slug}`,
+    articleSection: post.category,
+    inLanguage: "es",
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <Header />
       <ArticleContent post={post} previousPost={previousPost} nextPost={nextPost} />
     </>

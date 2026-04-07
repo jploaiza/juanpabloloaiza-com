@@ -3,7 +3,7 @@ import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AdmissionSection() {
   const [formData, setFormData] = useState({
@@ -12,8 +12,47 @@ export default function AdmissionSection() {
     phone: "",
     reason: "",
   });
+  const [countryCode, setCountryCode] = useState("+56");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const countryCodes = [
+    { code: "+54", label: "🇦🇷 Argentina (+54)" },
+    { code: "+591", label: "🇧🇴 Bolivia (+591)" },
+    { code: "+55", label: "🇧🇷 Brasil (+55)" },
+    { code: "+56", label: "🇨🇱 Chile (+56)" },
+    { code: "+57", label: "🇨🇴 Colombia (+57)" },
+    { code: "+506", label: "🇨🇷 Costa Rica (+506)" },
+    { code: "+53", label: "🇨🇺 Cuba (+53)" },
+    { code: "+593", label: "🇪🇨 Ecuador (+593)" },
+    { code: "+503", label: "🇸🇻 El Salvador (+503)" },
+    { code: "+34", label: "🇪🇸 España (+34)" },
+    { code: "+502", label: "🇬🇹 Guatemala (+502)" },
+    { code: "+504", label: "🇭🇳 Honduras (+504)" },
+    { code: "+52", label: "🇲🇽 México (+52)" },
+    { code: "+505", label: "🇳🇮 Nicaragua (+505)" },
+    { code: "+507", label: "🇵🇦 Panamá (+507)" },
+    { code: "+595", label: "🇵🇾 Paraguay (+595)" },
+    { code: "+51", label: "🇵🇪 Perú (+51)" },
+    { code: "+1787", label: "🇵🇷 Puerto Rico (+1787)" },
+    { code: "+1", label: "🇺🇸 USA / Canadá (+1)" },
+    { code: "+598", label: "🇺🇾 Uruguay (+598)" },
+    { code: "+58", label: "🇻🇪 Venezuela (+58)" },
+  ];
+
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((r) => r.json())
+      .then((data) => {
+        const countryCallingCode = data.country_calling_code;
+        if (countryCallingCode && countryCodes.some((c) => c.code === countryCallingCode)) {
+          setCountryCode(countryCallingCode);
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -40,6 +79,7 @@ export default function AdmissionSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch("/api/contact", {
@@ -47,7 +87,7 @@ export default function AdmissionSection() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, phone: formData.phone ? `${countryCode} ${formData.phone}` : "" }),
       });
 
       if (response.ok) {
@@ -58,10 +98,13 @@ export default function AdmissionSection() {
           phone: "",
           reason: "",
         });
-        setTimeout(() => setSubmitted(false), 5000);
+        setTimeout(() => setSubmitted(false), 8000);
+      } else {
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || "Hubo un problema al enviar tu solicitud. Por favor intenta de nuevo.");
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
+    } catch {
+      setError("No se pudo conectar con el servidor. Verifica tu conexión e intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -93,15 +136,15 @@ export default function AdmissionSection() {
         <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
           <motion.div variants={itemVariants} className="space-y-6">
             <p className="text-gray-300 font-crimson text-xl leading-relaxed">
-              Para comenzar este viaje transformador, necesitamos que completes un formulario de admisión. Esto nos ayuda a:
+              Este es tu primer paso para conectarte conmigo. Cuéntame brevemente sobre ti para que pueda:
             </p>
 
             <ul className="space-y-3">
               {[
-                "Entender tu situación y tus principales conflictos",
-                "Evaluar tu disponibilidad y comprometimiento",
-                "Preparar una sesión personalizada",
-                "Establecer objetivos claros para tu terapia",
+                "Conocer tu situación y lo que te trajo aquí",
+                "Entender qué tipo de ayuda estás buscando",
+                "Evaluar si el proceso es adecuado para ti",
+                "Contactarte personalmente para explicarte todo el proceso",
               ].map((item, index) => (
                 <li key={index} className="flex gap-3 text-gray-300">
                   <span className="text-[#C5A059] min-w-fit font-bold">✓</span>
@@ -115,7 +158,7 @@ export default function AdmissionSection() {
                 Nota Importante
               </p>
               <p className="text-gray-300 text-sm leading-relaxed font-crimson">
-                Espacios limitados disponibles. El proceso es personalizado y dedicado a cada cliente. Se requiere entrevista preliminar gratuita antes de comenzar.
+                Este formulario es solo el primer contacto. Una vez que hablemos y entiendas el proceso, las sesiones, los valores y todo lo que implica, te enviaré personalmente el formulario de admisión completo.
               </p>
             </div>
           </motion.div>
@@ -127,11 +170,27 @@ export default function AdmissionSection() {
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded text-center"
+                className="mb-6 p-4 bg-green-500/20 border border-green-500/50 text-center"
               >
-                <p className="body-text text-green-300 font-semibold">
-                  ¡Solicitud recibida! Me pondré en contacto pronto.
+                <p className="text-green-300 font-semibold font-cinzel text-sm uppercase tracking-widest mb-1">
+                  ¡Solicitud Recibida!
                 </p>
+                <p className="text-green-200/80 font-crimson text-base">
+                  Gracias por contactarme. Te escribiré a la brevedad para coordinar tu entrevista gratuita.
+                </p>
+              </motion.div>
+            )}
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-500/20 border border-red-500/50 text-center"
+              >
+                <p className="text-red-300 font-semibold font-cinzel text-sm uppercase tracking-widest mb-1">
+                  Error al Enviar
+                </p>
+                <p className="text-red-200/80 font-crimson text-base">{error}</p>
               </motion.div>
             )}
 
@@ -170,18 +229,30 @@ export default function AdmissionSection() {
 
               <div>
                 <label htmlFor="phone" className="text-[#C5A059] text-xs uppercase tracking-widest font-semibold block mb-2">Teléfono / WhatsApp</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="+56 9 6208 1884"
-                  required
-                  aria-required="true"
-                  aria-label="Teléfono o WhatsApp"
-                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    aria-label="Código de país"
+                    className="bg-[#050b1a] border border-[#C5A059]/30 text-white text-sm px-2 py-2.5 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition rounded-sm shrink-0"
+                  >
+                    {countryCodes.map((c) => (
+                      <option key={c.code} value={c.code}>{c.label}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="9 6208 1884"
+                    required
+                    aria-required="true"
+                    aria-label="Número de teléfono"
+                    className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
+                  />
+                </div>
               </div>
 
               <div>
