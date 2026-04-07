@@ -73,7 +73,7 @@ function RegisterForm() {
         .from("courses")
         .select("id")
         .eq("slug", "hipnosis-regresiva-preparacion")
-        .single();
+        .maybeSingle();
       if (course) {
         await supabase
           .from("enrollments")

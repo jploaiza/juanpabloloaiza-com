@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from("lessons")
     .select("title")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
   return { title: lesson?.title ?? "Lección" };
 }
 
@@ -30,13 +30,13 @@ export default async function LessonPage({ params }: Props) {
 
   // Fetch profile + lesson concurrently
   const [{ data: profile }, { data: lesson }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase
       .from("lessons")
       .select("*, section:sections(id, title, order_index)")
       .eq("slug", slug)
       .eq("is_published", true)
-      .single(),
+      .maybeSingle(),
   ]);
 
   if (!lesson) notFound();
@@ -47,7 +47,7 @@ export default async function LessonPage({ params }: Props) {
     .select("id")
     .eq("user_id", user.id)
     .eq("course_id", lesson.course_id)
-    .single();
+    .maybeSingle();
 
   if (!enrollment) redirect("/academy/dashboard");
 

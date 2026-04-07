@@ -57,7 +57,7 @@ export async function updateSession(request: NextRequest) {
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (profile?.role !== "admin") {
       return NextResponse.redirect(new URL("/academy/dashboard", request.url));

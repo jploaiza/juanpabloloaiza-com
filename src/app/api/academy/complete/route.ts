@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     .select("verify_token")
     .eq("user_id", user.id)
     .eq("course_id", courseId)
-    .single();
+    .maybeSingle();
 
   if (!existing) {
     const { data: cert } = await adminSb
@@ -78,12 +78,12 @@ export async function POST(req: NextRequest) {
 
   // 3. Fetch profile + course settings for emails
   const [{ data: profile }, { data: course }] = await Promise.all([
-    adminSb.from("profiles").select("email, full_name").eq("id", user.id).single(),
+    adminSb.from("profiles").select("email, full_name").eq("id", user.id).maybeSingle(),
     adminSb
       .from("courses")
       .select("title, notify_completion_user, notify_completion_admin, admin_notify_email")
       .eq("id", courseId)
-      .single(),
+      .maybeSingle(),
   ]);
 
   if (!profile || !course) return NextResponse.json({ success: true, certificateToken });

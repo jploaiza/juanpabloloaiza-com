@@ -17,7 +17,7 @@ export async function GET(request: Request) {
           .from("courses")
           .select("id")
           .eq("slug", "hipnosis-regresiva-preparacion")
-          .single();
+          .maybeSingle();
 
         if (course) {
           await supabase.from("enrollments").upsert(

@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/academy/login");
 
   const [{ data: profile }, { data: enrollment }, { data: progressRows }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("enrollments").select("*, courses(*)").eq("user_id", user.id).maybeSingle(),
     supabase.from("lesson_progress").select("*, lessons(slug,title,order_index,duration_seconds,section_id,sections(order_index))").eq("user_id", user.id).eq("is_completed", true),
   ]);
