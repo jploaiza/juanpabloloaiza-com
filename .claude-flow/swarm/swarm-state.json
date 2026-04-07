@@ -1,0 +1,77 @@
+{
+  "swarms": {
+    "swarm-1775457700895-ht2r0c": {
+      "swarmId": "swarm-1775457700895-ht2r0c",
+      "topology": "hierarchical",
+      "maxAgents": 15,
+      "status": "running",
+      "agents": [],
+      "tasks": [],
+      "config": {
+        "topology": "hierarchical",
+        "maxAgents": 15,
+        "strategy": "specialized",
+        "communicationProtocol": "message-bus",
+        "autoScaling": true,
+        "consensusMechanism": "majority"
+      },
+      "createdAt": "2026-04-06T06:41:40.895Z",
+      "updatedAt": "2026-04-06T06:41:40.895Z"
+    },
+    "swarm-1775457772515-rev3mu": {
+      "swarmId": "swarm-1775457772515-rev3mu",
+      "topology": "hierarchical-mesh",
+      "maxAgents": 15,
+      "status": "running",
+      "agents": [],
+      "tasks": [],
+      "config": {
+        "topology": "hierarchical-mesh",
+        "maxAgents": 15,
+        "strategy": "specialized",
+        "communicationProtocol": "message-bus",
+        "autoScaling": true,
+        "consensusMechanism": "majority"
+      },
+      "createdAt": "2026-04-06T06:42:52.515Z",
+      "updatedAt": "2026-04-06T06:42:52.515Z"
+    },
+    "swarm-1775529897424-t9lcpd": {
+      "swarmId": "swarm-1775529897424-t9lcpd",
+      "topology": "hierarchical",
+      "maxAgents": 8,
+      "status": "running",
+      "agents": [],
+      "tasks": [],
+      "config": {
+        "topology": "hierarchical",
+        "maxAgents": 8,
+        "strategy": "specialized",
+        "communicationProtocol": "message-bus",
+        "autoScaling": true,
+        "consensusMechanism": "majority"
+      },
+      "createdAt": "2026-04-07T02:44:57.424Z",
+      "updatedAt": "2026-04-07T02:44:57.424Z"
+    },
+    "swarm-1775530165378-pe3wym": {
+      "swarmId": "swarm-1775530165378-pe3wym",
+      "topology": "hierarchical",
+      "maxAgents": 8,
+      "status": "running",
+      "agents": [],
+      "tasks": [],
+      "config": {
+        "topology": "hierarchical",
+        "maxAgents": 8,
+        "strategy": "specialized",
+        "communicationProtocol": "message-bus",
+        "autoScaling": true,
+        "consensusMechanism": "majority"
+      },
+      "createdAt": "2026-04-07T02:49:25.378Z",
+      "updatedAt": "2026-04-07T02:49:25.378Z"
+    }
+  },
+  "version": "3.0.0"
+}
