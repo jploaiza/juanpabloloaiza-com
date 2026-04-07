@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Serif_4 } from "next/font/google";
+import { Playfair_Display, Source_Serif_4, DM_Sans } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -15,6 +15,13 @@ const sourceSerif4 = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  style: ["normal"],
 });
 
 export const metadata: Metadata = {
@@ -85,7 +92,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${playfairDisplay.variable} ${sourceSerif4.variable} h-full antialiased scroll-smooth`}
+      className={`${playfairDisplay.variable} ${sourceSerif4.variable} ${dmSans.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         {/* Preconnect to external asset hosts */}

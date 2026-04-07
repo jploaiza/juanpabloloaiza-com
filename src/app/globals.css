@@ -3,6 +3,7 @@
 @theme {
   --font-cinzel: var(--font-cinzel);
   --font-crimson: var(--font-crimson);
+  --font-dm-sans: var(--font-dm-sans);
 }
 
 :root {
@@ -170,4 +171,37 @@ body {
   .font-cinzel.text-gray-500 {
     color: #c8c8c8; /* mínimo requerido sobre fondos < #1a1a1a */
   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   DM Sans — UI micro-text: labels, counters, nav, tabs,
+   breadcrumbs, durations, badges, placeholders.
+   Unlayered so it beats @layer utilities where needed.
+   Never touches .font-cinzel headings or .font-crimson body.
+   ───────────────────────────────────────────────────────────── */
+
+/* Tailwind text-size utilities xs/sm on non-heading, non-paragraph elements */
+.text-xs:not(.font-cinzel):not(.font-crimson),
+.text-sm:not(.font-cinzel):not(.font-crimson) {
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+/* tracking-widest uppercase labels (nav pills, badge text) */
+.tracking-widest:not(.font-cinzel):not(.font-crimson),
+.tracking-wider:not(.font-cinzel):not(.font-crimson) {
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Explicit DM Sans utility class for one-off use */
+.font-dm-sans {
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+/* Textarea / input placeholders */
+textarea::placeholder,
+input::placeholder {
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.875rem;
 }
