@@ -39,6 +39,18 @@ yarn-error.log*
 # local mcp config (may contain tokens)
 .mcp.json
 
+# Claude Code / claude-flow internal files
+.claude/
+.claude-flow/
+.swarm/
+.wrangler/
+ruvector.db
+ruflo-wizard.sh
+claude-flow.config.json
+
+# Generated docs (not part of source)
+docs/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
