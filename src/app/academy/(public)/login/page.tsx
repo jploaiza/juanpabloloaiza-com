@@ -81,7 +81,7 @@ function LoginForm() {
     const next = [...otp];
     next[index] = digit;
     setOtp(next);
-    if (digit && index < 5) inputRefs.current[index + 1]?.focus();
+    if (digit && index < 7) inputRefs.current[index + 1]?.focus();
     const full = next.join("");
     if (full.length === 8) handleVerifyOTP(full);
   };

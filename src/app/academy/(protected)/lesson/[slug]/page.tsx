@@ -29,16 +29,17 @@ export default async function LessonPage({ params }: Props) {
   if (!user) redirect(`/academy/login?redirect=/academy/lesson/${slug}`);
 
   // Fetch profile + lesson concurrently
-  const [{ data: profile }, { data: lesson }] = await Promise.all([
+  const [{ data: profile }, { data: lesson, error: lessonError }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase
       .from("lessons")
-      .select("*, section:sections(id, title, order_index)")
+      .select("*")
       .eq("slug", slug)
       .eq("is_published", true)
       .maybeSingle(),
   ]);
 
+  if (lessonError) console.error("[lesson] query error:", lessonError);
   if (!lesson) notFound();
 
   // Verify enrollment
@@ -74,6 +75,12 @@ export default async function LessonPage({ params }: Props) {
         .maybeSingle(),
     ]);
 
+  // Derive the lesson's section from already-fetched sections data
+  const lessonWithSection = {
+    ...lesson,
+    section: (sections ?? []).find((s) => s.id === lesson.section_id) ?? null,
+  };
+
   // Build flat ordered lesson list for prev/next navigation
   const sortedSections = (sections ?? []).sort(
     (a, b) => a.order_index - b.order_index
@@ -101,7 +108,7 @@ export default async function LessonPage({ params }: Props) {
     <div className="min-h-screen bg-[#020617]">
       <AcademyHeader user={profile} />
       <LessonPlayer
-        lesson={lesson}
+        lesson={lessonWithSection}
         sections={sortedSections}
         progressMap={progressMap}
         prevLesson={prevLesson}
