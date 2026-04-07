@@ -632,7 +632,7 @@ export default function LessonPlayer({
           </div>
 
           {/* ── Right: sidebar (desktop) ── */}
-          <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-white/5 bg-[#020617] overflow-y-auto max-h-[calc(100vh-64px)] sticky top-16">
+          <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-white/5 bg-[#020617] overflow-y-auto max-h-[calc(100vh-64px)] sticky top-16 scrollbar-gold">
             <CourseSidebar
               sections={sections}
               currentLessonId={lesson.id}
@@ -645,7 +645,7 @@ export default function LessonPlayer({
 
       {/* ── Mobile sidebar drawer ── */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-[#020617] border-l border-white/5 z-50 overflow-y-auto transition-transform duration-300 lg:hidden ${
+        className={`fixed top-0 right-0 h-full w-80 bg-[#020617] border-l border-white/5 z-50 overflow-y-auto transition-transform duration-300 lg:hidden scrollbar-gold ${
           sidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -685,6 +685,12 @@ function CourseSidebar({
   progressMap: Record<string, ProgressEntry>;
   onClose: () => void;
 }) {
+  const activeRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [currentLessonId]);
+
   return (
     <div className="py-4">
       {sections.map((section) => {
@@ -716,6 +722,7 @@ function CourseSidebar({
               return (
                 <Link
                   key={lesson.id}
+                  ref={isCurrent ? activeRef : undefined}
                   href={`/academy/lesson/${lesson.slug}`}
                   onClick={onClose}
                   className={`flex items-center gap-3 px-5 py-3 text-left transition border-l-2 ${

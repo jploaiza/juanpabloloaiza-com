@@ -205,3 +205,25 @@ input::placeholder {
   font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 0.875rem;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Custom scrollbar — gold on void (sidebar, overflow panels)
+   ───────────────────────────────────────────────────────────── */
+.scrollbar-gold::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-gold::-webkit-scrollbar-track {
+  background: #020617;
+}
+.scrollbar-gold::-webkit-scrollbar-thumb {
+  background: rgba(197, 160, 89, 0.3);
+  border-radius: 2px;
+}
+.scrollbar-gold::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 160, 89, 0.6);
+}
+/* Firefox */
+.scrollbar-gold {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(197, 160, 89, 0.3) #020617;
+}
