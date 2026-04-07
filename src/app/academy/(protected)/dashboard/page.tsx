@@ -18,14 +18,17 @@ export default async function DashboardPage() {
     supabase.from("lesson_progress").select("*, lessons(slug,title,order_index,duration_seconds,section_id,sections(order_index))").eq("user_id", user.id).eq("is_completed", true),
   ]);
 
-  if (!enrollment) {
-    // Auto-enroll if somehow missed
-    const { data: course } = await supabase.from("courses").select("id").eq("slug", "hipnosis-regresiva-preparacion").single();
+  let activeEnrollment = enrollment;
+  if (!activeEnrollment) {
+    const { data: course } = await supabase.from("courses").select("id").eq("slug", "hipnosis-regresiva-preparacion").maybeSingle();
     if (course) {
       await supabase.from("enrollments").upsert(
         { user_id: user.id, course_id: course.id },
         { onConflict: "user_id,course_id", ignoreDuplicates: true }
       );
+      const { data: refreshed } = await supabase
+        .from("enrollments").select("*, courses(*)").eq("user_id", user.id).maybeSingle();
+      activeEnrollment = refreshed;
     }
   }
 
@@ -54,7 +57,9 @@ export default async function DashboardPage() {
     .select("watch_seconds")
     .eq("user_id", user.id)).data?.reduce((a, r) => a + (r.watch_seconds ?? 0), 0) ?? 0;
 
-  const enrolledDate = new Date(enrollment.enrolled_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
+  const enrolledDate = activeEnrollment?.enrolled_at
+    ? new Date(activeEnrollment.enrolled_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
+    : "—";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lastLesson = (lastProgress?.lessons as any);
 
