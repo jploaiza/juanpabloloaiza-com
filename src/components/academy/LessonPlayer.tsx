@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatDuration } from "@/lib/academy-data";
+import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -411,7 +412,8 @@ export default function LessonPlayer({
             </div>
 
             {/* ── Lesson info + navigation ── */}
-            <div className="px-4 sm:px-6 py-5 border-b border-white/5">
+            <div className="relative px-4 sm:px-6 py-5 border-b border-white/5 overflow-hidden">
+              <ScrollworkCorners size={40} opacity={0.6} />
               <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                 <div className="flex-1 min-w-0">
                   {/* Section label */}
@@ -599,7 +601,8 @@ export default function LessonPlayer({
           sidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-white/5">
+        <div className="relative flex items-center justify-between p-4 border-b border-white/5 overflow-hidden">
+          <ScrollworkCorners size={36} opacity={0.6} />
           <span className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059]">
             Contenido del curso
           </span>
@@ -792,7 +795,8 @@ function QAPanel({
       ) : (
         <div className="space-y-4">
           {questions.map((q) => (
-            <div key={q.id} className="bg-[#0a1628] border border-white/5 p-4">
+            <div key={q.id} className="relative bg-[#0a1628] border border-white/5 p-4 overflow-hidden">
+              <ScrollworkCorners size={28} opacity={0.55} />
               <p className="font-crimson text-sm text-gray-300">{q.content}</p>
               {q.answer && (
                 <div className="mt-3 pt-3 border-t border-[#C5A059]/10">

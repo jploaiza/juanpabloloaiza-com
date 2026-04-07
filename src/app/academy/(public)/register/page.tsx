@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import AcademyButton from "@/components/academy/AcademyButton";
 import AcademyInput from "@/components/academy/AcademyInput";
+import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 
 export default function RegisterPage() {
   return (
@@ -145,11 +146,8 @@ function RegisterForm() {
           <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/60">Academy</p>
         </div>
 
-        <div className="relative bg-[#0a1628] border border-[#C5A059]/15 p-8">
-          <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/50" />
-          <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/50" />
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#C5A059]/50" />
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#C5A059]/50" />
+        <div className="relative bg-[#0a1628] border border-[#C5A059]/15 p-8 overflow-hidden">
+          <ScrollworkCorners size={52} opacity={0.9} />
 
           <AnimatePresence mode="wait">
             {step === "form" && (

@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import AcademyCard from "@/components/academy/AcademyCard";
 import AdminNotifyToggle from "@/components/academy/AdminNotifyToggle";
+import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import {
   Users,
   BookOpen,
@@ -139,7 +140,8 @@ export default async function AdminPage() {
                 : "Sin nuevos",
             },
           ].map(({ icon: Icon, label, value, sub }) => (
-            <div key={label} className="bg-[#0a1628] border border-white/5 p-5">
+            <div key={label} className="relative bg-[#0a1628] border border-white/5 p-5 overflow-hidden">
+              <ScrollworkCorners size={40} opacity={0.75} />
               <Icon className="w-5 h-5 text-[#C5A059] mb-3" />
               <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>
               <p className="font-cinzel text-2xl text-white mb-1">{value}</p>

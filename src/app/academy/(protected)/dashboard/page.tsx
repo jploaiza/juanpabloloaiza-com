@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import ProgressBar from "@/components/academy/ProgressBar";
 import AcademyCard from "@/components/academy/AcademyCard";
+import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import { BookOpen, Clock, CheckCircle, Award, MessageCircle, Calendar } from "lucide-react";
 import { TOTAL_LESSONS } from "@/lib/academy-data";
 
@@ -143,7 +144,8 @@ export default async function DashboardPage() {
             { icon: BookOpen, label: "Inscrito el", value: enrolledDate },
             { icon: Award, label: "Certificado", value: isCompleted ? "Disponible" : `Falta ${TOTAL_LESSONS - completedCount}` },
           ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="bg-[#0a1628] border border-white/5 p-4">
+            <div key={label} className="relative bg-[#0a1628] border border-white/5 p-4 overflow-hidden">
+              <ScrollworkCorners size={36} opacity={0.7} />
               <Icon className="w-4 h-4 text-[#C5A059] mb-2" />
               <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>
               <p className="font-crimson text-base text-gray-200">{value}</p>
@@ -157,8 +159,9 @@ export default async function DashboardPage() {
             href="https://api.whatsapp.com/send?phone=56962081884"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 hover:border-[#C5A059]/20 transition group"
+            className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 hover:border-[#C5A059]/20 transition group overflow-hidden"
           >
+            <ScrollworkCorners size={40} opacity={0.65} />
             <MessageCircle className="w-8 h-8 text-green-400 flex-shrink-0" />
             <div>
               <p className="font-cinzel text-xs uppercase tracking-widest text-white mb-0.5">¿Tienes dudas?</p>
@@ -167,8 +170,9 @@ export default async function DashboardPage() {
           </a>
           <Link
             href="https://www.juanpabloloaiza.com/agenda"
-            className="flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 hover:border-[#C5A059]/20 transition group"
+            className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 hover:border-[#C5A059]/20 transition group overflow-hidden"
           >
+            <ScrollworkCorners size={40} opacity={0.65} />
             <Calendar className="w-8 h-8 text-[#C5A059] flex-shrink-0" />
             <div>
               <p className="font-cinzel text-xs uppercase tracking-widest text-white mb-0.5">¿Listo para tu sesión?</p>

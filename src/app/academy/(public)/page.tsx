@@ -5,6 +5,7 @@ import { CheckCircle, Clock, PlayCircle, ChevronDown, Star } from "lucide-react"
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import { COURSE_SECTIONS, COURSE_META, TOTAL_LESSONS, formatDuration } from "@/lib/academy-data";
 import AcademyLandingClient from "./LandingClient";
+import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 
 export const metadata: Metadata = {
   title: "Curso Gratuito — Preparación para tu Regresión a Vidas Pasadas",
@@ -181,7 +182,8 @@ export default function AcademyLandingPage() {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {WHAT_YOU_LEARN.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 p-4 bg-[#0a1628] border border-white/5">
+              <div key={i} className="relative flex items-start gap-3 p-4 bg-[#0a1628] border border-white/5 overflow-hidden">
+                <ScrollworkCorners size={28} opacity={0.6} />
                 <CheckCircle className="w-4 h-4 text-[#C5A059] mt-0.5 flex-shrink-0" />
                 <span className="font-crimson text-gray-300 text-base leading-relaxed">{item}</span>
               </div>
