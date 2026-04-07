@@ -9,7 +9,7 @@ import {
   CheckCircle,
   Circle,
   PlayCircle,
-  Menu,
+  LayoutList,
   X,
   BookOpen,
   MessageCircle,
@@ -337,7 +337,7 @@ export default function LessonPlayer({
         />
       )}
 
-      <main className="pt-16 min-h-screen flex flex-col">
+      <main className="pt-16 h-screen flex flex-col overflow-hidden">
         {/* ── Top breadcrumb bar ── */}
         <div className="border-b border-white/5 bg-[#020617]/80 backdrop-blur-sm">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-10 flex items-center justify-between gap-4">
@@ -356,19 +356,20 @@ export default function LessonPlayer({
             </div>
             {/* Mobile sidebar toggle */}
             <button
-              className="lg:hidden text-[#C5A059] p-1"
+              className="lg:hidden flex items-center gap-1.5 border border-[#C5A059]/30 text-[#C5A059] px-2.5 py-1 hover:bg-[#C5A059]/10 transition"
               onClick={() => setSidebarOpen(true)}
               aria-label="Ver lecciones"
             >
-              <Menu className="w-5 h-5" />
+              <LayoutList className="w-3.5 h-3.5" />
+              <span className="font-cinzel text-[9px] uppercase tracking-widest">Lecciones</span>
             </button>
           </div>
         </div>
 
         {/* ── Main layout: video + sidebar ── */}
-        <div className="flex flex-1 max-w-[1400px] mx-auto w-full">
+        <div className="flex flex-1 max-w-[1400px] mx-auto w-full overflow-hidden">
           {/* ── Left: video column ── */}
-          <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 min-w-0 flex flex-col overflow-y-auto scrollbar-gold">
             {/* Video */}
             <div className="relative w-full bg-black aspect-video">
               {lesson.video_url ? (
@@ -522,7 +523,7 @@ export default function LessonPlayer({
                       className="flex items-center gap-1.5 group"
                       title={autoAdvance ? "Siguiente automático: activado" : "Siguiente automático: desactivado"}
                     >
-                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition hidden sm:block">
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition">
                         Autonext
                       </span>
                       <div className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${autoAdvance ? "bg-[#C5A059]" : "bg-white/10"}`}>
@@ -537,7 +538,7 @@ export default function LessonPlayer({
                       className="flex items-center gap-1.5 group disabled:opacity-30"
                       title={autoPlay ? "Autoplay: activado" : "Autoplay: desactivado"}
                     >
-                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition hidden sm:block">
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition">
                         Autoplay
                       </span>
                       <div className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${autoPlay && autoAdvance ? "bg-[#C5A059]" : "bg-white/10"}`}>
@@ -632,7 +633,7 @@ export default function LessonPlayer({
           </div>
 
           {/* ── Right: sidebar (desktop) ── */}
-          <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-white/5 bg-[#020617] overflow-y-auto max-h-[calc(100vh-64px)] sticky top-16 scrollbar-gold">
+          <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-white/5 bg-[#020617] overflow-y-auto scrollbar-gold">
             <CourseSidebar
               sections={sections}
               currentLessonId={lesson.id}
@@ -692,7 +693,7 @@ function CourseSidebar({
   }, [currentLessonId]);
 
   return (
-    <div className="py-4">
+    <div className="py-4 pb-[45vh]">
       {sections.map((section) => {
         const lessons = [...(section.lessons ?? [])]
           .filter((l) => l.is_published)
