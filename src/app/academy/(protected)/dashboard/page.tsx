@@ -168,17 +168,28 @@ export default async function DashboardPage() {
               <p className="font-crimson text-gray-400 text-sm">Escríbeme por WhatsApp</p>
             </div>
           </a>
-          <Link
-            href="https://www.juanpabloloaiza.com/agenda"
-            className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 hover:border-[#C5A059]/20 transition group overflow-hidden"
-          >
-            <ScrollworkCorners size={40} opacity={0.65} />
-            <Calendar className="w-8 h-8 text-[#C5A059] flex-shrink-0" />
-            <div>
-              <p className="font-cinzel text-xs uppercase tracking-widest text-white mb-0.5">¿Listo para tu sesión?</p>
-              <p className="font-crimson text-gray-400 text-sm">Agenda tu primera sesión</p>
+          {isCompleted ? (
+            <Link
+              href="/agenda"
+              className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition overflow-hidden"
+            >
+              <ScrollworkCorners size={40} opacity={0.65} />
+              <Calendar className="w-8 h-8 text-[#C5A059] flex-shrink-0" />
+              <div>
+                <p className="font-cinzel text-xs uppercase tracking-widest text-white mb-0.5">¡Estás listo!</p>
+                <p className="font-crimson text-gray-400 text-sm">Agenda tu primera sesión →</p>
+              </div>
+            </Link>
+          ) : (
+            <div className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 overflow-hidden opacity-60">
+              <ScrollworkCorners size={40} opacity={0.4} />
+              <Calendar className="w-8 h-8 text-gray-600 flex-shrink-0" />
+              <div>
+                <p className="font-cinzel text-xs uppercase tracking-widest text-gray-500 mb-0.5">Agenda tu primera sesión</p>
+                <p className="font-crimson text-gray-600 text-sm">Disponible al completar el 100% del curso</p>
+              </div>
             </div>
-          </Link>
+          )}
         </div>
       </main>
     </div>
