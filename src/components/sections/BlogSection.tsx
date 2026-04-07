@@ -4,27 +4,40 @@ import ScrollDivider from "@/components/ScrollDivider";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Tag, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { getFeaturedPosts } from "@/lib/blog-data";
 
 const CARDS = 3;
+const AUTO_INTERVAL = 5000;
 
 export default function BlogSection() {
   const allPosts = getFeaturedPosts(9);
   const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = next, -1 = prev
+  const [direction, setDirection] = useState(1);
   const isAnimating = useRef(false);
+  const hovered = useRef(false);
 
-  const slide = (dir: 1 | -1) => {
+  const slide = useCallback((dir: 1 | -1) => {
     if (isAnimating.current) return;
+    isAnimating.current = true;
     setDirection(dir);
     setCurrent((c) => (c + dir + allPosts.length) % allPosts.length);
-  };
+    setTimeout(() => { isAnimating.current = false; }, 600);
+  }, [allPosts.length]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!hovered.current) slide(1);
+    }, AUTO_INTERVAL);
+    return () => clearInterval(timer);
+  }, [slide]);
 
   const goTo = (index: number) => {
     if (isAnimating.current || index === current) return;
+    isAnimating.current = true;
     setDirection(index > current ? 1 : -1);
     setCurrent(index);
+    setTimeout(() => { isAnimating.current = false; }, 600);
   };
 
   const visiblePosts = Array.from({ length: CARDS }, (_, i) =>
@@ -56,12 +69,12 @@ export default function BlogSection() {
         </motion.div>
 
         {/* Carousel */}
-        <div className="relative overflow-hidden">
-          <AnimatePresence
-            mode="popLayout"
-            custom={direction}
-            onExitComplete={() => { isAnimating.current = false; }}
-          >
+        <div
+          className="relative overflow-hidden"
+          onMouseEnter={() => { hovered.current = true; }}
+          onMouseLeave={() => { hovered.current = false; }}
+        >
+          <AnimatePresence mode="popLayout" custom={direction}>
             <motion.div
               key={current}
               custom={direction}
@@ -70,7 +83,6 @@ export default function BlogSection() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
-              onAnimationStart={() => { isAnimating.current = true; }}
               className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {visiblePosts.map((post, idx) => (
