@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Cinzel, Crimson_Text } from "next/font/google";
+import { IM_Fell_English, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
-const cinzel = Cinzel({
+// IM Fell English solo existe en weight 400 (normal + italic)
+const imFellEnglish = IM_Fell_English({
   variable: "--font-cinzel",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "900"],
+  weight: ["400"],
+  style: ["normal", "italic"],
 });
 
-const crimson = Crimson_Text({
+const sourceSerif4 = Source_Serif_4({
   variable: "--font-crimson",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
@@ -84,7 +86,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${cinzel.variable} ${crimson.variable} h-full antialiased scroll-smooth`}
+      className={`${imFellEnglish.variable} ${sourceSerif4.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         {/* Preconnect to external asset hosts */}
