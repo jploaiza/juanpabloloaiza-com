@@ -9,17 +9,21 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.86.1",
+    "@aws-sdk/client-s3": "^3.1027.0",
     "@calcom/embed-react": "^1.5.3",
     "@fortawesome/fontawesome-free": "^7.2.0",
     "@react-pdf/renderer": "^4.3.3",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
+    "@uiw/react-md-editor": "^4.1.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "next-pwa": "^5.6.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-markdown": "^10.1.0",
     "resend": "^6.10.0"
   },
   "devDependencies": {

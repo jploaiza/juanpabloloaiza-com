@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
+import ContentEditor from "@/components/admin/ContentEditor";
 import { ArrowLeft, X, Plus } from "lucide-react";
 
 function slugify(text: string): string {
@@ -210,13 +211,7 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
             </div>
             <div>
               <label className={labelClass}>Contenido *</label>
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Escribe el contenido del artículo en Markdown o HTML..."
-                className={`${inputClass} resize-y`}
-                style={{ minHeight: "400px" }}
-              />
+              <ContentEditor value={content} onChange={setContent} />
               {errors.content && <p className={errorClass}>{errors.content}</p>}
             </div>
           </div>

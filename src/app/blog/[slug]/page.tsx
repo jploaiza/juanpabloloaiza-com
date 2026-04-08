@@ -59,6 +59,7 @@ export default async function ArticlePage({
   const idx = allPosts.findIndex((p) => p.slug === slug);
   const previousPost = idx > 0 ? allPosts[idx - 1] : null;
   const nextPost = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
+  const relatedPosts = allPosts.filter((p) => p.slug !== slug).slice(0, 3);
 
   const image = post.imageUrl || OG_FALLBACK;
   const structuredData = {
@@ -88,7 +89,7 @@ export default async function ArticlePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <Header />
-      <ArticleContent post={post} previousPost={previousPost} nextPost={nextPost} />
+      <ArticleContent post={post} previousPost={previousPost} nextPost={nextPost} relatedPosts={relatedPosts} />
     </>
   );
 }

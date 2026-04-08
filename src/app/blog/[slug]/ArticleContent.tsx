@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Clock, ArrowLeft } from "lucide-react";
 import type { BlogPost } from "@/lib/blog-data";
-import { getAllBlogPosts } from "@/lib/blog-data";
+import ReactMarkdown from "react-markdown";
 
 interface Props {
   post: BlogPost;
@@ -12,10 +12,7 @@ interface Props {
   nextPost: BlogPost | null;
 }
 
-export default function ArticleContent({ post, previousPost, nextPost }: Props) {
-  const relatedPosts = getAllBlogPosts()
-    .filter((p) => p.id !== post.id)
-    .slice(0, 3);
+export default function ArticleContent({ post, previousPost, nextPost, relatedPosts }: Props & { relatedPosts: BlogPost[] }) {
 
   const shareUrl = `https://juanpabloloaiza.com/blog/${post.slug}`;
 
@@ -90,38 +87,69 @@ export default function ArticleContent({ post, previousPost, nextPost }: Props) 
             transition={{ duration: 0.6, delay: 0.12 }}
             className="font-crimson text-lg text-gray-300 leading-relaxed"
           >
-            {post.content.split("\n\n").map((paragraph, index) => {
-              if (paragraph.startsWith("##")) {
-                return (
-                  <h2
-                    key={index}
-                    className="text-2xl font-cinzel text-white mt-10 mb-4 font-bold border-l-2 border-[#C5A059] pl-4"
-                  >
-                    {paragraph.replace(/^##\s*/, "")}
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => (
+                  <h1 className="text-3xl font-cinzel text-white mt-10 mb-4 font-bold border-l-2 border-[#C5A059] pl-4">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-2xl font-cinzel text-white mt-10 mb-4 font-bold border-l-2 border-[#C5A059] pl-4">
+                    {children}
                   </h2>
-                );
-              }
-              if (paragraph.trim().startsWith("-") || paragraph.trim().match(/^\d+\./)) {
-                return (
-                  <ul key={index} className="list-none space-y-2 mb-6 pl-2">
-                    {paragraph
-                      .split("\n")
-                      .filter((line) => line.trim())
-                      .map((line, i) => (
-                        <li key={i} className="flex items-start gap-2 text-gray-300">
-                          <span className="text-[#C5A059] mt-1.5 flex-shrink-0 text-xs">▸</span>
-                          <span>{line.replace(/^[-\d+\.]\s*/, "")}</span>
-                        </li>
-                      ))}
-                  </ul>
-                );
-              }
-              return (
-                <p key={index} className="mb-6 text-gray-300">
-                  {paragraph}
-                </p>
-              );
-            })}
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-xl font-cinzel text-[#C5A059] mt-8 mb-3">
+                    {children}
+                  </h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-6 text-gray-300">{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-none space-y-2 mb-6 pl-2">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-none space-y-2 mb-6 pl-2">{children}</ol>
+                ),
+                li: ({ children }) => (
+                  <li className="flex items-start gap-2 text-gray-300">
+                    <span className="text-[#C5A059] mt-1.5 flex-shrink-0 text-xs">▸</span>
+                    <span>{children}</span>
+                  </li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="text-white font-semibold">{children}</strong>
+                ),
+                em: ({ children }) => (
+                  <em className="text-gray-200 italic">{children}</em>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-2 border-[#C5A059]/50 pl-4 my-6 text-gray-400 italic">
+                    {children}
+                  </blockquote>
+                ),
+                code: ({ children }) => (
+                  <code className="bg-white/5 text-[#C5A059] px-1.5 py-0.5 text-sm font-mono">
+                    {children}
+                  </code>
+                ),
+                img: ({ src, alt }) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={src}
+                    alt={alt ?? ""}
+                    className="w-full my-8 object-cover border border-white/5"
+                  />
+                ),
+                hr: () => (
+                  <hr className="border-0 border-t border-[#C5A059]/20 my-10" />
+                ),
+              }}
+            >
+              {post.content}
+            </ReactMarkdown>
           </motion.article>
 
           {/* Share — mobile/below content */}
