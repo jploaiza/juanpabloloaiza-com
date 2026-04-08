@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getBlogPostBySlug, getAllBlogPosts } from "@/lib/blog-data";
 import { notFound } from "next/navigation";
 import ArticleContent from "./ArticleContent";
+import { getPublishedPostBySlug, getAllPublishedPosts } from "@/lib/supabase/blog";
+
+export const dynamic = "force-dynamic";
 
 const OG_FALLBACK = "https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu";
-
-export function generateStaticParams() {
-  return getAllBlogPosts().map((post) => ({ slug: post.slug }));
-}
 
 export async function generateMetadata({
   params,
@@ -16,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPostBySlug(slug);
+  const post = await getPublishedPostBySlug(slug);
   if (!post) return {};
 
   const image = post.imageUrl || OG_FALLBACK;
@@ -54,10 +52,10 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getBlogPostBySlug(slug);
+  const post = await getPublishedPostBySlug(slug);
   if (!post) notFound();
 
-  const allPosts = getAllBlogPosts();
+  const allPosts = await getAllPublishedPosts();
   const idx = allPosts.findIndex((p) => p.slug === slug);
   const previousPost = idx > 0 ? allPosts[idx - 1] : null;
   const nextPost = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
@@ -68,7 +66,7 @@ export default async function ArticlePage({
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
-    image: image,
+    image,
     author: { "@type": "Person", name: post.author, url: "https://juanpabloloaiza.com" },
     publisher: {
       "@type": "Organization",

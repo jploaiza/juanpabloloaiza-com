@@ -3,25 +3,32 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Clock, ArrowRight, Search } from "lucide-react";
-import { getAllBlogPosts, getPaginatedPosts } from "@/lib/blog-data";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import type { BlogPost } from "@/lib/blog-data";
 
-const CATEGORIES = ["Todos", "Karma", "Relaciones", "Propósito", "Sanación", "Espíritus", "Ciencia"];
+const POSTS_PER_PAGE = 6;
 
-export default function BlogContent() {
+interface Props {
+  posts: BlogPost[];
+}
+
+export default function BlogContent({ posts }: Props) {
   const searchParams = useSearchParams();
   const page = parseInt(searchParams.get("page") || "1");
-  const allPosts = getAllBlogPosts();
-  const { posts, totalPages } = getPaginatedPosts(page);
   const [activeCategory, setActiveCategory] = useState("Todos");
 
-  const featuredPost = page === 1 ? allPosts[0] : null;
-  const gridPosts = page === 1 ? posts.filter((p) => p.id !== allPosts[0].id) : posts;
-  const filteredGrid =
-    activeCategory === "Todos"
-      ? gridPosts
-      : gridPosts.filter((p) => p.category === activeCategory);
+  const categories = ["Todos", ...Array.from(new Set(posts.map((p) => p.category)))];
+
+  const filtered =
+    activeCategory === "Todos" ? posts : posts.filter((p) => p.category === activeCategory);
+
+  const totalPages = Math.ceil(filtered.length / POSTS_PER_PAGE);
+  const start = (page - 1) * POSTS_PER_PAGE;
+  const pagePosts = filtered.slice(start, start + POSTS_PER_PAGE);
+
+  const featuredPost = page === 1 ? filtered[0] : null;
+  const gridPosts = page === 1 ? pagePosts.filter((p) => p.id !== filtered[0]?.id) : pagePosts;
 
   return (
     <main className="min-h-screen bg-[#020617] pt-28">
@@ -60,7 +67,7 @@ export default function BlogContent() {
 
             {/* Category filters */}
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
@@ -76,7 +83,7 @@ export default function BlogContent() {
             </div>
           </motion.div>
 
-          {/* Right: Featured "Editor's Choice" post */}
+          {/* Right: Featured post */}
           {featuredPost && (
             <motion.div
               initial={{ opacity: 0, x: 24 }}
@@ -85,11 +92,9 @@ export default function BlogContent() {
             >
               <Link href={`/blog/${featuredPost.slug}`} className="group block">
                 <div className="relative overflow-hidden border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition duration-300">
-                  {/* Badge */}
                   <div className="absolute top-4 left-4 z-20 bg-[#C5A059] text-[#020617] font-cinzel text-[9px] uppercase tracking-widest px-3 py-1 font-bold">
                     Editor&apos;s Choice
                   </div>
-                  {/* Image */}
                   <div className="relative h-64 overflow-hidden bg-black">
                     {featuredPost.imageUrl ? (
                       <img
@@ -102,7 +107,6 @@ export default function BlogContent() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-transparent" />
                   </div>
-                  {/* Content */}
                   <div className="bg-[#0b1120] p-5">
                     <span className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]">
                       {featuredPost.category}
@@ -133,7 +137,7 @@ export default function BlogContent() {
       {/* ── Posts Grid ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredGrid.map((post, idx) => (
+          {gridPosts.map((post, idx) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
@@ -142,7 +146,6 @@ export default function BlogContent() {
             >
               <Link href={`/blog/${post.slug}`} className="group block h-full">
                 <div className="relative overflow-hidden h-full bg-[#0b1120] border border-[#C5A059]/10 hover:border-[#C5A059]/35 transition duration-300 flex flex-col">
-                  {/* Image */}
                   <div className="relative h-48 overflow-hidden flex-shrink-0">
                     {post.imageUrl ? (
                       <img
@@ -162,7 +165,6 @@ export default function BlogContent() {
                       style={{ display: post.imageUrl ? "none" : "block" }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0b1120] via-transparent to-transparent opacity-70" />
-                    {/* Overlaid meta */}
                     <div className="absolute bottom-3 left-3">
                       <span className="font-cinzel text-[9px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-2 py-0.5">
                         {post.category}
@@ -173,7 +175,6 @@ export default function BlogContent() {
                       <span className="font-crimson">{post.readTime}</span>
                     </div>
                   </div>
-                  {/* Text */}
                   <div className="p-5 flex flex-col flex-1">
                     <h3 className="font-cinzel text-sm text-white leading-snug mb-2 line-clamp-2 group-hover:text-[#C5A059] transition-colors flex-1">
                       {post.title}

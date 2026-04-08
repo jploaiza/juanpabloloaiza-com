@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import BlogContent from "./BlogContent";
+import { getAllPublishedPosts } from "@/lib/supabase/blog";
+
+export const dynamic = "force-dynamic";
 
 const OG_IMAGE = "https://media.juanpabloloaiza.com/blog/la-conexion-entre-miedos-actuales-y-vidas-pasadas.webp";
 
@@ -27,12 +30,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const posts = await getAllPublishedPosts();
+
   return (
     <>
       <Header />
       <Suspense>
-        <BlogContent />
+        <BlogContent posts={posts} />
       </Suspense>
     </>
   );

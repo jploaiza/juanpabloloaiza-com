@@ -1,5 +1,5 @@
 export interface BlogPost {
-  id: number;
+  id: string | number;
   title: string;
   excerpt: string;
   content: string;
