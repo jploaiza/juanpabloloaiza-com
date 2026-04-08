@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Clock,
   Circle,
+  FileText,
 } from "lucide-react";
 import { formatDuration } from "@/lib/academy-data";
 
@@ -105,9 +106,18 @@ export default async function AdminPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-20">
         {/* Header */}
-        <div className="mb-10">
-          <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Panel de administración</p>
-          <h1 className="font-cinzel text-2xl sm:text-3xl text-white">Analytics & Estudiantes</h1>
+        <div className="flex items-start justify-between mb-10">
+          <div>
+            <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Panel de administración</p>
+            <h1 className="font-cinzel text-2xl sm:text-3xl text-white">Analytics & Estudiantes</h1>
+          </div>
+          <Link
+            href="/academy/admin/blog"
+            className="flex items-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-4 py-2.5 hover:bg-[#C5A059]/10 transition"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            Blog Manager
+          </Link>
         </div>
 
         {/* ── Stats cards ── */}
