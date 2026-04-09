@@ -1,12 +1,15 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
-import { Play } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import { Play, ChevronDown } from "lucide-react";
 import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
 
 const R2 = "https://media.juanpabloloaiza.com";
+
+// Static poster image shown before video plays (avoids black screen on iOS)
+const POSTER = "https://res.cloudinary.com/dvudfdhoi/image/upload/f_auto,q_auto,w_400/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu";
 
 const faqs = [
   {
@@ -77,14 +80,158 @@ const faqs = [
   },
 ];
 
+// Callback ref: plays the video as soon as it mounts — critical for iOS Safari
+// where autoplay must happen synchronously within the user-gesture call stack.
+function useVideoAutoplay(active: boolean) {
+  return useCallback(
+    (node: HTMLVideoElement | null) => {
+      if (node && active) {
+        node.play().catch(() => {});
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [active]
+  );
+}
+
+// Desktop: single video panel (shared, swaps content)
+function DesktopVideoPanel({ faq, index }: { faq: typeof faqs[0]; index: number }) {
+  const videoRef = useVideoAutoplay(true);
+  return (
+    <div className="flex flex-col items-center w-full">
+      <HeraldFrame size={64} className="w-full max-w-[280px] sm:max-w-[320px]">
+        <div
+          className="border border-[#C5A059]/30 overflow-hidden w-full"
+          style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #020617)" }}
+        >
+          <video
+            ref={videoRef}
+            key={faq.src}
+            src={faq.src}
+            poster={POSTER}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full h-full object-contain"
+            controlsList="nodownload"
+            disablePictureInPicture
+          />
+        </div>
+      </HeraldFrame>
+      <div className="mt-5 w-full max-w-[320px] px-1">
+        <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-1 font-cinzel">Reproduciendo</p>
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={index + "-q"}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.25 }}
+            className="text-white font-crimson text-lg leading-snug"
+          >
+            {faq.question}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={index + "-a"}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25 }}
+          className="mt-4 w-full max-w-[320px] p-5 bg-[#0f172a] border border-[#C5A059]/20"
+        >
+          <p className="text-gray-300 font-crimson text-base leading-relaxed">{faq.answer}</p>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Mobile: inline video inside accordion item
+function MobileAccordionItem({
+  faq,
+  index,
+  isOpen,
+  onToggle,
+}: {
+  faq: typeof faqs[0];
+  index: number;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const videoRef = useVideoAutoplay(isOpen);
+
+  return (
+    <div className={`border transition-all duration-300 ${isOpen ? "border-[#C5A059]/60 bg-[#0f172a]" : "border-[#C5A059]/15 bg-[#0f172a]/50"}`}>
+      {/* Header button */}
+      <button
+        onClick={onToggle}
+        className="w-full text-left p-4 flex items-center gap-3"
+      >
+        <span
+          className={`flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-cinzel font-bold transition-colors ${
+            isOpen ? "border-[#C5A059] text-[#C5A059] bg-[#C5A059]/10" : "border-gray-600 text-gray-500"
+          }`}
+        >
+          {index + 1}
+        </span>
+        <span className={`font-crimson text-base leading-snug flex-1 transition-colors ${isOpen ? "text-white" : "text-gray-400"}`}>
+          {faq.question}
+        </span>
+        <ChevronDown
+          size={16}
+          className={`flex-shrink-0 text-[#C5A059] transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {/* Expandable content */}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="px-4 pb-5 flex flex-col items-center gap-4">
+              {/* Video inline */}
+              <div
+                className="w-full max-w-[260px] border border-[#C5A059]/30 overflow-hidden"
+                style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #020617)" }}
+              >
+                <video
+                  ref={videoRef}
+                  key={faq.src}
+                  src={faq.src}
+                  poster={POSTER}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-contain"
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                />
+              </div>
+
+              {/* Answer */}
+              <div className="w-full p-4 bg-[#020617] border border-[#C5A059]/10">
+                <p className="text-gray-300 font-crimson text-base leading-relaxed">{faq.answer}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function FAQSection() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const hasInteracted = useRef(false);
 
-  // Stop every video on the page, then auto-play the selected one
   const handleSelect = (index: number) => {
-    hasInteracted.current = true;
     if (typeof document !== "undefined") {
       document.querySelectorAll("video").forEach((v) => {
         v.pause();
@@ -94,76 +241,17 @@ export default function FAQSection() {
     setActiveIndex(index);
   };
 
-  // Auto-play only when user has explicitly clicked a question
-  useEffect(() => {
-    if (!hasInteracted.current) return;
-    const timer = setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.play().catch(() => {});
-      }
-    }, 80);
-    return () => clearTimeout(timer);
-  }, [activeIndex]);
-
-  const active = faqs[activeIndex];
-
-  // Shared video + info panel (used in both mobile and desktop)
-  const VideoPanel = (
-    <div className="flex flex-col items-center w-full">
-      <HeraldFrame size={64} className="w-full max-w-[280px] sm:max-w-[320px]">
-        <div
-          className="bg-black border border-[#C5A059]/30 overflow-hidden w-full"
-          style={{ aspectRatio: "9/16" }}
-        >
-          <video
-            ref={videoRef}
-            key={active.src}
-            src={active.src}
-            controls
-            playsInline
-            className="w-full h-full object-contain"
-            controlsList="nodownload"
-            disablePictureInPicture
-          />
-        </div>
-      </HeraldFrame>
-
-      {/* Label */}
-      <div className="mt-5 w-full max-w-[320px] px-1">
-        <p className="text-[#C5A059] text-xs uppercase tracking-widest mb-1 font-cinzel">
-          Reproduciendo
-        </p>
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={activeIndex + "-q"}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.25 }}
-            className="text-white font-crimson text-lg leading-snug"
-          >
-            {active.question}
-          </motion.p>
-        </AnimatePresence>
-      </div>
-
-      {/* Answer */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeIndex + "-a"}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.25 }}
-          className="mt-4 w-full max-w-[320px] p-5 bg-[#0f172a] border border-[#C5A059]/20"
-        >
-          <p className="text-gray-300 font-crimson text-base leading-relaxed">
-            {active.answer}
-          </p>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
+  // Mobile accordion: toggle open/close, only one open at a time
+  const [mobileOpen, setMobileOpen] = useState<number | null>(null);
+  const handleMobileToggle = (index: number) => {
+    if (typeof document !== "undefined") {
+      document.querySelectorAll("video").forEach((v) => {
+        v.pause();
+        v.currentTime = 0;
+      });
+    }
+    setMobileOpen((prev) => (prev === index ? null : index));
+  };
 
   return (
     <section
@@ -178,73 +266,35 @@ export default function FAQSection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">
-            Tus Dudas
-          </span>
-          <h2 className="text-2xl sm:text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
-            Preguntas Frecuentes
-          </h2>
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Tus Dudas</span>
+          <h2 className="text-2xl sm:text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Preguntas Frecuentes</h2>
           <ScrollDivider className="mt-6" />
         </motion.div>
 
-        {/* ── MOBILE layout (< lg) ── */}
-        <div className="lg:hidden flex flex-col gap-6">
-          {/* Video panel — fixed area, content swaps */}
-          <div className="flex justify-center">{VideoPanel}</div>
-
-          {/* Question list — vertical carousel feel */}
-          <div className="space-y-2">
-            {faqs.map((faq, index) => (
-              <button
-                key={index}
-                onClick={() => handleSelect(index)}
-                className={`w-full text-left p-4 border transition-all duration-300 group ${
-                  activeIndex === index
-                    ? "border-[#C5A059]/60 bg-[#0f172a]"
-                    : "border-[#C5A059]/15 bg-[#0f172a]/50 hover:border-[#C5A059]/40"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-cinzel font-bold transition-colors ${
-                      activeIndex === index
-                        ? "border-[#C5A059] text-[#C5A059] bg-[#C5A059]/10"
-                        : "border-gray-600 text-gray-500"
-                    }`}
-                  >
-                    {index + 1}
-                  </span>
-                  <span
-                    className={`font-crimson text-base leading-snug transition-colors ${
-                      activeIndex === index
-                        ? "text-white"
-                        : "text-gray-400 group-hover:text-gray-200"
-                    }`}
-                  >
-                    {faq.question}
-                  </span>
-                  {activeIndex === index && (
-                    <Play size={11} className="text-[#C5A059] ml-auto flex-shrink-0" />
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
+        {/* ── MOBILE: Accordion (< lg) ── */}
+        <div className="lg:hidden space-y-2">
+          {faqs.map((faq, index) => (
+            <MobileAccordionItem
+              key={index}
+              faq={faq}
+              index={index}
+              isOpen={mobileOpen === index}
+              onToggle={() => handleMobileToggle(index)}
+            />
+          ))}
         </div>
 
-        {/* ── DESKTOP layout (lg+) ── */}
+        {/* ── DESKTOP: Sticky video + question list (lg+) ── */}
         <div className="hidden lg:grid lg:grid-cols-2 gap-10 items-start">
-          {/* Left: sticky video panel */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="lg:sticky lg:top-32 flex justify-center"
           >
-            {VideoPanel}
+            <DesktopVideoPanel faq={faqs[activeIndex]} index={activeIndex} />
           </motion.div>
 
-          {/* Right: question list */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -273,9 +323,7 @@ export default function FAQSection() {
                   </span>
                   <span
                     className={`font-crimson text-base leading-snug transition-colors ${
-                      activeIndex === index
-                        ? "text-white"
-                        : "text-gray-400 group-hover:text-gray-200"
+                      activeIndex === index ? "text-white" : "text-gray-400 group-hover:text-gray-200"
                     }`}
                   >
                     {faq.question}

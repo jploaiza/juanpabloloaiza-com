@@ -4,7 +4,7 @@ import ScrollDivider from "@/components/ScrollDivider";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Tag, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { getAllPublishedPosts } from "@/lib/supabase/blog";
 
 const CARDS = 3;
@@ -16,6 +16,15 @@ export default function BlogSection() {
   useEffect(() => {
     getAllPublishedPosts().then(setAllPosts);
   }, []);
+
+  // Latest post first, then up to 5 random from the rest — max 6 total
+  const posts = useMemo(() => {
+    if (allPosts.length === 0) return [];
+    const latest = allPosts[0];
+    const rest = [...allPosts.slice(1)].sort(() => Math.random() - 0.5).slice(0, 5);
+    return [latest, ...rest];
+  }, [allPosts]);
+
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const isAnimating = useRef(false);
@@ -25,9 +34,9 @@ export default function BlogSection() {
     if (isAnimating.current) return;
     isAnimating.current = true;
     setDirection(dir);
-    setCurrent((c) => (c + dir + allPosts.length) % allPosts.length);
+    setCurrent((c) => (c + dir + posts.length) % posts.length);
     setTimeout(() => { isAnimating.current = false; }, 600);
-  }, [allPosts.length]);
+  }, [posts.length]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -45,7 +54,7 @@ export default function BlogSection() {
   };
 
   const visiblePosts = Array.from({ length: CARDS }, (_, i) =>
-    allPosts[(current + i) % allPosts.length]
+    posts[(current + i) % posts.length]
   );
 
   const variants = {
@@ -54,7 +63,7 @@ export default function BlogSection() {
     exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
   };
 
-  if (allPosts.length === 0) return null;
+  if (posts.length === 0) return null;
 
   return (
     <section id="blog" className="py-20 sm:py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
@@ -89,10 +98,10 @@ export default function BlogSection() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
-              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {visiblePosts.map((post, idx) => (
-                <Link key={`${post.id}-${idx}`} href={`/blog/${post.slug}`} className="group block">
+                <Link key={`${post.id}-${idx}`} href={`/blog/${post.slug}`} className={`group block${idx > 0 ? " hidden sm:block" : ""}`}>
                   <div className="relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition duration-300 overflow-hidden h-full">
                     <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/40 z-10" />
                     <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/40 z-10" />
@@ -149,7 +158,7 @@ export default function BlogSection() {
           </button>
 
           <div className="flex gap-2">
-            {allPosts.map((_, i) => (
+            {posts.map((_, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}

@@ -22,15 +22,18 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/60 via-transparent to-[#020617]/70" />
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#312e81]/15 to-transparent" />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center flex flex-col items-center gap-10 py-40">
-        {/* Badge */}
+      {/* Content — shifted upward with asymmetric padding */}
+      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center flex flex-col items-center gap-6 sm:gap-8 pt-16 pb-32 sm:pt-20 sm:pb-40">
+        {/* Badge — responsive, wraps gracefully on mobile */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
         >
-          <span className="text-[#C5A059] font-cinzel font-semibold uppercase tracking-[0.2em] text-[10px] sm:text-[11px] md:text-[13px] border border-[#C5A059]/30 py-2 px-4 sm:px-6 rounded-sm">
-            Hipnosis Terapéutica · Regresión a Vidas Pasadas
+          <span className="inline-flex flex-wrap justify-center gap-x-1 text-[#C5A059] font-cinzel font-semibold uppercase tracking-[0.15em] text-[9px] sm:text-[11px] md:text-[13px] border border-[#C5A059]/30 py-2 px-4 sm:px-6 rounded-sm leading-relaxed">
+            <span>Hipnosis Terapéutica</span>
+            <span className="opacity-60">·</span>
+            <span>Regresión a Vidas Pasadas</span>
           </span>
         </motion.div>
 
@@ -39,7 +42,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-          className="text-[1.75rem] sm:text-4xl md:text-5xl lg:text-6xl text-white leading-tight font-cinzel font-bold"
+          className="text-[2rem] sm:text-4xl md:text-5xl lg:text-6xl text-white leading-tight font-cinzel font-bold"
         >
           <span className="block whitespace-nowrap">Devuelve la Felicidad</span>
           <span className="block text-[#C5A059]">a tu Vida</span>
