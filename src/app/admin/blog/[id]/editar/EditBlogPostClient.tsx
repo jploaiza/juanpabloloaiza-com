@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import ContentEditor from "@/components/admin/ContentEditor";
-import { ArrowLeft, X, Plus, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, X, Plus, Trash2, Upload, Sparkles } from "lucide-react";
 
 type BlogPost = {
   id: string;
@@ -67,6 +67,8 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [seoImproving, setSeoImproving] = useState(false);
+  const [seoError, setSeoError] = useState("");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,6 +90,37 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSeoImprove = async () => {
+    if (!title.trim() || !content.trim()) {
+      setSeoError("Agrega título y contenido antes de mejorar SEO.");
+      return;
+    }
+    setSeoError("");
+    setSeoImproving(true);
+    try {
+      const res = await fetch("/api/admin/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "seo",
+          input: JSON.stringify({ title, excerpt, content }),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSeoError(data.error ?? "Error al mejorar SEO.");
+      } else {
+        if (data.seoTitle) setSeoTitle(data.seoTitle.slice(0, 60));
+        if (data.seoDescription) setSeoDescription(data.seoDescription.slice(0, 160));
+        if (data.excerpt) setExcerpt(data.excerpt.slice(0, 300));
+      }
+    } catch {
+      setSeoError("Error de conexión.");
+    } finally {
+      setSeoImproving(false);
     }
   };
 
@@ -387,6 +420,16 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
                 </p>
               )}
               {uploadError && <p className="text-red-400 text-xs font-crimson mt-1">{uploadError}</p>}
+              {featuredImageUrl && !uploading && (
+                <a
+                  href={featuredImageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-cinzel text-[8px] tracking-widest text-[#C5A059]/50 hover:text-[#C5A059] mt-1 block truncate transition-colors"
+                >
+                  {featuredImageUrl}
+                </a>
+              )}
               {featuredImageUrl && (
                 <div className="mt-2 border border-white/5 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -448,7 +491,19 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
         <div className="relative bg-[#0a1628] border border-white/5 p-6 overflow-hidden">
           <ScrollworkCorners size={40} opacity={0.7} />
 
-          <h2 className="font-cinzel text-xs uppercase tracking-widest text-white mb-6">SEO</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-cinzel text-xs uppercase tracking-widest text-white">SEO</h2>
+            <button
+              type="button"
+              onClick={handleSeoImprove}
+              disabled={seoImproving}
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 disabled:opacity-50 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+            >
+              <Sparkles className="w-3 h-3" />
+              {seoImproving ? "Generando..." : "Mejorar con IA"}
+            </button>
+          </div>
+          {seoError && <p className="text-red-400 text-xs font-crimson mb-4">{seoError}</p>}
 
           <div className="space-y-5">
             <div>

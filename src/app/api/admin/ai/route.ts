@@ -30,6 +30,21 @@ Devuelve ÚNICAMENTE el contenido mejorado en Markdown:
 
 ${content}`;
 
+const SEO_PROMPT = (title: string, excerpt: string, content: string) => `Eres un experto en SEO para contenido espiritual y terapéutico en español.
+
+Analiza este artículo de blog y genera campos SEO optimizados para Google.
+
+Título del artículo: ${title}
+Extracto actual: ${excerpt}
+Contenido: ${content.slice(0, 3000)}
+
+Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, sin explicaciones):
+{
+  "seoTitle": "título SEO optimizado, máximo 60 caracteres, incluye keyword principal",
+  "seoDescription": "meta descripción atractiva para clicks, máximo 160 caracteres",
+  "excerpt": "extracto del artículo para listados, máximo 300 caracteres, engancha al lector"
+}`;
+
 export async function POST(req: NextRequest) {
   // Auth guard
   const supabase = await createClient();
@@ -53,7 +68,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { action, input } = body as { action: "generate" | "improve"; input: string };
+  const { action, input } = body as { action: "generate" | "improve" | "seo"; input: string };
 
   if (!action || !input?.trim()) {
     return NextResponse.json({ error: "Faltan campos requeridos." }, { status: 400 });
@@ -61,13 +76,24 @@ export async function POST(req: NextRequest) {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  const prompt = action === "generate" ? GENERATE_PROMPT(input) : IMPROVE_PROMPT(input);
+  let prompt: string;
+  if (action === "seo") {
+    let parsed: { title: string; excerpt: string; content: string };
+    try {
+      parsed = JSON.parse(input);
+    } catch {
+      return NextResponse.json({ error: "Input inválido para acción SEO." }, { status: 400 });
+    }
+    prompt = SEO_PROMPT(parsed.title, parsed.excerpt, parsed.content);
+  } else {
+    prompt = action === "generate" ? GENERATE_PROMPT(input) : IMPROVE_PROMPT(input);
+  }
 
   let message;
   try {
     message = await client.messages.create({
       model: "claude-3-5-sonnet-20241022",
-      max_tokens: 4096,
+      max_tokens: action === "seo" ? 512 : 4096,
       messages: [{ role: "user", content: prompt }],
     });
   } catch (err) {
@@ -76,8 +102,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Anthropic: ${msg}` }, { status: 500 });
   }
 
-  const content =
-    message.content[0].type === "text" ? message.content[0].text : "";
+  const raw = message.content[0].type === "text" ? message.content[0].text : "";
 
-  return NextResponse.json({ content });
+  if (action === "seo") {
+    try {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      const seoData = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+      return NextResponse.json(seoData);
+    } catch {
+      return NextResponse.json({ error: "IA no devolvió JSON válido.", raw }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ content: raw });
 }
