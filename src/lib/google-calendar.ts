@@ -84,6 +84,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
       client_secret: process.env.GOOGLE_CLIENT_SECRET!,
       grant_type: "refresh_token",
     }),
+    signal: AbortSignal.timeout(6000),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error_description ?? data.error ?? "Token refresh failed");
@@ -143,7 +144,7 @@ export async function getWeekEvents(accessToken: string, calendarId = "primary")
   const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${params}`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
-    signal: AbortSignal.timeout(10000),
+    signal: AbortSignal.timeout(7000),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error?.message ?? "Google Calendar fetch failed");

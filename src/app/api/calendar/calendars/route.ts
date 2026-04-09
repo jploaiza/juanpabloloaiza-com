@@ -11,6 +11,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { type GCalTokenData, getValidToken } from "@/lib/google-calendar";
 
+export const maxDuration = 25;
+
 interface GCalCalendar {
   id: string;
   summary: string;
