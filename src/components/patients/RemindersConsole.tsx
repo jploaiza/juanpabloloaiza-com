@@ -37,6 +37,9 @@ type Channel = "whatsapp" | "email";
 const DEFAULT_TEMPLATE =
   "Hola {nombre} 👋 Te escribo para recordarte que tienes tu sesión disponible esta semana. Te quedan {sesiones} sesiones y tu pack vence el {vencimiento}. ¿Agendamos? 🌟";
 
+const DEFAULT_TEMPLATE_SIN_SESIONES =
+  "Hola {nombre} 👋 Ha sido un honor acompañarte en tu proceso de sanación. Para seguir avanzando juntos, te invito a renovar tus sesiones y agendar cuando lo desees — cada paso cuenta en este camino. ¿Continuamos? 🌟";
+
 const VARIABLES = [
   { label: "{nombre}", desc: "Primer nombre" },
   { label: "{sesiones}", desc: "Sesiones restantes" },
@@ -83,6 +86,8 @@ export default function RemindersConsole() {
 
   // Template
   const [template, setTemplate] = useState(DEFAULT_TEMPLATE);
+  const [templateSinSesiones, setTemplateSinSesiones] = useState(DEFAULT_TEMPLATE_SIN_SESIONES);
+  const [activeTemplateTab, setActiveTemplateTab] = useState<"con_sesiones" | "sin_sesiones">("con_sesiones");
   const [showPreview, setShowPreview] = useState(false);
   const [previewPatient, setPreviewPatient] = useState<Patient | null>(null);
 
@@ -156,14 +161,19 @@ export default function RemindersConsole() {
 
   useEffect(() => { loadCalendarStatus(); }, [loadCalendarStatus]);
 
-  // Persist template in localStorage
+  // Persist templates in localStorage
   useEffect(() => {
     const saved = localStorage.getItem("crm_reminder_template");
     if (saved) setTemplate(saved);
+    const savedSin = localStorage.getItem("crm_reminder_template_sin_sesiones");
+    if (savedSin) setTemplateSinSesiones(savedSin);
   }, []);
   useEffect(() => {
     localStorage.setItem("crm_reminder_template", template);
   }, [template]);
+  useEffect(() => {
+    localStorage.setItem("crm_reminder_template_sin_sesiones", templateSinSesiones);
+  }, [templateSinSesiones]);
 
   // Filtered patients
   const filtered = patients
@@ -216,15 +226,47 @@ export default function RemindersConsole() {
     abortRef.current = false;
     setProgress({ current: 0, total: selectedIds.length, results: [] });
 
+    function templateFor(patientId: string): string {
+      const p = patients.find((pt) => pt.id === patientId);
+      return p && sessionsLeft(p) === 0 ? templateSinSesiones : template;
+    }
+
     if (sendMode === "batch") {
       try {
-        const res = await fetch("/api/patients/send-reminders-now", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ patient_ids: selectedIds, whatsapp_template: template, channels }),
+        // Split into two groups: with sessions and without sessions
+        const withSessions = selectedIds.filter((id) => {
+          const p = patients.find((pt) => pt.id === id);
+          return !p || sessionsLeft(p) > 0;
         });
-        const data = await res.json();
-        setProgress({ current: selectedIds.length, total: selectedIds.length, results: data.results ?? [] });
+        const withoutSessions = selectedIds.filter((id) => {
+          const p = patients.find((pt) => pt.id === id);
+          return p && sessionsLeft(p) === 0;
+        });
+
+        const allResults: SendResult[] = [];
+        const calls: Promise<void>[] = [];
+
+        if (withSessions.length) {
+          calls.push(
+            fetch("/api/patients/send-reminders-now", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ patient_ids: withSessions, whatsapp_template: template, channels }),
+            }).then((r) => r.json()).then((d) => { allResults.push(...(d.results ?? [])); })
+          );
+        }
+        if (withoutSessions.length) {
+          calls.push(
+            fetch("/api/patients/send-reminders-now", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ patient_ids: withoutSessions, whatsapp_template: templateSinSesiones, channels }),
+            }).then((r) => r.json()).then((d) => { allResults.push(...(d.results ?? [])); })
+          );
+        }
+
+        await Promise.all(calls);
+        setProgress({ current: selectedIds.length, total: selectedIds.length, results: allResults });
       } catch {
         setProgress((p) => p ? { ...p, results: [...p.results, { id: "", name: "Error de red", email: false, whatsapp: false }] } : null);
       }
@@ -237,7 +279,7 @@ export default function RemindersConsole() {
           const res = await fetch("/api/patients/send-reminders-now", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patient_ids: [selectedIds[i]], whatsapp_template: template, channels }),
+            body: JSON.stringify({ patient_ids: [selectedIds[i]], whatsapp_template: templateFor(selectedIds[i]), channels }),
           });
           const data = await res.json();
           if (data.results?.[0]) results.push(data.results[0]);
@@ -262,7 +304,11 @@ export default function RemindersConsole() {
   }
 
   function insertVar(v: string) {
-    setTemplate((t) => t + v);
+    if (activeTemplateTab === "sin_sesiones") {
+      setTemplateSinSesiones((t) => t + v);
+    } else {
+      setTemplate((t) => t + v);
+    }
   }
 
   // ── Render ──────────────────────────────────────────────────
@@ -350,7 +396,7 @@ export default function RemindersConsole() {
                 </div>
 
                 <div className="flex-shrink-0 flex items-center gap-1.5 text-[10px]">
-                  <span className="text-gray-500 font-cinzel">{sl}s</span>
+                  <span className={`font-cinzel ${sl === 0 ? "text-amber-400" : "text-gray-500"}`}>{sl}s</span>
                   <span className={`font-cinzel ${daysLeftColor(dl)}`}>{dl}d</span>
                   <span className={`px-1.5 py-0.5 border text-[9px] font-cinzel uppercase ${statusColor(patient.status)}`}>
                     {statusLabel(patient.status)[0]}
@@ -427,7 +473,37 @@ export default function RemindersConsole() {
             </button>
           </div>
 
+          {/* Template tabs */}
+          <div className="flex border-b border-[#C5A059]/10">
+            <button
+              onClick={() => setActiveTemplateTab("con_sesiones")}
+              className={`flex-1 px-4 py-2 text-[10px] font-cinzel uppercase tracking-widest transition border-b-2 -mb-px ${
+                activeTemplateTab === "con_sesiones"
+                  ? "border-[#C5A059] text-[#C5A059]"
+                  : "border-transparent text-gray-600 hover:text-gray-400"
+              }`}
+            >
+              Con sesiones
+            </button>
+            <button
+              onClick={() => setActiveTemplateTab("sin_sesiones")}
+              className={`flex-1 px-4 py-2 text-[10px] font-cinzel uppercase tracking-widest transition border-b-2 -mb-px ${
+                activeTemplateTab === "sin_sesiones"
+                  ? "border-amber-500 text-amber-400"
+                  : "border-transparent text-gray-600 hover:text-gray-400"
+              }`}
+            >
+              Sin sesiones
+            </button>
+          </div>
+
           <div className="p-4 space-y-3">
+            {activeTemplateTab === "sin_sesiones" && (
+              <p className="text-[10px] font-crimson text-amber-400/70 italic">
+                Esta plantilla se envía automáticamente a los pacientes con 0 sesiones restantes.
+              </p>
+            )}
+
             {/* Variables */}
             <div className="flex flex-wrap gap-1.5">
               {VARIABLES.map(({ label, desc }) => (
@@ -443,27 +519,46 @@ export default function RemindersConsole() {
             </div>
 
             {/* Textarea */}
-            <textarea
-              value={template}
-              onChange={(e) => setTemplate(e.target.value)}
-              rows={4}
-              className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
-              placeholder="Escribe el mensaje..."
-            />
+            {activeTemplateTab === "con_sesiones" ? (
+              <textarea
+                value={template}
+                onChange={(e) => setTemplate(e.target.value)}
+                rows={4}
+                className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
+                placeholder="Escribe el mensaje..."
+              />
+            ) : (
+              <textarea
+                value={templateSinSesiones}
+                onChange={(e) => setTemplateSinSesiones(e.target.value)}
+                rows={4}
+                className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
+                placeholder="Escribe el mensaje para pacientes sin sesiones..."
+              />
+            )}
 
             {/* Preview */}
             {showPreview && previewPatient && (
               <div className="bg-emerald-950/40 border border-emerald-700/30 rounded-sm p-3">
                 <p className="text-[10px] font-cinzel text-emerald-400/70 uppercase tracking-widest mb-1.5">Vista previa con {previewPatient.first_name}</p>
                 <p className="text-emerald-100 font-crimson text-sm leading-relaxed whitespace-pre-wrap">
-                  {renderPreview(template, previewPatient)}
+                  {renderPreview(
+                    activeTemplateTab === "sin_sesiones" ? templateSinSesiones : template,
+                    previewPatient
+                  )}
                 </p>
               </div>
             )}
 
             {/* Reset template */}
             <button
-              onClick={() => setTemplate(DEFAULT_TEMPLATE)}
+              onClick={() => {
+                if (activeTemplateTab === "sin_sesiones") {
+                  setTemplateSinSesiones(DEFAULT_TEMPLATE_SIN_SESIONES);
+                } else {
+                  setTemplate(DEFAULT_TEMPLATE);
+                }
+              }}
               className="text-[10px] font-cinzel text-gray-600 hover:text-gray-400 transition"
             >
               Restablecer plantilla
