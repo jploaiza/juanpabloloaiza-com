@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { Users, Award, TrendingUp, Clock, Activity, UserPlus } from "lucide-react";
+import { Users, Award, TrendingUp, Clock, Activity, UserPlus, BookOpen, BarChart2 } from "lucide-react";
 
-export const metadata: Metadata = { title: "Analytics Extendido — Admin" };
+export const metadata: Metadata = { title: "Analytics — Admin" };
 
 function formatMinutes(seconds: number): string {
   const mins = Math.round(seconds / 60);
@@ -56,6 +56,7 @@ export default async function AnalyticsPage() {
   const adminSb = await createAdminClient();
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 86400000).toISOString();
 
   const [
     { data: enrollments },
@@ -65,6 +66,7 @@ export default async function AnalyticsPage() {
     { data: newEnrollments },
     { data: allProfiles },
     { data: lessons },
+    { data: recentEnrollments },
   ] = await Promise.all([
     adminSb.from("enrollments").select("user_id, enrolled_at, completed_at"),
     adminSb.from("certificates").select("user_id, issued_at"),
@@ -83,6 +85,7 @@ export default async function AnalyticsPage() {
       .gte("enrolled_at", thirtyDaysAgo),
     adminSb.from("profiles").select("id, full_name, email, role"),
     adminSb.from("lessons").select("id, title, course_id").eq("is_published", true),
+    adminSb.from("enrollments").select("enrolled_at").gte("enrolled_at", sixMonthsAgo),
   ]);
 
   // ── KPI Calculations ──────────────────────────────────────────
@@ -182,6 +185,35 @@ export default async function AnalyticsPage() {
     })
     .sort((a, b) => b.progressPct - a.progressPct);
 
+  // ── Monthly enrollments (last 6 months) ──────────────────────
+  function last6Months(): string[] {
+    const months: string[] = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    }
+    return months;
+  }
+  const months6 = last6Months();
+  const monthlyEnrollMap: Record<string, number> = Object.fromEntries(months6.map((m) => [m, 0]));
+  for (const e of recentEnrollments ?? []) {
+    const mk = e.enrolled_at?.slice(0, 7) ?? "";
+    if (mk in monthlyEnrollMap) monthlyEnrollMap[mk]++;
+  }
+  const monthlyEnrollments = months6.map((m) => ({ month: m, count: monthlyEnrollMap[m] }));
+
+  // ── Progress distribution buckets ─────────────────────────────
+  const progBuckets = { "0%": 0, "1–25%": 0, "26–50%": 0, "51–75%": 0, "76–99%": 0, "100%": 0 };
+  for (const s of studentRows) {
+    if (s.progressPct === 0) progBuckets["0%"]++;
+    else if (s.progressPct <= 25) progBuckets["1–25%"]++;
+    else if (s.progressPct <= 50) progBuckets["26–50%"]++;
+    else if (s.progressPct <= 75) progBuckets["51–75%"]++;
+    else if (s.progressPct < 100) progBuckets["76–99%"]++;
+    else progBuckets["100%"]++;
+  }
+
   const kpiCards = [
     {
       icon: Users,
@@ -247,6 +279,67 @@ export default async function AnalyticsPage() {
             <p className="font-crimson text-xs text-gray-600">{sub}</p>
           </div>
         ))}
+      </div>
+
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10">
+        {/* Monthly enrollments bar chart */}
+        <div className="bg-[#0a1628] border border-white/5 p-5 relative overflow-hidden">
+          <ScrollworkCorners size={32} opacity={0.5} />
+          <div className="flex items-center gap-2 mb-1">
+            <UserPlus className="w-4 h-4 text-[#C5A059]" />
+            <h2 className="font-cinzel text-xs uppercase tracking-widest text-white">Inscripciones por mes</h2>
+          </div>
+          <p className="font-crimson text-xs text-gray-600 mb-4">Últimos 6 meses</p>
+          <div className="flex items-end gap-2 h-24">
+            {(() => {
+              const maxVal = Math.max(...monthlyEnrollments.map((d) => d.count), 1);
+              return monthlyEnrollments.map((d) => (
+                <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex items-end justify-center" style={{ height: "64px" }}>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: `${Math.max(2, Math.round((d.count / maxVal) * 64))}px`,
+                        backgroundColor: "#C5A059",
+                        opacity: d.count === 0 ? 0.12 : 0.85,
+                      }}
+                    />
+                  </div>
+                  <span className="font-cinzel text-[9px] text-gray-600">{d.month.slice(5)}</span>
+                  <span className="font-cinzel text-[10px] text-gray-400">{d.count}</span>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+
+        {/* Progress distribution */}
+        <div className="bg-[#0a1628] border border-white/5 p-5 relative overflow-hidden">
+          <ScrollworkCorners size={32} opacity={0.5} />
+          <div className="flex items-center gap-2 mb-1">
+            <BarChart2 className="w-4 h-4 text-[#C5A059]" />
+            <h2 className="font-cinzel text-xs uppercase tracking-widest text-white">Distribución de progreso</h2>
+          </div>
+          <p className="font-crimson text-xs text-gray-600 mb-4">Estudiantes por rango de avance</p>
+          <div className="space-y-2">
+            {Object.entries(progBuckets).map(([label, count]) => {
+              const pct = studentRows.length > 0 ? Math.round((count / studentRows.length) * 100) : 0;
+              return (
+                <div key={label} className="flex items-center gap-3">
+                  <span className="font-cinzel text-[9px] text-gray-500 w-12 flex-shrink-0">{label}</span>
+                  <div className="flex-1 h-2 bg-[#020617]">
+                    <div
+                      className="h-full bg-[#C5A059] transition-all duration-500"
+                      style={{ width: `${pct}%`, opacity: count === 0 ? 0.1 : 0.8 }}
+                    />
+                  </div>
+                  <span className="font-cinzel text-[10px] text-gray-400 w-6 text-right">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Watch integrity section */}
