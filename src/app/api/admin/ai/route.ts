@@ -44,7 +44,7 @@ Devuelve ÚNICAMENTE un JSON válido (sin markdown wrapper, sin explicaciones) c
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
   "seoTitle": "título SEO optimizado para Google, máximo 60 caracteres",
   "seoDescription": "meta descripción atractiva para clicks, máximo 155 caracteres",
-  "imagePrompt": "prompt en inglés para generar imagen: ethereal, spiritual, [tema específico del artículo], mystical atmosphere, soft light, professional photography, no text, no faces"
+  "imagePrompt": "cinematic realistic photo, ultra-detailed, [tema específico del artículo], ethereal spiritual atmosphere, soft golden light, mystical depth, professional photography, 8k resolution, --ar 16:9, no text, no faces, no logos"
 }`;
 
 const IMPROVE_PROMPT = (content: string) => `Eres un editor experto en contenido espiritual y terapéutico en español.

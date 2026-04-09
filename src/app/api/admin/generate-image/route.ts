@@ -14,10 +14,11 @@ const s3 = new S3Client({
 
 const IMAGE_PROMPT_SYSTEM = `You are an expert at writing prompts for AI image generation.
 Given a blog article about spiritual therapy, hypnosis, and past-life regression,
-write a short, vivid image generation prompt in English.
-Style: ethereal, spiritual, peaceful, mystical, professional photography.
-Avoid: text, people's faces, logos, violence.
-Return ONLY the prompt, nothing else. Max 100 words.`;
+write a cinematic, ultra-realistic image generation prompt in English.
+Style: cinematic realistic photo, ultra-detailed, ethereal spiritual atmosphere, soft golden light, mystical depth, professional photography, 8k resolution.
+Always end the prompt with: --ar 16:9
+Avoid: text, people's faces, logos, violence, cartoons, illustrations.
+Return ONLY the prompt, nothing else. Max 120 words.`;
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
