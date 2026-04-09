@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import AcademyHeader from "@/components/academy/AcademyHeader";
 import AcademyCard from "@/components/academy/AcademyCard";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import { FileText, Plus, Pencil } from "lucide-react";
@@ -56,11 +55,7 @@ export default async function AcademyBlogManagerPage() {
   const draftCount = allPosts.filter((p) => p.status === "draft").length;
 
   return (
-    <div className="min-h-screen bg-[#020617]">
-      <AcademyHeader user={profile} />
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_70%_50%_at_30%_0%,rgba(197,160,89,0.04),transparent)]" />
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-28 pb-20">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-20">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
@@ -208,7 +203,6 @@ export default async function AcademyBlogManagerPage() {
             </div>
           )}
         </AcademyCard>
-      </main>
-    </div>
+    </main>
   );
 }

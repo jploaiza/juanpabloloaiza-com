@@ -103,7 +103,7 @@ export default async function AnalyticsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20">
       <div className="mb-8">
         <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Admin</p>
-        <h1 className="font-cinzel text-2xl text-white">Analytics</h1>
+        <h1 className="font-cinzel text-2xl text-white pt-8">Analytics</h1>
       </div>
 
       {/* Site analytics */}

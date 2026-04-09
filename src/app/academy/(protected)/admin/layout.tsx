@@ -1,33 +1,68 @@
-/**
- * Admin layout — sobreescribe las fuentes del sitio principal
- * por Plus Jakarta Sans: sans-serif moderna con antialiasing perfecto
- * para texto pequeño sobre fondo oscuro.
- *
- * Solo aplica a /academy/admin/* sin tocar componentes ni páginas.
- */
-
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { LayoutDashboard, Users, FileText, BarChart2 } from "lucide-react";
+import AcademyHeader from "@/components/academy/AcademyHeader";
+import AdminNavLink from "@/components/academy/AdminNavLink";
 
-const jakartaSans = Plus_Jakarta_Sans({
+const jakarta = Plus_Jakarta_Sans({
   variable: "--font-admin",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+const NAV_LINKS = [
+  { href: "/academy/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/academy/admin/crm", label: "CRM", icon: Users },
+  { href: "/academy/admin/blog", label: "Blog", icon: FileText },
+  { href: "/academy/admin/analytics", label: "Analíticas", icon: BarChart2 },
+];
+
+export default async function AcademyAdminLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/academy/login");
+
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  if (profile?.role !== "admin") redirect("/academy/dashboard");
+
   return (
     <div
-      data-admin-panel
-      className={jakartaSans.variable}
-      style={
-        {
-          "--font-cinzel": "var(--font-admin)",
-          "--font-crimson": "var(--font-admin)",
-        } as React.CSSProperties
-      }
+      className={`${jakarta.variable} min-h-screen bg-[#020617]`}
+      style={{ "--font-cinzel": "var(--font-admin)", "--font-crimson": "var(--font-admin)" } as React.CSSProperties}
     >
-      {children}
+      <AcademyHeader user={profile} />
+
+      {/* Sidebar — desktop */}
+      <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-0 w-52 bg-[#020617] border-r border-white/5 z-40 pt-8 pb-6 px-3">
+        <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/50 mb-5 px-2">
+          Admin
+        </p>
+        <nav className="flex flex-col gap-0.5 flex-1">
+          {NAV_LINKS.map(({ href, label, icon, exact }) => (
+            <AdminNavLink key={href} href={href} label={label} icon={icon} exact={exact} />
+          ))}
+        </nav>
+        <div className="border-t border-white/5 pt-4 px-2">
+          <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600 truncate">
+            {profile?.full_name ?? profile?.email}
+          </p>
+          <p className="font-cinzel text-[9px] text-[#C5A059]/40 mt-0.5">Administrador</p>
+        </div>
+      </aside>
+
+      {/* Bottom nav — mobile */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#020617]/98 backdrop-blur-xl border-t border-white/5 flex">
+        {NAV_LINKS.map(({ href, label, icon, exact }) => (
+          <AdminNavLink key={href} href={href} label={label} icon={icon} exact={exact} mobile />
+        ))}
+      </nav>
+
+      {/* Main content area */}
+      <div className="lg:pl-52 pt-16 pb-20 lg:pb-0 min-h-screen">
+        {children}
+      </div>
     </div>
   );
 }

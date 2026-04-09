@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import AcademyHeader from "@/components/academy/AcademyHeader";
 import CrmDashboard from "@/components/patients/CrmDashboard";
 import type { Patient } from "@/lib/patients";
-import type { Profile } from "@/types/academy";
 
 export const metadata: Metadata = { title: "CRM Pacientes — JPL" };
 export const dynamic = "force-dynamic";
@@ -37,12 +35,9 @@ export default async function CrmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617]">
-      <AcademyHeader user={profile as Profile} />
-      <CrmDashboard
-        initialPatients={(patients ?? []) as Patient[]}
-        lastSessions={lastSessions}
-      />
-    </div>
+    <CrmDashboard
+      initialPatients={(patients ?? []) as Patient[]}
+      lastSessions={lastSessions}
+    />
   );
 }

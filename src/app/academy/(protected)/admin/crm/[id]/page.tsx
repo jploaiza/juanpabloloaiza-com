@@ -1,10 +1,8 @@
 import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import AcademyHeader from "@/components/academy/AcademyHeader";
 import PatientDetail from "@/components/patients/PatientDetail";
 import type { Patient, PatientLog } from "@/lib/patients";
-import type { Profile } from "@/types/academy";
 
 export const metadata: Metadata = { title: "Paciente — JPL CRM" };
 export const dynamic = "force-dynamic";
@@ -37,12 +35,9 @@ export default async function PatientDetailPage({
   if (!patient) notFound();
 
   return (
-    <div className="min-h-screen bg-[#020617]">
-      <AcademyHeader user={profile as Profile} />
-      <PatientDetail
-        patient={patient as Patient}
-        logs={(logs ?? []) as PatientLog[]}
-      />
-    </div>
+    <PatientDetail
+      patient={patient as Patient}
+      logs={(logs ?? []) as PatientLog[]}
+    />
   );
 }
