@@ -2,9 +2,10 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Clock, ArrowLeft } from "lucide-react";
+import { Clock, ArrowLeft, Download, Loader2 } from "lucide-react";
 import type { BlogPost } from "@/lib/blog-data";
 import ReactMarkdown from "react-markdown";
+import { useState } from "react";
 
 interface Props {
   post: BlogPost;
@@ -15,6 +16,35 @@ interface Props {
 export default function ArticleContent({ post, previousPost, nextPost, relatedPosts }: Props & { relatedPosts: BlogPost[] }) {
 
   const shareUrl = `https://juanpabloloaiza.com/blog/${post.slug}`;
+  const [storyLoading, setStoryLoading] = useState(false);
+  const [storyDone, setStoryDone] = useState(false);
+
+  const handleDownloadStory = async () => {
+    setStoryLoading(true);
+    try {
+      const params = new URLSearchParams({
+        title: post.title,
+        excerpt: post.excerpt ?? "",
+        slug: post.slug,
+        ...(post.imageUrl ? { imageUrl: post.imageUrl } : {}),
+      });
+      const res = await fetch(`/api/og/story?${params}`);
+      if (!res.ok) throw new Error("Error generando imagen");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `story-${post.slug}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setStoryDone(true);
+      setTimeout(() => setStoryDone(false), 4000);
+    } catch {
+      alert("Error generando la imagen. Intenta de nuevo.");
+    } finally {
+      setStoryLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#020617] pt-28">
@@ -179,14 +209,21 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
               >
                 X / Twitter
               </a>
-              <a
-                href={`https://www.instagram.com/jploaizao`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/25 text-gray-400 hover:border-[#C5A059]/60 hover:text-[#C5A059] transition"
-              >
-                Instagram
-              </a>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={handleDownloadStory}
+                  disabled={storyLoading}
+                  className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/40 text-[#C5A059] hover:bg-[#C5A059]/10 transition disabled:opacity-60"
+                >
+                  {storyLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                  {storyLoading ? "Generando..." : storyDone ? "Descargada!" : "Historia Instagram"}
+                </button>
+                {storyDone && (
+                  <p className="font-crimson text-xs text-gray-500 px-1">
+                    Guarda la imagen y súbela a tus Historias de Instagram
+                  </p>
+                )}
+              </div>
             </div>
           </motion.div>
 
@@ -296,14 +333,14 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
                 >
                   Twitter
                 </a>
-                <a
-                  href="https://www.instagram.com/jploaizao"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/20 text-gray-500 hover:text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                <button
+                  onClick={handleDownloadStory}
+                  disabled={storyLoading}
+                  className="flex items-center gap-1.5 font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/10 transition disabled:opacity-60"
                 >
-                  Instagram
-                </a>
+                  {storyLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                  {storyLoading ? "..." : "Historia IG"}
+                </button>
               </div>
             </div>
           </div>
