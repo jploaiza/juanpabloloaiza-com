@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import ContentEditor from "@/components/admin/ContentEditor";
-import { ArrowLeft, X, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, X, Plus, Trash2, Upload } from "lucide-react";
 
 type BlogPost = {
   id: string;
@@ -64,6 +64,32 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
   const [serverError, setServerError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError("");
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) {
+        setUploadError(data.error ?? "Error al subir imagen.");
+      } else {
+        setFeaturedImageUrl(data.url);
+      }
+    } catch {
+      setUploadError("Error de conexión al subir imagen.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleTitleChange = useCallback(
     (val: string) => {
@@ -329,14 +355,38 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
 
           <div className="space-y-5">
             <div>
-              <label className={labelClass}>URL Imagen destacada</label>
-              <input
-                type="url"
-                value={featuredImageUrl}
-                onChange={(e) => setFeaturedImageUrl(e.target.value)}
-                placeholder="https://media.juanpabloloaiza.com/blog/..."
-                className={inputClass}
-              />
+              <label className={labelClass}>Imagen destacada</label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={featuredImageUrl}
+                  onChange={(e) => setFeaturedImageUrl(e.target.value)}
+                  placeholder="https://media.juanpabloloaiza.com/blog/..."
+                  className={`${inputClass} flex-1`}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="px-3 py-3 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 disabled:opacity-50 transition-colors"
+                  title="Subir imagen a R2"
+                >
+                  <Upload className="w-4 h-4" />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </div>
+              {uploading && (
+                <p className="font-cinzel text-[9px] tracking-widest text-[#C5A059]/60 mt-1">
+                  Subiendo...
+                </p>
+              )}
+              {uploadError && <p className="text-red-400 text-xs font-crimson mt-1">{uploadError}</p>}
               {featuredImageUrl && (
                 <div className="mt-2 border border-white/5 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
