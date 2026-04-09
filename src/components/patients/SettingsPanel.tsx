@@ -73,14 +73,26 @@ export default function SettingsPanel() {
   // Load status on mount
   useEffect(() => { checkStatus(); }, []);
 
-  // Load saved templates from localStorage
+  // Load templates from Supabase (source of truth), fall back to localStorage
   useEffect(() => {
-    const t = localStorage.getItem(REMINDER_TEMPLATE_KEY); if (t) setTemplate(t);
-    const ts = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY); if (ts) setTemplateSinSesiones(ts);
-    const es = localStorage.getItem(REMINDER_EMAIL_SUBJECT_KEY); if (es) setEmailSubject(es);
-    const eb = localStorage.getItem(REMINDER_EMAIL_BODY_KEY); if (eb) setEmailBody(eb);
-    const ess = localStorage.getItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY); if (ess) setEmailSubjectSin(ess);
-    const ebs = localStorage.getItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY); if (ebs) setEmailBodySin(ebs);
+    // Load from API (persisted, used by cron)
+    fetch("/api/crm-settings").then((r) => r.json()).then(({ settings }) => {
+      if (!settings) return;
+      if (settings[REMINDER_TEMPLATE_KEY]) { setTemplate(settings[REMINDER_TEMPLATE_KEY]); localStorage.setItem(REMINDER_TEMPLATE_KEY, settings[REMINDER_TEMPLATE_KEY]); }
+      if (settings[REMINDER_TEMPLATE_SIN_SESIONES_KEY]) { setTemplateSinSesiones(settings[REMINDER_TEMPLATE_SIN_SESIONES_KEY]); localStorage.setItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY, settings[REMINDER_TEMPLATE_SIN_SESIONES_KEY]); }
+      if (settings[REMINDER_EMAIL_SUBJECT_KEY]) { setEmailSubject(settings[REMINDER_EMAIL_SUBJECT_KEY]); localStorage.setItem(REMINDER_EMAIL_SUBJECT_KEY, settings[REMINDER_EMAIL_SUBJECT_KEY]); }
+      if (settings[REMINDER_EMAIL_BODY_KEY]) { setEmailBody(settings[REMINDER_EMAIL_BODY_KEY]); localStorage.setItem(REMINDER_EMAIL_BODY_KEY, settings[REMINDER_EMAIL_BODY_KEY]); }
+      if (settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY]) { setEmailSubjectSin(settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY]); localStorage.setItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY]); }
+      if (settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]) { setEmailBodySin(settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]); localStorage.setItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY, settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]); }
+    }).catch(() => {
+      // Fallback: load from localStorage if API unavailable
+      const t = localStorage.getItem(REMINDER_TEMPLATE_KEY); if (t) setTemplate(t);
+      const ts = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY); if (ts) setTemplateSinSesiones(ts);
+      const es = localStorage.getItem(REMINDER_EMAIL_SUBJECT_KEY); if (es) setEmailSubject(es);
+      const eb = localStorage.getItem(REMINDER_EMAIL_BODY_KEY); if (eb) setEmailBody(eb);
+      const ess = localStorage.getItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY); if (ess) setEmailSubjectSin(ess);
+      const ebs = localStorage.getItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY); if (ebs) setEmailBodySin(ebs);
+    });
     // Fetch a patient for preview
     fetch("/api/patients").then((r) => r.json()).then(({ patients }) => {
       if (patients?.length) {
@@ -89,18 +101,36 @@ export default function SettingsPanel() {
     }).catch(() => {});
   }, []);
 
-  function saveTemplates() {
+  async function saveTemplates() {
     localStorage.setItem(REMINDER_TEMPLATE_KEY, template);
     localStorage.setItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY, templateSinSesiones);
+    await fetch("/api/crm-settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([
+        { key: REMINDER_TEMPLATE_KEY, value: template },
+        { key: REMINDER_TEMPLATE_SIN_SESIONES_KEY, value: templateSinSesiones },
+      ]),
+    }).catch(() => {});
     setTemplateSaved(true);
     setTimeout(() => setTemplateSaved(false), 2000);
   }
 
-  function saveEmailTemplates() {
+  async function saveEmailTemplates() {
     localStorage.setItem(REMINDER_EMAIL_SUBJECT_KEY, emailSubject);
     localStorage.setItem(REMINDER_EMAIL_BODY_KEY, emailBody);
     localStorage.setItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, emailSubjectSin);
     localStorage.setItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY, emailBodySin);
+    await fetch("/api/crm-settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([
+        { key: REMINDER_EMAIL_SUBJECT_KEY, value: emailSubject },
+        { key: REMINDER_EMAIL_BODY_KEY, value: emailBody },
+        { key: REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, value: emailSubjectSin },
+        { key: REMINDER_EMAIL_BODY_SIN_SESIONES_KEY, value: emailBodySin },
+      ]),
+    }).catch(() => {});
     setEmailSaved(true);
     setTimeout(() => setEmailSaved(false), 2000);
   }

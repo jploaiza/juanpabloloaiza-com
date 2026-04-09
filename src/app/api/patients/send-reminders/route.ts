@@ -10,14 +10,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
-import { type Patient, sessionsLeft } from "@/lib/patients";
+import {
+  type Patient, sessionsLeft,
+  DEFAULT_REMINDER_TEMPLATE, DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
+  DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY,
+  DEFAULT_EMAIL_SUBJECT_SIN_SESIONES, DEFAULT_EMAIL_BODY_SIN_SESIONES,
+  REMINDER_TEMPLATE_KEY, REMINDER_TEMPLATE_SIN_SESIONES_KEY,
+  REMINDER_EMAIL_SUBJECT_KEY, REMINDER_EMAIL_BODY_KEY,
+  REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, REMINDER_EMAIL_BODY_SIN_SESIONES_KEY,
+} from "@/lib/patients";
 
 const FROM_EMAIL = "Juan Pablo Loaiza <academy@juanpabloloaiza.com>";
 const AGENDA_URL = "https://www.juanpabloloaiza.com/agenda";
 const SITE_URL = "https://www.juanpabloloaiza.com";
-
-const DEFAULT_TEMPLATE =
-  "Hola {nombre} 👋 Te escribo para recordarte que tienes tu sesión disponible esta semana. Te quedan {sesiones} sesiones y tu pack vence el {vencimiento}. ¿Agendamos? 🌟";
 
 function renderTemplate(tpl: string, patient: Patient): string {
   const sl = sessionsLeft(patient);
@@ -51,6 +56,20 @@ export async function GET(req: NextRequest) {
   const chileHour = nowChile.getUTCHours();
   const todayStr = nowChile.toISOString().split("T")[0];
 
+  // Load saved templates from Supabase
+  const { data: settingsRows } = await adminSb.from("crm_settings").select("key, value");
+  const settings: Record<string, string> = {};
+  for (const row of settingsRows ?? []) settings[row.key] = row.value;
+
+  const globalTemplates = {
+    wa:           settings[REMINDER_TEMPLATE_KEY]                  || DEFAULT_REMINDER_TEMPLATE,
+    waSin:        settings[REMINDER_TEMPLATE_SIN_SESIONES_KEY]     || DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
+    emailSubject: settings[REMINDER_EMAIL_SUBJECT_KEY]             || DEFAULT_EMAIL_SUBJECT,
+    emailBody:    settings[REMINDER_EMAIL_BODY_KEY]                || DEFAULT_EMAIL_BODY,
+    emailSubjectSin: settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY] || DEFAULT_EMAIL_SUBJECT_SIN_SESIONES,
+    emailBodySin: settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]   || DEFAULT_EMAIL_BODY_SIN_SESIONES,
+  };
+
   const { data: configs, error: cfgErr } = await adminSb
     .from("reminder_configs")
     .select("*")
@@ -81,9 +100,16 @@ export async function GET(req: NextRequest) {
       query = query.gt("end_date", todayStr);
     }
     const { data: patients } = await query;
-    const eligible = ((patients ?? []) as Patient[]).filter((p) => sessionsLeft(p) > 0);
 
-    const template: string = config.whatsapp_template || DEFAULT_TEMPLATE;
+    // Include ALL active patients: split into con/sin sesiones
+    const allPatients = (patients ?? []) as Patient[];
+    const conSesiones = allPatients.filter((p) => sessionsLeft(p) > 0);
+    const sinSesiones = allPatients.filter((p) => sessionsLeft(p) === 0);
+    const eligible = [...conSesiones, ...sinSesiones];
+
+    // Per-config WA template override (only for "con sesiones")
+    const waTemplate = config.whatsapp_template || globalTemplates.wa;
+
     const channels: string[] = config.channels ?? ["whatsapp", "email"];
     const sendMode: string = config.send_mode ?? "batch";
     const delayMin = (config.delay_min ?? 30) * 1000;
@@ -95,11 +121,16 @@ export async function GET(req: NextRequest) {
     for (let i = 0; i < eligible.length; i++) {
       const patient = eligible[i];
       const sl = sessionsLeft(patient);
+      const isSin = sl === 0;
       const name = patient.first_name;
       const expiryDate = new Date(patient.end_date + "T12:00:00").toLocaleDateString("es-CL", {
         day: "numeric", month: "long", year: "numeric",
       });
-      const waText = renderTemplate(template, patient);
+
+      const waText = renderTemplate(isSin ? globalTemplates.waSin : waTemplate, patient);
+      const emailSubject = renderTemplate(isSin ? globalTemplates.emailSubjectSin : globalTemplates.emailSubject, patient);
+      const emailBodyText = renderTemplate(isSin ? globalTemplates.emailBodySin : globalTemplates.emailBody, patient);
+
       const errors: string[] = [];
       let emailOk = false;
       let whatsappOk = false;
@@ -109,8 +140,8 @@ export async function GET(req: NextRequest) {
           const { error: emailErr } = await resend.emails.send({
             from: FROM_EMAIL,
             to: patient.email,
-            subject: `Recuerda tus sesiones — Te quedan ${sl}`,
-            html: reminderEmailHtml({ name, sl, expiryDate }),
+            subject: emailSubject,
+            html: reminderEmailHtml({ name, sl, expiryDate, bodyText: emailBodyText }),
           });
           if (emailErr) throw new Error(emailErr.message);
           emailOk = true;
@@ -141,8 +172,8 @@ export async function GET(req: NextRequest) {
         patient_id: patient.id,
         type: "reminder_sent",
         content: errors.length
-          ? `Recordatorio automático${ch ? ` por ${ch}` : ""}. Errores: ${errors.join("; ")}`
-          : `Recordatorio automático enviado por ${ch}.`,
+          ? `Recordatorio automático${isSin ? " (sin sesiones)" : ""}${ch ? ` por ${ch}` : ""}. Errores: ${errors.join("; ")}`
+          : `Recordatorio automático${isSin ? " (sin sesiones)" : ""} enviado por ${ch}.`,
       });
 
       if (emailOk || whatsappOk) sent++; else failed++;
@@ -157,13 +188,35 @@ export async function GET(req: NextRequest) {
       .update({ last_run_at: new Date().toISOString() })
       .eq("id", config.id);
 
-    results.push({ config_id: config.id, label: config.label, patients: eligible.length, sent, failed });
+    results.push({
+      config_id: config.id,
+      label: config.label,
+      patients: eligible.length,
+      con_sesiones: conSesiones.length,
+      sin_sesiones: sinSesiones.length,
+      sent,
+      failed,
+    });
   }
 
   return NextResponse.json({ day: chileDay, hour: chileHour, processed: results.length, results });
 }
 
-function reminderEmailHtml({ name, sl, expiryDate }: { name: string; sl: number; expiryDate: string }) {
+function reminderEmailHtml({ name, sl, expiryDate, bodyText }: {
+  name: string; sl: number; expiryDate: string; bodyText: string;
+}) {
+  const showCounter = sl > 0;
+  const ctaLabel = sl > 0 ? "Agenda tu sesión →" : "Renovar sesiones →";
+  const title = sl > 0 ? "Esta semana es tu sesión 🌟" : "Continúa tu proceso de sanación 🌟";
+
+  const counterBlock = showCounter ? `
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#020d1f;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
+<tr><td style="padding:18px;text-align:center;">
+<p style="margin:0 0 4px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b7280;">Sesiones disponibles</p>
+<p style="margin:0;font-size:40px;color:#C5A059;line-height:1;">${sl}</p>
+</td></tr>
+</table>` : "";
+
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#020617;font-family:Georgia,serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#020617;padding:40px 20px;">
@@ -175,17 +228,12 @@ function reminderEmailHtml({ name, sl, expiryDate }: { name: string; sl: number;
 </td></tr>
 <tr><td style="padding:32px 40px;">
 <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#C5A059;">Hola, ${name}</p>
-<h1 style="margin:0 0 20px;font-size:20px;color:#ffffff;font-weight:400;line-height:1.4;">Esta semana es tu sesión 🌟</h1>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#020d1f;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
-<tr><td style="padding:18px;text-align:center;">
-<p style="margin:0 0 4px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b7280;">Sesiones disponibles</p>
-<p style="margin:0;font-size:40px;color:#C5A059;line-height:1;">${sl}</p>
-</td></tr>
-</table>
-<p style="margin:0 0 20px;font-size:15px;color:#9ca3af;line-height:1.8;">Tus sesiones vencen el <span style="color:#C5A059;">${expiryDate}</span>.</p>
+<h1 style="margin:0 0 20px;font-size:20px;color:#ffffff;font-weight:400;line-height:1.4;">${title}</h1>
+${counterBlock}
+<p style="margin:0 0 24px;font-size:15px;color:#9ca3af;line-height:1.8;">${bodyText.replace(/\n/g, "<br/>")}</p>
 <table cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
 <tr><td style="background:#C5A059;padding:13px 32px;">
-<a href="${AGENDA_URL}" style="color:#020617;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">Agenda tu sesión →</a>
+<a href="${AGENDA_URL}" style="color:#020617;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">${ctaLabel}</a>
 </td></tr>
 </table>
 </td></tr>
