@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
           {/* Logo pequeño + URL al fondo */}
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={LOGO_DATA_URL} alt="Juan Pablo Loaiza" width={300} height={72} style={{ height: "52px", width: "217px", objectFit: "contain" }} />
+            <img src={LOGO_DATA_URL} alt="Juan Pablo Loaiza" width={300} height={72} style={{ height: "62px", width: "260px", objectFit: "contain" }} />
             <span style={{ fontSize: "22px", color: "#6b7280", letterSpacing: "0.08em" }}>www.juanpabloloaiza.com</span>
           </div>
         </div>
