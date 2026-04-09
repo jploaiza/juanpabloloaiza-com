@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Bell, Dumbbell, StickyNote, RefreshCw, ArrowLeft,
-  MessageCircle, Mail, Plus, Pencil, ShoppingBag, PlayCircle,
+  MessageCircle, Mail, Plus, Pencil, ShoppingBag, PlayCircle, CalendarPlus,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -40,6 +40,9 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
   const [addNotes, setAddNotes] = useState("");
   const [addStartDate, setAddStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [addingsessions, setAddingSessions] = useState(false);
+  const [showExtend, setShowExtend] = useState(false);
+  const [extendDays, setExtendDays] = useState(7);
+  const [extendingDeadline, setExtendingDeadline] = useState(false);
 
   const dl = daysLeft(patient.end_date);
   const sl = sessionsLeft(patient);
@@ -52,6 +55,26 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
     ]);
     if (pr.patient) setPatient(pr.patient);
     if (lr.logs) setLogs(lr.logs);
+  }
+
+  async function handleExtend() {
+    if (extendDays < 1) return;
+    setExtendingDeadline(true);
+    try {
+      const res = await fetch(`/api/patients/${patient.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "extend_deadline", days: extendDays }),
+      });
+      if (!res.ok) { const j = await res.json(); throw new Error(j.error ?? "Error"); }
+      setShowExtend(false);
+      setExtendDays(7);
+      await refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al extender plazo");
+    } finally {
+      setExtendingDeadline(false);
+    }
   }
 
   async function addSession() {
@@ -228,6 +251,17 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
             <ShoppingBag size={12} />
             Agregar sesiones
           </button>
+          <button
+            onClick={() => setShowExtend((v) => !v)}
+            className={`flex items-center gap-1.5 px-3 py-2 border text-xs font-cinzel uppercase tracking-wide transition ${
+              showExtend
+                ? "bg-blue-950/60 border-blue-500/40 text-blue-400"
+                : "bg-blue-950/30 border-blue-600/20 text-blue-400/60 hover:text-blue-400 hover:border-blue-500/40"
+            }`}
+          >
+            <CalendarPlus size={12} />
+            Extender plazo
+          </button>
           <a href={buildWhatsappUrl(patient)} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-2 bg-emerald-950/60 border border-emerald-600/30 text-emerald-400 text-xs font-cinzel uppercase tracking-wide hover:bg-emerald-900/40 transition">
             <MessageCircle size={12} />WhatsApp
@@ -255,6 +289,55 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
             </button>
           )}
         </div>
+
+        {/* Extend deadline inline form */}
+        {showExtend && (
+          <div className="mt-4 p-4 bg-[#020617] border border-blue-400/20 space-y-3">
+            <p className="text-[10px] font-cinzel text-blue-400 uppercase tracking-widest">Extender plazo de vencimiento</p>
+            <div className="flex gap-3 items-end flex-wrap">
+              <div>
+                <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Días extra</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={extendDays}
+                  onChange={(e) => setExtendDays(Math.max(1, Number(e.target.value)))}
+                  className="w-20 bg-[#0a1628] border border-blue-400/20 text-white px-3 py-2 text-sm font-crimson focus:border-blue-400/40 outline-none"
+                />
+              </div>
+              <div className="flex gap-1 flex-wrap">
+                {[7, 14, 21, 30, 60].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setExtendDays(d)}
+                    className={`px-2 py-1 text-[10px] font-cinzel border transition ${
+                      extendDays === d ? "border-blue-400 text-blue-400 bg-blue-400/10" : "border-blue-400/15 text-gray-500 hover:text-gray-300"
+                    }`}
+                  >
+                    {d}d
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleExtend}
+                disabled={extendingDeadline}
+                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600/80 text-white text-xs font-cinzel uppercase tracking-widest hover:bg-blue-600 transition disabled:opacity-50"
+              >
+                {extendingDeadline ? <RefreshCw size={11} className="animate-spin" /> : <CalendarPlus size={11} />}
+                {extendingDeadline ? "Guardando..." : `Extender ${extendDays} día${extendDays === 1 ? "" : "s"}`}
+              </button>
+              <button
+                onClick={() => setShowExtend(false)}
+                className="px-4 py-2 border border-blue-400/15 text-gray-500 text-xs font-cinzel uppercase tracking-widest hover:text-gray-300 transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Add sessions inline form */}
         {showAddSessions && (

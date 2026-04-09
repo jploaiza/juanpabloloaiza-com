@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   Plus, FileText, MessageCircle, Mail,
   PauseCircle, PlayCircle, CheckCircle, Pencil,
-  ShoppingBag, RefreshCw,
+  ShoppingBag, RefreshCw, CalendarPlus,
 } from "lucide-react";
 import {
   type Patient,
@@ -31,6 +31,9 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
   const [addNotes, setAddNotes] = useState("");
   const [addStartDate, setAddStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [addingPurchase, setAddingPurchase] = useState(false);
+  const [showExtend, setShowExtend] = useState(false);
+  const [extendDays, setExtendDays] = useState(7);
+  const [extendingDeadline, setExtendingDeadline] = useState(false);
 
   const dl = daysLeft(patient.end_date);
   const sl = sessionsLeft(patient);
@@ -91,6 +94,26 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
       alert(err instanceof Error ? err.message : "Error al agregar sesiones");
     } finally {
       setAddingPurchase(false);
+    }
+  }
+
+  async function handleExtend() {
+    if (extendDays < 1) return;
+    setExtendingDeadline(true);
+    try {
+      const res = await fetch(`/api/patients/${patient.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "extend_deadline", days: extendDays }),
+      });
+      if (!res.ok) { const j = await res.json(); throw new Error(j.error ?? "Error"); }
+      setShowExtend(false);
+      setExtendDays(7);
+      onRefresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al extender plazo");
+    } finally {
+      setExtendingDeadline(false);
     }
   }
 
@@ -167,6 +190,19 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
           Compra
         </button>
 
+        <button
+          onClick={() => setShowExtend((v) => !v)}
+          title="Extender plazo de vencimiento"
+          className={`flex items-center gap-1 px-2.5 py-1.5 border text-[11px] font-cinzel uppercase tracking-wide transition ${
+            showExtend
+              ? "border-blue-400/50 text-blue-400 bg-blue-950/40"
+              : "border-blue-400/20 text-blue-400/50 hover:text-blue-400 hover:border-blue-400/40"
+          }`}
+        >
+          <CalendarPlus size={11} />
+          Plazo
+        </button>
+
         <Link
           href={`/academy/admin/crm/${patient.id}`}
           className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-800/60 border border-gray-600/30 text-gray-400 text-[11px] font-cinzel uppercase tracking-wide hover:text-white hover:border-gray-500/50 transition"
@@ -230,6 +266,50 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
           </button>
         )}
       </div>
+
+      {/* Extend deadline inline form */}
+      {showExtend && (
+        <div className="mt-3 p-3 bg-[#020617] border border-blue-400/20 space-y-2">
+          <p className="text-[10px] font-cinzel text-blue-400/70 uppercase tracking-widest">Extender plazo</p>
+          <div className="flex gap-1 flex-wrap">
+            {[7, 14, 21, 30].map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setExtendDays(d)}
+                className={`px-2 py-0.5 text-[10px] font-cinzel border transition ${
+                  extendDays === d ? "border-blue-400 text-blue-400 bg-blue-400/10" : "border-blue-400/15 text-gray-500 hover:text-gray-300"
+                }`}
+              >
+                {d}d
+              </button>
+            ))}
+            <input
+              type="number"
+              min={1}
+              value={extendDays}
+              onChange={(e) => setExtendDays(Math.max(1, Number(e.target.value)))}
+              className="w-14 bg-[#0a1628] border border-blue-400/20 text-white px-2 py-0.5 text-xs font-crimson outline-none"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExtend}
+              disabled={extendingDeadline}
+              className="flex items-center gap-1 px-3 py-1.5 bg-blue-600/80 text-white text-[10px] font-cinzel uppercase tracking-widest hover:bg-blue-600 transition disabled:opacity-50"
+            >
+              {extendingDeadline ? <RefreshCw size={10} className="animate-spin" /> : <CalendarPlus size={10} />}
+              {extendingDeadline ? "..." : `+${extendDays} días`}
+            </button>
+            <button
+              onClick={() => setShowExtend(false)}
+              className="px-3 py-1.5 border border-blue-400/15 text-gray-500 text-[10px] font-cinzel uppercase tracking-widest hover:text-gray-300 transition"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add sessions inline form */}
       {showAddSessions && (

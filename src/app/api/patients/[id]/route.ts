@@ -35,6 +35,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
 
   // Status actions
   if (body.action) {
+    // Extend deadline action
+    if (body.action === "extend_deadline") {
+      const days = Number(body.days);
+      if (!days || days < 1 || !Number.isInteger(days)) {
+        return NextResponse.json({ error: "days debe ser un entero positivo" }, { status: 400 });
+      }
+      const { data: current } = await adminSb.from("patients").select("end_date").eq("id", id).single();
+      if (!current) return NextResponse.json({ error: "Paciente no encontrado" }, { status: 404 });
+
+      const base = new Date((current.end_date ?? new Date().toISOString().split("T")[0]) + "T12:00:00");
+      base.setDate(base.getDate() + days);
+      const newEndDate = base.toISOString().split("T")[0];
+
+      const { data, error } = await adminSb.from("patients").update({ end_date: newEndDate }).eq("id", id).select().single();
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      const formatted = base.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" });
+      await adminSb.from("patient_logs").insert({
+        patient_id: id,
+        type: "note_added",
+        content: `Plazo extendido ${days} día${days === 1 ? "" : "s"}. Nueva fecha de vencimiento: ${formatted}.`,
+      });
+
+      return NextResponse.json({ patient: data });
+    }
+
     const STATUS_MAP: Record<string, PatientStatus> = {
       pause: "paused",
       activate: "active",
