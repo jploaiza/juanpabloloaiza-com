@@ -418,7 +418,18 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
             </div>
             <div>
               <label className={labelClass}>Contenido *</label>
-              <ContentEditor value={content} onChange={setContent} />
+              <ContentEditor
+                value={content}
+                onChange={setContent}
+                onFullGenerate={(data) => {
+                  if (data.title) { setTitle(data.title); if (!slugManual) setSlug(slugify(data.title)); }
+                  if (data.excerpt) setExcerpt(data.excerpt.slice(0, 300));
+                  if (data.content) setContent(data.content);
+                  if (data.tags?.length) setTags(data.tags);
+                  if (data.seoTitle) setSeoTitle(data.seoTitle.slice(0, 60));
+                  if (data.seoDescription) setSeoDescription(data.seoDescription.slice(0, 160));
+                }}
+              />
               {errors.content && <p className={errorClass}>{errors.content}</p>}
             </div>
           </div>

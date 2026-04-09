@@ -2,24 +2,37 @@
 
 import dynamic from "next/dynamic";
 import { useState, useRef } from "react";
-import { Sparkles, Upload, Loader2, X, Wand2 } from "lucide-react";
+import { Sparkles, Upload, Loader2, X, Wand2, Copy, Check } from "lucide-react";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
+
+type FullGenerateData = {
+  title: string;
+  excerpt: string;
+  content: string;
+  tags: string[];
+  seoTitle: string;
+  seoDescription: string;
+  imagePrompt: string;
+};
 
 interface Props {
   value: string;
   onChange: (val: string) => void;
+  onFullGenerate?: (data: FullGenerateData) => void;
 }
 
 const btnBase =
   "flex items-center gap-1.5 font-cinzel text-[9px] uppercase tracking-widest px-3 py-2 border transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
 
-export default function ContentEditor({ value, onChange }: Props) {
+export default function ContentEditor({ value, onChange, onFullGenerate }: Props) {
   const [uploading, setUploading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [panel, setPanel] = useState<"generate" | "improve" | null>(null);
   const [idea, setIdea] = useState("");
   const [aiError, setAiError] = useState("");
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   /* ── Image upload ─────────────────────────────────── */
@@ -34,28 +47,45 @@ export default function ContentEditor({ value, onChange }: Props) {
       const md = `\n\n![${file.name}](${url})\n\n`;
       onChange(value + md);
     } catch {
-      // silently fail — user sees no change
+      // silently fail
     } finally {
       setUploading(false);
     }
   };
 
-  /* ── AI: generate post ────────────────────────────── */
+  /* ── AI: generate full post ───────────────────────── */
   const handleGenerate = async () => {
     if (!idea.trim()) return;
     setAiLoading(true);
     setAiError("");
+    setImagePrompt("");
     try {
       const res = await fetch("/api/admin/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "generate", input: idea }),
+        body: JSON.stringify({ action: "generate-full", input: idea }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Error");
-      onChange(data.content);
-      setPanel(null);
-      setIdea("");
+
+      // Fill content in editor
+      onChange(data.content ?? "");
+
+      // Show image prompt
+      if (data.imagePrompt) setImagePrompt(data.imagePrompt);
+
+      // Propagate all fields to parent if callback provided
+      if (onFullGenerate) {
+        onFullGenerate({
+          title: data.title ?? "",
+          excerpt: data.excerpt ?? "",
+          content: data.content ?? "",
+          tags: Array.isArray(data.tags) ? data.tags : [],
+          seoTitle: data.seoTitle ?? "",
+          seoDescription: data.seoDescription ?? "",
+          imagePrompt: data.imagePrompt ?? "",
+        });
+      }
     } catch (e: unknown) {
       setAiError(e instanceof Error ? e.message : "Error generando el post");
     } finally {
@@ -83,6 +113,12 @@ export default function ContentEditor({ value, onChange }: Props) {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(imagePrompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -143,12 +179,12 @@ export default function ContentEditor({ value, onChange }: Props) {
             <div className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
               <p className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059]">
-                Generar post desde idea
+                Generar post completo desde idea
               </p>
             </div>
             <button
               type="button"
-              onClick={() => setPanel(null)}
+              onClick={() => { setPanel(null); setImagePrompt(""); }}
               className="text-gray-600 hover:text-gray-400 transition"
             >
               <X className="w-4 h-4" />
@@ -171,12 +207,32 @@ export default function ContentEditor({ value, onChange }: Props) {
               className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#d4b06a] disabled:opacity-50 text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-5 py-2.5 transition"
             >
               {aiLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-              {aiLoading ? "Generando..." : "Generar post completo"}
+              {aiLoading ? "Generando (~30s)..." : "Generar post completo"}
             </button>
             <p className="font-crimson text-xs text-gray-600">
-              Reemplazará el contenido actual
+              {onFullGenerate ? "Llenará todos los campos automáticamente" : "Reemplazará el contenido actual"}
             </p>
           </div>
+
+          {/* Image prompt result */}
+          {imagePrompt && (
+            <div className="mt-5 border border-purple-500/20 bg-purple-900/10 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-cinzel text-[9px] uppercase tracking-widest text-purple-300">
+                  Prompt de imagen generado
+                </p>
+                <button
+                  type="button"
+                  onClick={handleCopyPrompt}
+                  className="flex items-center gap-1.5 font-cinzel text-[8px] uppercase tracking-widest text-purple-300 hover:text-purple-200 transition-colors"
+                >
+                  {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+              </div>
+              <p className="font-crimson text-sm text-gray-400 leading-relaxed">{imagePrompt}</p>
+            </div>
+          )}
         </div>
       )}
 
