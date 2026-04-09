@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import ContentEditor from "@/components/admin/ContentEditor";
-import { ArrowLeft, X, Plus, Trash2, Upload, Sparkles } from "lucide-react";
+import { ArrowLeft, X, Plus, Trash2, Upload, Sparkles, ImagePlus } from "lucide-react";
 
 type BlogPost = {
   id: string;
@@ -67,12 +67,33 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const [seoImproving, setSeoImproving] = useState(false);
   const [seoError, setSeoError] = useState("");
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiFields, setAiFields] = useState<string[]>(["title", "excerpt", "content", "tags", "seoTitle", "seoDescription"]);
   const [aiImproving, setAiImproving] = useState(false);
   const [aiError, setAiError] = useState("");
+
+  const handleGenerateImage = async () => {
+    if (!title.trim()) { setUploadError("Agrega un título antes de generar imagen."); return; }
+    setUploadError("");
+    setGeneratingImage(true);
+    try {
+      const res = await fetch("/api/admin/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, excerpt, content }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setUploadError(data.error ?? "Error al generar imagen."); }
+      else { setFeaturedImageUrl(data.url); }
+    } catch {
+      setUploadError("Error de conexión al generar imagen.");
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -525,8 +546,17 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
                 />
                 <button
                   type="button"
+                  onClick={handleGenerateImage}
+                  disabled={generatingImage || uploading}
+                  className="px-3 py-3 bg-purple-900/30 border border-purple-500/30 text-purple-300 hover:bg-purple-900/50 disabled:opacity-50 transition-colors"
+                  title="Generar imagen con IA"
+                >
+                  <ImagePlus className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
+                  disabled={uploading || generatingImage}
                   className="px-3 py-3 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 disabled:opacity-50 transition-colors"
                   title="Subir imagen a R2"
                 >
@@ -540,9 +570,9 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
                   onChange={handleImageUpload}
                 />
               </div>
-              {uploading && (
+              {(uploading || generatingImage) && (
                 <p className="font-cinzel text-[9px] tracking-widest text-[#C5A059]/60 mt-1">
-                  Subiendo...
+                  {generatingImage ? "Generando imagen con IA (~20s)..." : "Subiendo..."}
                 </p>
               )}
               {uploadError && <p className="text-red-400 text-xs font-crimson mt-1">{uploadError}</p>}
