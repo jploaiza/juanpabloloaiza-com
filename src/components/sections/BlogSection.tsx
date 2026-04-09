@@ -5,13 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Tag, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { getFeaturedPosts } from "@/lib/blog-data";
+import { getAllPublishedPosts } from "@/lib/supabase/blog";
 
 const CARDS = 3;
 const AUTO_INTERVAL = 5000;
 
 export default function BlogSection() {
-  const allPosts = getFeaturedPosts(9);
+  const [allPosts, setAllPosts] = useState<Awaited<ReturnType<typeof getAllPublishedPosts>>>([]);
+
+  useEffect(() => {
+    getAllPublishedPosts().then(setAllPosts);
+  }, []);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const isAnimating = useRef(false);
@@ -49,6 +53,8 @@ export default function BlogSection() {
     center: { x: 0, opacity: 1 },
     exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
   };
+
+  if (allPosts.length === 0) return null;
 
   return (
     <section id="blog" className="py-20 sm:py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
