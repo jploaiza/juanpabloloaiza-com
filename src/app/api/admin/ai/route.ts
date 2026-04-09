@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 
 const GENERATE_PROMPT = (idea: string) => `Eres Juan Pablo Loaiza, terapeuta chileno especializado en regresión a vidas pasadas, hipnosis terapéutica y sanación espiritual. Escribes para tu blog personal.
@@ -46,7 +46,6 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, s
 }`;
 
 export async function POST(req: NextRequest) {
-  // Auth guard
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,11 +59,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (!process.env.GOOGLE_AI_API_KEY) {
-    return NextResponse.json(
-      { error: "GOOGLE_AI_API_KEY no está configurada." },
-      { status: 500 }
-    );
+  if (!process.env.DEEPSEEK_API_KEY) {
+    return NextResponse.json({ error: "DEEPSEEK_API_KEY no está configurada." }, { status: 500 });
   }
 
   const body = await req.json();
@@ -89,14 +85,20 @@ export async function POST(req: NextRequest) {
 
   let raw: string;
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
-    raw = result.response.text();
+    const client = new OpenAI({
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      baseURL: "https://api.deepseek.com",
+    });
+    const response = await client.chat.completions.create({
+      model: "deepseek-chat",
+      max_tokens: action === "seo" ? 512 : 4096,
+      messages: [{ role: "user", content: prompt }],
+    });
+    raw = response.choices[0]?.message?.content ?? "";
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[ai] Gemini error:", msg);
-    return NextResponse.json({ error: `Gemini: ${msg}` }, { status: 500 });
+    console.error("[ai] DeepSeek error:", msg);
+    return NextResponse.json({ error: `DeepSeek: ${msg}` }, { status: 500 });
   }
 
   if (action === "seo") {
