@@ -3,18 +3,6 @@ import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
-async function toDataUrl(url: string, timeoutMs = 6000): Promise<string | null> {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
-    if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    const mime = res.headers.get("content-type") ?? "image/jpeg";
-    return `data:${mime};base64,${Buffer.from(buf).toString("base64")}`;
-  } catch {
-    return null;
-  }
-}
-
 export async function GET(req: NextRequest) {
   const { searchParams, origin } = new URL(req.url);
   const title = searchParams.get("title") ?? "Juan Pablo Loaiza";
@@ -26,11 +14,8 @@ export async function GET(req: NextRequest) {
   const truncatedTitle = title.length > 80 ? title.slice(0, 77) + "..." : title;
   const truncatedExcerpt = excerpt.length > 150 ? excerpt.slice(0, 147) + "..." : excerpt;
 
-  // Fetch logo + background in parallel
-  const [logoDataUrl, bgDataUrl] = await Promise.all([
-    toDataUrl(`${origin}/assets/logo.webp`),
-    imageUrl ? toDataUrl(imageUrl) : Promise.resolve(null),
-  ]);
+  // next/og fetches image URLs directly — no Buffer needed
+  const logoUrl = `${origin}/assets/logo.webp`;
 
   return new ImageResponse(
     (
@@ -46,11 +31,11 @@ export async function GET(req: NextRequest) {
           fontFamily: "Georgia, serif",
         }}
       >
-        {/* ── Background image — more presence ── */}
-        {bgDataUrl && (
+        {/* Background image — fetched by next/og directly */}
+        {imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={bgDataUrl}
+            src={imageUrl}
             alt=""
             style={{
               position: "absolute",
@@ -63,13 +48,13 @@ export async function GET(req: NextRequest) {
           />
         )}
 
-        {/* Gradient: dark top (logo readable) + dark bottom (text readable) */}
+        {/* Gradient: darkens top + bottom, keeps centre vivid */}
         <div
           style={{
             position: "absolute",
             inset: "0",
             background:
-              "linear-gradient(to bottom, #020617ee 0%, #02061788 18%, transparent 40%, transparent 50%, #02061799 70%, #020617f5 88%)",
+              "linear-gradient(to bottom, #020617ee 0%, #02061766 20%, transparent 42%, transparent 52%, #02061799 72%, #020617f5 88%)",
           }}
         />
 
@@ -77,16 +62,12 @@ export async function GET(req: NextRequest) {
         <div style={{ position: "absolute", top: "0", left: "0", right: "0", height: "6px", background: "#C5A059" }} />
 
         {/* Corner decorations */}
-        {([
-          { top: "50px", left: "50px", borderTop: "2px solid #C5A059", borderLeft: "2px solid #C5A059" },
-          { top: "50px", right: "50px", borderTop: "2px solid #C5A059", borderRight: "2px solid #C5A059" },
-          { bottom: "50px", left: "50px", borderBottom: "2px solid #C5A059", borderLeft: "2px solid #C5A059" },
-          { bottom: "50px", right: "50px", borderBottom: "2px solid #C5A059", borderRight: "2px solid #C5A059" },
-        ] as React.CSSProperties[]).map((s, i) => (
-          <div key={i} style={{ position: "absolute", width: "48px", height: "48px", ...s }} />
-        ))}
+        <div style={{ position: "absolute", top: "50px", left: "50px", width: "48px", height: "48px", borderTop: "2px solid #C5A059", borderLeft: "2px solid #C5A059" }} />
+        <div style={{ position: "absolute", top: "50px", right: "50px", width: "48px", height: "48px", borderTop: "2px solid #C5A059", borderRight: "2px solid #C5A059" }} />
+        <div style={{ position: "absolute", bottom: "50px", left: "50px", width: "48px", height: "48px", borderBottom: "2px solid #C5A059", borderLeft: "2px solid #C5A059" }} />
+        <div style={{ position: "absolute", bottom: "50px", right: "50px", width: "48px", height: "48px", borderBottom: "2px solid #C5A059", borderRight: "2px solid #C5A059" }} />
 
-        {/* ── Logo — top center ── */}
+        {/* Logo — top center */}
         <div
           style={{
             position: "absolute",
@@ -95,25 +76,18 @@ export async function GET(req: NextRequest) {
             right: "0",
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
             paddingTop: "100px",
           }}
         >
-          {logoDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={logoDataUrl}
-              alt="Juan Pablo Loaiza"
-              style={{ height: "180px", objectFit: "contain" }}
-            />
-          ) : (
-            <span style={{ fontSize: "36px", color: "#C5A059", letterSpacing: "0.2em" }}>
-              JUAN PABLO LOAIZA
-            </span>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoUrl}
+            alt="Juan Pablo Loaiza"
+            style={{ height: "180px", objectFit: "contain" }}
+          />
         </div>
 
-        {/* ── Article info — bottom ── */}
+        {/* Article info — bottom */}
         <div
           style={{
             display: "flex",
@@ -147,14 +121,7 @@ export async function GET(req: NextRequest) {
 
           {/* Excerpt */}
           {truncatedExcerpt && (
-            <div
-              style={{
-                fontSize: "34px",
-                color: "#d1d5db",
-                lineHeight: 1.6,
-                marginBottom: "72px",
-              }}
-            >
+            <div style={{ fontSize: "34px", color: "#d1d5db", lineHeight: 1.6, marginBottom: "72px" }}>
               {truncatedExcerpt}
             </div>
           )}
