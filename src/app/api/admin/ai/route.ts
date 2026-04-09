@@ -66,13 +66,14 @@ export async function POST(req: NextRequest) {
   let message;
   try {
     message = await client.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
       messages: [{ role: "user", content: prompt }],
     });
   } catch (err) {
-    console.error("[ai] Anthropic error:", err);
-    return NextResponse.json({ error: "Error al conectar con Anthropic." }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[ai] Anthropic error:", msg);
+    return NextResponse.json({ error: `Anthropic: ${msg}` }, { status: 500 });
   }
 
   const content =
