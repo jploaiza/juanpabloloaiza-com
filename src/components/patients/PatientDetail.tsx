@@ -100,7 +100,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-12">
       {/* Back */}
       <Link
         href="/academy/admin/crm"

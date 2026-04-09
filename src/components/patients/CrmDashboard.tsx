@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Plus, Search, RefreshCw, Users, Activity, Clock } from "lucide-react";
+import { Plus, Search, RefreshCw, Users, Activity, Clock, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Patient, type PatientStatus } from "@/lib/patients";
 import PatientCard from "./PatientCard";
 import PatientForm from "./PatientForm";
+import ImportModal from "./ImportModal";
 
 const TABS: { key: PatientStatus; label: string; icon: React.ReactNode }[] = [
   { key: "active", label: "Activos", icon: <Activity size={13} /> },
@@ -24,6 +25,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
   const [activeTab, setActiveTab] = useState<PatientStatus>("active");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [editPatient, setEditPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -54,14 +56,14 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-cinzel">Admin CRM</span>
           <h1 className="text-2xl sm:text-3xl font-cinzel text-white mt-1">Gestión de Pacientes</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={refresh}
             disabled={loading}
@@ -71,11 +73,18 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           </button>
           <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-[#C5A059]/30 text-[#C5A059] text-xs font-cinzel uppercase tracking-widest hover:bg-[#C5A059]/10 transition"
+          >
+            <Download size={13} />
+            Importar LMS
+          </button>
+          <button
             onClick={() => { setEditPatient(null); setShowForm(true); }}
             className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#020617] text-xs font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition"
           >
             <Plus size={13} />
-            Nuevo Paciente
+            Nuevo
           </button>
         </div>
       </div>
@@ -151,6 +160,14 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
           patient={editPatient}
           onClose={() => { setShowForm(false); setEditPatient(null); }}
           onSaved={refresh}
+        />
+      )}
+
+      {/* Import modal */}
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
+          onImported={refresh}
         />
       )}
     </div>
