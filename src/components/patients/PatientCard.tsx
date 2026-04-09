@@ -27,7 +27,8 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
   const dl = daysLeft(patient.end_date);
   const sl = sessionsLeft(patient);
   const alerts = getAlerts(patient, lastSessionAt);
-  const progress = Math.min(100, Math.round((patient.sessions_used / patient.pack_size) * 100));
+  const total = patient.total_sessions || patient.pack_size;
+  const progress = total > 0 ? Math.min(100, Math.round((patient.sessions_used / total) * 100)) : 0;
 
   async function doAction(action: string, body?: object) {
     setLoadingAction(action);
@@ -47,7 +48,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
   }
 
   async function addSession() {
-    if (sl <= 0) return;
+    if (patient.status !== "active") return;
     setLoadingAction("session");
     try {
       const res = await fetch(`/api/patients/${patient.id}/session`, { method: "POST" });
@@ -87,7 +88,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs text-gray-400 font-cinzel">
-            Pack {patient.pack_size} · {patient.sessions_used}/{patient.pack_size} sesiones
+            {patient.sessions_used}/{total} sesiones{sl === 0 ? " · pack completo" : ""}
           </span>
           <span className={`text-xs font-cinzel font-bold ${daysLeftColor(dl)}`}>
             {dl > 0 ? `${dl}d restantes` : "Vencido"}
@@ -110,7 +111,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
         {/* +Sesión */}
         <button
           onClick={addSession}
-          disabled={!!loadingAction || sl <= 0 || patient.status !== "active"}
+          disabled={!!loadingAction || patient.status !== "active"}
           title="Registrar sesión"
           className="flex items-center gap-1 px-2.5 py-1.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] text-[11px] font-cinzel uppercase tracking-wide hover:bg-[#C5A059]/20 transition disabled:opacity-40 disabled:cursor-not-allowed"
         >
@@ -157,19 +158,24 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
         </button>
 
         {/* Pausar / Reactivar */}
-        {patient.status !== "finished" && (
+        {patient.status === "active" && (
           <button
-            onClick={() => doAction(isPausing ? "pause" : "activate", { action: isPausing ? "pause" : "activate" })}
+            onClick={() => doAction("pause", { action: "pause" })}
             disabled={!!loadingAction}
-            title={isPausing ? "Pausar" : "Reactivar"}
-            className={`flex items-center gap-1 px-2.5 py-1.5 border text-[11px] font-cinzel uppercase tracking-wide transition disabled:opacity-40 ${
-              isPausing
-                ? "bg-yellow-950/60 border-yellow-600/30 text-yellow-400 hover:bg-yellow-900/40"
-                : "bg-emerald-950/60 border-emerald-600/30 text-emerald-400 hover:bg-emerald-900/40"
-            }`}
+            title="Pausar"
+            className="flex items-center gap-1 px-2.5 py-1.5 border bg-yellow-950/60 border-yellow-600/30 text-yellow-400 text-[11px] font-cinzel uppercase tracking-wide hover:bg-yellow-900/40 transition disabled:opacity-40"
           >
-            {isPausing ? <PauseCircle size={11} /> : <PlayCircle size={11} />}
-            {isPausing ? "Pausar" : "Reactivar"}
+            <PauseCircle size={11} />Pausar
+          </button>
+        )}
+        {patient.status !== "active" && (
+          <button
+            onClick={() => doAction("activate", { action: "activate" })}
+            disabled={!!loadingAction}
+            title="Reactivar"
+            className="flex items-center gap-1 px-2.5 py-1.5 border bg-emerald-950/60 border-emerald-600/30 text-emerald-400 text-[11px] font-cinzel uppercase tracking-wide hover:bg-emerald-900/40 transition disabled:opacity-40"
+          >
+            <PlayCircle size={11} />Reactivar
           </button>
         )}
 

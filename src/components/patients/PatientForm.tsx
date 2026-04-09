@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import {
   type Patient, type PackSize,
-  PACK_WEEKS, REMINDER_DAYS, calcEndDate,
+  REMINDER_DAYS, calcEndDate,
 } from "@/lib/patients";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
   onSaved: () => void;
 }
 
-const PACK_OPTIONS: PackSize[] = [3, 5, 8];
+const PACK_PRESETS: PackSize[] = [1, 3, 5, 8, 10];
 
 export default function PatientForm({ patient, onClose, onSaved }: Props) {
   const isEdit = !!patient;
@@ -145,19 +145,32 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-cinzel text-gray-400 uppercase tracking-widest mb-1">
-                Pack *
+                Sesiones iniciales *
               </label>
-              <select
-                value={form.pack_size}
-                onChange={(e) => set("pack_size", Number(e.target.value) as PackSize)}
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
-              >
-                {PACK_OPTIONS.map((p) => (
-                  <option key={p} value={p}>
-                    Pack {p} sesiones ({PACK_WEEKS[p]} semanas)
-                  </option>
+              <div className="flex gap-1 mb-1.5">
+                {PACK_PRESETS.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => set("pack_size", p)}
+                    className={`px-2 py-1 text-[10px] font-cinzel uppercase tracking-wide border transition ${
+                      form.pack_size === p
+                        ? "border-[#C5A059] bg-[#C5A059]/15 text-[#C5A059]"
+                        : "border-[#C5A059]/15 text-gray-500 hover:text-gray-300"
+                    }`}
+                  >
+                    {p}
+                  </button>
                 ))}
-              </select>
+              </div>
+              <input
+                required
+                type="number"
+                min={1}
+                value={form.pack_size}
+                onChange={(e) => set("pack_size", Math.max(1, Number(e.target.value)))}
+                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+              />
             </div>
             <div>
               <label className="block text-xs font-cinzel text-gray-400 uppercase tracking-widest mb-1">

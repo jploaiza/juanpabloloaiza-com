@@ -10,7 +10,7 @@ async function assertAdmin() {
   return await createAdminClient();
 }
 
-// POST /api/patients/[id]/session — register a session
+// POST /api/patients/[id]/session — register one session
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const adminSb = await assertAdmin();
@@ -18,32 +18,29 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
   const { data: patient, error: fetchErr } = await adminSb
     .from("patients")
-    .select("sessions_used, pack_size, status")
+    .select("sessions_used, total_sessions, pack_size, status")
     .eq("id", id)
     .single();
 
   if (fetchErr || !patient) return NextResponse.json({ error: "Paciente no encontrado" }, { status: 404 });
   if (patient.status !== "active") return NextResponse.json({ error: "El paciente no está activo" }, { status: 400 });
-  if (patient.sessions_used >= patient.pack_size) return NextResponse.json({ error: "No hay sesiones disponibles" }, { status: 400 });
 
   const newUsed = patient.sessions_used + 1;
-  const isLast = newUsed >= patient.pack_size;
-
-  const updates: Record<string, unknown> = { sessions_used: newUsed };
-  if (isLast) updates.status = "finished";
+  const total = patient.total_sessions || patient.pack_size;
 
   const { data: updated, error: updateErr } = await adminSb
     .from("patients")
-    .update(updates)
+    .update({ sessions_used: newUsed })
     .eq("id", id)
     .select()
     .single();
 
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
 
-  const content = isLast
-    ? `Sesión ${newUsed}/${patient.pack_size} registrada. Pack completado — estado cambiado a Finalizado.`
-    : `Sesión ${newUsed}/${patient.pack_size} registrada.`;
+  const remaining = Math.max(0, total - newUsed);
+  const content = remaining === 0
+    ? `Sesión ${newUsed}/${total} registrada. Pack completado — quedan 0 sesiones.`
+    : `Sesión ${newUsed}/${total} registrada. Quedan ${remaining} sesión${remaining === 1 ? "" : "es"}.`;
 
   await adminSb.from("patient_logs").insert({
     patient_id: id,
@@ -51,13 +48,5 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     content,
   });
 
-  if (isLast) {
-    await adminSb.from("patient_logs").insert({
-      patient_id: id,
-      type: "status_changed",
-      content: "Pack completado. Estado cambiado a Finalizado.",
-    });
-  }
-
-  return NextResponse.json({ patient: updated, completed: isLast });
+  return NextResponse.json({ patient: updated });
 }

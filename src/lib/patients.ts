@@ -2,7 +2,7 @@
 // lib/patients.ts — Tipos y helpers para el CRM de pacientes
 // ================================================================
 
-export type PackSize = 3 | 5 | 8;
+export type PackSize = number;
 export type PatientStatus = "active" | "paused" | "finished";
 export type LogType = "reminder_sent" | "session_registered" | "note_added" | "status_changed";
 
@@ -14,6 +14,7 @@ export interface Patient {
   phone: string;
   pack_size: PackSize;
   sessions_used: number;
+  total_sessions: number;
   start_date: string;
   end_date: string;
   status: PatientStatus;
@@ -30,13 +31,21 @@ export interface PatientLog {
   created_at: string;
 }
 
+export interface SessionPurchase {
+  id: string;
+  patient_id: string;
+  quantity: number;
+  notes: string | null;
+  purchased_at: string;
+}
+
 // ── Nombre completo ─────────────────────────────────────────────
 export function patientFullName(patient: Pick<Patient, "first_name" | "last_name">): string {
   return `${patient.first_name} ${patient.last_name}`.trim();
 }
 
 // ── Validez por pack ────────────────────────────────────────────
-export const PACK_WEEKS: Record<PackSize, number> = { 3: 4, 5: 7, 8: 11 };
+export const PACK_WEEKS: Record<number, number> = { 1: 2, 3: 4, 5: 7, 8: 11, 10: 14 };
 
 export const REMINDER_DAYS = [
   "Domingo", "Lunes", "Martes", "Miércoles",
@@ -44,9 +53,10 @@ export const REMINDER_DAYS = [
 ];
 
 // ── Cálculo de fechas ───────────────────────────────────────────
-export function calcEndDate(startDate: string, packSize: PackSize): string {
+export function calcEndDate(startDate: string, packSize: number): string {
   const d = new Date(startDate + "T12:00:00");
-  d.setDate(d.getDate() + PACK_WEEKS[packSize] * 7);
+  const weeks = PACK_WEEKS[packSize] ?? Math.ceil(packSize * 1.5);
+  d.setDate(d.getDate() + weeks * 7);
   return d.toISOString().split("T")[0];
 }
 
@@ -58,7 +68,7 @@ export function daysLeft(endDate: string): number {
 }
 
 export function sessionsLeft(patient: Patient): number {
-  return patient.pack_size - patient.sessions_used;
+  return Math.max(0, patient.total_sessions - patient.sessions_used);
 }
 
 // ── Alertas ─────────────────────────────────────────────────────

@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
     email: email.trim(),
     phone: phone.trim(),
     pack_size,
+    total_sessions: pack_size,
     start_date,
     end_date,
     notes: notes?.trim() || null,
@@ -63,10 +64,17 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Register initial purchase in history
+  await adminSb.from("patient_session_purchases").insert({
+    patient_id: data.id,
+    quantity: pack_size,
+    notes: "Pack inicial",
+  });
+
   await adminSb.from("patient_logs").insert({
     patient_id: data.id,
     type: "status_changed",
-    content: `Paciente creado con Pack ${pack_size} sesiones. Vence el ${end_date}.`,
+    content: `Paciente creado con ${pack_size} sesiones iniciales. Vence el ${end_date}.`,
   });
 
   return NextResponse.json({ patient: data }, { status: 201 });
