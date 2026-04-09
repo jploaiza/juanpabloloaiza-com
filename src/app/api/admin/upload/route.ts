@@ -57,16 +57,24 @@ export async function POST(req: NextRequest) {
   const key = `blog/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  await s3.send(
-    new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: key,
-      Body: buffer,
-      ContentType: file.type,
-      CacheControl: "public, max-age=31536000",
-    })
-  );
+  try {
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: key,
+        Body: buffer,
+        ContentType: file.type,
+        CacheControl: "public, max-age=31536000",
+      })
+    );
+  } catch (err) {
+    console.error("[upload] R2 error:", err);
+    return NextResponse.json(
+      { error: "Error al subir a R2. Verifica credenciales y bucket." },
+      { status: 500 }
+    );
+  }
 
-  const url = `${process.env.R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
+  const url = `${process.env.R2_PUBLIC_URL!.replace(/\/$/, "")}/${key}`;
   return NextResponse.json({ url });
 }
