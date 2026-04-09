@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Bell, Send, Check, MessageCircle, Mail, RefreshCw,
   Users, Activity, Clock, ChevronDown, ChevronUp,
-  Zap, Timer, Hash, Shuffle, Eye, EyeOff, AlertCircle,
+  Zap, Timer, Hash, Shuffle, Eye, EyeOff, AlertCircle, Calendar,
 } from "lucide-react";
 import {
   type Patient, type PatientStatus,
@@ -12,6 +12,7 @@ import {
 } from "@/lib/patients";
 import Link from "next/link";
 import AutoSchedulePanel from "./AutoSchedulePanel";
+import CalendarStatusBanner from "./CalendarStatusBanner";
 
 // ── Types ───────────────────────────────────────────────────────
 interface SendResult {
@@ -100,6 +101,13 @@ export default function RemindersConsole() {
   // History
   const [showHistory, setShowHistory] = useState(true);
 
+  // Google Calendar integration
+  const [calendarConnected, setCalendarConnected] = useState<boolean | null>(null);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+  const [scheduledIds, setScheduledIds] = useState<Set<string>>(new Set());
+  const [skipScheduled, setSkipScheduled] = useState(false);
+  const [weekRange, setWeekRange] = useState<{ start?: string; end?: string }>({});
+
   // Load
   const load = useCallback(async () => {
     setLoading(true);
@@ -123,6 +131,32 @@ export default function RemindersConsole() {
 
   useEffect(() => { load(); }, [load]);
 
+  const loadCalendarStatus = useCallback(async () => {
+    setCalendarLoading(true);
+    try {
+      const statusRes = await fetch("/api/calendar/status");
+      if (!statusRes.ok) { setCalendarConnected(false); return; }
+      const { connected } = await statusRes.json();
+      setCalendarConnected(connected);
+      if (connected) {
+        const evRes = await fetch("/api/calendar/week-events");
+        if (evRes.ok) {
+          const data = await evRes.json();
+          const ids = new Set<string>(
+            (data.statuses as { patient_id: string; scheduled: boolean }[])
+              .filter((s) => s.scheduled)
+              .map((s) => s.patient_id),
+          );
+          setScheduledIds(ids);
+          setWeekRange({ start: data.week_start, end: data.week_end });
+        }
+      }
+    } catch { /* calendar unavailable */ }
+    finally { setCalendarLoading(false); }
+  }, []);
+
+  useEffect(() => { loadCalendarStatus(); }, [loadCalendarStatus]);
+
   // Persist template in localStorage
   useEffect(() => {
     const saved = localStorage.getItem("crm_reminder_template");
@@ -139,7 +173,8 @@ export default function RemindersConsole() {
       !search ||
       p.full_name.toLowerCase().includes(search.toLowerCase()) ||
       p.email.toLowerCase().includes(search.toLowerCase())
-    );
+    )
+    .filter((p) => !skipScheduled || !scheduledIds.has(p.id));
 
   const counts: Record<FilterTab, number> = {
     all: patients.length,
@@ -240,12 +275,26 @@ export default function RemindersConsole() {
         {/* Header */}
         <div className="px-4 py-3 border-b border-[#C5A059]/10 flex items-center justify-between gap-2">
           <span className="font-cinzel text-xs uppercase tracking-widest text-gray-400">Pacientes</span>
-          <button
-            onClick={toggleAll}
-            className="text-[10px] font-cinzel text-gray-500 hover:text-[#C5A059] uppercase tracking-widest transition"
-          >
-            {allFilteredSelected ? "Desel. todos" : "Sel. todos"}
-          </button>
+          <div className="flex items-center gap-3">
+            {calendarConnected && (
+              <button
+                onClick={() => setSkipScheduled((v) => !v)}
+                title="Omitir pacientes con cita esta semana"
+                className={`flex items-center gap-1 text-[10px] font-cinzel uppercase tracking-widest transition ${
+                  skipScheduled ? "text-emerald-400" : "text-gray-600 hover:text-gray-400"
+                }`}
+              >
+                <Calendar size={11} />
+                <span className="hidden sm:inline">Sin cita</span>
+              </button>
+            )}
+            <button
+              onClick={toggleAll}
+              className="text-[10px] font-cinzel text-gray-500 hover:text-[#C5A059] uppercase tracking-widest transition"
+            >
+              {allFilteredSelected ? "Desel. todos" : "Sel. todos"}
+            </button>
+          </div>
         </div>
 
         {/* Filter tabs */}
@@ -307,6 +356,11 @@ export default function RemindersConsole() {
                   <span className={`px-1.5 py-0.5 border text-[9px] font-cinzel uppercase ${statusColor(patient.status)}`}>
                     {statusLabel(patient.status)[0]}
                   </span>
+                  {calendarConnected && scheduledIds.has(patient.id) && (
+                    <span title="Ya agendó esta semana" className="text-emerald-400">
+                      <Calendar size={10} />
+                    </span>
+                  )}
                 </div>
               </div>
             );
@@ -328,6 +382,21 @@ export default function RemindersConsole() {
 
       {/* ── RIGHT: Config + Send + History ─────────────────── */}
       <div className="lg:col-span-3 space-y-4">
+
+        {/* Google Calendar status */}
+        <CalendarStatusBanner
+          connected={calendarConnected}
+          loading={calendarLoading}
+          scheduledCount={scheduledIds.size}
+          weekStart={weekRange.start}
+          weekEnd={weekRange.end}
+          onRefresh={loadCalendarStatus}
+          onDisconnect={async () => {
+            await fetch("/api/calendar/disconnect", { method: "DELETE" });
+            setCalendarConnected(false);
+            setScheduledIds(new Set());
+          }}
+        />
 
         {/* Message template */}
         <div className="bg-[#0a1628] border border-[#C5A059]/20">
