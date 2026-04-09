@@ -10,7 +10,11 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const title = searchParams.get("title") ?? "Juan Pablo Loaiza";
   const excerpt = searchParams.get("excerpt") ?? "";
-  const imageUrl = searchParams.get("imageUrl") ?? "";
+  const rawImageUrl = searchParams.get("imageUrl") ?? "";
+  // Satori (edge runtime) cannot decode WebP — proxy through Cloudinary fetch to get JPEG
+  const imageUrl = rawImageUrl.endsWith(".webp")
+    ? `https://res.cloudinary.com/dvudfdhoi/image/fetch/w_1080,h_1920,c_fill,f_jpg,q_auto/${encodeURIComponent(rawImageUrl)}`
+    : rawImageUrl;
   const slug = searchParams.get("slug") ?? "";
   const siteUrl = slug ? "juanpabloloaiza.com/blog/" + slug : "juanpabloloaiza.com";
 
