@@ -38,6 +38,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
   const [showAddSessions, setShowAddSessions] = useState(false);
   const [addQty, setAddQty] = useState(5);
   const [addNotes, setAddNotes] = useState("");
+  const [addStartDate, setAddStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [addingsessions, setAddingSessions] = useState(false);
 
   const dl = daysLeft(patient.end_date);
@@ -76,7 +77,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
       const res = await fetch(`/api/patients/${patient.id}/add-sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity: addQty, notes: addNotes }),
+        body: JSON.stringify({ quantity: addQty, notes: addNotes, start_date: addStartDate }),
       });
       if (!res.ok) {
         const j = await res.json();
@@ -85,6 +86,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
       setShowAddSessions(false);
       setAddQty(5);
       setAddNotes("");
+      setAddStartDate(new Date().toISOString().split("T")[0]);
       await refresh();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error al agregar sesiones");
@@ -283,6 +285,15 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
                   </button>
                 ))}
               </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Fecha de inicio del pack</label>
+              <input
+                type="date"
+                value={addStartDate}
+                onChange={(e) => setAddStartDate(e.target.value)}
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+              />
             </div>
             <div>
               <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Nota (opcional)</label>

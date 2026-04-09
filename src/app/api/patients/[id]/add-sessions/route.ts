@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { calcEndDate } from "@/lib/patients";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!adminSb) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  const { quantity, notes } = body as { quantity?: number; notes?: string };
+  const { quantity, notes, start_date } = body as { quantity?: number; notes?: string; start_date?: string };
 
   if (!quantity || quantity < 1 || !Number.isInteger(quantity)) {
     return NextResponse.json({ error: "quantity debe ser un entero positivo" }, { status: 400 });
@@ -35,11 +36,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const currentTotal = patient.total_sessions || patient.pack_size;
   const newTotal = currentTotal + quantity;
 
-  // Each purchase extends end_date to at least 2 weeks from today
-  const twoWeeksFromNow = new Date();
-  twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
-  const twoWeeksStr = twoWeeksFromNow.toISOString().split("T")[0];
-  const newEndDate = (patient.end_date ?? "") < twoWeeksStr ? twoWeeksStr : patient.end_date;
+  // Calculate new end_date from the provided start_date (or today) + pack weeks for quantity
+  const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(start_date ?? "")
+    ? start_date!
+    : new Date().toISOString().split("T")[0];
+  const calculatedEndDate = calcEndDate(baseDate, quantity);
+  const newEndDate = (patient.end_date ?? "") < calculatedEndDate ? calculatedEndDate : patient.end_date;
 
   // Update total_sessions and end_date
   const { data: updated, error: updateErr } = await adminSb
@@ -60,10 +62,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // Log the purchase
   const noteStr = notes?.trim() ? ` — ${notes.trim()}` : "";
+  const dateStr = baseDate !== new Date().toISOString().split("T")[0]
+    ? ` Inicio: ${new Date(baseDate + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" })}.`
+    : "";
   await adminSb.from("patient_logs").insert({
     patient_id: id,
     type: "note_added",
-    content: `Compra de ${quantity} sesión${quantity === 1 ? "" : "es"} registrada. Total acumulado: ${newTotal} sesiones${noteStr}.`,
+    content: `Compra de ${quantity} sesión${quantity === 1 ? "" : "es"} registrada.${dateStr} Total acumulado: ${newTotal} sesiones${noteStr}.`,
   });
 
   return NextResponse.json({ patient: updated, added: quantity, total: newTotal });

@@ -29,6 +29,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
   const [showAddSessions, setShowAddSessions] = useState(false);
   const [addQty, setAddQty] = useState(5);
   const [addNotes, setAddNotes] = useState("");
+  const [addStartDate, setAddStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [addingPurchase, setAddingPurchase] = useState(false);
 
   const dl = daysLeft(patient.end_date);
@@ -75,7 +76,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
       const res = await fetch(`/api/patients/${patient.id}/add-sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity: addQty, notes: addNotes }),
+        body: JSON.stringify({ quantity: addQty, notes: addNotes, start_date: addStartDate }),
       });
       if (!res.ok) {
         const j = await res.json();
@@ -84,6 +85,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
       setShowAddSessions(false);
       setAddQty(5);
       setAddNotes("");
+      setAddStartDate(new Date().toISOString().split("T")[0]);
       onRefresh();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error al agregar sesiones");
@@ -254,6 +256,12 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
               className="w-14 bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-0.5 text-xs font-crimson outline-none"
             />
           </div>
+          <input
+            type="date"
+            value={addStartDate}
+            onChange={(e) => setAddStartDate(e.target.value)}
+            className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-2 py-1 text-xs font-crimson outline-none"
+          />
           <input
             type="text"
             value={addNotes}
