@@ -3,13 +3,17 @@
 import { useState, useEffect } from "react";
 import {
   Calendar, Check, RefreshCw, LogOut, AlertCircle, ChevronDown, Link2, Link2Off,
-  MessageCircle, Eye, EyeOff,
+  MessageCircle, Mail, Eye, EyeOff,
 } from "lucide-react";
 import {
   type Patient,
   sessionsLeft, daysLeft,
   DEFAULT_REMINDER_TEMPLATE, DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
   REMINDER_TEMPLATE_KEY, REMINDER_TEMPLATE_SIN_SESIONES_KEY,
+  DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY,
+  DEFAULT_EMAIL_SUBJECT_SIN_SESIONES, DEFAULT_EMAIL_BODY_SIN_SESIONES,
+  REMINDER_EMAIL_SUBJECT_KEY, REMINDER_EMAIL_BODY_KEY,
+  REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, REMINDER_EMAIL_BODY_SIN_SESIONES_KEY,
 } from "@/lib/patients";
 
 interface CalendarOption {
@@ -49,7 +53,7 @@ export default function SettingsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [needsReconnect, setNeedsReconnect] = useState(false);
 
-  // Template state
+  // Template state (WhatsApp)
   const [template, setTemplate] = useState(DEFAULT_REMINDER_TEMPLATE);
   const [templateSinSesiones, setTemplateSinSesiones] = useState(DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES);
   const [activeTemplateTab, setActiveTemplateTab] = useState<"con_sesiones" | "sin_sesiones">("con_sesiones");
@@ -57,15 +61,26 @@ export default function SettingsPanel() {
   const [showPreview, setShowPreview] = useState(false);
   const [previewPatient, setPreviewPatient] = useState<Patient | null>(null);
 
+  // Template state (Email)
+  const [emailSubject, setEmailSubject] = useState(DEFAULT_EMAIL_SUBJECT);
+  const [emailBody, setEmailBody] = useState(DEFAULT_EMAIL_BODY);
+  const [emailSubjectSin, setEmailSubjectSin] = useState(DEFAULT_EMAIL_SUBJECT_SIN_SESIONES);
+  const [emailBodySin, setEmailBodySin] = useState(DEFAULT_EMAIL_BODY_SIN_SESIONES);
+  const [activeEmailTab, setActiveEmailTab] = useState<"con_sesiones" | "sin_sesiones">("con_sesiones");
+  const [emailSaved, setEmailSaved] = useState(false);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+
   // Load status on mount
   useEffect(() => { checkStatus(); }, []);
 
   // Load saved templates from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem(REMINDER_TEMPLATE_KEY);
-    if (saved) setTemplate(saved);
-    const savedSin = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY);
-    if (savedSin) setTemplateSinSesiones(savedSin);
+    const t = localStorage.getItem(REMINDER_TEMPLATE_KEY); if (t) setTemplate(t);
+    const ts = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY); if (ts) setTemplateSinSesiones(ts);
+    const es = localStorage.getItem(REMINDER_EMAIL_SUBJECT_KEY); if (es) setEmailSubject(es);
+    const eb = localStorage.getItem(REMINDER_EMAIL_BODY_KEY); if (eb) setEmailBody(eb);
+    const ess = localStorage.getItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY); if (ess) setEmailSubjectSin(ess);
+    const ebs = localStorage.getItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY); if (ebs) setEmailBodySin(ebs);
     // Fetch a patient for preview
     fetch("/api/patients").then((r) => r.json()).then(({ patients }) => {
       if (patients?.length) {
@@ -81,11 +96,30 @@ export default function SettingsPanel() {
     setTimeout(() => setTemplateSaved(false), 2000);
   }
 
+  function saveEmailTemplates() {
+    localStorage.setItem(REMINDER_EMAIL_SUBJECT_KEY, emailSubject);
+    localStorage.setItem(REMINDER_EMAIL_BODY_KEY, emailBody);
+    localStorage.setItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, emailSubjectSin);
+    localStorage.setItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY, emailBodySin);
+    setEmailSaved(true);
+    setTimeout(() => setEmailSaved(false), 2000);
+  }
+
   function insertVar(v: string) {
     if (activeTemplateTab === "sin_sesiones") {
       setTemplateSinSesiones((t) => t + v);
     } else {
       setTemplate((t) => t + v);
+    }
+  }
+
+  function insertEmailVar(v: string, field: "subject" | "body") {
+    if (activeEmailTab === "sin_sesiones") {
+      if (field === "subject") setEmailSubjectSin((t) => t + v);
+      else setEmailBodySin((t) => t + v);
+    } else {
+      if (field === "subject") setEmailSubject((t) => t + v);
+      else setEmailBody((t) => t + v);
     }
   }
 
@@ -323,7 +357,7 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* ── Plantillas de Recordatorio ───────────────────────────── */}
+      {/* ── Plantillas de Recordatorio WhatsApp ─────────────────── */}
       <div className="bg-[#0a1628] border border-[#C5A059]/20">
         {/* Section header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10">
@@ -441,6 +475,186 @@ export default function SettingsPanel() {
                   setTemplateSinSesiones(DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES);
                 } else {
                   setTemplate(DEFAULT_REMINDER_TEMPLATE);
+                }
+              }}
+              className="text-[10px] font-cinzel text-gray-600 hover:text-gray-400 transition uppercase tracking-widest"
+            >
+              Restablecer por defecto
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Plantillas de Recordatorio Email ────────────────────── */}
+      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10">
+          <div className="flex items-center gap-2">
+            <Mail size={14} className="text-[#C5A059]" />
+            <h3 className="font-cinzel text-white text-xs uppercase tracking-widest">Plantillas de Recordatorio — Email</h3>
+          </div>
+          <button
+            onClick={() => setShowEmailPreview((v) => !v)}
+            className="flex items-center gap-1 text-[10px] font-cinzel text-gray-500 hover:text-[#C5A059] transition"
+          >
+            {showEmailPreview ? <EyeOff size={11} /> : <Eye size={11} />}
+            {showEmailPreview ? "Ocultar" : "Vista previa"}
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-4">
+          <p className="text-xs font-crimson text-gray-500 leading-relaxed">
+            El asunto y el cuerpo del correo son editables. El diseño del email (marca, colores, botón) se mantiene fijo.
+          </p>
+
+          {/* Email template tabs */}
+          <div className="flex border border-[#C5A059]/15">
+            <button
+              onClick={() => setActiveEmailTab("con_sesiones")}
+              className={`flex-1 px-4 py-2.5 text-[10px] font-cinzel uppercase tracking-widest transition border-r border-[#C5A059]/15 ${
+                activeEmailTab === "con_sesiones"
+                  ? "bg-[#C5A059]/10 text-[#C5A059]"
+                  : "text-gray-600 hover:text-gray-400"
+              }`}
+            >
+              Con sesiones
+            </button>
+            <button
+              onClick={() => setActiveEmailTab("sin_sesiones")}
+              className={`flex-1 px-4 py-2.5 text-[10px] font-cinzel uppercase tracking-widest transition ${
+                activeEmailTab === "sin_sesiones"
+                  ? "bg-amber-500/10 text-amber-400"
+                  : "text-gray-600 hover:text-gray-400"
+              }`}
+            >
+              Sin sesiones
+            </button>
+          </div>
+
+          {activeEmailTab === "sin_sesiones" && (
+            <p className="text-[10px] font-crimson text-amber-400/70 italic">
+              Para esta variante el botón dice "Renovar sesiones" y se oculta el contador de sesiones.
+            </p>
+          )}
+
+          {/* Variable buttons */}
+          <div>
+            <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest mb-2">Variables</p>
+            <div className="flex flex-wrap gap-1.5">
+              {VARIABLES.map(({ label, desc }) => (
+                <button
+                  key={label}
+                  title={desc}
+                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#020617] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                >
+                  <span
+                    onClick={() => insertEmailVar(label, "subject")}
+                    title={`Insertar en asunto: ${desc}`}
+                  >{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="block text-[10px] font-cinzel text-gray-400 uppercase tracking-widest mb-1.5">
+              Asunto del email
+            </label>
+            {activeEmailTab === "con_sesiones" ? (
+              <input
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                placeholder="Asunto del email con sesiones..."
+              />
+            ) : (
+              <input
+                value={emailSubjectSin}
+                onChange={(e) => setEmailSubjectSin(e.target.value)}
+                className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2 text-sm font-crimson focus:border-amber-500/40 outline-none"
+                placeholder="Asunto del email sin sesiones..."
+              />
+            )}
+          </div>
+
+          {/* Body */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] font-cinzel text-gray-400 uppercase tracking-widest">
+                Cuerpo del mensaje
+              </label>
+              <div className="flex gap-1.5">
+                {VARIABLES.map(({ label, desc }) => (
+                  <button
+                    key={label}
+                    onClick={() => insertEmailVar(label, "body")}
+                    title={`Insertar en cuerpo: ${desc}`}
+                    className="text-[9px] font-cinzel px-1.5 py-0.5 bg-[#020617] border border-[#C5A059]/15 text-[#C5A059]/70 hover:text-[#C5A059] hover:border-[#C5A059]/40 transition"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {activeEmailTab === "con_sesiones" ? (
+              <textarea
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                rows={3}
+                className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
+                placeholder="Texto del email para pacientes con sesiones..."
+              />
+            ) : (
+              <textarea
+                value={emailBodySin}
+                onChange={(e) => setEmailBodySin(e.target.value)}
+                rows={3}
+                className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
+                placeholder="Texto del email para pacientes sin sesiones..."
+              />
+            )}
+          </div>
+
+          {/* Preview */}
+          {showEmailPreview && previewPatient && (
+            <div className={`border rounded-sm p-4 space-y-2 ${activeEmailTab === "sin_sesiones" ? "bg-amber-950/10 border-amber-700/20" : "bg-blue-950/20 border-blue-700/20"}`}>
+              <p className={`text-[10px] font-cinzel uppercase tracking-widest ${activeEmailTab === "sin_sesiones" ? "text-amber-400/70" : "text-blue-400/70"}`}>
+                Vista previa — {previewPatient.first_name}
+              </p>
+              <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest">
+                Asunto: <span className="text-gray-300 normal-case font-crimson tracking-normal text-xs">
+                  {renderTemplatePreview(
+                    activeEmailTab === "sin_sesiones" ? emailSubjectSin : emailSubject,
+                    previewPatient
+                  )}
+                </span>
+              </p>
+              <p className="text-gray-300 font-crimson text-sm leading-relaxed whitespace-pre-wrap border-t border-white/5 pt-2">
+                {renderTemplatePreview(
+                  activeEmailTab === "sin_sesiones" ? emailBodySin : emailBody,
+                  previewPatient
+                )}
+              </p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-4 pt-1">
+            <button
+              onClick={saveEmailTemplates}
+              className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#020617] text-xs font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition"
+            >
+              {emailSaved ? <Check size={13} /> : null}
+              {emailSaved ? "Guardado" : "Guardar plantillas email"}
+            </button>
+            <button
+              onClick={() => {
+                if (activeEmailTab === "sin_sesiones") {
+                  setEmailSubjectSin(DEFAULT_EMAIL_SUBJECT_SIN_SESIONES);
+                  setEmailBodySin(DEFAULT_EMAIL_BODY_SIN_SESIONES);
+                } else {
+                  setEmailSubject(DEFAULT_EMAIL_SUBJECT);
+                  setEmailBody(DEFAULT_EMAIL_BODY);
                 }
               }}
               className="text-[10px] font-cinzel text-gray-600 hover:text-gray-400 transition uppercase tracking-widest"

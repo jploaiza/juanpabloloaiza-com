@@ -11,6 +11,10 @@ import {
   sessionsLeft, daysLeft, daysLeftColor, statusLabel, statusColor, patientFullName,
   DEFAULT_REMINDER_TEMPLATE, DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
   REMINDER_TEMPLATE_KEY, REMINDER_TEMPLATE_SIN_SESIONES_KEY,
+  DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY,
+  DEFAULT_EMAIL_SUBJECT_SIN_SESIONES, DEFAULT_EMAIL_BODY_SIN_SESIONES,
+  REMINDER_EMAIL_SUBJECT_KEY, REMINDER_EMAIL_BODY_KEY,
+  REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, REMINDER_EMAIL_BODY_SIN_SESIONES_KEY,
 } from "@/lib/patients";
 import Link from "next/link";
 import AutoSchedulePanel from "./AutoSchedulePanel";
@@ -84,12 +88,18 @@ export default function RemindersConsole() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  // Template
+  // Template (WhatsApp)
   const [template, setTemplate] = useState(DEFAULT_TEMPLATE);
   const [templateSinSesiones, setTemplateSinSesiones] = useState(DEFAULT_TEMPLATE_SIN_SESIONES);
   const [activeTemplateTab, setActiveTemplateTab] = useState<"con_sesiones" | "sin_sesiones">("con_sesiones");
   const [showPreview, setShowPreview] = useState(false);
   const [previewPatient, setPreviewPatient] = useState<Patient | null>(null);
+
+  // Email templates (loaded from Settings, temporary overrides)
+  const [emailSubject, setEmailSubject] = useState(DEFAULT_EMAIL_SUBJECT);
+  const [emailBody, setEmailBody] = useState(DEFAULT_EMAIL_BODY);
+  const [emailSubjectSin, setEmailSubjectSin] = useState(DEFAULT_EMAIL_SUBJECT_SIN_SESIONES);
+  const [emailBodySin, setEmailBodySin] = useState(DEFAULT_EMAIL_BODY_SIN_SESIONES);
 
   // Send config
   const [sendMode, setSendMode] = useState<SendMode>("batch");
@@ -163,17 +173,21 @@ export default function RemindersConsole() {
 
   // Load saved templates from localStorage on mount (read-only — edits here are temporary)
   useEffect(() => {
-    const saved = localStorage.getItem(REMINDER_TEMPLATE_KEY);
-    if (saved) setTemplate(saved);
-    const savedSin = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY);
-    if (savedSin) setTemplateSinSesiones(savedSin);
+    const t = localStorage.getItem(REMINDER_TEMPLATE_KEY); if (t) setTemplate(t);
+    const ts = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY); if (ts) setTemplateSinSesiones(ts);
+    const es = localStorage.getItem(REMINDER_EMAIL_SUBJECT_KEY); if (es) setEmailSubject(es);
+    const eb = localStorage.getItem(REMINDER_EMAIL_BODY_KEY); if (eb) setEmailBody(eb);
+    const ess = localStorage.getItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY); if (ess) setEmailSubjectSin(ess);
+    const ebs = localStorage.getItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY); if (ebs) setEmailBodySin(ebs);
   }, []);
 
   function restoreFromSettings() {
-    const saved = localStorage.getItem(REMINDER_TEMPLATE_KEY) ?? DEFAULT_TEMPLATE;
-    const savedSin = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY) ?? DEFAULT_TEMPLATE_SIN_SESIONES;
-    setTemplate(saved);
-    setTemplateSinSesiones(savedSin);
+    setTemplate(localStorage.getItem(REMINDER_TEMPLATE_KEY) ?? DEFAULT_TEMPLATE);
+    setTemplateSinSesiones(localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY) ?? DEFAULT_TEMPLATE_SIN_SESIONES);
+    setEmailSubject(localStorage.getItem(REMINDER_EMAIL_SUBJECT_KEY) ?? DEFAULT_EMAIL_SUBJECT);
+    setEmailBody(localStorage.getItem(REMINDER_EMAIL_BODY_KEY) ?? DEFAULT_EMAIL_BODY);
+    setEmailSubjectSin(localStorage.getItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY) ?? DEFAULT_EMAIL_SUBJECT_SIN_SESIONES);
+    setEmailBodySin(localStorage.getItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY) ?? DEFAULT_EMAIL_BODY_SIN_SESIONES);
   }
 
   // Filtered patients
@@ -252,7 +266,13 @@ export default function RemindersConsole() {
             fetch("/api/patients/send-reminders-now", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ patient_ids: withSessions, whatsapp_template: template, channels }),
+              body: JSON.stringify({
+                patient_ids: withSessions,
+                whatsapp_template: template,
+                email_subject: emailSubject,
+                email_body: emailBody,
+                channels,
+              }),
             }).then((r) => r.json()).then((d) => { allResults.push(...(d.results ?? [])); })
           );
         }
@@ -261,7 +281,13 @@ export default function RemindersConsole() {
             fetch("/api/patients/send-reminders-now", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ patient_ids: withoutSessions, whatsapp_template: templateSinSesiones, channels }),
+              body: JSON.stringify({
+                patient_ids: withoutSessions,
+                whatsapp_template: templateSinSesiones,
+                email_subject: emailSubjectSin,
+                email_body: emailBodySin,
+                channels,
+              }),
             }).then((r) => r.json()).then((d) => { allResults.push(...(d.results ?? [])); })
           );
         }
@@ -277,10 +303,17 @@ export default function RemindersConsole() {
       for (let i = 0; i < selectedIds.length; i++) {
         if (abortRef.current) break;
         try {
+          const isSin = (() => { const p = patients.find((pt) => pt.id === selectedIds[i]); return p ? sessionsLeft(p) === 0 : false; })();
           const res = await fetch("/api/patients/send-reminders-now", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patient_ids: [selectedIds[i]], whatsapp_template: templateFor(selectedIds[i]), channels }),
+            body: JSON.stringify({
+              patient_ids: [selectedIds[i]],
+              whatsapp_template: templateFor(selectedIds[i]),
+              email_subject: isSin ? emailSubjectSin : emailSubject,
+              email_body: isSin ? emailBodySin : emailBody,
+              channels,
+            }),
           });
           const data = await res.json();
           if (data.results?.[0]) results.push(data.results[0]);

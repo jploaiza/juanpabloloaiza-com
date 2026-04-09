@@ -130,6 +130,7 @@ export function buildEmailUrl(patient: Patient): string {
 }
 
 // ── Reminder templates (shared source of truth) ─────────────────
+// ── WhatsApp templates ───────────────────────────────────────────
 export const REMINDER_TEMPLATE_KEY = "crm_reminder_template";
 export const REMINDER_TEMPLATE_SIN_SESIONES_KEY = "crm_reminder_template_sin_sesiones";
 
@@ -138,6 +139,24 @@ export const DEFAULT_REMINDER_TEMPLATE =
 
 export const DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES =
   "Hola {nombre} 👋 Ha sido un honor acompañarte en tu proceso de sanación. Para seguir avanzando juntos, te invito a renovar tus sesiones y agendar cuando lo desees — cada paso cuenta en este camino. ¿Continuamos? 🌟";
+
+// ── Email templates ──────────────────────────────────────────────
+export const REMINDER_EMAIL_SUBJECT_KEY = "crm_email_subject";
+export const REMINDER_EMAIL_BODY_KEY = "crm_email_body";
+export const REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY = "crm_email_subject_sin_sesiones";
+export const REMINDER_EMAIL_BODY_SIN_SESIONES_KEY = "crm_email_body_sin_sesiones";
+
+export const DEFAULT_EMAIL_SUBJECT =
+  "Recuerda tus sesiones — Te quedan {sesiones}";
+
+export const DEFAULT_EMAIL_BODY =
+  "Tus sesiones vencen el {vencimiento}. No dejes pasar esta oportunidad de continuar tu proceso de sanación.";
+
+export const DEFAULT_EMAIL_SUBJECT_SIN_SESIONES =
+  "Continúa tu proceso de sanación con nuevas sesiones";
+
+export const DEFAULT_EMAIL_BODY_SIN_SESIONES =
+  "Ha sido un honor acompañarte en este camino. Te invito a renovar tus sesiones para seguir avanzando juntos hacia tu bienestar — cada paso que das cuenta enormemente.";
 
 // ── Reminder WhatsApp message (para cron) ───────────────────────
 export function buildReminderText(patient: Patient): string {

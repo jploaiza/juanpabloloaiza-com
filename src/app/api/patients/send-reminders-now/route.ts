@@ -14,14 +14,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
-import { type Patient, sessionsLeft } from "@/lib/patients";
+import {
+  type Patient, sessionsLeft,
+  DEFAULT_REMINDER_TEMPLATE, DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY,
+} from "@/lib/patients";
 
 const FROM_EMAIL = "Juan Pablo Loaiza <academy@juanpabloloaiza.com>";
 const AGENDA_URL = "https://www.juanpabloloaiza.com/agenda";
 const SITE_URL = "https://www.juanpabloloaiza.com";
-
-const DEFAULT_TEMPLATE =
-  "Hola {nombre} 👋 Te escribo para recordarte que tienes tu sesión disponible esta semana. Te quedan {sesiones} sesiones y tu pack vence el {vencimiento}. ¿Agendamos? 🌟";
 
 function renderTemplate(tpl: string, patient: Patient): string {
   const sl = sessionsLeft(patient);
@@ -55,11 +55,15 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const {
     patient_ids,
-    whatsapp_template = DEFAULT_TEMPLATE,
+    whatsapp_template = DEFAULT_REMINDER_TEMPLATE,
+    email_subject = DEFAULT_EMAIL_SUBJECT,
+    email_body = DEFAULT_EMAIL_BODY,
     channels = ["whatsapp", "email"],
   } = body as {
     patient_ids: string[];
     whatsapp_template?: string;
+    email_subject?: string;
+    email_body?: string;
     channels?: string[];
   };
 
@@ -93,11 +97,13 @@ export async function POST(req: NextRequest) {
     // Email
     if (channels.includes("email") && process.env.RESEND_API_KEY) {
       try {
+        const renderedSubject = renderTemplate(email_subject, patient);
+        const renderedBody = renderTemplate(email_body, patient);
         const { error: emailErr } = await resend.emails.send({
           from: FROM_EMAIL,
           to: patient.email,
-          subject: `Recuerda tus sesiones — Te quedan ${sl}`,
-          html: reminderEmailHtml({ name, sl, expiryDate: expiry }),
+          subject: renderedSubject,
+          html: reminderEmailHtml({ name, sl, expiryDate: expiry, bodyText: renderedBody }),
         });
         if (emailErr) throw new Error(emailErr.message);
         emailOk = true;
@@ -153,7 +159,21 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ sent: results.length, results });
 }
 
-function reminderEmailHtml({ name, sl, expiryDate }: { name: string; sl: number; expiryDate: string }) {
+function reminderEmailHtml({ name, sl, expiryDate, bodyText }: {
+  name: string; sl: number; expiryDate: string; bodyText: string;
+}) {
+  const showCounter = sl > 0;
+  const ctaLabel = sl > 0 ? "Agenda tu sesión →" : "Renovar sesiones →";
+  const title = sl > 0 ? "Esta semana es tu sesión 🌟" : "Continúa tu proceso de sanación 🌟";
+
+  const counterBlock = showCounter ? `
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#020d1f;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
+<tr><td style="padding:18px;text-align:center;">
+<p style="margin:0 0 4px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b7280;">Sesiones disponibles</p>
+<p style="margin:0;font-size:40px;color:#C5A059;line-height:1;">${sl}</p>
+</td></tr>
+</table>` : "";
+
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#020617;font-family:Georgia,serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#020617;padding:40px 20px;">
@@ -165,17 +185,12 @@ function reminderEmailHtml({ name, sl, expiryDate }: { name: string; sl: number;
 </td></tr>
 <tr><td style="padding:32px 40px;">
 <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#C5A059;">Hola, ${name}</p>
-<h1 style="margin:0 0 20px;font-size:20px;color:#ffffff;font-weight:400;line-height:1.4;">Esta semana es tu sesión 🌟</h1>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#020d1f;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
-<tr><td style="padding:18px;text-align:center;">
-<p style="margin:0 0 4px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b7280;">Sesiones disponibles</p>
-<p style="margin:0;font-size:40px;color:#C5A059;line-height:1;">${sl}</p>
-</td></tr>
-</table>
-<p style="margin:0 0 20px;font-size:15px;color:#9ca3af;line-height:1.8;">Tus sesiones vencen el <span style="color:#C5A059;">${expiryDate}</span>.</p>
+<h1 style="margin:0 0 20px;font-size:20px;color:#ffffff;font-weight:400;line-height:1.4;">${title}</h1>
+${counterBlock}
+<p style="margin:0 0 24px;font-size:15px;color:#9ca3af;line-height:1.8;">${bodyText.replace(/\n/g, "<br/>")}</p>
 <table cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
 <tr><td style="background:#C5A059;padding:13px 32px;">
-<a href="${AGENDA_URL}" style="color:#020617;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">Agenda tu sesión →</a>
+<a href="${AGENDA_URL}" style="color:#020617;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">${ctaLabel}</a>
 </td></tr>
 </table>
 </td></tr>
