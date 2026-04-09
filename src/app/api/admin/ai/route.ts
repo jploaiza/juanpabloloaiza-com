@@ -63,11 +63,17 @@ export async function POST(req: NextRequest) {
 
   const prompt = action === "generate" ? GENERATE_PROMPT(input) : IMPROVE_PROMPT(input);
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 4096,
-    messages: [{ role: "user", content: prompt }],
-  });
+  let message;
+  try {
+    message = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 4096,
+      messages: [{ role: "user", content: prompt }],
+    });
+  } catch (err) {
+    console.error("[ai] Anthropic error:", err);
+    return NextResponse.json({ error: "Error al conectar con Anthropic." }, { status: 500 });
+  }
 
   const content =
     message.content[0].type === "text" ? message.content[0].text : "";
