@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
 import { Users, Award, TrendingUp, Clock, Activity, UserPlus, BookOpen, BarChart2 } from "lucide-react";
+import SiteAnalyticsPanel from "@/components/SiteAnalyticsPanel";
 
 export const metadata: Metadata = { title: "Analytics — Admin" };
 
@@ -260,7 +261,17 @@ export default async function AnalyticsPage() {
         <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">
           Panel de administración
         </p>
-        <h1 className="font-cinzel text-2xl text-white">Analytics Extendido</h1>
+        <h1 className="font-cinzel text-2xl text-white">Analytics</h1>
+      </div>
+
+      {/* Site analytics */}
+      <div className="mb-12">
+        <SiteAnalyticsPanel />
+      </div>
+
+      <div className="border-t border-white/5 mb-10 pt-10">
+        <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Academia</p>
+        <h2 className="font-cinzel text-xl text-white">Analytics de Estudiantes</h2>
       </div>
 
       {/* KPI row */}

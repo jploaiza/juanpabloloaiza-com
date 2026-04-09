@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Source_Serif_4, DM_Sans } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import PageTracker from "@/components/PageTracker";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-cinzel",
@@ -107,6 +108,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-black text-white">
         {children}
         <WhatsAppButton />
+        <PageTracker />
       </body>
     </html>
   );
