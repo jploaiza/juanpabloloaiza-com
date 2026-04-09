@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@/lib/supabase/server";
 
 const GENERATE_PROMPT = (idea: string) => `Eres Juan Pablo Loaiza, terapeuta chileno especializado en regresión a vidas pasadas, hipnosis terapéutica y sanación espiritual. Escribes para tu blog personal.
@@ -38,7 +38,7 @@ Título del artículo: ${title}
 Extracto actual: ${excerpt}
 Contenido: ${content.slice(0, 3000)}
 
-Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, sin explicaciones):
+Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, sin bloques de código, sin explicaciones):
 {
   "seoTitle": "título SEO optimizado, máximo 60 caracteres, incluye keyword principal",
   "seoDescription": "meta descripción atractiva para clicks, máximo 160 caracteres",
@@ -60,9 +60,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GOOGLE_AI_API_KEY) {
     return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY no está configurada." },
+      { error: "GOOGLE_AI_API_KEY no está configurada." },
       { status: 500 }
     );
   }
@@ -73,8 +73,6 @@ export async function POST(req: NextRequest) {
   if (!action || !input?.trim()) {
     return NextResponse.json({ error: "Faltan campos requeridos." }, { status: 400 });
   }
-
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   let prompt: string;
   if (action === "seo") {
@@ -89,20 +87,17 @@ export async function POST(req: NextRequest) {
     prompt = action === "generate" ? GENERATE_PROMPT(input) : IMPROVE_PROMPT(input);
   }
 
-  let message;
+  let raw: string;
   try {
-    message = await client.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: action === "seo" ? 512 : 4096,
-      messages: [{ role: "user", content: prompt }],
-    });
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(prompt);
+    raw = result.response.text();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[ai] Anthropic error:", msg);
-    return NextResponse.json({ error: `Anthropic: ${msg}` }, { status: 500 });
+    console.error("[ai] Gemini error:", msg);
+    return NextResponse.json({ error: `Gemini: ${msg}` }, { status: 500 });
   }
-
-  const raw = message.content[0].type === "text" ? message.content[0].text : "";
 
   if (action === "seo") {
     try {
