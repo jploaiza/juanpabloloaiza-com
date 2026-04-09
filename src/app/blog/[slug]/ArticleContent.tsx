@@ -31,15 +31,26 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
       const res = await fetch(`/api/og/story?${params}`);
       if (!res.ok) throw new Error("Error generando imagen");
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `story-${post.slug}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const file = new File([blob], `story-${post.slug}.png`, { type: "image/png" });
+
+      // Mobile: use Web Share API so Instagram receives a real file
+      if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: post.title });
+      } else {
+        // Desktop fallback: download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
       setStoryDone(true);
       setTimeout(() => setStoryDone(false), 4000);
-    } catch {
+    } catch (e) {
+      // AbortError = user cancelled share sheet — not an error
+      if (e instanceof Error && e.name === "AbortError") return;
       alert("Error generando la imagen. Intenta de nuevo.");
     } finally {
       setStoryLoading(false);
