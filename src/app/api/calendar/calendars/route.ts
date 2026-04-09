@@ -27,9 +27,14 @@ async function listCalendars(accessToken: string): Promise<GCalCalendar[]> {
       signal: AbortSignal.timeout(10000),
     },
   );
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message ?? "Error al obtener calendarios");
-  return data.items ?? [];
+  let data: Record<string, unknown>;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`Google Calendar respondió con HTML (HTTP ${res.status}) — token posiblemente revocado`);
+  }
+  if (!res.ok) throw new Error((data.error as { message?: string })?.message ?? `HTTP ${res.status}`);
+  return (data.items as GCalCalendar[]) ?? [];
 }
 
 // ── Auth helper ──────────────────────────────────────────────────
@@ -57,6 +62,7 @@ async function getAdminAndToken(req?: NextRequest) {
 // ── GET ──────────────────────────────────────────────────────────
 
 export async function GET() {
+  try {
   const auth = await getAdminAndToken();
   if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
@@ -90,11 +96,19 @@ export async function GET() {
   } catch (err) {
     return NextResponse.json({ error: `${err instanceof Error ? err.message : "unknown"}` }, { status: 502 });
   }
+  } catch (err) {
+    // Top-level safety net — ensures this route always returns JSON
+    return NextResponse.json(
+      { error: `Error inesperado: ${err instanceof Error ? err.message : String(err)}` },
+      { status: 500 },
+    );
+  }
 }
 
 // ── PATCH ────────────────────────────────────────────────────────
 
 export async function PATCH(req: NextRequest) {
+  try {
   const auth = await getAdminAndToken(req);
   if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
@@ -111,4 +125,10 @@ export async function PATCH(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ updated: true, calendar_id });
+  } catch (err) {
+    return NextResponse.json(
+      { error: `Error inesperado: ${err instanceof Error ? err.message : String(err)}` },
+      { status: 500 },
+    );
+  }
 }

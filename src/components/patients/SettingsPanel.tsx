@@ -44,13 +44,19 @@ export default function SettingsPanel() {
     setError(null);
     try {
       const res = await fetch("/api/calendar/calendars");
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Error al cargar calendarios");
+      let data: Record<string, unknown>;
+      try {
+        data = await res.json();
+      } catch {
+        setError(`El servidor devolvió una respuesta inesperada (HTTP ${res.status}). Desconecta y vuelve a conectar Google Calendar.`);
         return;
       }
-      setCalendars(data.calendars ?? []);
-      setSelectedId(data.selected ?? "primary");
+      if (!res.ok) {
+        setError((data.error as string) ?? `Error HTTP ${res.status}`);
+        return;
+      }
+      setCalendars((data.calendars as CalendarOption[]) ?? []);
+      setSelectedId((data.selected as string) ?? "primary");
     } catch (err) {
       setError(`Error de red: ${err instanceof Error ? err.message : "desconocido"}`);
     } finally {
