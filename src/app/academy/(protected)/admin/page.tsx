@@ -111,13 +111,22 @@ export default async function AdminPage() {
             <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Panel de administración</p>
             <h1 className="font-cinzel text-2xl sm:text-3xl text-white">Analytics & Estudiantes</h1>
           </div>
-          <Link
-            href="/academy/admin/blog"
-            className="flex items-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-4 py-2.5 hover:bg-[#C5A059]/10 transition"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            Blog Manager
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href="/academy/admin/crm"
+              className="flex items-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-4 py-2.5 hover:bg-[#C5A059]/10 transition"
+            >
+              <Users className="w-3.5 h-3.5" />
+              CRM
+            </Link>
+            <Link
+              href="/academy/admin/blog"
+              className="flex items-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-4 py-2.5 hover:bg-[#C5A059]/10 transition"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Blog
+            </Link>
+          </div>
         </div>
 
         {/* ── Stats cards ── */}
