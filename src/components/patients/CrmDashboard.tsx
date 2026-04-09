@@ -7,7 +7,7 @@ import { type Patient, type PatientStatus } from "@/lib/patients";
 import PatientCard from "./PatientCard";
 import PatientForm from "./PatientForm";
 import ImportModal from "./ImportModal";
-import RemindersPanel from "./RemindersPanel";
+import RemindersConsole from "./RemindersConsole";
 
 type Tab = PatientStatus | "reminders";
 
@@ -142,7 +142,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
           transition={{ duration: 0.2 }}
         >
           {activeTab === "reminders" ? (
-            <RemindersPanel />
+            <RemindersConsole />
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-600 font-crimson text-lg">
