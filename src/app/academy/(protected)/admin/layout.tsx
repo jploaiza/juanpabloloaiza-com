@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { LayoutDashboard, Users, FileText, BarChart2 } from "lucide-react";
 import AcademyHeader from "@/components/academy/AcademyHeader";
-import AdminNavLink from "@/components/academy/AdminNavLink";
+import { AdminSidebar, AdminBottomNav } from "@/components/academy/AdminNav";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-admin",
@@ -11,13 +10,6 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-
-const NAV_LINKS = [
-  { href: "/academy/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/academy/admin/crm", label: "CRM", icon: Users },
-  { href: "/academy/admin/blog", label: "Blog", icon: FileText },
-  { href: "/academy/admin/analytics", label: "Analíticas", icon: BarChart2 },
-];
 
 export default async function AcademyAdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -39,12 +31,8 @@ export default async function AcademyAdminLayout({ children }: { children: React
         <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/50 mb-5 px-2">
           Admin
         </p>
-        <nav className="flex flex-col gap-0.5 flex-1">
-          {NAV_LINKS.map(({ href, label, icon, exact }) => (
-            <AdminNavLink key={href} href={href} label={label} icon={icon} exact={exact} />
-          ))}
-        </nav>
-        <div className="border-t border-white/5 pt-4 px-2">
+        <AdminSidebar />
+        <div className="border-t border-white/5 pt-4 px-2 mt-4">
           <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600 truncate">
             {profile?.full_name ?? profile?.email}
           </p>
@@ -54,12 +42,10 @@ export default async function AcademyAdminLayout({ children }: { children: React
 
       {/* Bottom nav — mobile */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#020617]/98 backdrop-blur-xl border-t border-white/5 flex">
-        {NAV_LINKS.map(({ href, label, icon, exact }) => (
-          <AdminNavLink key={href} href={href} label={label} icon={icon} exact={exact} mobile />
-        ))}
+        <AdminBottomNav />
       </nav>
 
-      {/* Main content area */}
+      {/* Main content */}
       <div className="lg:pl-52 pt-16 pb-20 lg:pb-0 min-h-screen">
         {children}
       </div>
