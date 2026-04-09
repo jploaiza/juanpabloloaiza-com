@@ -19,6 +19,7 @@ export default function SettingsPanel() {
   const [calLoading, setCalLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsReconnect, setNeedsReconnect] = useState(false);
 
   // Load status on mount
   useEffect(() => { checkStatus(); }, []);
@@ -42,17 +43,24 @@ export default function SettingsPanel() {
   async function loadCalendars() {
     setCalLoading(true);
     setError(null);
+    setNeedsReconnect(false);
     try {
       const res = await fetch("/api/calendar/calendars");
       let data: Record<string, unknown>;
       try {
         data = await res.json();
       } catch {
-        setError(`El servidor devolvió una respuesta inesperada (HTTP ${res.status}). Desconecta y vuelve a conectar Google Calendar.`);
+        setError(`El servidor devolvió respuesta inesperada (HTTP ${res.status}).`);
+        setNeedsReconnect(true);
         return;
       }
       if (!res.ok) {
-        setError((data.error as string) ?? `Error HTTP ${res.status}`);
+        const msg = (data.error as string) ?? `Error HTTP ${res.status}`;
+        setError(msg);
+        // 401/403/502 from Google = token issue → prompt reconnect
+        if (res.status === 401 || res.status === 403 || res.status === 502) {
+          setNeedsReconnect(true);
+        }
         return;
       }
       setCalendars((data.calendars as CalendarOption[]) ?? []);
@@ -157,15 +165,41 @@ export default function SettingsPanel() {
                   <div className="space-y-3">
                     <div className="flex items-start gap-2 p-3 bg-red-950/30 border border-red-700/20">
                       <AlertCircle size={12} className="text-red-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-red-300 font-crimson text-xs">{error}</p>
+                      <div>
+                        <p className="text-red-300 font-crimson text-xs">{error}</p>
+                        {needsReconnect && (
+                          <p className="text-red-400/70 font-crimson text-xs mt-1">
+                            El token de Google no es válido o no tiene permisos suficientes.
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <button
-                      onClick={loadCalendars}
-                      className="flex items-center gap-1.5 text-[10px] font-cinzel text-gray-400 hover:text-[#C5A059] uppercase tracking-widest transition"
-                    >
-                      <RefreshCw size={11} />
-                      Reintentar
-                    </button>
+                    {needsReconnect ? (
+                      <div className="flex items-center gap-3">
+                        <a
+                          href={authUrl}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#020617] text-xs font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition"
+                        >
+                          <Link2 size={12} />
+                          Reconectar Google Calendar
+                        </a>
+                        <button
+                          onClick={loadCalendars}
+                          className="flex items-center gap-1.5 text-[10px] font-cinzel text-gray-500 hover:text-gray-300 uppercase tracking-widest transition"
+                        >
+                          <RefreshCw size={11} />
+                          Reintentar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={loadCalendars}
+                        className="flex items-center gap-1.5 text-[10px] font-cinzel text-gray-400 hover:text-[#C5A059] uppercase tracking-widest transition"
+                      >
+                        <RefreshCw size={11} />
+                        Reintentar
+                      </button>
+                    )}
                   </div>
                 ) : calendars.length === 0 ? (
                   <div className="space-y-3">

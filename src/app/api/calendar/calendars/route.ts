@@ -33,7 +33,10 @@ async function listCalendars(accessToken: string): Promise<GCalCalendar[]> {
   } catch {
     throw new Error(`Google Calendar respondió con HTML (HTTP ${res.status}) — token posiblemente revocado`);
   }
-  if (!res.ok) throw new Error((data.error as { message?: string })?.message ?? `HTTP ${res.status}`);
+  if (!res.ok) {
+    const googleErr = data.error as { message?: string; status?: string } | undefined;
+    throw new Error(`Google ${res.status}: ${googleErr?.message ?? googleErr?.status ?? "error desconocido"}`);
+  }
   return (data.items as GCalCalendar[]) ?? [];
 }
 
