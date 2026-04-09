@@ -129,6 +129,16 @@ export function buildEmailUrl(patient: Patient): string {
   return `mailto:${patient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
+// ── Reminder templates (shared source of truth) ─────────────────
+export const REMINDER_TEMPLATE_KEY = "crm_reminder_template";
+export const REMINDER_TEMPLATE_SIN_SESIONES_KEY = "crm_reminder_template_sin_sesiones";
+
+export const DEFAULT_REMINDER_TEMPLATE =
+  "Hola {nombre} 👋 Te escribo para recordarte que tienes tu sesión disponible esta semana. Te quedan {sesiones} sesiones y tu pack vence el {vencimiento}. ¿Agendamos? 🌟";
+
+export const DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES =
+  "Hola {nombre} 👋 Ha sido un honor acompañarte en tu proceso de sanación. Para seguir avanzando juntos, te invito a renovar tus sesiones y agendar cuando lo desees — cada paso cuenta en este camino. ¿Continuamos? 🌟";
+
 // ── Reminder WhatsApp message (para cron) ───────────────────────
 export function buildReminderText(patient: Patient): string {
   const name = patient.first_name;

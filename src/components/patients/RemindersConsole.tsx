@@ -9,6 +9,8 @@ import {
 import {
   type Patient, type PatientStatus,
   sessionsLeft, daysLeft, daysLeftColor, statusLabel, statusColor, patientFullName,
+  DEFAULT_REMINDER_TEMPLATE, DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
+  REMINDER_TEMPLATE_KEY, REMINDER_TEMPLATE_SIN_SESIONES_KEY,
 } from "@/lib/patients";
 import Link from "next/link";
 import AutoSchedulePanel from "./AutoSchedulePanel";
@@ -34,11 +36,9 @@ type FilterTab = PatientStatus | "all";
 type SendMode = "batch" | "human";
 type Channel = "whatsapp" | "email";
 
-const DEFAULT_TEMPLATE =
-  "Hola {nombre} 👋 Te escribo para recordarte que tienes tu sesión disponible esta semana. Te quedan {sesiones} sesiones y tu pack vence el {vencimiento}. ¿Agendamos? 🌟";
-
-const DEFAULT_TEMPLATE_SIN_SESIONES =
-  "Hola {nombre} 👋 Ha sido un honor acompañarte en tu proceso de sanación. Para seguir avanzando juntos, te invito a renovar tus sesiones y agendar cuando lo desees — cada paso cuenta en este camino. ¿Continuamos? 🌟";
+// Aliases for convenience within this component
+const DEFAULT_TEMPLATE = DEFAULT_REMINDER_TEMPLATE;
+const DEFAULT_TEMPLATE_SIN_SESIONES = DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES;
 
 const VARIABLES = [
   { label: "{nombre}", desc: "Primer nombre" },
@@ -161,19 +161,20 @@ export default function RemindersConsole() {
 
   useEffect(() => { loadCalendarStatus(); }, [loadCalendarStatus]);
 
-  // Persist templates in localStorage
+  // Load saved templates from localStorage on mount (read-only — edits here are temporary)
   useEffect(() => {
-    const saved = localStorage.getItem("crm_reminder_template");
+    const saved = localStorage.getItem(REMINDER_TEMPLATE_KEY);
     if (saved) setTemplate(saved);
-    const savedSin = localStorage.getItem("crm_reminder_template_sin_sesiones");
+    const savedSin = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY);
     if (savedSin) setTemplateSinSesiones(savedSin);
   }, []);
-  useEffect(() => {
-    localStorage.setItem("crm_reminder_template", template);
-  }, [template]);
-  useEffect(() => {
-    localStorage.setItem("crm_reminder_template_sin_sesiones", templateSinSesiones);
-  }, [templateSinSesiones]);
+
+  function restoreFromSettings() {
+    const saved = localStorage.getItem(REMINDER_TEMPLATE_KEY) ?? DEFAULT_TEMPLATE;
+    const savedSin = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY) ?? DEFAULT_TEMPLATE_SIN_SESIONES;
+    setTemplate(saved);
+    setTemplateSinSesiones(savedSin);
+  }
 
   // Filtered patients
   const filtered = patients
@@ -343,17 +344,17 @@ export default function RemindersConsole() {
         </div>
 
         {/* Filter tabs */}
-        <div className="flex border-b border-[#C5A059]/10">
+        <div className="flex border-b border-[#C5A059]/10 overflow-x-auto">
           {FILTER_TABS.map(({ key, label, icon }) => (
             <button
               key={key}
               onClick={() => setFilterTab(key)}
-              className={`flex items-center gap-1 px-3 py-2 text-[10px] font-cinzel uppercase tracking-widest flex-1 justify-center transition border-b-2 -mb-px ${
+              className={`flex items-center gap-1 px-2 py-2 text-[10px] font-cinzel uppercase tracking-wide flex-1 justify-center transition border-b-2 -mb-px whitespace-nowrap min-w-0 ${
                 filterTab === key ? "border-[#C5A059] text-[#C5A059]" : "border-transparent text-gray-600 hover:text-gray-400"
               }`}
             >
               {icon}
-              <span className="hidden sm:inline">{label}</span>
+              <span className="hidden xs:inline sm:inline">{label}</span>
               <span className="text-[9px] opacity-60">({counts[key]})</span>
             </button>
           ))}
@@ -463,6 +464,7 @@ export default function RemindersConsole() {
           <div className="flex items-center justify-between px-5 py-3 border-b border-[#C5A059]/10">
             <span className="font-cinzel text-xs uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
               <MessageCircle size={12} className="text-[#C5A059]" /> Mensaje WhatsApp
+              <span className="text-[9px] text-gray-600 normal-case font-crimson tracking-normal">(temporal)</span>
             </span>
             <button
               onClick={() => setShowPreview((v) => !v)}
@@ -550,19 +552,28 @@ export default function RemindersConsole() {
               </div>
             )}
 
-            {/* Reset template */}
-            <button
-              onClick={() => {
-                if (activeTemplateTab === "sin_sesiones") {
-                  setTemplateSinSesiones(DEFAULT_TEMPLATE_SIN_SESIONES);
-                } else {
-                  setTemplate(DEFAULT_TEMPLATE);
-                }
-              }}
-              className="text-[10px] font-cinzel text-gray-600 hover:text-gray-400 transition"
-            >
-              Restablecer plantilla
-            </button>
+            {/* Restore / reset actions */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={restoreFromSettings}
+                className="text-[10px] font-cinzel text-[#C5A059]/60 hover:text-[#C5A059] transition"
+              >
+                Cargar desde Configuración
+              </button>
+              <span className="text-gray-700 text-[10px]">·</span>
+              <button
+                onClick={() => {
+                  if (activeTemplateTab === "sin_sesiones") {
+                    setTemplateSinSesiones(DEFAULT_TEMPLATE_SIN_SESIONES);
+                  } else {
+                    setTemplate(DEFAULT_TEMPLATE);
+                  }
+                }}
+                className="text-[10px] font-cinzel text-gray-600 hover:text-gray-400 transition"
+              >
+                Restablecer por defecto
+              </button>
+            </div>
           </div>
         </div>
 

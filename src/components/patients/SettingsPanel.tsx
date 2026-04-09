@@ -3,12 +3,40 @@
 import { useState, useEffect } from "react";
 import {
   Calendar, Check, RefreshCw, LogOut, AlertCircle, ChevronDown, Link2, Link2Off,
+  MessageCircle, Eye, EyeOff,
 } from "lucide-react";
+import {
+  type Patient,
+  sessionsLeft, daysLeft,
+  DEFAULT_REMINDER_TEMPLATE, DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
+  REMINDER_TEMPLATE_KEY, REMINDER_TEMPLATE_SIN_SESIONES_KEY,
+} from "@/lib/patients";
 
 interface CalendarOption {
   id: string;
   summary: string;
   primary: boolean;
+}
+
+const VARIABLES = [
+  { label: "{nombre}", desc: "Primer nombre del paciente" },
+  { label: "{sesiones}", desc: "Sesiones restantes" },
+  { label: "{vencimiento}", desc: "Fecha de vencimiento del pack" },
+  { label: "{dias}", desc: "Días restantes del pack" },
+];
+
+function renderTemplatePreview(tpl: string, patient: Patient): string {
+  const sl = sessionsLeft(patient);
+  const exp = new Date(patient.end_date + "T12:00:00").toLocaleDateString("es-CL", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const dias = Math.ceil((new Date(patient.end_date + "T00:00:00").getTime() - now.getTime()) / 86400000);
+  return tpl
+    .replace(/\{nombre\}/g, patient.first_name)
+    .replace(/\{sesiones\}/g, String(sl))
+    .replace(/\{vencimiento\}/g, exp)
+    .replace(/\{dias\}/g, String(dias));
 }
 
 export default function SettingsPanel() {
@@ -21,8 +49,45 @@ export default function SettingsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [needsReconnect, setNeedsReconnect] = useState(false);
 
+  // Template state
+  const [template, setTemplate] = useState(DEFAULT_REMINDER_TEMPLATE);
+  const [templateSinSesiones, setTemplateSinSesiones] = useState(DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES);
+  const [activeTemplateTab, setActiveTemplateTab] = useState<"con_sesiones" | "sin_sesiones">("con_sesiones");
+  const [templateSaved, setTemplateSaved] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewPatient, setPreviewPatient] = useState<Patient | null>(null);
+
   // Load status on mount
   useEffect(() => { checkStatus(); }, []);
+
+  // Load saved templates from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(REMINDER_TEMPLATE_KEY);
+    if (saved) setTemplate(saved);
+    const savedSin = localStorage.getItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY);
+    if (savedSin) setTemplateSinSesiones(savedSin);
+    // Fetch a patient for preview
+    fetch("/api/patients").then((r) => r.json()).then(({ patients }) => {
+      if (patients?.length) {
+        setPreviewPatient(patients.find((p: Patient) => p.status === "active") ?? patients[0]);
+      }
+    }).catch(() => {});
+  }, []);
+
+  function saveTemplates() {
+    localStorage.setItem(REMINDER_TEMPLATE_KEY, template);
+    localStorage.setItem(REMINDER_TEMPLATE_SIN_SESIONES_KEY, templateSinSesiones);
+    setTemplateSaved(true);
+    setTimeout(() => setTemplateSaved(false), 2000);
+  }
+
+  function insertVar(v: string) {
+    if (activeTemplateTab === "sin_sesiones") {
+      setTemplateSinSesiones((t) => t + v);
+    } else {
+      setTemplate((t) => t + v);
+    }
+  }
 
   async function checkStatus() {
     setStatusLoading(true);
@@ -258,11 +323,132 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* Placeholder for future settings */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/10 px-5 py-4">
-        <p className="text-[10px] font-cinzel text-gray-600 uppercase tracking-widest">
-          Más configuraciones próximamente
-        </p>
+      {/* ── Plantillas de Recordatorio ───────────────────────────── */}
+      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+        {/* Section header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10">
+          <div className="flex items-center gap-2">
+            <MessageCircle size={14} className="text-[#C5A059]" />
+            <h3 className="font-cinzel text-white text-xs uppercase tracking-widest">Plantillas de Recordatorio</h3>
+          </div>
+          <button
+            onClick={() => setShowPreview((v) => !v)}
+            className="flex items-center gap-1 text-[10px] font-cinzel text-gray-500 hover:text-[#C5A059] transition"
+          >
+            {showPreview ? <EyeOff size={11} /> : <Eye size={11} />}
+            {showPreview ? "Ocultar vista previa" : "Vista previa"}
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-4">
+          <p className="text-xs font-crimson text-gray-500 leading-relaxed">
+            Estas plantillas se usan en todos los envíos de recordatorios. En la consola de Recordatorios puedes modificarlas temporalmente para un envío puntual.
+          </p>
+
+          {/* Template tabs */}
+          <div className="flex border border-[#C5A059]/15">
+            <button
+              onClick={() => setActiveTemplateTab("con_sesiones")}
+              className={`flex-1 px-4 py-2.5 text-[10px] font-cinzel uppercase tracking-widest transition border-r border-[#C5A059]/15 ${
+                activeTemplateTab === "con_sesiones"
+                  ? "bg-[#C5A059]/10 text-[#C5A059]"
+                  : "text-gray-600 hover:text-gray-400"
+              }`}
+            >
+              Con sesiones
+            </button>
+            <button
+              onClick={() => setActiveTemplateTab("sin_sesiones")}
+              className={`flex-1 px-4 py-2.5 text-[10px] font-cinzel uppercase tracking-widest transition ${
+                activeTemplateTab === "sin_sesiones"
+                  ? "bg-amber-500/10 text-amber-400"
+                  : "text-gray-600 hover:text-gray-400"
+              }`}
+            >
+              Sin sesiones
+            </button>
+          </div>
+
+          {activeTemplateTab === "sin_sesiones" && (
+            <p className="text-[10px] font-crimson text-amber-400/70 italic">
+              Se envía automáticamente a pacientes con 0 sesiones restantes. Úsala para invitarlos a renovar.
+            </p>
+          )}
+
+          {/* Variable insertion buttons */}
+          <div>
+            <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest mb-2">Variables disponibles</p>
+            <div className="flex flex-wrap gap-1.5">
+              {VARIABLES.map(({ label, desc }) => (
+                <button
+                  key={label}
+                  onClick={() => insertVar(label)}
+                  title={desc}
+                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#020617] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Textarea */}
+          {activeTemplateTab === "con_sesiones" ? (
+            <textarea
+              value={template}
+              onChange={(e) => setTemplate(e.target.value)}
+              rows={4}
+              className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
+              placeholder="Plantilla para pacientes con sesiones disponibles..."
+            />
+          ) : (
+            <textarea
+              value={templateSinSesiones}
+              onChange={(e) => setTemplateSinSesiones(e.target.value)}
+              rows={4}
+              className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
+              placeholder="Plantilla para pacientes sin sesiones restantes..."
+            />
+          )}
+
+          {/* Preview */}
+          {showPreview && previewPatient && (
+            <div className={`border rounded-sm p-3 ${activeTemplateTab === "sin_sesiones" ? "bg-amber-950/20 border-amber-700/30" : "bg-emerald-950/30 border-emerald-700/20"}`}>
+              <p className={`text-[10px] font-cinzel uppercase tracking-widest mb-1.5 ${activeTemplateTab === "sin_sesiones" ? "text-amber-400/70" : "text-emerald-400/70"}`}>
+                Vista previa con {previewPatient.first_name}
+              </p>
+              <p className="text-gray-200 font-crimson text-sm leading-relaxed whitespace-pre-wrap">
+                {renderTemplatePreview(
+                  activeTemplateTab === "sin_sesiones" ? templateSinSesiones : template,
+                  previewPatient
+                )}
+              </p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-4 pt-1">
+            <button
+              onClick={saveTemplates}
+              className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#020617] text-xs font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition"
+            >
+              {templateSaved ? <Check size={13} /> : null}
+              {templateSaved ? "Guardado" : "Guardar plantillas"}
+            </button>
+            <button
+              onClick={() => {
+                if (activeTemplateTab === "sin_sesiones") {
+                  setTemplateSinSesiones(DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES);
+                } else {
+                  setTemplate(DEFAULT_REMINDER_TEMPLATE);
+                }
+              }}
+              className="text-[10px] font-cinzel text-gray-600 hover:text-gray-400 transition uppercase tracking-widest"
+            >
+              Restablecer por defecto
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
