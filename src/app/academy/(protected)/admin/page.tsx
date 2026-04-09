@@ -65,6 +65,27 @@ export default async function AdminPage() {
 
   const totalLessonsCount = allLessons?.length ?? 1;
 
+  // ── Monthly enrollments (last 6 months) ──────────────────────
+  const now = new Date();
+  const months6: string[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months6.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
+  const { data: monthlyEnrollData } = await adminSb
+    .from("enrollments")
+    .select("enrolled_at")
+    .gte("enrolled_at", sixMonthsAgo);
+
+  const monthlyEnrollMap: Record<string, number> = Object.fromEntries(months6.map((m) => [m, 0]));
+  for (const e of monthlyEnrollData ?? []) {
+    const mk = (e.enrolled_at ?? "").slice(0, 7);
+    if (mk in monthlyEnrollMap) monthlyEnrollMap[mk]++;
+  }
+  const monthlyEnrollments = months6.map((m) => ({ month: m, count: monthlyEnrollMap[m] }));
+  const maxEnroll = Math.max(...monthlyEnrollments.map((d) => d.count), 1);
+
   // Build per-user progress map
   const progressByUser: Record<string, { completed: number; watchSeconds: number; lastActive: string }> = {};
   for (const p of progressAll ?? []) {
@@ -98,6 +119,17 @@ export default async function AdminPage() {
       };
     })
     .sort((a, b) => b.progressPct - a.progressPct);
+
+  // ── Progress distribution ─────────────────────────────────────
+  const progBuckets: Record<string, number> = { "0%": 0, "1–25%": 0, "26–50%": 0, "51–75%": 0, "76–99%": 0, "100%": 0 };
+  for (const u of userRows) {
+    if (u.progressPct === 0) progBuckets["0%"]++;
+    else if (u.progressPct <= 25) progBuckets["1–25%"]++;
+    else if (u.progressPct <= 50) progBuckets["26–50%"]++;
+    else if (u.progressPct <= 75) progBuckets["51–75%"]++;
+    else if (u.progressPct < 100) progBuckets["76–99%"]++;
+    else progBuckets["100%"]++;
+  }
 
   return (
     <div className="min-h-screen bg-[#020617]">
@@ -169,6 +201,64 @@ export default async function AdminPage() {
           ))}
         </div>
 
+        {/* ── Charts row ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10">
+          {/* Monthly enrollments */}
+          <div className="bg-[#0a1628] border border-white/5 p-5 relative overflow-hidden">
+            <ScrollworkCorners size={32} opacity={0.5} />
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-[#C5A059]" />
+              <h2 className="font-cinzel text-xs uppercase tracking-widest text-white">Inscripciones por mes</h2>
+            </div>
+            <p className="font-crimson text-xs text-gray-600 mb-4">Últimos 6 meses</p>
+            <div className="flex items-end gap-2 h-24">
+              {monthlyEnrollments.map((d) => (
+                <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex items-end justify-center" style={{ height: "64px" }}>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: `${Math.max(2, Math.round((d.count / maxEnroll) * 64))}px`,
+                        backgroundColor: "#C5A059",
+                        opacity: d.count === 0 ? 0.12 : 0.85,
+                      }}
+                    />
+                  </div>
+                  <span className="font-cinzel text-[9px] text-gray-600">{d.month.slice(5)}</span>
+                  <span className="font-cinzel text-[10px] text-gray-400">{d.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Progress distribution */}
+          <div className="bg-[#0a1628] border border-white/5 p-5 relative overflow-hidden">
+            <ScrollworkCorners size={32} opacity={0.5} />
+            <div className="flex items-center gap-2 mb-1">
+              <BookOpen className="w-4 h-4 text-[#C5A059]" />
+              <h2 className="font-cinzel text-xs uppercase tracking-widest text-white">Distribución de progreso</h2>
+            </div>
+            <p className="font-crimson text-xs text-gray-600 mb-4">Estudiantes por rango de avance</p>
+            <div className="space-y-2">
+              {Object.entries(progBuckets).map(([label, count]) => {
+                const pct = userRows.length > 0 ? Math.round((count / userRows.length) * 100) : 0;
+                return (
+                  <div key={label} className="flex items-center gap-3">
+                    <span className="font-cinzel text-[9px] text-gray-500 w-12 flex-shrink-0">{label}</span>
+                    <div className="flex-1 h-2 bg-[#020617]">
+                      <div
+                        className="h-full bg-[#C5A059] transition-all duration-500"
+                        style={{ width: `${pct}%`, opacity: count === 0 ? 0.1 : 0.8 }}
+                      />
+                    </div>
+                    <span className="font-cinzel text-[10px] text-gray-400 w-6 text-right">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-6">
           {/* ── Users table ── */}
           <div className="lg:col-span-2">
@@ -236,7 +326,7 @@ export default async function AdminPage() {
                             </span>
                           </td>
                           <td className="py-3">
-                            {u.isCompleted ? (
+                            {u.isCompleted || u.progressPct >= 100 ? (
                               <span className="flex items-center gap-1 font-cinzel text-[9px] uppercase tracking-widest text-emerald-500">
                                 <CheckCircle className="w-3 h-3" /> Completo
                               </span>
