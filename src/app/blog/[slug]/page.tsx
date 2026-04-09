@@ -8,6 +8,16 @@ export const dynamic = "force-dynamic";
 
 const OG_FALLBACK = "https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu";
 
+function toJpegUrl(url: string): string {
+  if (!url) return OG_FALLBACK;
+  // Instagram and many crawlers don't support WebP OG images.
+  // Use Cloudinary fetch to transcode the WebP to JPEG on the fly.
+  if (url.endsWith(".webp")) {
+    return `https://res.cloudinary.com/dvudfdhoi/image/fetch/w_1200,h_630,c_fill,f_jpg,q_auto/${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -17,7 +27,7 @@ export async function generateMetadata({
   const post = await getPublishedPostBySlug(slug);
   if (!post) return {};
 
-  const image = post.imageUrl || OG_FALLBACK;
+  const image = toJpegUrl(post.imageUrl || OG_FALLBACK);
 
   return {
     title: `${post.title} | Juan Pablo Loaiza`,
@@ -61,7 +71,7 @@ export default async function ArticlePage({
   const nextPost = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
   const relatedPosts = allPosts.filter((p) => p.slug !== slug).slice(0, 3);
 
-  const image = post.imageUrl || OG_FALLBACK;
+  const image = toJpegUrl(post.imageUrl || OG_FALLBACK);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
