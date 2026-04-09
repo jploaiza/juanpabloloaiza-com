@@ -207,6 +207,24 @@ input::placeholder {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Admin panel — font weight boost +200 (solo /academy/admin/*)
+   Unlayered → beats @layer base .font-cinzel { font-weight: 400 }
+   ───────────────────────────────────────────────────────────── */
+[data-admin-panel] .font-cinzel {
+  font-weight: 600;
+}
+[data-admin-panel] .font-crimson {
+  font-weight: 500;
+}
+/* Headings & semibold already at 600 → push to 700 */
+[data-admin-panel] .font-semibold,
+[data-admin-panel] .font-bold,
+[data-admin-panel] .font-cinzel.font-semibold,
+[data-admin-panel] .font-cinzel.font-bold {
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────────
    Custom scrollbar — gold on void (sidebar, overflow panels)
    ───────────────────────────────────────────────────────────── */
 .scrollbar-gold::-webkit-scrollbar {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Settings, Plus, Trash2, ChevronDown, ChevronUp,
-  Mail, MessageCircle, Zap, Timer, Calendar,
+  Mail, MessageCircle, Zap, Timer, Calendar, Pencil,
 } from "lucide-react";
 
 interface ReminderConfig {
@@ -50,6 +50,7 @@ export default function AutoSchedulePanel() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [showTemplate, setShowTemplate] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,6 +76,30 @@ export default function AutoSchedulePanel() {
     }));
   }
 
+  function startEdit(config: ReminderConfig) {
+    setForm({
+      label: config.label ?? "",
+      day_of_week: config.day_of_week,
+      hour_chile: config.hour_chile,
+      channels: config.channels ?? ["whatsapp", "email"],
+      patient_filter: config.patient_filter,
+      send_mode: config.send_mode,
+      delay_min: config.delay_min,
+      delay_max: config.delay_max,
+      whatsapp_template: config.whatsapp_template ?? "",
+    });
+    setShowTemplate(!!config.whatsapp_template);
+    setEditingId(config.id);
+    setShowForm(true);
+  }
+
+  function cancelForm() {
+    setShowForm(false);
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+    setShowTemplate(false);
+  }
+
   async function saveConfig() {
     setSaving(true);
     try {
@@ -83,14 +108,21 @@ export default function AutoSchedulePanel() {
         label: form.label || null,
         whatsapp_template: form.whatsapp_template || null,
       };
-      const res = await fetch("/api/patients/reminder-configs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+
+      const res = editingId
+        ? await fetch(`/api/patients/reminder-configs/${editingId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+        : await fetch("/api/patients/reminder-configs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
       if (res.ok) {
-        setShowForm(false);
-        setForm(EMPTY_FORM);
+        cancelForm();
         await load();
       }
     } finally {
@@ -157,16 +189,23 @@ export default function AutoSchedulePanel() {
                   {/* Toggle */}
                   <button
                     onClick={() => toggleActive(config)}
-                    className={`flex-shrink-0 transition ${config.is_active ? "text-[#C5A059]" : "text-gray-600 hover:text-gray-400"}`}
+                    className={`flex-shrink-0 transition ${config.is_active ? "text-emerald-400" : "text-gray-600 hover:text-gray-400"}`}
                     title={config.is_active ? "Desactivar" : "Activar"}
                   >
-                    {config.is_active
-                      ? <span className="text-[10px] font-cinzel text-emerald-400">ON</span>
-                      : <span className="text-[10px] font-cinzel text-gray-600">OFF</span>
-                    }
+                    <span className="text-[10px] font-cinzel">{config.is_active ? "ON" : "OFF"}</span>
                   </button>
+                  {/* Edit */}
+                  <button
+                    onClick={() => startEdit(config)}
+                    title="Editar"
+                    className="flex-shrink-0 text-gray-600 hover:text-[#C5A059] transition"
+                  >
+                    <Pencil size={12} />
+                  </button>
+                  {/* Delete */}
                   <button
                     onClick={() => deleteConfig(config.id)}
+                    title="Eliminar"
                     className="flex-shrink-0 text-gray-700 hover:text-red-400 transition"
                   >
                     <Trash2 size={12} />
@@ -179,7 +218,9 @@ export default function AutoSchedulePanel() {
           {/* Form */}
           {showForm && (
             <div className="border border-[#C5A059]/20 p-4 space-y-3 bg-[#020617]">
-              <p className="font-cinzel text-[11px] uppercase tracking-widest text-[#C5A059]">Nueva regla</p>
+              <p className="font-cinzel text-[11px] uppercase tracking-widest text-[#C5A059]">
+                {editingId ? "Editar regla" : "Nueva regla"}
+              </p>
 
               {/* Label */}
               <div>
@@ -329,7 +370,7 @@ export default function AutoSchedulePanel() {
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
+                  onClick={cancelForm}
                   className="px-3 py-1.5 text-[10px] font-cinzel uppercase tracking-widest text-gray-500 hover:text-white transition"
                 >
                   Cancelar
@@ -340,7 +381,7 @@ export default function AutoSchedulePanel() {
                   disabled={saving || form.channels.length === 0}
                   className="px-4 py-1.5 bg-[#C5A059] text-[#020617] text-[10px] font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition disabled:opacity-40"
                 >
-                  {saving ? "Guardando..." : "Guardar"}
+                  {saving ? "Guardando..." : editingId ? "Actualizar" : "Guardar"}
                 </button>
               </div>
             </div>

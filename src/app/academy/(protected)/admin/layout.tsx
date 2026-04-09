@@ -18,6 +18,7 @@ const jakartaSans = Plus_Jakarta_Sans({
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
+      data-admin-panel
       className={jakartaSans.variable}
       style={
         {
