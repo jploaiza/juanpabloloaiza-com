@@ -1,21 +1,23 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Plus, Search, RefreshCw, Users, Activity, Clock, Download, Bell } from "lucide-react";
+import { Plus, Search, RefreshCw, Users, Activity, Clock, Download, Bell, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Patient, type PatientStatus, patientFullName } from "@/lib/patients";
 import PatientCard from "./PatientCard";
 import PatientForm from "./PatientForm";
 import ImportModal from "./ImportModal";
 import RemindersConsole from "./RemindersConsole";
+import SettingsPanel from "./SettingsPanel";
 
-type Tab = PatientStatus | "reminders";
+type Tab = PatientStatus | "reminders" | "settings";
 
 const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: "active", label: "Activos", icon: <Activity size={13} /> },
   { key: "paused", label: "Pausados", icon: <Clock size={13} /> },
   { key: "finished", label: "Finalizados", icon: <Users size={13} /> },
   { key: "reminders", label: "Recordatorios", icon: <Bell size={13} /> },
+  { key: "settings", label: "Configuración", icon: <Settings size={13} /> },
 ];
 
 interface Props {
@@ -47,7 +49,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
   }, []);
 
   const filtered = patients
-    .filter((p) => activeTab !== "reminders" && p.status === activeTab)
+    .filter((p) => activeTab !== "reminders" && activeTab !== "settings" && p.status === activeTab)
     .filter((p) =>
       !search || patientFullName(p).toLowerCase().includes(search.toLowerCase()) ||
       p.email.toLowerCase().includes(search.toLowerCase())
@@ -58,6 +60,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
     paused: patients.filter((p) => p.status === "paused").length,
     finished: patients.filter((p) => p.status === "finished").length,
     reminders: 0,
+    settings: 0,
   };
 
   return (
@@ -108,7 +111,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
           >
             {icon}
             {label}
-            {key !== "reminders" && (
+            {key !== "reminders" && key !== "settings" && (
               <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-full ${
                 activeTab === key ? "bg-[#C5A059]/20 text-[#C5A059]" : "bg-gray-800 text-gray-500"
               }`}>
@@ -119,8 +122,8 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
         ))}
       </div>
 
-      {/* Search — hidden on reminders tab */}
-      {activeTab !== "reminders" && (
+      {/* Search — hidden on reminders and settings tabs */}
+      {activeTab !== "reminders" && activeTab !== "settings" && (
         <div className="relative mb-6">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
@@ -141,7 +144,9 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
         >
-          {activeTab === "reminders" ? (
+          {activeTab === "settings" ? (
+            <SettingsPanel />
+          ) : activeTab === "reminders" ? (
             <RemindersConsole />
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">

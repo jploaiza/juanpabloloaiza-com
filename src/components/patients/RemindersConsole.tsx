@@ -12,7 +12,6 @@ import {
 } from "@/lib/patients";
 import Link from "next/link";
 import AutoSchedulePanel from "./AutoSchedulePanel";
-import CalendarStatusBanner from "./CalendarStatusBanner";
 
 // ── Types ───────────────────────────────────────────────────────
 interface SendResult {
@@ -383,20 +382,35 @@ export default function RemindersConsole() {
       {/* ── RIGHT: Config + Send + History ─────────────────── */}
       <div className="lg:col-span-3 space-y-4">
 
-        {/* Google Calendar status */}
-        <CalendarStatusBanner
-          connected={calendarConnected}
-          loading={calendarLoading}
-          scheduledCount={scheduledIds.size}
-          weekStart={weekRange.start}
-          weekEnd={weekRange.end}
-          onRefresh={loadCalendarStatus}
-          onDisconnect={async () => {
-            await fetch("/api/calendar/disconnect", { method: "DELETE" });
-            setCalendarConnected(false);
-            setScheduledIds(new Set());
-          }}
-        />
+        {/* Google Calendar status indicator */}
+        <div className="bg-[#0a1628] border border-[#C5A059]/15 px-4 py-2.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            {calendarLoading ? (
+              <RefreshCw size={11} className="text-gray-600 animate-spin" />
+            ) : (
+              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                calendarConnected === null ? "bg-gray-600" :
+                calendarConnected ? "bg-emerald-400" : "bg-gray-600"
+              }`} />
+            )}
+            <span className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest">
+              Google Calendar
+            </span>
+            {calendarConnected && (
+              <span className="text-[10px] font-cinzel text-emerald-400">
+                · {scheduledIds.size} con cita
+              </span>
+            )}
+          </div>
+          <button
+            onClick={loadCalendarStatus}
+            disabled={calendarLoading}
+            title="Actualizar estado"
+            className="text-gray-600 hover:text-[#C5A059] transition disabled:opacity-40"
+          >
+            <RefreshCw size={11} className={calendarLoading ? "animate-spin" : ""} />
+          </button>
+        </div>
 
         {/* Message template */}
         <div className="bg-[#0a1628] border border-[#C5A059]/20">
