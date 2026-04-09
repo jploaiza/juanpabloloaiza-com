@@ -26,7 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data: patient, error: fetchErr } = await adminSb
     .from("patients")
-    .select("total_sessions, pack_size")
+    .select("total_sessions, pack_size, end_date")
     .eq("id", id)
     .single();
 
@@ -35,10 +35,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const currentTotal = patient.total_sessions || patient.pack_size;
   const newTotal = currentTotal + quantity;
 
-  // Update total_sessions
+  // Each purchase extends end_date to at least 2 weeks from today
+  const twoWeeksFromNow = new Date();
+  twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
+  const twoWeeksStr = twoWeeksFromNow.toISOString().split("T")[0];
+  const newEndDate = (patient.end_date ?? "") < twoWeeksStr ? twoWeeksStr : patient.end_date;
+
+  // Update total_sessions and end_date
   const { data: updated, error: updateErr } = await adminSb
     .from("patients")
-    .update({ total_sessions: newTotal })
+    .update({ total_sessions: newTotal, end_date: newEndDate })
     .eq("id", id)
     .select()
     .single();

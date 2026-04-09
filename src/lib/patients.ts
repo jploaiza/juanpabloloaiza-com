@@ -84,8 +84,15 @@ export function getAlerts(patient: Patient, lastSessionAt?: string | null): Pati
   const dl = daysLeft(patient.end_date);
   const sl = sessionsLeft(patient);
 
-  if (dl < 7) alerts.push({ type: "danger", message: `Pack vence en ${dl} día${dl === 1 ? "" : "s"}` });
-  if (sl <= 2 && sl > 0) alerts.push({ type: "warning", message: `Solo ${sl} sesión${sl === 1 ? "" : "es"} restante${sl === 1 ? "" : "s"}` });
+  // When no sessions left, skip expiry warnings (irrelevant)
+  if (sl === 0) {
+    alerts.push({ type: "warning", message: "Sin sesiones — registra una nueva compra" });
+    return alerts;
+  }
+
+  if (dl < 0) alerts.push({ type: "danger", message: "Pack vencido — sesiones sin plazo" });
+  else if (dl < 7) alerts.push({ type: "danger", message: `Pack vence en ${dl} día${dl === 1 ? "" : "s"}` });
+  if (sl <= 2) alerts.push({ type: "warning", message: `Solo ${sl} sesión${sl === 1 ? "" : "es"} restante${sl === 1 ? "" : "s"}` });
 
   if (lastSessionAt) {
     const daysSinceLast = Math.floor(

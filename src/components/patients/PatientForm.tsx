@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import {
   type Patient, type PackSize,
-  REMINDER_DAYS, calcEndDate,
+  calcEndDate,
 } from "@/lib/patients";
 
 interface Props {
@@ -28,7 +28,6 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
     pack_size: (patient?.pack_size ?? 5) as PackSize,
     start_date: patient?.start_date ?? new Date().toISOString().split("T")[0],
     notes: patient?.notes ?? "",
-    reminder_day: patient?.reminder_day ?? 1,
   });
 
   const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(form.start_date);
@@ -192,22 +191,6 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
             <span className="text-[#C5A059] font-crimson text-sm">
               {endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" }) : "—"}
             </span>
-          </div>
-
-          {/* Día recordatorio */}
-          <div>
-            <label className="block text-xs font-cinzel text-gray-400 uppercase tracking-widest mb-1">
-              Día preferido de sesión
-            </label>
-            <select
-              value={form.reminder_day}
-              onChange={(e) => set("reminder_day", Number(e.target.value))}
-              className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
-            >
-              {REMINDER_DAYS.map((d, i) => (
-                <option key={i} value={i}>{d}</option>
-              ))}
-            </select>
           </div>
 
           {/* Notas */}

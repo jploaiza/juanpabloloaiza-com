@@ -10,7 +10,7 @@ import {
   type Patient, type PatientLog,
   daysLeft, sessionsLeft, getAlerts,
   statusColor, statusLabel, daysLeftColor,
-  buildWhatsappUrl, buildEmailUrl, REMINDER_DAYS, patientFullName,
+  buildWhatsappUrl, buildEmailUrl, patientFullName,
 } from "@/lib/patients";
 import AlertBanner from "./AlertBanner";
 import PatientForm from "./PatientForm";
@@ -158,9 +158,6 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
               </span>
             </div>
             <p className="text-gray-400 text-sm font-crimson">{patient.email} · {patient.phone}</p>
-            <p className="text-gray-500 text-xs font-cinzel mt-1">
-              Recordatorio: {REMINDER_DAYS[patient.reminder_day]}
-            </p>
           </div>
 
           <button
@@ -188,8 +185,8 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
           </div>
           <div className="bg-[#020617] border border-[#C5A059]/10 p-3 text-center">
             <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Vence</p>
-            <p className={`font-cinzel font-bold text-sm ${daysLeftColor(dl)}`}>
-              {dl > 0 ? `${dl}d` : "Vencido"}
+            <p className={`font-cinzel font-bold text-sm ${sl === 0 ? "text-gray-500" : daysLeftColor(dl)}`}>
+              {sl === 0 ? "Sin ses." : dl > 0 ? `${dl}d` : "Vencido"}
             </p>
           </div>
         </div>

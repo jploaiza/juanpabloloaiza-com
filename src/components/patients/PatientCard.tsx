@@ -3,7 +3,8 @@
 import { useState } from "react";
 import {
   Plus, FileText, MessageCircle, Mail,
-  PauseCircle, PlayCircle, CheckCircle, Pencil, Trash2,
+  PauseCircle, PlayCircle, CheckCircle, Pencil,
+  ShoppingBag, RefreshCw,
 } from "lucide-react";
 import {
   type Patient,
@@ -21,8 +22,14 @@ interface Props {
   onRefresh: () => void;
 }
 
+const PRESETS = [1, 3, 5, 8, 10];
+
 export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh }: Props) {
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [showAddSessions, setShowAddSessions] = useState(false);
+  const [addQty, setAddQty] = useState(5);
+  const [addNotes, setAddNotes] = useState("");
+  const [addingPurchase, setAddingPurchase] = useState(false);
 
   const dl = daysLeft(patient.end_date);
   const sl = sessionsLeft(patient);
@@ -61,7 +68,36 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
     }
   }
 
-  const isPausing = patient.status === "active";
+  async function handleAddSessions() {
+    if (addQty < 1) return;
+    setAddingPurchase(true);
+    try {
+      const res = await fetch(`/api/patients/${patient.id}/add-sessions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: addQty, notes: addNotes }),
+      });
+      if (!res.ok) {
+        const j = await res.json();
+        throw new Error(j.error ?? "Error");
+      }
+      setShowAddSessions(false);
+      setAddQty(5);
+      setAddNotes("");
+      onRefresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al agregar sesiones");
+    } finally {
+      setAddingPurchase(false);
+    }
+  }
+
+  const expiryLabel = sl === 0
+    ? "Sin sesiones"
+    : dl > 0 ? `${dl}d` : "Vencido";
+  const expiryColor = sl === 0
+    ? "text-gray-500"
+    : daysLeftColor(dl);
 
   return (
     <div className="relative bg-[#0a1628] border border-[#C5A059]/15 hover:border-[#C5A059]/35 transition-all duration-300 p-4">
@@ -84,17 +120,16 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
         </span>
       </div>
 
-      {/* Pack info */}
+      {/* Session info */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs text-gray-400 font-cinzel">
-            {patient.sessions_used}/{total} sesiones{sl === 0 ? " · pack completo" : ""}
+            {patient.sessions_used}/{total} sesiones
           </span>
-          <span className={`text-xs font-cinzel font-bold ${daysLeftColor(dl)}`}>
-            {dl > 0 ? `${dl}d restantes` : "Vencido"}
+          <span className={`text-xs font-cinzel font-bold ${expiryColor}`}>
+            {expiryLabel}
           </span>
         </div>
-        {/* Progress bar */}
         <div className="h-1.5 bg-[#020617] border border-[#C5A059]/10">
           <div
             className="h-full bg-[#C5A059] transition-all duration-500"
@@ -103,12 +138,10 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
         </div>
       </div>
 
-      {/* Alerts */}
       <AlertBanner alerts={alerts} />
 
       {/* Actions */}
       <div className="flex flex-wrap gap-1.5 mt-3">
-        {/* +Sesión */}
         <button
           onClick={addSession}
           disabled={!!loadingAction || patient.status !== "active"}
@@ -119,36 +152,43 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
           Sesión
         </button>
 
-        {/* Notas / Detalle */}
+        <button
+          onClick={() => setShowAddSessions((v) => !v)}
+          title="Agregar sesiones compradas"
+          className={`flex items-center gap-1 px-2.5 py-1.5 border text-[11px] font-cinzel uppercase tracking-wide transition ${
+            showAddSessions
+              ? "border-[#C5A059]/50 text-[#C5A059] bg-[#C5A059]/10"
+              : "border-[#C5A059]/20 text-[#C5A059]/60 hover:text-[#C5A059] hover:border-[#C5A059]/40"
+          }`}
+        >
+          <ShoppingBag size={11} />
+          Compra
+        </button>
+
         <Link
           href={`/academy/admin/crm/${patient.id}`}
           className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-800/60 border border-gray-600/30 text-gray-400 text-[11px] font-cinzel uppercase tracking-wide hover:text-white hover:border-gray-500/50 transition"
         >
           <FileText size={11} />
-          Notas
+          Detalle
         </Link>
 
-        {/* WhatsApp */}
         <a
           href={buildWhatsappUrl(patient)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-950/60 border border-emerald-600/30 text-emerald-400 text-[11px] font-cinzel uppercase tracking-wide hover:bg-emerald-900/40 transition"
         >
-          <MessageCircle size={11} />
-          WA
+          <MessageCircle size={11} />WA
         </a>
 
-        {/* Email */}
         <a
           href={buildEmailUrl(patient)}
           className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-950/60 border border-blue-600/30 text-blue-400 text-[11px] font-cinzel uppercase tracking-wide hover:bg-blue-900/40 transition"
         >
-          <Mail size={11} />
-          Email
+          <Mail size={11} />Email
         </a>
 
-        {/* Editar */}
         <button
           onClick={() => onEdit(patient)}
           title="Editar paciente"
@@ -157,12 +197,10 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
           <Pencil size={11} />
         </button>
 
-        {/* Pausar / Reactivar */}
         {patient.status === "active" && (
           <button
             onClick={() => doAction("pause", { action: "pause" })}
             disabled={!!loadingAction}
-            title="Pausar"
             className="flex items-center gap-1 px-2.5 py-1.5 border bg-yellow-950/60 border-yellow-600/30 text-yellow-400 text-[11px] font-cinzel uppercase tracking-wide hover:bg-yellow-900/40 transition disabled:opacity-40"
           >
             <PauseCircle size={11} />Pausar
@@ -172,30 +210,75 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
           <button
             onClick={() => doAction("activate", { action: "activate" })}
             disabled={!!loadingAction}
-            title="Reactivar"
             className="flex items-center gap-1 px-2.5 py-1.5 border bg-emerald-950/60 border-emerald-600/30 text-emerald-400 text-[11px] font-cinzel uppercase tracking-wide hover:bg-emerald-900/40 transition disabled:opacity-40"
           >
             <PlayCircle size={11} />Reactivar
           </button>
         )}
 
-        {/* Finalizar */}
         {patient.status !== "finished" && (
           <button
             onClick={() => {
-              if (confirm(`¿Finalizar el pack de ${patientFullName(patient)}?`)) {
-                doAction("finish", { action: "finish" });
-              }
+              if (confirm(`¿Finalizar a ${patientFullName(patient)}?`)) doAction("finish", { action: "finish" });
             }}
             disabled={!!loadingAction}
-            title="Finalizar pack"
             className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-900/60 border border-gray-600/20 text-gray-500 text-[11px] font-cinzel uppercase tracking-wide hover:text-red-400 hover:border-red-500/30 transition disabled:opacity-40"
           >
-            <CheckCircle size={11} />
-            Finalizar
+            <CheckCircle size={11} />Finalizar
           </button>
         )}
       </div>
+
+      {/* Add sessions inline form */}
+      {showAddSessions && (
+        <div className="mt-3 p-3 bg-[#020617] border border-[#C5A059]/20 space-y-2">
+          <p className="text-[10px] font-cinzel text-[#C5A059]/70 uppercase tracking-widest">Registrar compra</p>
+          <div className="flex gap-1 flex-wrap">
+            {PRESETS.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => setAddQty(q)}
+                className={`px-2 py-0.5 text-[10px] font-cinzel border transition ${
+                  addQty === q ? "border-[#C5A059] text-[#C5A059] bg-[#C5A059]/10" : "border-[#C5A059]/15 text-gray-500 hover:text-gray-300"
+                }`}
+              >
+                {q}
+              </button>
+            ))}
+            <input
+              type="number"
+              min={1}
+              value={addQty}
+              onChange={(e) => setAddQty(Math.max(1, Number(e.target.value)))}
+              className="w-14 bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-0.5 text-xs font-crimson outline-none"
+            />
+          </div>
+          <input
+            type="text"
+            value={addNotes}
+            onChange={(e) => setAddNotes(e.target.value)}
+            placeholder="Nota (opcional)"
+            className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-2 py-1 text-xs font-crimson outline-none"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleAddSessions}
+              disabled={addingPurchase}
+              className="flex items-center gap-1 px-3 py-1.5 bg-[#C5A059] text-[#020617] text-[10px] font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition disabled:opacity-50"
+            >
+              {addingPurchase ? <RefreshCw size={10} className="animate-spin" /> : <ShoppingBag size={10} />}
+              {addingPurchase ? "..." : `+${addQty} ses.`}
+            </button>
+            <button
+              onClick={() => setShowAddSessions(false)}
+              className="px-3 py-1.5 border border-[#C5A059]/15 text-gray-500 text-[10px] font-cinzel uppercase tracking-widest hover:text-gray-300 transition"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
