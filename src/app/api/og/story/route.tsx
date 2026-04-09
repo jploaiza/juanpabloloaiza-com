@@ -49,11 +49,6 @@ export async function GET(req: NextRequest) {
         <div style={{ position: "absolute", bottom: "50px", left: "50px", width: "48px", height: "48px", borderBottom: "2px solid #C5A059", borderLeft: "2px solid #C5A059" }} />
         <div style={{ position: "absolute", bottom: "50px", right: "50px", width: "48px", height: "48px", borderBottom: "2px solid #C5A059", borderRight: "2px solid #C5A059" }} />
 
-        <div style={{ position: "absolute", top: "0", left: "0", right: "0", display: "flex", justifyContent: "center", paddingTop: "100px" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGO_DATA_URL} alt="Juan Pablo Loaiza" width={300} height={72} style={{ height: "180px", width: "750px", objectFit: "contain" }} />
-        </div>
-
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "100px 90px", position: "absolute", inset: "0" }}>
           <div style={{ display: "flex", alignItems: "center", marginBottom: "44px" }}>
             <div style={{ width: "40px", height: "2px", background: "#C5A059", marginRight: "20px" }} />
@@ -71,7 +66,13 @@ export async function GET(req: NextRequest) {
           )}
 
           <div style={{ width: "80px", height: "2px", background: "#C5A059", marginBottom: "48px", opacity: 0.7 }} />
-          <span style={{ fontSize: "24px", color: "#6b7280", letterSpacing: "0.1em" }}>{siteUrl}</span>
+
+          {/* Logo pequeño + URL al fondo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={LOGO_DATA_URL} alt="Juan Pablo Loaiza" width={300} height={72} style={{ height: "52px", width: "217px", objectFit: "contain" }} />
+            <span style={{ fontSize: "22px", color: "#6b7280", letterSpacing: "0.08em" }}>www.juanpabloloaiza.com</span>
+          </div>
         </div>
       </div>
     ),
