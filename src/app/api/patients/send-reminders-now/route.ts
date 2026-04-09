@@ -107,15 +107,27 @@ export async function POST(req: NextRequest) {
     }
 
     // WhatsApp via TextMeBot
-    if (channels.includes("whatsapp") && process.env.TEXTMEBOT_API_KEY && patient.phone) {
-      try {
-        const phone = patient.phone.replace(/[^\d+]/g, "");
-        const url = `https://api.textmebot.com/send.php?recipient=${encodeURIComponent(phone)}&apikey=${process.env.TEXTMEBOT_API_KEY}&text=${encodeURIComponent(waText)}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-        if (!res.ok) throw new Error(`TextMeBot HTTP ${res.status}`);
-        whatsappOk = true;
-      } catch (err) {
-        errors.push(`WhatsApp: ${err instanceof Error ? err.message : String(err)}`);
+    if (channels.includes("whatsapp")) {
+      if (!process.env.TEXTMEBOT_API_KEY) {
+        errors.push("WhatsApp: TEXTMEBOT_API_KEY no configurada");
+      } else if (!patient.phone) {
+        errors.push("WhatsApp: paciente sin teléfono");
+      } else {
+        try {
+          const phone = patient.phone.replace(/[^\d+]/g, "");
+          const url = `https://api.textmebot.com/send.php?recipient=${encodeURIComponent(phone)}&apikey=${process.env.TEXTMEBOT_API_KEY}&text=${encodeURIComponent(waText)}&json=yes`;
+          const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+          const body = await res.text();
+          if (!res.ok) throw new Error(`TextMeBot HTTP ${res.status}: ${body}`);
+          // TextMeBot puede responder 200 con error en body
+          const lower = body.toLowerCase();
+          if (lower.includes("error") || lower.includes("invalid") || lower.includes("failed")) {
+            throw new Error(`TextMeBot: ${body}`);
+          }
+          whatsappOk = true;
+        } catch (err) {
+          errors.push(`WhatsApp: ${err instanceof Error ? err.message : String(err)}`);
+        }
       }
     }
 
