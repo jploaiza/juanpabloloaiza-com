@@ -45,6 +45,39 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, s
   "excerpt": "extracto del artículo para listados, máximo 300 caracteres, engancha al lector"
 }`;
 
+const IMPROVE_FIELDS_PROMPT = (
+  fields: string[],
+  data: { title: string; excerpt: string; content: string; tags: string[]; seoTitle: string; seoDescription: string }
+) => `Eres Juan Pablo Loaiza, terapeuta chileno especializado en regresión a vidas pasadas, hipnosis terapéutica y sanación espiritual.
+
+Artículo actual:
+- Título: ${data.title}
+- Extracto: ${data.excerpt}
+- Tags: ${data.tags.join(", ")}
+- SEO Title: ${data.seoTitle}
+- SEO Description: ${data.seoDescription}
+- Contenido: ${data.content.slice(0, 6000)}
+
+Mejora ÚNICAMENTE estos campos: ${fields.join(", ")}
+
+Reglas por campo:
+- title: más atractivo y claro, mantén la esencia
+- excerpt: engancha al lector, máximo 300 caracteres
+- content: más fluido y rico en vocabulario, mantén Markdown y longitud similar
+- tags: array de 4-8 tags relevantes en español, palabras simples
+- seoTitle: optimizado para Google, máximo 60 caracteres
+- seoDescription: atractiva para clicks, máximo 160 caracteres
+
+Devuelve ÚNICAMENTE un JSON válido con SOLO los campos solicitados (sin markdown, sin explicaciones):
+{
+  ${fields.includes("title") ? '"title": "...",' : ""}
+  ${fields.includes("excerpt") ? '"excerpt": "...",' : ""}
+  ${fields.includes("content") ? '"content": "...",' : ""}
+  ${fields.includes("tags") ? '"tags": ["...", "..."],' : ""}
+  ${fields.includes("seoTitle") ? '"seoTitle": "...",' : ""}
+  ${fields.includes("seoDescription") ? '"seoDescription": "..."' : ""}
+}`;
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -64,7 +97,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { action, input } = body as { action: "generate" | "improve" | "seo"; input: string };
+  const { action, input } = body as { action: "generate" | "improve" | "seo" | "improve-fields"; input: string };
 
   if (!action || !input?.trim()) {
     return NextResponse.json({ error: "Faltan campos requeridos." }, { status: 400 });
@@ -79,6 +112,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Input inválido para acción SEO." }, { status: 400 });
     }
     prompt = SEO_PROMPT(parsed.title, parsed.excerpt, parsed.content);
+  } else if (action === "improve-fields") {
+    let parsed: { fields: string[]; title: string; excerpt: string; content: string; tags: string[]; seoTitle: string; seoDescription: string };
+    try {
+      parsed = JSON.parse(input);
+    } catch {
+      return NextResponse.json({ error: "Input inválido para improve-fields." }, { status: 400 });
+    }
+    if (!parsed.fields?.length) {
+      return NextResponse.json({ error: "Selecciona al menos un campo." }, { status: 400 });
+    }
+    prompt = IMPROVE_FIELDS_PROMPT(parsed.fields, parsed);
   } else {
     prompt = action === "generate" ? GENERATE_PROMPT(input) : IMPROVE_PROMPT(input);
   }
@@ -101,11 +145,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `DeepSeek: ${msg}` }, { status: 500 });
   }
 
-  if (action === "seo") {
+  if (action === "seo" || action === "improve-fields") {
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      const seoData = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
-      return NextResponse.json(seoData);
+      const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+      return NextResponse.json(parsed);
     } catch {
       return NextResponse.json({ error: "IA no devolvió JSON válido.", raw }, { status: 500 });
     }

@@ -69,6 +69,10 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [seoImproving, setSeoImproving] = useState(false);
   const [seoError, setSeoError] = useState("");
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiFields, setAiFields] = useState<string[]>(["title", "excerpt", "content", "tags", "seoTitle", "seoDescription"]);
+  const [aiImproving, setAiImproving] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -90,6 +94,47 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const AI_FIELDS = [
+    { key: "title", label: "Título" },
+    { key: "excerpt", label: "Extracto" },
+    { key: "content", label: "Contenido" },
+    { key: "tags", label: "Tags" },
+    { key: "seoTitle", label: "SEO Title" },
+    { key: "seoDescription", label: "SEO Description" },
+  ];
+
+  const toggleAiField = (key: string) =>
+    setAiFields((prev) => prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]);
+
+  const handleAiImproveAll = async () => {
+    if (!aiFields.length) { setAiError("Selecciona al menos un campo."); return; }
+    setAiError("");
+    setAiImproving(true);
+    try {
+      const res = await fetch("/api/admin/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "improve-fields",
+          input: JSON.stringify({ fields: aiFields, title, excerpt, content, tags, seoTitle, seoDescription }),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setAiError(data.error ?? "Error al mejorar con IA."); return; }
+      if (data.title) { setTitle(data.title); if (!slugManual) setSlug(slugify(data.title)); }
+      if (data.excerpt) setExcerpt(data.excerpt.slice(0, 300));
+      if (data.content) setContent(data.content);
+      if (data.tags && Array.isArray(data.tags)) setTags(data.tags);
+      if (data.seoTitle) setSeoTitle(data.seoTitle.slice(0, 60));
+      if (data.seoDescription) setSeoDescription(data.seoDescription.slice(0, 160));
+      setShowAiModal(false);
+    } catch {
+      setAiError("Error de conexión.");
+    } finally {
+      setAiImproving(false);
     }
   };
 
@@ -262,15 +307,24 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
           </p>
         </div>
 
-        {/* Delete button */}
-        <button
-          type="button"
-          onClick={() => setShowDeleteConfirm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 border border-red-500/30 text-red-400 hover:bg-red-500/10 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-          Eliminar
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => { setAiError(""); setShowAiModal(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Mejorar con IA
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-2 px-4 py-2.5 border border-red-500/30 text-red-400 hover:bg-red-500/10 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Eliminar
+          </button>
+        </div>
       </div>
 
       {/* Delete confirmation dialog */}
@@ -296,6 +350,78 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
                 className="flex-1 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 font-cinzel text-[10px] uppercase tracking-widest px-6 py-3 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Improve Modal */}
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="relative bg-[#0a1628] border border-[#C5A059]/20 p-8 max-w-md w-full overflow-hidden">
+            <ScrollworkCorners size={36} opacity={0.6} />
+            <div className="flex items-center gap-3 mb-2">
+              <Sparkles className="w-4 h-4 text-[#C5A059]" />
+              <h3 className="font-cinzel text-base text-white">Mejorar con IA</h3>
+            </div>
+            <p className="font-crimson text-sm text-gray-400 mb-6">
+              Selecciona qué campos quieres mejorar:
+            </p>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {AI_FIELDS.map(({ key, label }) => (
+                <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                  <div
+                    onClick={() => toggleAiField(key)}
+                    className={`w-4 h-4 border flex-shrink-0 flex items-center justify-center transition-colors cursor-pointer ${
+                      aiFields.includes(key)
+                        ? "border-[#C5A059] bg-[#C5A059]"
+                        : "border-white/20 group-hover:border-white/40"
+                    }`}
+                  >
+                    {aiFields.includes(key) && <div className="w-2 h-2 bg-[#020617]" />}
+                  </div>
+                  <span className="font-cinzel text-[10px] uppercase tracking-widest text-gray-300">
+                    {label}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-3 mb-6">
+              <button
+                type="button"
+                onClick={() => setAiFields(AI_FIELDS.map((f) => f.key))}
+                className="font-cinzel text-[8px] uppercase tracking-widest text-[#C5A059]/60 hover:text-[#C5A059] transition-colors"
+              >
+                Seleccionar todo
+              </button>
+              <span className="text-gray-600">·</span>
+              <button
+                type="button"
+                onClick={() => setAiFields([])}
+                className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
+              >
+                Limpiar
+              </button>
+            </div>
+            {aiError && <p className="text-red-400 text-xs font-crimson mb-4">{aiError}</p>}
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={handleAiImproveAll}
+                disabled={aiImproving || !aiFields.length}
+                className="flex-1 bg-[#C5A059] hover:bg-[#d4b06a] disabled:opacity-50 text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-6 py-3 transition-colors flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                {aiImproving ? "Mejorando..." : "Mejorar seleccionado"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAiModal(false)}
+                disabled={aiImproving}
+                className="px-6 py-3 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 font-cinzel text-[10px] uppercase tracking-widest transition-colors"
               >
                 Cancelar
               </button>
