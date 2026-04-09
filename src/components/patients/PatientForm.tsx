@@ -31,7 +31,8 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
     reminder_day: patient?.reminder_day ?? 1,
   });
 
-  const endDate = calcEndDate(form.start_date, form.pack_size);
+  const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(form.start_date);
+  const endDate = isValidDate ? calcEndDate(form.start_date, form.pack_size) : "";
 
   function set(k: keyof typeof form, v: unknown) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -176,7 +177,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
           <div className="bg-[#020617] border border-[#C5A059]/10 px-3 py-2 flex items-center justify-between">
             <span className="text-xs font-cinzel text-gray-500 uppercase tracking-widest">Fecha de vencimiento</span>
             <span className="text-[#C5A059] font-crimson text-sm">
-              {new Date(endDate + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" })}
+              {endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" }) : "—"}
             </span>
           </div>
 
