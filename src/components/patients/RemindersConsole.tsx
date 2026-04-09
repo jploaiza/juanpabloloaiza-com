@@ -11,6 +11,7 @@ import {
   sessionsLeft, daysLeft, daysLeftColor, statusLabel, statusColor,
 } from "@/lib/patients";
 import Link from "next/link";
+import AutoSchedulePanel from "./AutoSchedulePanel";
 
 // ── Types ───────────────────────────────────────────────────────
 interface SendResult {
@@ -559,6 +560,9 @@ export default function RemindersConsole() {
             )}
           </div>
         </div>
+
+        {/* Auto schedule */}
+        <AutoSchedulePanel />
 
         {/* History */}
         <div className="bg-[#0a1628] border border-[#C5A059]/20">
