@@ -5,7 +5,7 @@ import {
   Bell, Send, Check, X, MessageCircle, Mail,
   RefreshCw, CalendarClock, ChevronDown, ChevronUp,
 } from "lucide-react";
-import { type Patient, type PatientLog, sessionsLeft, daysLeft, REMINDER_DAYS, buildWhatsappUrl, buildEmailUrl, daysLeftColor } from "@/lib/patients";
+import { type Patient, type PatientLog, sessionsLeft, daysLeft, REMINDER_DAYS, buildWhatsappUrl, buildEmailUrl, daysLeftColor, patientFullName } from "@/lib/patients";
 import Link from "next/link";
 
 interface TodayPatient extends Patient {
@@ -154,7 +154,7 @@ export default function RemindersPanel() {
 
                     <div className="flex-1 min-w-0">
                       <Link href={`/academy/admin/crm/${patient.id}`} className="font-cinzel text-white text-sm hover:text-[#C5A059] transition truncate block">
-                        {patient.full_name}
+                        {patientFullName(patient)}
                       </Link>
                       <p className="text-gray-500 text-xs font-crimson truncate">{patient.email}</p>
                     </div>
@@ -252,7 +252,7 @@ export default function RemindersPanel() {
                       href={`/academy/admin/crm/${p.id}`}
                       className="text-xs font-crimson text-gray-400 hover:text-[#C5A059] transition bg-[#020617] border border-[#C5A059]/10 px-2 py-0.5"
                     >
-                      {p.full_name.split(" ")[0]} ({sessionsLeft(p)}s)
+                      {p.first_name} ({sessionsLeft(p)}s)
                     </Link>
                   ))}
                 </div>

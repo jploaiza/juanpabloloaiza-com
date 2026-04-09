@@ -5,7 +5,9 @@ import { calcEndDate, type PackSize } from "@/lib/patients";
 interface ImportUser {
   id: string;
   email: string;
-  full_name: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
   phone: string;
   pack_size: PackSize;
   start_date: string;
@@ -38,8 +40,13 @@ export async function POST(req: NextRequest) {
 
     const end_date = calcEndDate(u.start_date, u.pack_size);
 
+    // Support both legacy full_name and new first_name/last_name
+    const rawFirst = u.first_name?.trim() || u.full_name?.trim().split(" ")[0] || u.email;
+    const rawLast = u.last_name?.trim() || (u.full_name?.trim().includes(" ") ? u.full_name.trim().substring(u.full_name.trim().indexOf(" ") + 1) : "");
+
     const { data: patient, error: insertErr } = await adminSb.from("patients").insert({
-      full_name: u.full_name?.trim() || u.email,
+      first_name: rawFirst,
+      last_name: rawLast,
       email: u.email.trim(),
       phone: u.phone?.trim() || "",
       pack_size: u.pack_size,

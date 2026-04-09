@@ -21,7 +21,8 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
-    full_name: patient?.full_name ?? "",
+    first_name: patient?.first_name ?? "",
+    last_name: patient?.last_name ?? "",
     email: patient?.email ?? "",
     phone: patient?.phone ?? "",
     pack_size: (patient?.pack_size ?? 5) as PackSize,
@@ -83,18 +84,31 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-          {/* Nombre */}
-          <div>
-            <label className="block text-xs font-cinzel text-gray-400 uppercase tracking-widest mb-1">
-              Nombre completo *
-            </label>
-            <input
-              required
-              value={form.full_name}
-              onChange={(e) => set("full_name", e.target.value)}
-              className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
-              placeholder="María González"
-            />
+          {/* Nombre + Apellido */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-cinzel text-gray-400 uppercase tracking-widest mb-1">
+                Nombre(s) *
+              </label>
+              <input
+                required
+                value={form.first_name}
+                onChange={(e) => set("first_name", e.target.value)}
+                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                placeholder="María Fernanda"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-cinzel text-gray-400 uppercase tracking-widest mb-1">
+                Apellido(s)
+              </label>
+              <input
+                value={form.last_name}
+                onChange={(e) => set("last_name", e.target.value)}
+                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                placeholder="González"
+              />
+            </div>
           </div>
 
           {/* Email + Teléfono */}

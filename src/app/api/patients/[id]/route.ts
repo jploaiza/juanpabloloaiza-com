@@ -57,10 +57,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   }
 
   // Field update
-  const { full_name, email, phone, pack_size, start_date, notes, reminder_day } = body;
+  const { first_name, last_name, email, phone, pack_size, start_date, notes, reminder_day } = body;
   const updates: Record<string, unknown> = {};
 
-  if (full_name !== undefined) updates.full_name = full_name.trim();
+  if (first_name !== undefined) updates.first_name = first_name.trim();
+  if (last_name !== undefined) updates.last_name = last_name.trim();
   if (email !== undefined) updates.email = email.trim();
   if (phone !== undefined) updates.phone = phone.trim();
   if (pack_size !== undefined) updates.pack_size = pack_size;

@@ -76,10 +76,10 @@ export async function GET() {
   // Get all patients from CRM
   const { data: patients } = await adminSb
     .from("patients")
-    .select("id, email, phone, full_name");
+    .select("id, email, phone, first_name, last_name");
 
   const statuses = matchPatientsWithEvents(
-    (patients ?? []) as Pick<Patient, "id" | "email" | "phone" | "full_name">[],
+    (patients ?? []) as Pick<Patient, "id" | "email" | "phone" | "first_name" | "last_name">[],
     events,
   );
 

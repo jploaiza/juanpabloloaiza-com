@@ -39,16 +39,17 @@ export async function POST(req: NextRequest) {
   if (!adminSb) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { full_name, email, phone, pack_size, start_date, notes, reminder_day } = body;
+  const { first_name, last_name, email, phone, pack_size, start_date, notes, reminder_day } = body;
 
-  if (!full_name?.trim() || !email?.trim() || !phone?.trim() || !pack_size || !start_date) {
+  if (!first_name?.trim() || !email?.trim() || !phone?.trim() || !pack_size || !start_date) {
     return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
   }
 
   const end_date = calcEndDate(start_date, pack_size as PackSize);
 
   const { data, error } = await adminSb.from("patients").insert({
-    full_name: full_name.trim(),
+    first_name: first_name.trim(),
+    last_name: (last_name ?? "").trim(),
     email: email.trim(),
     phone: phone.trim(),
     pack_size,

@@ -10,7 +10,7 @@ import {
   type Patient, type PatientLog,
   daysLeft, sessionsLeft, getAlerts,
   statusColor, statusLabel, daysLeftColor,
-  buildWhatsappUrl, buildEmailUrl, REMINDER_DAYS,
+  buildWhatsappUrl, buildEmailUrl, REMINDER_DAYS, patientFullName,
 } from "@/lib/patients";
 import AlertBanner from "./AlertBanner";
 import PatientForm from "./PatientForm";
@@ -63,7 +63,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
 
   async function changeStatus(action: "pause" | "activate" | "finish") {
     const labels = { pause: "pausar", activate: "reactivar", finish: "finalizar" };
-    if (!confirm(`¿${labels[action]} a ${patient.full_name}?`)) return;
+    if (!confirm(`¿${labels[action]} a ${patientFullName(patient)}?`)) return;
     setLoadingAction(action);
     try {
       const res = await fetch(`/api/patients/${patient.id}`, {
@@ -120,7 +120,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="font-cinzel text-white text-lg leading-snug">{patient.full_name}</h1>
+              <h1 className="font-cinzel text-white text-lg leading-snug">{patientFullName(patient)}</h1>
               <span className={`text-[10px] font-cinzel uppercase tracking-wide px-2 py-0.5 border ${statusColor(patient.status)}`}>
                 {statusLabel(patient.status)}
               </span>

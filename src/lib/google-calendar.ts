@@ -152,7 +152,7 @@ export async function getWeekEvents(accessToken: string, calendarId = "primary")
 
 // ── Cross-reference ──────────────────────────────────────────────
 
-type PatientRef = { id: string; email: string; phone: string; full_name: string };
+type PatientRef = { id: string; email: string; phone: string; first_name: string; last_name: string };
 
 /**
  * Matches patients to calendar events by:

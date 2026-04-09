@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { Plus, Search, RefreshCw, Users, Activity, Clock, Download, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { type Patient, type PatientStatus } from "@/lib/patients";
+import { type Patient, type PatientStatus, patientFullName } from "@/lib/patients";
 import PatientCard from "./PatientCard";
 import PatientForm from "./PatientForm";
 import ImportModal from "./ImportModal";
@@ -49,7 +49,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
   const filtered = patients
     .filter((p) => activeTab !== "reminders" && p.status === activeTab)
     .filter((p) =>
-      !search || p.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      !search || patientFullName(p).toLowerCase().includes(search.toLowerCase()) ||
       p.email.toLowerCase().includes(search.toLowerCase())
     );
 

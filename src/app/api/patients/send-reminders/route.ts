@@ -29,7 +29,7 @@ function renderTemplate(tpl: string, patient: Patient): string {
   const end = new Date(patient.end_date + "T00:00:00");
   const dias = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   return tpl
-    .replace(/\{nombre\}/g, patient.full_name.split(" ")[0])
+    .replace(/\{nombre\}/g, patient.first_name)
     .replace(/\{sesiones\}/g, String(sl))
     .replace(/\{vencimiento\}/g, exp)
     .replace(/\{dias\}/g, String(dias));
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     for (let i = 0; i < eligible.length; i++) {
       const patient = eligible[i];
       const sl = sessionsLeft(patient);
-      const name = patient.full_name.split(" ")[0];
+      const name = patient.first_name;
       const expiryDate = new Date(patient.end_date + "T12:00:00").toLocaleDateString("es-CL", {
         day: "numeric", month: "long", year: "numeric",
       });

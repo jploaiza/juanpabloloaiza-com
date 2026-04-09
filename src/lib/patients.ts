@@ -8,7 +8,8 @@ export type LogType = "reminder_sent" | "session_registered" | "note_added" | "s
 
 export interface Patient {
   id: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   pack_size: PackSize;
@@ -27,6 +28,11 @@ export interface PatientLog {
   type: LogType;
   content: string;
   created_at: string;
+}
+
+// ── Nombre completo ─────────────────────────────────────────────
+export function patientFullName(patient: Pick<Patient, "first_name" | "last_name">): string {
+  return `${patient.first_name} ${patient.last_name}`.trim();
 }
 
 // ── Validez por pack ────────────────────────────────────────────
@@ -85,7 +91,7 @@ export function getAlerts(patient: Patient, lastSessionAt?: string | null): Pati
 
 // ── URLs de contacto ────────────────────────────────────────────
 export function buildWhatsappUrl(patient: Patient): string {
-  const name = patient.full_name.split(" ")[0];
+  const name = patient.first_name;
   const sl = sessionsLeft(patient);
   const expiry = new Date(patient.end_date + "T12:00:00").toLocaleDateString("es-CL", {
     day: "numeric", month: "long", year: "numeric",
@@ -96,7 +102,7 @@ export function buildWhatsappUrl(patient: Patient): string {
 }
 
 export function buildEmailUrl(patient: Patient): string {
-  const name = patient.full_name.split(" ")[0];
+  const name = patient.first_name;
   const sl = sessionsLeft(patient);
   const expiry = new Date(patient.end_date + "T12:00:00").toLocaleDateString("es-CL", {
     day: "numeric", month: "long", year: "numeric",
@@ -108,7 +114,7 @@ export function buildEmailUrl(patient: Patient): string {
 
 // ── Reminder WhatsApp message (para cron) ───────────────────────
 export function buildReminderText(patient: Patient): string {
-  const name = patient.full_name.split(" ")[0];
+  const name = patient.first_name;
   const sl = sessionsLeft(patient);
   const expiry = new Date(patient.end_date + "T12:00:00").toLocaleDateString("es-CL", {
     day: "numeric", month: "long", year: "numeric",

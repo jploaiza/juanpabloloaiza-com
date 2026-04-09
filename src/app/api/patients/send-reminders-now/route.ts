@@ -32,7 +32,7 @@ function renderTemplate(tpl: string, patient: Patient): string {
   now.setHours(0, 0, 0, 0);
   const end = new Date(patient.end_date + "T00:00:00");
   const dias = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  const nombre = patient.full_name.split(" ")[0];
+  const nombre = patient.first_name;
 
   return tpl
     .replace(/\{nombre\}/g, nombre)
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
   for (const patient of (patients ?? []) as Patient[]) {
     const sl = sessionsLeft(patient);
     const waText = renderTemplate(whatsapp_template, patient);
-    const name = patient.full_name.split(" ")[0];
+    const name = patient.first_name;
     const expiry = new Date(patient.end_date + "T12:00:00").toLocaleDateString("es-CL", {
       day: "numeric", month: "long", year: "numeric",
     });
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 
     results.push({
       id: patient.id,
-      name: patient.full_name,
+      name: `${patient.first_name} ${patient.last_name}`.trim(),
       email: emailOk,
       whatsapp: whatsappOk,
       error: errors.join("; ") || undefined,

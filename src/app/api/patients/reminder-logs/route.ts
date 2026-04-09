@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data: logs, error } = await adminSb
     .from("patient_logs")
-    .select("id, patient_id, content, created_at, patients(full_name)")
+    .select("id, patient_id, content, created_at, patients(first_name, last_name)")
     .eq("type", "reminder_sent")
     .order("created_at", { ascending: false })
     .limit(50);
@@ -27,7 +27,9 @@ export async function GET() {
     patient_id: l.patient_id,
     content: l.content,
     created_at: l.created_at,
-    patient_name: Array.isArray(l.patients) ? l.patients[0]?.full_name ?? null : l.patients?.full_name ?? null,
+    patient_name: Array.isArray(l.patients)
+      ? (l.patients[0] ? `${l.patients[0].first_name} ${l.patients[0].last_name}`.trim() : null)
+      : (l.patients ? `${l.patients.first_name} ${l.patients.last_name}`.trim() : null),
   }));
 
   return NextResponse.json({ logs: formatted });

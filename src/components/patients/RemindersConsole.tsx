@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import {
   type Patient, type PatientStatus,
-  sessionsLeft, daysLeft, daysLeftColor, statusLabel, statusColor,
+  sessionsLeft, daysLeft, daysLeftColor, statusLabel, statusColor, patientFullName,
 } from "@/lib/patients";
 import Link from "next/link";
 import AutoSchedulePanel from "./AutoSchedulePanel";
@@ -60,7 +60,7 @@ function renderPreview(tpl: string, patient: Patient): string {
   const now = new Date(); now.setHours(0,0,0,0);
   const dias = Math.ceil((new Date(patient.end_date + "T00:00:00").getTime() - now.getTime()) / 86400000);
   return tpl
-    .replace(/\{nombre\}/g, patient.full_name.split(" ")[0])
+    .replace(/\{nombre\}/g, patient.first_name)
     .replace(/\{sesiones\}/g, String(sl))
     .replace(/\{vencimiento\}/g, exp)
     .replace(/\{dias\}/g, String(dias));
@@ -171,7 +171,7 @@ export default function RemindersConsole() {
     .filter((p) => filterTab === "all" || p.status === filterTab)
     .filter((p) =>
       !search ||
-      p.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      patientFullName(p).toLowerCase().includes(search.toLowerCase()) ||
       p.email.toLowerCase().includes(search.toLowerCase())
     )
     .filter((p) => !skipScheduled || !scheduledIds.has(p.id));
@@ -244,7 +244,7 @@ export default function RemindersConsole() {
           if (data.results?.[0]) results.push(data.results[0]);
         } catch {
           const p = patients.find((pt) => pt.id === selectedIds[i]);
-          results.push({ id: selectedIds[i], name: p?.full_name ?? "?", email: false, whatsapp: false, error: "Error de red" });
+          results.push({ id: selectedIds[i], name: p ? patientFullName(p) : "?", email: false, whatsapp: false, error: "Error de red" });
         }
         setProgress({ current: i + 1, total: selectedIds.length, results: [...results] });
         if (i < selectedIds.length - 1 && !abortRef.current) {
@@ -346,7 +346,7 @@ export default function RemindersConsole() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-xs font-cinzel truncate leading-snug">{patient.full_name}</p>
+                  <p className="text-white text-xs font-cinzel truncate leading-snug">{patientFullName(patient)}</p>
                   <p className="text-gray-600 text-[10px] font-crimson truncate">{patient.email}</p>
                 </div>
 
@@ -440,7 +440,7 @@ export default function RemindersConsole() {
             {/* Preview */}
             {showPreview && previewPatient && (
               <div className="bg-emerald-950/40 border border-emerald-700/30 rounded-sm p-3">
-                <p className="text-[10px] font-cinzel text-emerald-400/70 uppercase tracking-widest mb-1.5">Vista previa con {previewPatient.full_name.split(" ")[0]}</p>
+                <p className="text-[10px] font-cinzel text-emerald-400/70 uppercase tracking-widest mb-1.5">Vista previa con {previewPatient.first_name}</p>
                 <p className="text-emerald-100 font-crimson text-sm leading-relaxed whitespace-pre-wrap">
                   {renderPreview(template, previewPatient)}
                 </p>

@@ -9,7 +9,7 @@ import {
   type Patient,
   daysLeft, sessionsLeft, getAlerts,
   statusColor, statusLabel, daysLeftColor,
-  buildWhatsappUrl, buildEmailUrl,
+  buildWhatsappUrl, buildEmailUrl, patientFullName,
 } from "@/lib/patients";
 import AlertBanner from "./AlertBanner";
 import Link from "next/link";
@@ -74,7 +74,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
           <Link href={`/academy/admin/crm/${patient.id}`} className="font-cinzel text-white text-sm leading-snug hover:text-[#C5A059] transition line-clamp-1">
-            {patient.full_name}
+            {patientFullName(patient)}
           </Link>
           <p className="text-gray-500 text-xs font-crimson mt-0.5">{patient.email}</p>
         </div>
@@ -177,7 +177,7 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
         {patient.status !== "finished" && (
           <button
             onClick={() => {
-              if (confirm(`¿Finalizar el pack de ${patient.full_name}?`)) {
+              if (confirm(`¿Finalizar el pack de ${patientFullName(patient)}?`)) {
                 doAction("finish", { action: "finish" });
               }
             }}
