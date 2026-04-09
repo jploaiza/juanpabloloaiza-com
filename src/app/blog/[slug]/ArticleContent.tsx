@@ -101,11 +101,41 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
               {post.title}
             </h1>
 
-            <div className="flex items-center gap-4 pb-6 border-b border-[#C5A059]/15 mb-8">
-              <span className="text-gray-400 font-crimson text-sm">{post.author}</span>
-              <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                <Clock className="w-3 h-3" />
-                <span>{post.readTime} de lectura</span>
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#C5A059]/15 mb-8">
+              <div className="flex items-center gap-4">
+                <span className="text-gray-400 font-crimson text-sm">{post.author}</span>
+                <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                  <Clock className="w-3 h-3" />
+                  <span>{post.readTime} de lectura</span>
+                </div>
+              </div>
+              {/* Share — top */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600 mr-1">Compartir</span>
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/20 text-gray-500 hover:text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                >
+                  Facebook
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/20 text-gray-500 hover:text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                >
+                  X / Twitter
+                </a>
+                <button
+                  onClick={handleDownloadStory}
+                  disabled={storyLoading}
+                  className="flex items-center gap-1.5 font-cinzel text-[9px] uppercase tracking-widest px-3 py-1.5 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/10 transition disabled:opacity-60"
+                >
+                  {storyLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                  {storyLoading ? "..." : storyDone ? "Descargada!" : "Historia IG"}
+                </button>
               </div>
             </div>
           </motion.div>
@@ -181,51 +211,6 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
               {post.content}
             </ReactMarkdown>
           </motion.article>
-
-          {/* Share — mobile/below content */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.22 }}
-            className="mt-12 pt-8 border-t border-[#C5A059]/15"
-          >
-            <p className="font-cinzel text-xs uppercase tracking-widest text-gray-400 mb-4">
-              Compartir
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/25 text-gray-400 hover:border-[#C5A059]/60 hover:text-[#C5A059] transition"
-              >
-                Facebook
-              </a>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/25 text-gray-400 hover:border-[#C5A059]/60 hover:text-[#C5A059] transition"
-              >
-                X / Twitter
-              </a>
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={handleDownloadStory}
-                  disabled={storyLoading}
-                  className="flex items-center gap-2 font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 border border-[#C5A059]/40 text-[#C5A059] hover:bg-[#C5A059]/10 transition disabled:opacity-60"
-                >
-                  {storyLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-                  {storyLoading ? "Generando..." : storyDone ? "Descargada!" : "Historia Instagram"}
-                </button>
-                {storyDone && (
-                  <p className="font-crimson text-xs text-gray-500 px-1">
-                    Guarda la imagen y súbela a tus Historias de Instagram
-                  </p>
-                )}
-              </div>
-            </div>
-          </motion.div>
 
           {/* Prev / Next navigation */}
           {(previousPost || nextPost) && (
