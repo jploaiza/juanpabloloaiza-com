@@ -84,14 +84,13 @@ export async function GET(req: NextRequest) {
     emailBodySin:    settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]       || DEFAULT_EMAIL_BODY_SIN_SESIONES,
   };
 
-  // Match configs by exact Chile day + hour + minute
+  // Match configs by Chile day + hour (minute ignored on Hobby plan — daily cron only)
   const { data: configs, error: cfgErr } = await adminSb
     .from("reminder_configs")
     .select("*")
     .eq("is_active", true)
     .eq("day_of_week", chileDay)
-    .eq("hour_chile", chileHour)
-    .eq("minute_chile", chileMinute);
+    .eq("hour_chile", chileHour);
 
   if (cfgErr) return NextResponse.json({ error: cfgErr.message }, { status: 500 });
   if (!configs?.length) {
