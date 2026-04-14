@@ -104,6 +104,26 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <meta name="robots" content="index, follow, max-image-preview:large" />
+        {/* Auto-retry failed JS chunks (slow mobile connections) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(){
+  var _retried = {};
+  window.addEventListener('error', function(e) {
+    var src = e && e.target && (e.target.src || e.target.href);
+    if (!src || _retried[src]) return;
+    if (/(\\/_next\\/static\\/)/.test(src)) {
+      _retried[src] = true;
+      var el = e.target.cloneNode();
+      el.src = src + '?r=' + Date.now();
+      document.head.appendChild(el);
+    }
+  }, true);
+})();
+`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-black text-white">
         {children}

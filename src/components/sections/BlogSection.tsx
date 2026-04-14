@@ -5,25 +5,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Tag, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { getAllPublishedPosts } from "@/lib/supabase/blog";
+import { type toDisplayPost } from "@/lib/supabase/blog";
+
+type DisplayPost = ReturnType<typeof toDisplayPost>;
 
 const CARDS = 3;
 const AUTO_INTERVAL = 5000;
 
-export default function BlogSection() {
-  const [allPosts, setAllPosts] = useState<Awaited<ReturnType<typeof getAllPublishedPosts>>>([]);
-
-  useEffect(() => {
-    getAllPublishedPosts().then(setAllPosts);
-  }, []);
-
+export default function BlogSection({ initialPosts = [] }: { initialPosts?: DisplayPost[] }) {
   // Latest post first, then up to 5 random from the rest — max 6 total
   const posts = useMemo(() => {
-    if (allPosts.length === 0) return [];
-    const latest = allPosts[0];
-    const rest = [...allPosts.slice(1)].sort(() => Math.random() - 0.5).slice(0, 5);
+    if (initialPosts.length === 0) return [];
+    const latest = initialPosts[0];
+    const rest = [...initialPosts.slice(1)].sort(() => Math.random() - 0.5).slice(0, 5);
     return [latest, ...rest];
-  }, [allPosts]);
+  }, [initialPosts]);
 
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);

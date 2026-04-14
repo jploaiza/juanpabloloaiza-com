@@ -9,8 +9,25 @@ import AdmissionSection from "@/components/sections/AdmissionSection";
 import BlogSection from "@/components/sections/BlogSection";
 import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/Footer";
+import { createClient } from "@/lib/supabase/server";
+import { toDisplayPost, type SupabasePost } from "@/lib/supabase/blog";
 
-export default function Home() {
+async function getBlogPosts() {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("id, slug, title, excerpt, content, featured_image_url, tags, status, seo_title, seo_description, published_at, created_at")
+      .eq("status", "published")
+      .order("published_at", { ascending: false });
+    return (data ?? []).map((p) => toDisplayPost(p as SupabasePost));
+  } catch {
+    return [];
+  }
+}
+
+export default async function Home() {
+  const blogPosts = await getBlogPosts();
   return (
     <main className="min-h-screen bg-black">
       {/* Preload LCP hero image only on the homepage */}
@@ -45,7 +62,7 @@ export default function Home() {
           <AdmissionSection />
         </section>
         <section id="blog">
-          <BlogSection />
+          <BlogSection initialPosts={blogPosts} />
         </section>
         <section id="contacto">
           <ContactSection />
