@@ -92,8 +92,18 @@ export async function GET(req: NextRequest) {
     .eq("day_of_week", chileDay)
     .eq("hour_chile", chileHour);
 
-  if (cfgErr) return NextResponse.json({ error: cfgErr.message }, { status: 500 });
+  if (cfgErr) {
+    await adminSb.from("reminder_run_logs").insert({
+      chile_day: chileDay, chile_hour: chileHour, chile_minute: chileMinute,
+      configs_matched: 0, results: [], top_error: cfgErr.message,
+    });
+    return NextResponse.json({ error: cfgErr.message }, { status: 500 });
+  }
   if (!configs?.length) {
+    await adminSb.from("reminder_run_logs").insert({
+      chile_day: chileDay, chile_hour: chileHour, chile_minute: chileMinute,
+      configs_matched: 0, results: [],
+    });
     return NextResponse.json({ message: "No configs match", day: chileDay, hour: chileHour, minute: chileMinute });
   }
 
@@ -279,6 +289,12 @@ export async function GET(req: NextRequest) {
       failed,
     });
   }
+
+  await adminSb.from("reminder_run_logs").insert({
+    chile_day: chileDay, chile_hour: chileHour, chile_minute: chileMinute,
+    configs_matched: results.length,
+    results,
+  });
 
   return NextResponse.json({ day: chileDay, hour: chileHour, minute: chileMinute, processed: results.length, results });
 }

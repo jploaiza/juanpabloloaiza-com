@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Bell, Send, Check, MessageCircle, Mail, RefreshCw,
   Users, Activity, Clock, ChevronDown, ChevronUp,
-  Zap, Timer, Hash, Shuffle, Eye, EyeOff, AlertCircle, Calendar,
+  Zap, Timer, Hash, Shuffle, Eye, EyeOff, AlertCircle, Calendar, Cpu,
 } from "lucide-react";
 import {
   type Patient, type PatientStatus,
@@ -34,6 +34,17 @@ interface ReminderLog {
   patient_name?: string;
   content: string;
   created_at: string;
+}
+
+interface RunLog {
+  id: string;
+  run_at: string;
+  chile_day: number;
+  chile_hour: number;
+  chile_minute: number;
+  configs_matched: number;
+  results: { config_id: string; label?: string; patients?: number; sent?: number; failed?: number; skipped?: boolean; reason?: string }[] | null;
+  top_error: string | null;
 }
 
 type FilterTab = PatientStatus | "all" | "without_appointment" | "with_appointment" | "without_appointment_next_week" | "with_appointment_next_week";
@@ -118,6 +129,7 @@ export default function RemindersConsole() {
 
   // History
   const [showHistory, setShowHistory] = useState(true);
+  const [runLogs, setRunLogs] = useState<RunLog[]>([]);
 
   // Google Calendar integration
   const [calendarConnected, setCalendarConnected] = useState<boolean | null>(null);
@@ -131,14 +143,17 @@ export default function RemindersConsole() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [pRes, lRes] = await Promise.all([
+      const [pRes, lRes, rlRes] = await Promise.all([
         fetch("/api/patients"),
         fetch("/api/patients/reminder-logs"),
+        fetch("/api/patients/reminder-run-logs"),
       ]);
       const { patients: p } = await pRes.json();
       const { logs: l } = lRes.ok ? await lRes.json() : { logs: [] };
+      const { logs: rl } = rlRes.ok ? await rlRes.json() : { logs: [] };
       setPatients(p ?? []);
       setLogs(l ?? []);
+      setRunLogs(rl ?? []);
       if (!previewPatient && p?.length) {
         setPreviewPatient(p.find((pt: Patient) => pt.status === "active") ?? p[0]);
       }
@@ -832,27 +847,75 @@ export default function RemindersConsole() {
           </button>
 
           {showHistory && (
-            <div className="divide-y divide-[#C5A059]/6 max-h-72 overflow-y-auto">
-              {logs.length === 0 && (
+            <div className="divide-y divide-[#C5A059]/6 max-h-96 overflow-y-auto">
+              {logs.length === 0 && runLogs.length === 0 && (
                 <p className="py-8 text-center text-gray-700 font-crimson text-sm">Sin recordatorios enviados</p>
               )}
-              {logs.map((log) => (
-                <div key={log.id} className="flex gap-3 px-5 py-3">
-                  <Bell size={12} className="text-blue-400/60 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    {log.patient_name && (
-                      <p className="text-gray-300 text-[11px] font-cinzel mb-0.5 truncate">{log.patient_name}</p>
-                    )}
-                    <p className="text-gray-500 font-crimson text-xs leading-relaxed">{log.content}</p>
-                    <p className="text-gray-700 text-[10px] mt-0.5">
-                      {new Date(log.created_at).toLocaleDateString("es-CL", {
-                        day: "numeric", month: "short", year: "numeric",
-                        hour: "2-digit", minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ))}
+              {/* Merge patient logs + cron run logs sorted by date desc */}
+              {[
+                ...logs.map((l) => ({ type: "patient" as const, date: l.created_at, data: l })),
+                ...runLogs.map((r) => ({ type: "run" as const, date: r.run_at, data: r })),
+              ]
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map((item) => {
+                  if (item.type === "patient") {
+                    const log = item.data as ReminderLog;
+                    return (
+                      <div key={`p-${log.id}`} className="flex gap-3 px-5 py-3">
+                        <Bell size={12} className="text-blue-400/60 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          {log.patient_name && (
+                            <p className="text-gray-300 text-[11px] font-cinzel mb-0.5 truncate">{log.patient_name}</p>
+                          )}
+                          <p className="text-gray-500 font-crimson text-xs leading-relaxed">{log.content}</p>
+                          <p className="text-gray-700 text-[10px] mt-0.5">
+                            {new Date(log.created_at).toLocaleDateString("es-CL", {
+                              day: "numeric", month: "short", year: "numeric",
+                              hour: "2-digit", minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                  // Cron run log
+                  const run = item.data as RunLog;
+                  const totalSent = (run.results ?? []).reduce((s, r) => s + (r.sent ?? 0), 0);
+                  const totalFailed = (run.results ?? []).reduce((s, r) => s + (r.failed ?? 0), 0);
+                  const skipped = (run.results ?? []).filter((r) => r.skipped).length;
+                  const hasError = !!run.top_error;
+                  const noMatch = run.configs_matched === 0 && !hasError;
+                  return (
+                    <div key={`r-${run.id}`} className={`flex gap-3 px-5 py-3 ${hasError ? "bg-red-950/10" : noMatch ? "opacity-40" : "bg-emerald-950/5"}`}>
+                      <Cpu size={12} className={`flex-shrink-0 mt-0.5 ${hasError ? "text-red-400/70" : noMatch ? "text-gray-600" : "text-[#C5A059]/60"}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-[11px] font-cinzel mb-0.5 ${hasError ? "text-red-400" : noMatch ? "text-gray-600" : "text-[#C5A059]/80"}`}>
+                          Cron automático
+                          {noMatch && " · sin reglas que coincidan"}
+                          {hasError && " · error"}
+                        </p>
+                        {!noMatch && !hasError && run.results && run.results.length > 0 && (
+                          <div className="space-y-0.5">
+                            {run.results.map((r, i) => (
+                              <p key={i} className="text-gray-500 font-crimson text-[11px]">
+                                {r.skipped
+                                  ? `"${r.label ?? r.config_id}" · omitida (${r.reason === "recent_run" ? "ejecutada recientemente" : r.reason})`
+                                  : `"${r.label ?? r.config_id}" · ${r.patients ?? 0} pacientes · ${r.sent ?? 0} enviados${(r.failed ?? 0) > 0 ? ` · ${r.failed} fallidos` : ""}`}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                        {hasError && <p className="text-red-400/70 font-crimson text-[11px]">{run.top_error}</p>}
+                        <p className="text-gray-700 text-[10px] mt-0.5">
+                          {new Date(run.run_at).toLocaleDateString("es-CL", {
+                            day: "numeric", month: "short", year: "numeric",
+                            hour: "2-digit", minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>
