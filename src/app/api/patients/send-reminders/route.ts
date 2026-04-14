@@ -84,14 +84,30 @@ export async function GET(req: NextRequest) {
     emailBodySin:    settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]       || DEFAULT_EMAIL_BODY_SIN_SESIONES,
   };
 
-  // Match configs by Chile day + hour (minute ignored on Hobby plan — daily cron only)
-  const { data: configs, error: cfgErr } = await adminSb
-    .from("reminder_configs")
-    .select("*")
-    .eq("is_active", true)
-    .eq("day_of_week", chileDay)
-    .eq("hour_chile", chileHour);
+  // Match configs for current Chile hour, PLUS catch-up: configs scheduled for
+  // earlier today (up to 4 hours back) that haven't run today yet.
+  // This ensures GitHub Actions skipping an hour doesn't silently miss a rule.
+  const todayStartUtc = todayStr + "T00:00:00+00:00"; // midnight Chile as UTC ref
+  const catchupFromHour = Math.max(0, chileHour - 4);
 
+  const [currentRes, catchupRes] = await Promise.all([
+    adminSb
+      .from("reminder_configs")
+      .select("*")
+      .eq("is_active", true)
+      .eq("day_of_week", chileDay)
+      .eq("hour_chile", chileHour),
+    adminSb
+      .from("reminder_configs")
+      .select("*")
+      .eq("is_active", true)
+      .eq("day_of_week", chileDay)
+      .gte("hour_chile", catchupFromHour)
+      .lt("hour_chile", chileHour)
+      .or(`last_run_at.is.null,last_run_at.lt.${todayStartUtc}`),
+  ]);
+
+  const cfgErr = currentRes.error ?? catchupRes.error;
   if (cfgErr) {
     await adminSb.from("reminder_run_logs").insert({
       chile_day: chileDay, chile_hour: chileHour, chile_minute: chileMinute,
@@ -99,7 +115,15 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json({ error: cfgErr.message }, { status: 500 });
   }
-  if (!configs?.length) {
+
+  // Deduplicate: current hour takes priority; skip catchup if same id already present
+  const seen = new Set<string>();
+  const configs: typeof currentRes.data = [];
+  for (const c of [...(currentRes.data ?? []), ...(catchupRes.data ?? [])]) {
+    if (!seen.has(c.id)) { seen.add(c.id); configs.push(c); }
+  }
+
+  if (!configs.length) {
     await adminSb.from("reminder_run_logs").insert({
       chile_day: chileDay, chile_hour: chileHour, chile_minute: chileMinute,
       configs_matched: 0, results: [],
