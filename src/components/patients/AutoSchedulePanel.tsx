@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Settings, Plus, Trash2, ChevronDown, ChevronUp,
-  Mail, MessageCircle, Zap, Timer, Calendar, Pencil, Check,
+  Mail, MessageCircle, Zap, Timer, Calendar, Pencil, Check, CheckCircle,
 } from "lucide-react";
 import { type Patient, patientFullName } from "@/lib/patients";
 
@@ -67,6 +67,7 @@ export default function AutoSchedulePanel() {
   const [showTemplate, setShowTemplate] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [patientSearch, setPatientSearch] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -164,7 +165,13 @@ export default function AutoSchedulePanel() {
             body: JSON.stringify(payload),
           });
 
-      if (res.ok) { cancelForm(); await load(); }
+      if (res.ok) {
+        const msg = editingId ? "Regla actualizada correctamente" : "Regla activada y guardada";
+        cancelForm();
+        await load();
+        setToast(msg);
+        setTimeout(() => setToast(null), 3500);
+      }
     } finally {
       setSaving(false);
     }
@@ -203,6 +210,14 @@ export default function AutoSchedulePanel() {
 
       {open && (
         <div className="px-5 py-4 space-y-3">
+          {/* Success toast */}
+          {toast && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-cinzel uppercase tracking-widest">
+              <CheckCircle size={12} />
+              {toast}
+            </div>
+          )}
+
           {/* Config list */}
           {loading ? (
             <p className="text-gray-700 font-crimson text-sm text-center py-4">Cargando...</p>

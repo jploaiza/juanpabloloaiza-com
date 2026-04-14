@@ -213,6 +213,28 @@ input::placeholder {
 [data-admin-panel] .font-cinzel {
   font-weight: 600;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Scrollbars — dark background + gold thumb (todo el sitio)
+   ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(197, 160, 89, 0.35);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 160, 89, 0.65);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(197, 160, 89, 0.35) #020617;
+}
 [data-admin-panel] .font-crimson {
   font-weight: 500;
 }

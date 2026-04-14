@@ -405,18 +405,18 @@ export default function RemindersConsole() {
         </div>
 
         {/* Filter tabs */}
-        <div className="flex border-b border-[#C5A059]/10 overflow-x-auto">
+        <div className="flex flex-wrap border-b border-[#C5A059]/10">
           {FILTER_TABS.filter((t) => !t.calendarOnly || calendarConnected).map(({ key, label, icon }) => (
             <button
               key={key}
               onClick={() => setFilterTab(key)}
-              className={`flex items-center gap-1 px-2 py-2 text-[10px] font-cinzel uppercase tracking-wide flex-1 justify-center transition border-b-2 -mb-px whitespace-nowrap min-w-0 ${
+              className={`flex items-center gap-1 px-3 py-2 text-[10px] font-cinzel uppercase tracking-wide justify-center transition border-b-2 -mb-px whitespace-nowrap ${
                 filterTab === key ? "border-[#C5A059] text-[#C5A059]" : "border-transparent text-gray-600 hover:text-gray-400"
               }`}
             >
               {icon}
-              <span className="hidden xs:inline sm:inline">{label}</span>
-              <span className="text-[9px] opacity-60">({counts[key]})</span>
+              {label}
+              <span className="text-[9px] opacity-60 ml-0.5">({counts[key]})</span>
             </button>
           ))}
         </div>
