@@ -12,7 +12,7 @@
  * }
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import {
   type GCalTokenData,
@@ -22,7 +22,8 @@ import {
 } from "@/lib/google-calendar";
 import { type Patient } from "@/lib/patients";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const weekOffset = Number(req.nextUrl.searchParams.get("week_offset") ?? 0);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -65,7 +66,7 @@ export async function GET() {
   // Fetch this week's events
   let events;
   try {
-    events = await getWeekEvents(accessToken, stored.calendar_id ?? "primary");
+    events = await getWeekEvents(accessToken, stored.calendar_id ?? "primary", weekOffset);
   } catch (err) {
     return NextResponse.json(
       { error: `Error al obtener eventos: ${err instanceof Error ? err.message : "unknown"}` },
@@ -88,7 +89,7 @@ export async function GET() {
   const dow = nowChile.getUTCDay();
   const daysToMon = dow === 0 ? -6 : 1 - dow;
   const mon = new Date(nowChile);
-  mon.setUTCDate(nowChile.getUTCDate() + daysToMon);
+  mon.setUTCDate(nowChile.getUTCDate() + daysToMon + weekOffset * 7);
   const sun = new Date(mon);
   sun.setUTCDate(mon.getUTCDate() + 6);
 

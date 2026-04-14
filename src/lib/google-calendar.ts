@@ -114,15 +114,16 @@ export async function getValidToken(stored: GCalTokenData): Promise<{
 // ── Fetch Events ─────────────────────────────────────────────────
 
 /**
- * Returns events for the current calendar week (Mon–Sun) in Chile time (UTC-4).
+ * Returns events for a calendar week (Mon–Sun) in Chile time (UTC-4).
+ * @param weekOffset 0 = this week, 1 = next week, -1 = last week, etc.
  */
-export async function getWeekEvents(accessToken: string, calendarId = "primary"): Promise<CalendarEvent[]> {
+export async function getWeekEvents(accessToken: string, calendarId = "primary", weekOffset = 0): Promise<CalendarEvent[]> {
   const nowChile = new Date(Date.now() - 4 * 60 * 60 * 1000);
   const dow = nowChile.getUTCDay(); // 0=Sun
   const daysToMon = dow === 0 ? -6 : 1 - dow;
 
   const mon = new Date(nowChile);
-  mon.setUTCDate(nowChile.getUTCDate() + daysToMon);
+  mon.setUTCDate(nowChile.getUTCDate() + daysToMon + weekOffset * 7);
   mon.setUTCHours(0, 0, 0, 0);
 
   const sun = new Date(mon);

@@ -3,16 +3,19 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Settings, Plus, Trash2, ChevronDown, ChevronUp,
-  Mail, MessageCircle, Zap, Timer, Calendar, Pencil,
+  Mail, MessageCircle, Zap, Timer, Calendar, Pencil, Check,
 } from "lucide-react";
+import { type Patient, patientFullName } from "@/lib/patients";
 
 interface ReminderConfig {
   id: string;
   label: string | null;
   day_of_week: number;
   hour_chile: number;
+  minute_chile: number;
   channels: string[];
   patient_filter: string;
+  patient_ids: string[] | null;
   whatsapp_template: string | null;
   send_mode: string;
   delay_min: number;
@@ -23,27 +26,39 @@ interface ReminderConfig {
 }
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
 const FILTER_LABELS: Record<string, string> = {
   active: "Activos",
   paused: "Pausados",
   finished: "Finalizados",
   all: "Todos",
+  without_appointment: "Sin cita esta semana",
+  with_appointment: "Con cita esta semana",
+  without_appointment_next_week: "Sin cita próx. semana",
+  with_appointment_next_week: "Con cita próx. semana",
+  specific: "Específicos",
 };
 
 const EMPTY_FORM = {
   label: "",
   day_of_week: 1,
-  hour_chile: 9,
+  time_chile: "09:00",
   channels: ["whatsapp", "email"] as string[],
   patient_filter: "active",
-  send_mode: "batch",
+  patient_ids: [] as string[],
+  send_mode: "human",
   delay_min: 30,
   delay_max: 120,
   whatsapp_template: "",
 };
 
+function fmtTime(hour: number, minute: number) {
+  return `${String(hour).padStart(2, "0")}:${String(minute ?? 0).padStart(2, "0")}`;
+}
+
 export default function AutoSchedulePanel() {
   const [configs, setConfigs] = useState<ReminderConfig[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -51,14 +66,22 @@ export default function AutoSchedulePanel() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [showTemplate, setShowTemplate] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [patientSearch, setPatientSearch] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/patients/reminder-configs");
-      if (res.ok) {
-        const { configs: data } = await res.json();
+      const [cfgRes, pRes] = await Promise.all([
+        fetch("/api/patients/reminder-configs"),
+        fetch("/api/patients"),
+      ]);
+      if (cfgRes.ok) {
+        const { configs: data } = await cfgRes.json();
         setConfigs(data ?? []);
+      }
+      if (pRes.ok) {
+        const { patients: data } = await pRes.json();
+        setPatients(data ?? []);
       }
     } finally {
       setLoading(false);
@@ -70,9 +93,16 @@ export default function AutoSchedulePanel() {
   function toggleChannel(ch: string) {
     setForm((f) => ({
       ...f,
-      channels: f.channels.includes(ch)
-        ? f.channels.filter((c) => c !== ch)
-        : [...f.channels, ch],
+      channels: f.channels.includes(ch) ? f.channels.filter((c) => c !== ch) : [...f.channels, ch],
+    }));
+  }
+
+  function togglePatient(id: string) {
+    setForm((f) => ({
+      ...f,
+      patient_ids: f.patient_ids.includes(id)
+        ? f.patient_ids.filter((x) => x !== id)
+        : [...f.patient_ids, id],
     }));
   }
 
@@ -80,9 +110,10 @@ export default function AutoSchedulePanel() {
     setForm({
       label: config.label ?? "",
       day_of_week: config.day_of_week,
-      hour_chile: config.hour_chile,
+      time_chile: fmtTime(config.hour_chile, config.minute_chile ?? 0),
       channels: config.channels ?? ["whatsapp", "email"],
       patient_filter: config.patient_filter,
+      patient_ids: config.patient_ids ?? [],
       send_mode: config.send_mode,
       delay_min: config.delay_min,
       delay_max: config.delay_max,
@@ -98,14 +129,26 @@ export default function AutoSchedulePanel() {
     setForm(EMPTY_FORM);
     setEditingId(null);
     setShowTemplate(false);
+    setPatientSearch("");
   }
 
   async function saveConfig() {
     setSaving(true);
     try {
+      const [hh, mm] = form.time_chile.split(":").map(Number);
       const payload = {
-        ...form,
         label: form.label || null,
+        day_of_week: form.day_of_week,
+        hour_chile: hh,
+        minute_chile: mm ?? 0,
+        channels: form.channels,
+        patient_filter: form.patient_filter,
+        patient_ids: form.patient_filter === "specific" && form.patient_ids.length > 0
+          ? form.patient_ids
+          : null,
+        send_mode: form.send_mode,
+        delay_min: form.delay_min,
+        delay_max: form.delay_max,
         whatsapp_template: form.whatsapp_template || null,
       };
 
@@ -121,10 +164,7 @@ export default function AutoSchedulePanel() {
             body: JSON.stringify(payload),
           });
 
-      if (res.ok) {
-        cancelForm();
-        await load();
-      }
+      if (res.ok) { cancelForm(); await load(); }
     } finally {
       setSaving(false);
     }
@@ -145,9 +185,12 @@ export default function AutoSchedulePanel() {
     setConfigs((prev) => prev.filter((c) => c.id !== id));
   }
 
+  const filteredPatients = patients.filter((p) =>
+    !patientSearch || patientFullName(p).toLowerCase().includes(patientSearch.toLowerCase()) || p.email.toLowerCase().includes(patientSearch.toLowerCase())
+  );
+
   return (
     <div className="bg-[#0a1628] border border-[#C5A059]/20">
-      {/* Header */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-3 border-b border-[#C5A059]/10"
@@ -177,16 +220,17 @@ export default function AutoSchedulePanel() {
                   <Calendar size={12} className={config.is_active ? "text-[#C5A059]" : "text-gray-600"} />
                   <div className="flex-1 min-w-0">
                     <p className="font-cinzel text-white text-[11px] truncate">
-                      {config.label || `${DAYS[config.day_of_week]} a las ${config.hour_chile}:00`}
+                      {config.label || `${DAYS[config.day_of_week]} a las ${fmtTime(config.hour_chile, config.minute_chile ?? 0)}`}
                     </p>
                     <p className="text-gray-500 font-crimson text-[10px] mt-0.5">
-                      {DAYS[config.day_of_week]} {config.hour_chile}:00 ·{" "}
-                      {FILTER_LABELS[config.patient_filter]} ·{" "}
+                      {DAYS[config.day_of_week]} {fmtTime(config.hour_chile, config.minute_chile ?? 0)} ·{" "}
+                      {config.patient_filter === "specific"
+                        ? `${config.patient_ids?.length ?? 0} específico${(config.patient_ids?.length ?? 0) !== 1 ? "s" : ""}`
+                        : FILTER_LABELS[config.patient_filter] ?? config.patient_filter} ·{" "}
                       {config.channels.map((c) => c === "email" ? "Email" : "WA").join(" + ")} ·{" "}
                       {config.send_mode === "human" ? `Humano (${config.delay_min}s–${config.delay_max}s)` : "Batch"}
                     </p>
                   </div>
-                  {/* Toggle */}
                   <button
                     onClick={() => toggleActive(config)}
                     className={`flex-shrink-0 transition ${config.is_active ? "text-emerald-400" : "text-gray-600 hover:text-gray-400"}`}
@@ -194,20 +238,10 @@ export default function AutoSchedulePanel() {
                   >
                     <span className="text-[10px] font-cinzel">{config.is_active ? "ON" : "OFF"}</span>
                   </button>
-                  {/* Edit */}
-                  <button
-                    onClick={() => startEdit(config)}
-                    title="Editar"
-                    className="flex-shrink-0 text-gray-600 hover:text-[#C5A059] transition"
-                  >
+                  <button onClick={() => startEdit(config)} title="Editar" className="flex-shrink-0 text-gray-600 hover:text-[#C5A059] transition">
                     <Pencil size={12} />
                   </button>
-                  {/* Delete */}
-                  <button
-                    onClick={() => deleteConfig(config.id)}
-                    title="Eliminar"
-                    className="flex-shrink-0 text-gray-700 hover:text-red-400 transition"
-                  >
+                  <button onClick={() => deleteConfig(config.id)} title="Eliminar" className="flex-shrink-0 text-gray-700 hover:text-red-400 transition">
                     <Trash2 size={12} />
                   </button>
                 </div>
@@ -233,7 +267,7 @@ export default function AutoSchedulePanel() {
                 />
               </div>
 
-              {/* Day + Hour */}
+              {/* Day + Time */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-gray-500 text-[10px] font-cinzel uppercase tracking-widest block mb-1">Día</label>
@@ -246,16 +280,13 @@ export default function AutoSchedulePanel() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-500 text-[10px] font-cinzel uppercase tracking-widest block mb-1">Hora (Chile)</label>
-                  <select
-                    value={form.hour_chile}
-                    onChange={(e) => setForm((f) => ({ ...f, hour_chile: Number(e.target.value) }))}
-                    className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none"
-                  >
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <option key={i} value={i}>{String(i).padStart(2, "0")}:00</option>
-                    ))}
-                  </select>
+                  <label className="text-gray-500 text-[10px] font-cinzel uppercase tracking-widest block mb-1">Hora Chile (HH:MM)</label>
+                  <input
+                    type="time"
+                    value={form.time_chile}
+                    onChange={(e) => setForm((f) => ({ ...f, time_chile: e.target.value }))}
+                    className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none focus:border-[#C5A059]/40 [color-scheme:dark]"
+                  />
                 </div>
               </div>
 
@@ -264,15 +295,58 @@ export default function AutoSchedulePanel() {
                 <label className="text-gray-500 text-[10px] font-cinzel uppercase tracking-widest block mb-1">Pacientes</label>
                 <select
                   value={form.patient_filter}
-                  onChange={(e) => setForm((f) => ({ ...f, patient_filter: e.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, patient_filter: e.target.value, patient_ids: [] }))}
                   className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none"
                 >
                   <option value="active">Activos</option>
                   <option value="paused">Pausados</option>
                   <option value="finished">Finalizados</option>
                   <option value="all">Todos</option>
+                  <option value="without_appointment">Sin cita esta semana</option>
+                  <option value="with_appointment">Con cita esta semana</option>
+                  <option value="without_appointment_next_week">Sin cita próxima semana</option>
+                  <option value="with_appointment_next_week">Con cita próxima semana</option>
+                  <option value="specific">Específicos (elegir)</option>
                 </select>
               </div>
+
+              {/* Specific patient picker */}
+              {form.patient_filter === "specific" && (
+                <div className="border border-[#C5A059]/15 bg-[#0a1628]">
+                  <div className="px-3 pt-2.5 pb-1.5 border-b border-[#C5A059]/10 flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest">
+                      {form.patient_ids.length} seleccionado{form.patient_ids.length !== 1 ? "s" : ""}
+                    </span>
+                    <input
+                      value={patientSearch}
+                      onChange={(e) => setPatientSearch(e.target.value)}
+                      placeholder="Buscar..."
+                      className="bg-[#020617] border border-[#C5A059]/10 text-white text-[10px] font-crimson px-2 py-1 outline-none w-32"
+                    />
+                  </div>
+                  <div className="max-h-40 overflow-y-auto divide-y divide-[#C5A059]/6">
+                    {filteredPatients.map((p) => {
+                      const isSel = form.patient_ids.includes(p.id);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => togglePatient(p.id)}
+                          className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition text-[10px] ${isSel ? "bg-[#C5A059]/8" : "hover:bg-white/[0.02]"}`}
+                        >
+                          <div className={`flex-shrink-0 w-3.5 h-3.5 border flex items-center justify-center ${isSel ? "border-[#C5A059] bg-[#C5A059]/20" : "border-gray-700"}`}>
+                            {isSel && <Check size={8} className="text-[#C5A059]" />}
+                          </div>
+                          <span className="font-cinzel text-white truncate flex-1">{patientFullName(p)}</span>
+                          <span className="text-gray-600 font-crimson truncate">{p.status}</span>
+                        </div>
+                      );
+                    })}
+                    {filteredPatients.length === 0 && (
+                      <p className="py-4 text-center text-gray-700 font-crimson text-[10px]">Sin resultados</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Channels */}
               <div>
@@ -368,17 +442,13 @@ export default function AutoSchedulePanel() {
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={cancelForm}
-                  className="px-3 py-1.5 text-[10px] font-cinzel uppercase tracking-widest text-gray-500 hover:text-white transition"
-                >
+                <button type="button" onClick={cancelForm} className="px-3 py-1.5 text-[10px] font-cinzel uppercase tracking-widest text-gray-500 hover:text-white transition">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={saveConfig}
-                  disabled={saving || form.channels.length === 0}
+                  disabled={saving || form.channels.length === 0 || (form.patient_filter === "specific" && form.patient_ids.length === 0)}
                   className="px-4 py-1.5 bg-[#C5A059] text-[#020617] text-[10px] font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition disabled:opacity-40"
                 >
                   {saving ? "Guardando..." : editingId ? "Actualizar" : "Guardar"}

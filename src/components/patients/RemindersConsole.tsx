@@ -36,7 +36,7 @@ interface ReminderLog {
   created_at: string;
 }
 
-type FilterTab = PatientStatus | "all";
+type FilterTab = PatientStatus | "all" | "without_appointment" | "with_appointment" | "without_appointment_next_week" | "with_appointment_next_week";
 type SendMode = "batch" | "human";
 type Channel = "whatsapp" | "email";
 
@@ -51,11 +51,15 @@ const VARIABLES = [
   { label: "{dias}", desc: "Días restantes" },
 ];
 
-const FILTER_TABS: { key: FilterTab; label: string; icon: React.ReactNode }[] = [
+const FILTER_TABS: { key: FilterTab; label: string; icon: React.ReactNode; calendarOnly?: boolean }[] = [
   { key: "all", label: "Todos", icon: <Hash size={12} /> },
   { key: "active", label: "Activos", icon: <Activity size={12} /> },
   { key: "paused", label: "Pausados", icon: <Clock size={12} /> },
   { key: "finished", label: "Finalizados", icon: <Users size={12} /> },
+  { key: "without_appointment", label: "Sin cita", icon: <Calendar size={12} />, calendarOnly: true },
+  { key: "with_appointment", label: "Con cita", icon: <Calendar size={12} />, calendarOnly: true },
+  { key: "without_appointment_next_week", label: "Sin cita próx.", icon: <Calendar size={12} />, calendarOnly: true },
+  { key: "with_appointment_next_week", label: "Con cita próx.", icon: <Calendar size={12} />, calendarOnly: true },
 ];
 
 function renderPreview(tpl: string, patient: Patient): string {
@@ -102,7 +106,7 @@ export default function RemindersConsole() {
   const [emailBodySin, setEmailBodySin] = useState(DEFAULT_EMAIL_BODY_SIN_SESIONES);
 
   // Send config
-  const [sendMode, setSendMode] = useState<SendMode>("batch");
+  const [sendMode, setSendMode] = useState<SendMode>("human");
   const [channels, setChannels] = useState<Channel[]>(["whatsapp", "email"]);
   const [delayMin, setDelayMin] = useState(30);
   const [delayMax, setDelayMax] = useState(120);
@@ -119,6 +123,7 @@ export default function RemindersConsole() {
   const [calendarConnected, setCalendarConnected] = useState<boolean | null>(null);
   const [calendarLoading, setCalendarLoading] = useState(false);
   const [scheduledIds, setScheduledIds] = useState<Set<string>>(new Set());
+  const [nextWeekScheduledIds, setNextWeekScheduledIds] = useState<Set<string>>(new Set());
   const [skipScheduled, setSkipScheduled] = useState(false);
   const [weekRange, setWeekRange] = useState<{ start?: string; end?: string }>({});
 
@@ -153,7 +158,10 @@ export default function RemindersConsole() {
       const { connected } = await statusRes.json();
       setCalendarConnected(connected);
       if (connected) {
-        const evRes = await fetch("/api/calendar/week-events");
+        const [evRes, nextEvRes] = await Promise.all([
+          fetch("/api/calendar/week-events"),
+          fetch("/api/calendar/week-events?week_offset=1"),
+        ]);
         if (evRes.ok) {
           const data = await evRes.json();
           const ids = new Set<string>(
@@ -163,6 +171,15 @@ export default function RemindersConsole() {
           );
           setScheduledIds(ids);
           setWeekRange({ start: data.week_start, end: data.week_end });
+        }
+        if (nextEvRes.ok) {
+          const data = await nextEvRes.json();
+          const ids = new Set<string>(
+            (data.statuses as { patient_id: string; scheduled: boolean }[])
+              .filter((s) => s.scheduled)
+              .map((s) => s.patient_id),
+          );
+          setNextWeekScheduledIds(ids);
         }
       }
     } catch { /* calendar unavailable */ }
@@ -192,7 +209,14 @@ export default function RemindersConsole() {
 
   // Filtered patients
   const filtered = patients
-    .filter((p) => filterTab === "all" || p.status === filterTab)
+    .filter((p) => {
+      if (filterTab === "all") return true;
+      if (filterTab === "without_appointment") return !scheduledIds.has(p.id) && p.status === "active";
+      if (filterTab === "with_appointment") return scheduledIds.has(p.id) && p.status === "active";
+      if (filterTab === "without_appointment_next_week") return !nextWeekScheduledIds.has(p.id) && p.status === "active";
+      if (filterTab === "with_appointment_next_week") return nextWeekScheduledIds.has(p.id) && p.status === "active";
+      return p.status === filterTab;
+    })
     .filter((p) =>
       !search ||
       patientFullName(p).toLowerCase().includes(search.toLowerCase()) ||
@@ -205,6 +229,10 @@ export default function RemindersConsole() {
     active: patients.filter((p) => p.status === "active").length,
     paused: patients.filter((p) => p.status === "paused").length,
     finished: patients.filter((p) => p.status === "finished").length,
+    without_appointment: patients.filter((p) => !scheduledIds.has(p.id) && p.status === "active").length,
+    with_appointment: patients.filter((p) => scheduledIds.has(p.id) && p.status === "active").length,
+    without_appointment_next_week: patients.filter((p) => !nextWeekScheduledIds.has(p.id) && p.status === "active").length,
+    with_appointment_next_week: patients.filter((p) => nextWeekScheduledIds.has(p.id) && p.status === "active").length,
   };
 
   // Selection
@@ -378,7 +406,7 @@ export default function RemindersConsole() {
 
         {/* Filter tabs */}
         <div className="flex border-b border-[#C5A059]/10 overflow-x-auto">
-          {FILTER_TABS.map(({ key, label, icon }) => (
+          {FILTER_TABS.filter((t) => !t.calendarOnly || calendarConnected).map(({ key, label, icon }) => (
             <button
               key={key}
               onClick={() => setFilterTab(key)}
@@ -437,6 +465,11 @@ export default function RemindersConsole() {
                   </span>
                   {calendarConnected && scheduledIds.has(patient.id) && (
                     <span title="Ya agendó esta semana" className="text-emerald-400">
+                      <Calendar size={10} />
+                    </span>
+                  )}
+                  {calendarConnected && !scheduledIds.has(patient.id) && nextWeekScheduledIds.has(patient.id) && (
+                    <span title="Tiene cita la próxima semana" className="text-blue-400">
                       <Calendar size={10} />
                     </span>
                   )}

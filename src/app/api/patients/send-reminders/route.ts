@@ -1,8 +1,8 @@
 /**
  * GET /api/patients/send-reminders
  *
- * Cron job — runs every hour. Matches reminder_configs by current Chile day+hour
- * and sends reminders per config settings (filter, channels, mode).
+ * Cron job — runs every minute. Matches reminder_configs by current Chile
+ * day + hour + minute and sends reminders per config settings.
  *
  * Auth: x-cron-secret header
  */
@@ -19,10 +19,23 @@ import {
   REMINDER_EMAIL_SUBJECT_KEY, REMINDER_EMAIL_BODY_KEY,
   REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, REMINDER_EMAIL_BODY_SIN_SESIONES_KEY,
 } from "@/lib/patients";
+import {
+  type GCalTokenData,
+  getValidToken,
+  getWeekEvents,
+  matchPatientsWithEvents,
+} from "@/lib/google-calendar";
 
 const FROM_EMAIL = "Juan Pablo Loaiza <academy@juanpabloloaiza.com>";
 const AGENDA_URL = "https://www.juanpabloloaiza.com/agenda";
 const SITE_URL = "https://www.juanpabloloaiza.com";
+
+const CALENDAR_FILTERS = [
+  "without_appointment",
+  "with_appointment",
+  "without_appointment_next_week",
+  "with_appointment_next_week",
+];
 
 function renderTemplate(tpl: string, patient: Patient): string {
   const sl = sessionsLeft(patient);
@@ -54,6 +67,7 @@ export async function GET(req: NextRequest) {
   const nowChile = new Date(Date.now() - 4 * 60 * 60 * 1000);
   const chileDay = nowChile.getUTCDay();
   const chileHour = nowChile.getUTCHours();
+  const chileMinute = nowChile.getUTCMinutes();
   const todayStr = nowChile.toISOString().split("T")[0];
 
   // Load saved templates from Supabase
@@ -62,24 +76,69 @@ export async function GET(req: NextRequest) {
   for (const row of settingsRows ?? []) settings[row.key] = row.value;
 
   const globalTemplates = {
-    wa:           settings[REMINDER_TEMPLATE_KEY]                  || DEFAULT_REMINDER_TEMPLATE,
-    waSin:        settings[REMINDER_TEMPLATE_SIN_SESIONES_KEY]     || DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
-    emailSubject: settings[REMINDER_EMAIL_SUBJECT_KEY]             || DEFAULT_EMAIL_SUBJECT,
-    emailBody:    settings[REMINDER_EMAIL_BODY_KEY]                || DEFAULT_EMAIL_BODY,
-    emailSubjectSin: settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY] || DEFAULT_EMAIL_SUBJECT_SIN_SESIONES,
-    emailBodySin: settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]   || DEFAULT_EMAIL_BODY_SIN_SESIONES,
+    wa:              settings[REMINDER_TEMPLATE_KEY]                      || DEFAULT_REMINDER_TEMPLATE,
+    waSin:           settings[REMINDER_TEMPLATE_SIN_SESIONES_KEY]         || DEFAULT_REMINDER_TEMPLATE_SIN_SESIONES,
+    emailSubject:    settings[REMINDER_EMAIL_SUBJECT_KEY]                 || DEFAULT_EMAIL_SUBJECT,
+    emailBody:       settings[REMINDER_EMAIL_BODY_KEY]                    || DEFAULT_EMAIL_BODY,
+    emailSubjectSin: settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY]   || DEFAULT_EMAIL_SUBJECT_SIN_SESIONES,
+    emailBodySin:    settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]       || DEFAULT_EMAIL_BODY_SIN_SESIONES,
   };
 
+  // Match configs by exact Chile day + hour + minute
   const { data: configs, error: cfgErr } = await adminSb
     .from("reminder_configs")
     .select("*")
     .eq("is_active", true)
     .eq("day_of_week", chileDay)
-    .eq("hour_chile", chileHour);
+    .eq("hour_chile", chileHour)
+    .eq("minute_chile", chileMinute);
 
   if (cfgErr) return NextResponse.json({ error: cfgErr.message }, { status: 500 });
   if (!configs?.length) {
-    return NextResponse.json({ message: "No configs match", day: chileDay, hour: chileHour });
+    return NextResponse.json({ message: "No configs match", day: chileDay, hour: chileHour, minute: chileMinute });
+  }
+
+  // Fetch calendar events if any config needs them
+  let thisWeekIds: Set<string> | null = null;
+  let nextWeekIds: Set<string> | null = null;
+
+  const needsCalendar = configs.some((c) => CALENDAR_FILTERS.includes(c.patient_filter));
+  if (needsCalendar) {
+    try {
+      const { data: stored } = await adminSb
+        .from("google_calendar_tokens")
+        .select("*")
+        .limit(1)
+        .single();
+
+      if (stored) {
+        const { token, newExpiresAt } = await getValidToken(stored as GCalTokenData);
+        if (newExpiresAt) {
+          await adminSb
+            .from("google_calendar_tokens")
+            .update({ access_token: token, expires_at: newExpiresAt, updated_at: new Date().toISOString() })
+            .eq("id", stored.id);
+        }
+
+        const calId = stored.calendar_id ?? "primary";
+        const { data: allPatients } = await adminSb.from("patients").select("id, email, phone, first_name, last_name");
+        const patients = (allPatients ?? []) as Pick<Patient, "id" | "email" | "phone" | "first_name" | "last_name">[];
+
+        const needsThisWeek = configs.some((c) => c.patient_filter === "without_appointment" || c.patient_filter === "with_appointment");
+        const needsNextWeek = configs.some((c) => c.patient_filter === "without_appointment_next_week" || c.patient_filter === "with_appointment_next_week");
+
+        if (needsThisWeek) {
+          const evs = await getWeekEvents(token, calId, 0);
+          thisWeekIds = new Set(matchPatientsWithEvents(patients, evs).filter((s) => s.scheduled).map((s) => s.patient_id));
+        }
+        if (needsNextWeek) {
+          const evs = await getWeekEvents(token, calId, 1);
+          nextWeekIds = new Set(matchPatientsWithEvents(patients, evs).filter((s) => s.scheduled).map((s) => s.patient_id));
+        }
+      }
+    } catch {
+      // Calendar unavailable — calendar-filtered configs will get no patients
+    }
   }
 
   const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -88,30 +147,53 @@ export async function GET(req: NextRequest) {
   for (const config of configs) {
     // Dedup: skip if ran in last 30 min
     if (config.last_run_at && Date.now() - new Date(config.last_run_at).getTime() < 30 * 60 * 1000) {
-      results.push({ config_id: config.id, skipped: true });
+      results.push({ config_id: config.id, skipped: true, reason: "recent_run" });
       continue;
     }
 
-    let query = adminSb.from("patients").select("*");
-    if (config.patient_filter !== "all") {
-      query = query.eq("status", config.patient_filter);
-    }
-    if (config.patient_filter === "active") {
-      query = query.gt("end_date", todayStr);
-    }
-    const { data: patients } = await query;
+    let patients: Patient[] = [];
 
-    // Include ALL active patients: split into con/sin sesiones
-    const allPatients = (patients ?? []) as Patient[];
-    const conSesiones = allPatients.filter((p) => sessionsLeft(p) > 0);
-    const sinSesiones = allPatients.filter((p) => sessionsLeft(p) === 0);
+    if (config.patient_filter === "specific" && config.patient_ids?.length) {
+      // Specific patient IDs override everything else
+      const { data } = await adminSb.from("patients").select("*").in("id", config.patient_ids);
+      patients = (data ?? []) as Patient[];
+    } else if (CALENDAR_FILTERS.includes(config.patient_filter)) {
+      // Calendar-aware: base = active patients with remaining days
+      const { data } = await adminSb.from("patients").select("*").eq("status", "active").gt("end_date", todayStr);
+      let base = (data ?? []) as Patient[];
+      if (config.patient_filter === "without_appointment" && thisWeekIds) {
+        base = base.filter((p) => !thisWeekIds!.has(p.id));
+      } else if (config.patient_filter === "with_appointment" && thisWeekIds) {
+        base = base.filter((p) => thisWeekIds!.has(p.id));
+      } else if (config.patient_filter === "without_appointment_next_week" && nextWeekIds) {
+        base = base.filter((p) => !nextWeekIds!.has(p.id));
+      } else if (config.patient_filter === "with_appointment_next_week" && nextWeekIds) {
+        base = base.filter((p) => nextWeekIds!.has(p.id));
+      } else if (!thisWeekIds && !nextWeekIds) {
+        // Calendar not available — skip this config
+        results.push({ config_id: config.id, skipped: true, reason: "calendar_unavailable" });
+        continue;
+      }
+      patients = base;
+    } else {
+      let query = adminSb.from("patients").select("*");
+      if (config.patient_filter !== "all") {
+        query = query.eq("status", config.patient_filter);
+      }
+      if (config.patient_filter === "active") {
+        query = query.gt("end_date", todayStr);
+      }
+      const { data } = await query;
+      patients = (data ?? []) as Patient[];
+    }
+
+    const conSesiones = patients.filter((p) => sessionsLeft(p) > 0);
+    const sinSesiones = patients.filter((p) => sessionsLeft(p) === 0);
     const eligible = [...conSesiones, ...sinSesiones];
 
-    // Per-config WA template override (only for "con sesiones")
     const waTemplate = config.whatsapp_template || globalTemplates.wa;
-
     const channels: string[] = config.channels ?? ["whatsapp", "email"];
-    const sendMode: string = config.send_mode ?? "batch";
+    const sendMode: string = config.send_mode ?? "human";
     const delayMin = (config.delay_min ?? 30) * 1000;
     const delayMax = (config.delay_max ?? 120) * 1000;
 
@@ -199,7 +281,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ day: chileDay, hour: chileHour, processed: results.length, results });
+  return NextResponse.json({ day: chileDay, hour: chileHour, minute: chileMinute, processed: results.length, results });
 }
 
 function reminderEmailHtml({ name, sl, expiryDate, bodyText }: {
