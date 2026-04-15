@@ -108,6 +108,10 @@ Devuelve ÚNICAMENTE un JSON válido con SOLO los campos solicitados (sin markdo
   ${fields.includes("seoDescription") ? '"seoDescription": "..."' : ""}
 }`;
 
+// Extend timeout to 60 s on Pro plan (Hobby stays at 10 s but streaming keeps
+// the connection alive past Cloudflare's 30 s idle threshold)
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -159,15 +163,56 @@ export async function POST(req: NextRequest) {
     prompt = action === "generate" ? GENERATE_PROMPT(input) : IMPROVE_PROMPT(input);
   }
 
+  const openai = new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    baseURL: "https://api.deepseek.com",
+  });
+
+  // generate-full: stream the response so Cloudflare doesn't timeout waiting
+  // for a 2000+ word article. Client reads the stream and parses JSON at the end.
+  if (action === "generate-full") {
+    let stream: AsyncIterable<{ choices: { delta: { content?: string | null } }[] }>;
+    try {
+      stream = await openai.chat.completions.create({
+        model: "deepseek-chat",
+        max_tokens: 8192,
+        messages: [{ role: "user", content: prompt }],
+        stream: true,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return NextResponse.json({ error: `DeepSeek: ${msg}` }, { status: 500 });
+    }
+
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            const text = chunk.choices[0]?.delta?.content ?? "";
+            if (text) controller.enqueue(encoder.encode(text));
+          }
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Accel-Buffering": "no", // disable nginx/Cloudflare buffering
+        "Cache-Control": "no-cache",
+      },
+    });
+  }
+
+  // All other actions: standard (short) calls — no streaming needed
   let raw: string;
   try {
-    const client = new OpenAI({
-      apiKey: process.env.DEEPSEEK_API_KEY,
-      baseURL: "https://api.deepseek.com",
-    });
-    const response = await client.chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "deepseek-chat",
-      max_tokens: action === "seo" ? 512 : action === "generate-full" ? 8192 : 4096,
+      max_tokens: action === "seo" ? 512 : 4096,
       messages: [{ role: "user", content: prompt }],
     });
     raw = response.choices[0]?.message?.content ?? "";
@@ -177,7 +222,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `DeepSeek: ${msg}` }, { status: 500 });
   }
 
-  if (action === "seo" || action === "improve-fields" || action === "generate-full") {
+  if (action === "seo" || action === "improve-fields") {
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);

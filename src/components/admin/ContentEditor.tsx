@@ -33,6 +33,7 @@ const btnActive = "bg-white/15 text-white";
 
 export default function ContentEditor({ value, onChange, onFullGenerate }: Props) {
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiProgress, setAiProgress] = useState("");
   const [uploading, setUploading] = useState(false);
   const [panel, setPanel] = useState<"generate" | "improve" | null>(null);
   const [idea, setIdea] = useState("");
@@ -134,14 +135,41 @@ export default function ContentEditor({ value, onChange, onFullGenerate }: Props
     setAiLoading(true);
     setAiError("");
     setImagePrompt("");
+    setAiProgress("Conectando con IA...");
     try {
       const res = await fetch("/api/admin/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "generate-full", input: idea }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Error");
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Error desconocido" }));
+        throw new Error(err.error ?? "Error");
+      }
+
+      // Read the streamed plain-text response, accumulate, parse JSON at the end
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      let chars = 0;
+      setAiProgress("Generando artículo…");
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        chars += chunk.length;
+        setAiProgress(`Generando… ${chars} caracteres`);
+      }
+      fullText += decoder.decode(); // flush remaining bytes
+
+      // Parse the complete JSON
+      const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("La IA no devolvió un artículo válido. Intenta de nuevo.");
+      const data = JSON.parse(jsonMatch[0]);
+
       onChange(data.content ?? "");
       if (data.imagePrompt) setImagePrompt(data.imagePrompt);
       if (onFullGenerate) {
@@ -159,6 +187,7 @@ export default function ContentEditor({ value, onChange, onFullGenerate }: Props
       setAiError(e instanceof Error ? e.message : "Error generando el post");
     } finally {
       setAiLoading(false);
+      setAiProgress("");
     }
   };
 
@@ -290,7 +319,7 @@ export default function ContentEditor({ value, onChange, onFullGenerate }: Props
               className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#d4b06a] disabled:opacity-50 text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-5 py-2.5 transition"
             >
               {aiLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-              {aiLoading ? "Generando (~30s)..." : "Generar post completo"}
+              {aiLoading ? (aiProgress || "Generando…") : "Generar post completo"}
             </button>
             <p className="font-crimson text-xs text-gray-600">
               {onFullGenerate ? "Llenará todos los campos automáticamente" : "Reemplazará el contenido"}
