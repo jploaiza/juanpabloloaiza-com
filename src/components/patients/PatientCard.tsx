@@ -4,7 +4,8 @@ import { useState } from "react";
 import {
   Plus, FileText, MessageCircle, Mail,
   PauseCircle, PlayCircle, CheckCircle, Pencil,
-  ShoppingBag, RefreshCw, CalendarPlus,
+  ShoppingBag, RefreshCw, CalendarPlus, Calendar,
+  CheckCircle2, AlertTriangle, Undo2,
 } from "lucide-react";
 import {
   type Patient,
@@ -12,19 +13,37 @@ import {
   statusColor, statusLabel, daysLeftColor,
   buildWhatsappUrl, buildEmailUrl, patientFullName,
 } from "@/lib/patients";
+import { type PatientCalendarStatus } from "@/lib/google-calendar";
 import AlertBanner from "./AlertBanner";
 import Link from "next/link";
+
+/** Returns true if the given ISO date string falls within the current Mon–Sun week (Chile UTC-4) */
+function isThisWeek(dateStr: string | null | undefined): boolean {
+  if (!dateStr) return false;
+  const nowChile = new Date(Date.now() - 4 * 60 * 60 * 1000);
+  const dow = nowChile.getUTCDay();
+  const daysToMon = dow === 0 ? -6 : 1 - dow;
+  const mon = new Date(nowChile);
+  mon.setUTCDate(nowChile.getUTCDate() + daysToMon);
+  mon.setUTCHours(0, 0, 0, 0);
+  const sun = new Date(mon);
+  sun.setUTCDate(mon.getUTCDate() + 6);
+  sun.setUTCHours(23, 59, 59, 999);
+  const d = new Date(dateStr);
+  return d >= mon && d <= sun;
+}
 
 interface Props {
   patient: Patient;
   lastSessionAt?: string | null;
+  calendarStatus?: PatientCalendarStatus;
   onEdit: (p: Patient) => void;
   onRefresh: () => void;
 }
 
 const PRESETS = [1, 3, 5, 8, 10];
 
-export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh }: Props) {
+export default function PatientCard({ patient, lastSessionAt, calendarStatus, onEdit, onRefresh }: Props) {
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [showAddSessions, setShowAddSessions] = useState(false);
   const [addQty, setAddQty] = useState(5);
@@ -40,6 +59,15 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
   const alerts = getAlerts(patient, lastSessionAt);
   const total = patient.total_sessions || patient.pack_size;
   const progress = total > 0 ? Math.min(100, Math.round((patient.sessions_used / total) * 100)) : 0;
+
+  // Weekly session indicators
+  const sessionThisWeek = isThisWeek(lastSessionAt);
+  const hasCalendarAppointment = calendarStatus?.scheduled ?? false;
+  const appointmentPassed =
+    hasCalendarAppointment &&
+    !!calendarStatus?.event_start &&
+    new Date(calendarStatus.event_start) < new Date() &&
+    !sessionThisWeek;
 
   async function doAction(action: string, body?: object) {
     setLoadingAction(action);
@@ -67,6 +95,21 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
       onRefresh();
     } catch {
       alert("Error al registrar sesión");
+    } finally {
+      setLoadingAction(null);
+    }
+  }
+
+  async function undoSession() {
+    if (!confirm(`¿Deshacer la última sesión registrada de ${patientFullName(patient)}?`)) return;
+    setLoadingAction("undo");
+    try {
+      const res = await fetch(`/api/patients/${patient.id}/session/undo`, { method: "POST" });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error ?? "Error");
+      onRefresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al deshacer sesión");
     } finally {
       setLoadingAction(null);
     }
@@ -163,6 +206,30 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
         </div>
       </div>
 
+      {/* Weekly status badges */}
+      {(hasCalendarAppointment || sessionThisWeek || appointmentPassed) && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {appointmentPassed && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-cinzel uppercase tracking-wide px-2 py-0.5 border rounded-sm bg-red-950/70 border-red-500/60 text-red-400 animate-pulse">
+              <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+              Cita pasó sin sesión
+            </span>
+          )}
+          {hasCalendarAppointment && !appointmentPassed && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-cinzel uppercase tracking-wide px-2 py-0.5 border rounded-sm bg-emerald-950/60 border-emerald-500/40 text-emerald-400">
+              <Calendar className="w-3 h-3 flex-shrink-0" />
+              Cita esta semana
+            </span>
+          )}
+          {sessionThisWeek && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-cinzel uppercase tracking-wide px-2 py-0.5 border rounded-sm bg-blue-950/60 border-blue-500/40 text-blue-400">
+              <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+              Sesión sumada
+            </span>
+          )}
+        </div>
+      )}
+
       <AlertBanner alerts={alerts} />
 
       {/* Actions */}
@@ -176,6 +243,18 @@ export default function PatientCard({ patient, lastSessionAt, onEdit, onRefresh 
           <Plus size={11} />
           Sesión
         </button>
+
+        {sessionThisWeek && (
+          <button
+            onClick={undoSession}
+            disabled={!!loadingAction}
+            title="Deshacer última sesión (solo hoy)"
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-800/60 border border-gray-600/30 text-gray-400 text-[11px] font-cinzel uppercase tracking-wide hover:text-orange-400 hover:border-orange-500/40 transition disabled:opacity-40"
+          >
+            {loadingAction === "undo" ? <RefreshCw size={11} className="animate-spin" /> : <Undo2 size={11} />}
+            Deshacer
+          </button>
+        )}
 
         <button
           onClick={() => setShowAddSessions((v) => !v)}

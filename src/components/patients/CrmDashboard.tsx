@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Plus, Search, RefreshCw, Users, Activity, Clock, Download, Bell, Settings, BarChart2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Patient, type PatientStatus, patientFullName } from "@/lib/patients";
+import { type PatientCalendarStatus } from "@/lib/google-calendar";
 import PatientCard from "./PatientCard";
 import PatientForm from "./PatientForm";
 import ImportModal from "./ImportModal";
@@ -30,6 +31,7 @@ interface Props {
 export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
   const [patients, setPatients] = useState(initialPatients);
   const [lastSessionsMap, setLastSessionsMap] = useState(lastSessions);
+  const [calendarMap, setCalendarMap] = useState<Record<string, PatientCalendarStatus>>({});
   const [activeTab, setActiveTab] = useState<Tab>("active");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -37,18 +39,40 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
   const [editPatient, setEditPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const fetchCalendar = useCallback(async () => {
+    try {
+      const res = await fetch("/api/calendar/week-events");
+      if (!res.ok) return; // calendar not connected — graceful degradation
+      const { statuses } = await res.json();
+      const map: Record<string, PatientCalendarStatus> = {};
+      for (const s of (statuses ?? []) as PatientCalendarStatus[]) {
+        map[s.patient_id] = s;
+      }
+      setCalendarMap(map);
+    } catch {
+      // ignore — calendar may not be configured
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCalendar();
+  }, [fetchCalendar]);
+
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/patients");
-      if (!res.ok) return;
-      const { patients: fresh, lastSessions: freshSessions } = await res.json();
+      const [patientsRes] = await Promise.all([
+        fetch("/api/patients"),
+        fetchCalendar(),
+      ]);
+      if (!patientsRes.ok) return;
+      const { patients: fresh, lastSessions: freshSessions } = await patientsRes.json();
       setPatients(fresh ?? []);
       setLastSessionsMap(freshSessions ?? {});
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchCalendar]);
 
   const filtered = patients
     .filter((p) => activeTab !== "reminders" && activeTab !== "settings" && activeTab !== "analytics" && p.status === activeTab)
@@ -166,6 +190,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
                   key={patient.id}
                   patient={patient}
                   lastSessionAt={lastSessionsMap[patient.id]}
+                  calendarStatus={calendarMap[patient.id]}
                   onEdit={(p) => { setEditPatient(p); setShowForm(true); }}
                   onRefresh={refresh}
                 />
