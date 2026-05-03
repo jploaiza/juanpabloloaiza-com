@@ -18,7 +18,6 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 html {
@@ -27,7 +26,7 @@ html {
 
 body {
   background-color: #0a1628;
-  color: #E2E8F0;
+  color: #EDF2F7;
 }
 
 /* Hero Section */
@@ -131,24 +130,24 @@ body {
    ───────────────────────────────────────────────────────────── */
 @layer base {
 
-  /* Playfair Display — títulos, labels, nav, UI chrome */
+  /* Cinzel — títulos, labels, nav, UI chrome */
   .font-cinzel {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-weight: 400;
-    letter-spacing: 0.03em; /* las utilidades tracking-* lo sobreescriben */
+    letter-spacing: 0.03em;
   }
 
-  /* Source Serif 4 — párrafos, subtítulos, texto largo */
+  /* Crimson Text — párrafos, subtítulos, texto largo */
   .font-crimson {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+    text-rendering: auto;
     font-weight: 400;
     letter-spacing: 0.01em;
     line-height: 1.65;
-    font-size: 1rem;        /* base 16 px; las utilidades text-* lo sobreescriben */
+    font-size: 1rem;
   }
 
   /* Textos pequeños de Crimson sobre fondo oscuro — mínimo 14 px legible */
