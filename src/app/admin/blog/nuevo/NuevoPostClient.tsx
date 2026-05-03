@@ -5,7 +5,116 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import ContentEditor from "@/components/admin/ContentEditor";
-import { ArrowLeft, X, Plus, Upload, Sparkles, ImagePlus } from "lucide-react";
+import { ArrowLeft, X, Plus, Upload, Sparkles, ImagePlus, FileDown, FileUp } from "lucide-react";
+
+// ---------------------------------------------------------------------------
+// Frontmatter parser (no external deps)
+// ---------------------------------------------------------------------------
+interface ParsedMd {
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  featured_image_url?: string;
+  tags?: string[];
+  status?: "draft" | "published";
+  seo_title?: string;
+  seo_description?: string;
+  content: string;
+}
+
+function parseMdFile(raw: string): ParsedMd {
+  const fmMatch = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (!fmMatch) return { content: raw.trim() };
+
+  const yamlBlock = fmMatch[1];
+  const body = fmMatch[2].trim();
+  const fm: Record<string, string | string[]> = {};
+
+  for (const line of yamlBlock.split(/\r?\n/)) {
+    const colonIdx = line.indexOf(":");
+    if (colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    const rawVal = line.slice(colonIdx + 1).trim();
+
+    // Inline array: [a, b, c] or ["a", "b"]
+    if (rawVal.startsWith("[") && rawVal.endsWith("]")) {
+      fm[key] = rawVal
+        .slice(1, -1)
+        .split(",")
+        .map((v) => v.trim().replace(/^["']|["']$/g, ""))
+        .filter(Boolean);
+    } else {
+      fm[key] = rawVal.replace(/^["']|["']$/g, "");
+    }
+  }
+
+  const tagsRaw = fm["tags"];
+  const tags = Array.isArray(tagsRaw)
+    ? tagsRaw
+    : typeof tagsRaw === "string" && tagsRaw
+      ? [tagsRaw]
+      : undefined;
+
+  const statusRaw = fm["status"];
+  const status =
+    statusRaw === "published" || statusRaw === "draft" ? statusRaw : undefined;
+
+  return {
+    title: typeof fm["title"] === "string" ? fm["title"] : undefined,
+    slug: typeof fm["slug"] === "string" ? fm["slug"] : undefined,
+    excerpt: typeof fm["excerpt"] === "string" ? fm["excerpt"] : undefined,
+    featured_image_url:
+      typeof fm["featured_image_url"] === "string"
+        ? fm["featured_image_url"]
+        : undefined,
+    tags,
+    status,
+    seo_title: typeof fm["seo_title"] === "string" ? fm["seo_title"] : undefined,
+    seo_description:
+      typeof fm["seo_description"] === "string" ? fm["seo_description"] : undefined,
+    content: body,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Template .md for download
+// ---------------------------------------------------------------------------
+const MD_TEMPLATE = `---
+title: "Título del artículo"
+slug: "titulo-del-articulo"
+excerpt: "Breve descripción del artículo (máx. 300 caracteres). Aparece en listados y en la meta description si no defines seo_description."
+featured_image_url: "https://media.juanpabloloaiza.com/blog/imagen.jpg"
+tags: ["bienestar", "terapia", "TRVP"]
+status: "draft"
+seo_title: "Título SEO optimizado (máx. 60 caracteres)"
+seo_description: "Descripción meta para motores de búsqueda (máx. 160 caracteres)."
+---
+
+# Título del artículo
+
+Escribe aquí el contenido completo del artículo en Markdown.
+
+## Subtítulo de sección
+
+Párrafo de contenido...
+
+- Ítem de lista
+- Otro ítem
+
+> Cita o bloque destacado
+
+**Texto en negrita** y *texto en cursiva*.
+`;
+
+function downloadTemplate() {
+  const blob = new Blob([MD_TEMPLATE], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "plantilla-post.md";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function slugify(text: string): string {
   return text
@@ -56,6 +165,9 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importError, setImportError] = useState("");
+  const mdFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTitleChange = useCallback(
     (val: string) => {
@@ -206,6 +318,35 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
     setTags((prev) => prev.filter((t) => t !== tag));
   };
 
+  const handleMdFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportError("");
+    try {
+      const raw = await file.text();
+      const parsed = parseMdFile(raw);
+
+      if (parsed.title) {
+        setTitle(parsed.title);
+        if (!slugManual && !parsed.slug) setSlug(slugify(parsed.title));
+      }
+      if (parsed.slug) { setSlugManual(true); setSlug(slugify(parsed.slug)); }
+      if (parsed.excerpt) setExcerpt(parsed.excerpt.slice(0, 300));
+      if (parsed.content) setContent(parsed.content);
+      if (parsed.featured_image_url) setFeaturedImageUrl(parsed.featured_image_url);
+      if (parsed.tags?.length) setTags(parsed.tags);
+      if (parsed.status) setStatus(parsed.status);
+      if (parsed.seo_title) setSeoTitle(parsed.seo_title.slice(0, 60));
+      if (parsed.seo_description) setSeoDescription(parsed.seo_description.slice(0, 160));
+
+      setShowImportModal(false);
+    } catch {
+      setImportError("No se pudo leer el archivo. Asegúrate de que es un .md válido.");
+    } finally {
+      if (mdFileInputRef.current) mdFileInputRef.current.value = "";
+    }
+  };
+
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!title.trim()) errs.title = "El título es requerido.";
@@ -277,15 +418,129 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
           </p>
           <h1 className="font-cinzel text-2xl text-white">Nuevo Post</h1>
         </div>
-        <button
-          type="button"
-          onClick={() => { setAiError(""); setShowAiModal(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          Mejorar con IA
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => { setImportError(""); setShowImportModal(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+          >
+            <FileUp className="w-3.5 h-3.5" />
+            Importar .MD
+          </button>
+          <button
+            type="button"
+            onClick={() => { setAiError(""); setShowAiModal(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Mejorar con IA
+          </button>
+        </div>
       </div>
+
+      {/* Import .MD Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="relative bg-[#0a1628] border border-white/10 p-8 max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+            <ScrollworkCorners size={36} opacity={0.6} />
+            <div className="flex items-center gap-3 mb-2">
+              <FileUp className="w-4 h-4 text-[#C5A059]" />
+              <h3 className="font-cinzel text-base text-white">Importar archivo .MD</h3>
+            </div>
+            <p className="font-crimson text-sm text-gray-400 mb-6">
+              El archivo debe incluir un bloque de <strong className="text-gray-300">frontmatter</strong> al inicio con los metadatos del post, seguido del contenido en Markdown.
+            </p>
+
+            {/* Format reference */}
+            <div className="bg-black/40 border border-white/5 p-4 mb-6 font-mono text-[11px] text-gray-400 leading-relaxed overflow-x-auto">
+              <p className="text-[#C5A059]/80 mb-1 font-cinzel text-[8px] uppercase tracking-widest not-italic">Formato esperado</p>
+              <pre className="whitespace-pre">{`---
+title: "Título del artículo"          # requerido
+slug: "url-del-articulo"              # opcional (auto-generado)
+excerpt: "Descripción breve..."       # máx. 300 caracteres
+featured_image_url: "https://..."    # URL imagen destacada
+tags: ["tag1", "tag2", "tag3"]        # lista de etiquetas
+status: "draft"                       # "draft" | "published"
+seo_title: "Título SEO..."            # máx. 60 caracteres
+seo_description: "Meta descripción." # máx. 160 caracteres
+---
+
+# Título del artículo
+
+Contenido del artículo en Markdown...
+
+## Subtítulo
+
+Párrafos, listas, citas...`}</pre>
+            </div>
+
+            {/* Field table */}
+            <div className="mb-6">
+              <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/80 mb-3">Campos disponibles</p>
+              <div className="space-y-2">
+                {[
+                  { field: "title", req: true, desc: "Título principal del artículo" },
+                  { field: "slug", req: false, desc: "URL (se auto-genera si se omite)" },
+                  { field: "excerpt", req: false, desc: "Resumen corto — máx. 300 caracteres" },
+                  { field: "featured_image_url", req: false, desc: "URL de la imagen de portada" },
+                  { field: "tags", req: false, desc: 'Array: ["tag1", "tag2"]' },
+                  { field: "status", req: false, desc: '"draft" (default) o "published"' },
+                  { field: "seo_title", req: false, desc: "Título para Google — máx. 60 caracteres" },
+                  { field: "seo_description", req: false, desc: "Meta descripción — máx. 160 caracteres" },
+                  { field: "contenido", req: true, desc: "Cuerpo del artículo (debajo del ---)" },
+                ].map(({ field, req, desc }) => (
+                  <div key={field} className="flex items-start gap-3">
+                    <span className="font-mono text-[10px] text-[#C5A059]/80 w-36 flex-shrink-0">{field}</span>
+                    {req ? (
+                      <span className="font-cinzel text-[7px] uppercase tracking-widest text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 flex-shrink-0 mt-0.5">req</span>
+                    ) : (
+                      <span className="font-cinzel text-[7px] uppercase tracking-widest text-gray-600 border border-white/10 px-1.5 py-0.5 flex-shrink-0 mt-0.5">opc</span>
+                    )}
+                    <span className="font-crimson text-xs text-gray-400">{desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {importError && <p className="text-red-400 text-xs font-crimson mb-4">{importError}</p>}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => mdFileInputRef.current?.click()}
+                className="flex-1 bg-[#C5A059] hover:bg-[#d4b06a] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-6 py-3 transition-colors flex items-center justify-center gap-2"
+              >
+                <FileUp className="w-3.5 h-3.5" />
+                Seleccionar archivo
+              </button>
+              <button
+                type="button"
+                onClick={downloadTemplate}
+                className="px-4 py-3 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 font-cinzel text-[10px] uppercase tracking-widest transition-colors flex items-center gap-2"
+                title="Descargar plantilla .md"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                Plantilla
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowImportModal(false)}
+                className="px-4 py-3 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 font-cinzel text-[10px] uppercase tracking-widest transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+
+            <input
+              ref={mdFileInputRef}
+              type="file"
+              accept=".md,.markdown,text/markdown"
+              className="hidden"
+              onChange={handleMdFileSelect}
+            />
+          </div>
+        </div>
+      )}
 
       {/* AI Improve Modal */}
       {showAiModal && (
