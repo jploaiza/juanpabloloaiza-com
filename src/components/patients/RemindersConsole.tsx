@@ -43,7 +43,7 @@ interface RunLog {
   chile_hour: number;
   chile_minute: number;
   configs_matched: number;
-  results: { config_id: string; label?: string; patients?: number; sent?: number; failed?: number; skipped?: boolean; reason?: string }[] | null;
+  results: { config_id: string; label?: string; patients?: number; sent?: number; failed?: number; skipped?: boolean; reason?: string; calendarError?: string }[] | null;
   top_error: string | null;
 }
 
@@ -899,7 +899,7 @@ export default function RemindersConsole() {
                             {run.results.map((r, i) => (
                               <p key={i} className="text-gray-500 font-crimson text-[11px]">
                                 {r.skipped
-                                  ? `"${r.label ?? r.config_id}" · omitida (${r.reason === "recent_run" ? "ejecutada recientemente" : r.reason})`
+                                  ? `"${r.label ?? r.config_id}" · omitida (${r.reason === "recent_run" ? "ejecutada recientemente" : r.reason === "calendar_unavailable" ? `calendario no disponible${r.calendarError ? `: ${r.calendarError}` : ""}` : r.reason})`
                                   : `"${r.label ?? r.config_id}" · ${r.patients ?? 0} pacientes · ${r.sent ?? 0} enviados${(r.failed ?? 0) > 0 ? ` · ${r.failed} fallidos` : ""}`}
                               </p>
                             ))}

@@ -18,6 +18,7 @@ import {
   REMINDER_TEMPLATE_KEY, REMINDER_TEMPLATE_SIN_SESIONES_KEY,
   REMINDER_EMAIL_SUBJECT_KEY, REMINDER_EMAIL_BODY_KEY,
   REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, REMINDER_EMAIL_BODY_SIN_SESIONES_KEY,
+  ALERT_PHONE_KEY, ALERT_EMAIL_KEY,
 } from "@/lib/patients";
 import {
   type GCalTokenData,
@@ -134,6 +135,7 @@ export async function GET(req: NextRequest) {
   // Fetch calendar events if any config needs them
   let thisWeekIds: Set<string> | null = null;
   let nextWeekIds: Set<string> | null = null;
+  let calendarError: string | undefined;
 
   const needsCalendar = configs.some((c) => CALENDAR_FILTERS.includes(c.patient_filter));
   if (needsCalendar) {
@@ -169,8 +171,40 @@ export async function GET(req: NextRequest) {
           nextWeekIds = new Set(matchPatientsWithEvents(patients, evs).filter((s) => s.scheduled).map((s) => s.patient_id));
         }
       }
-    } catch {
-      // Calendar unavailable — calendar-filtered configs will get no patients
+    } catch (err) {
+      calendarError = err instanceof Error ? err.message : String(err);
+    }
+
+    // Send admin alert if calendar failed
+    if (calendarError) {
+      const { data: alertRows } = await adminSb
+        .from("crm_settings")
+        .select("key, value")
+        .in("key", [ALERT_PHONE_KEY, ALERT_EMAIL_KEY]);
+      const alertSettings: Record<string, string> = {};
+      for (const r of alertRows ?? []) alertSettings[r.key] = r.value;
+
+      const alertPhone = alertSettings[ALERT_PHONE_KEY];
+      const alertEmail = alertSettings[ALERT_EMAIL_KEY];
+      const alertMsg = `⚠️ Alerta CRM: Google Calendar no disponible.\nError: ${calendarError}\nLos recordatorios con filtro de citas fueron omitidos. Reconecta el calendario en /academy/admin/crm`;
+
+      if (alertPhone && process.env.TEXTMEBOT_API_KEY) {
+        const phone = alertPhone.replace(/[^\d+]/g, "");
+        await fetch(
+          `https://api.textmebot.com/send.php?recipient=${encodeURIComponent(phone)}&apikey=${process.env.TEXTMEBOT_API_KEY}&text=${encodeURIComponent(alertMsg)}&json=yes`,
+          { signal: AbortSignal.timeout(15000) }
+        ).catch(() => {});
+      }
+
+      if (alertEmail && process.env.RESEND_API_KEY) {
+        const resendAlert = new Resend(process.env.RESEND_API_KEY);
+        await resendAlert.emails.send({
+          from: FROM_EMAIL,
+          to: alertEmail,
+          subject: "⚠️ CRM: Google Calendar no disponible",
+          html: `<p style="font-family:sans-serif">${alertMsg.replace(/\n/g, "<br>")}</p>`,
+        }).catch(() => {});
+      }
     }
   }
 
@@ -194,18 +228,30 @@ export async function GET(req: NextRequest) {
       // Calendar-aware: base = active patients with remaining days
       const { data } = await adminSb.from("patients").select("*").eq("status", "active").gt("end_date", todayStr);
       let base = (data ?? []) as Patient[];
-      if (config.patient_filter === "without_appointment" && thisWeekIds) {
+      if (config.patient_filter === "without_appointment") {
+        if (!thisWeekIds) {
+          results.push({ config_id: config.id, skipped: true, reason: "calendar_unavailable", calendarError });
+          continue;
+        }
         base = base.filter((p) => !thisWeekIds!.has(p.id));
-      } else if (config.patient_filter === "with_appointment" && thisWeekIds) {
+      } else if (config.patient_filter === "with_appointment") {
+        if (!thisWeekIds) {
+          results.push({ config_id: config.id, skipped: true, reason: "calendar_unavailable", calendarError });
+          continue;
+        }
         base = base.filter((p) => thisWeekIds!.has(p.id));
-      } else if (config.patient_filter === "without_appointment_next_week" && nextWeekIds) {
+      } else if (config.patient_filter === "without_appointment_next_week") {
+        if (!nextWeekIds) {
+          results.push({ config_id: config.id, skipped: true, reason: "calendar_unavailable", calendarError });
+          continue;
+        }
         base = base.filter((p) => !nextWeekIds!.has(p.id));
-      } else if (config.patient_filter === "with_appointment_next_week" && nextWeekIds) {
+      } else if (config.patient_filter === "with_appointment_next_week") {
+        if (!nextWeekIds) {
+          results.push({ config_id: config.id, skipped: true, reason: "calendar_unavailable", calendarError });
+          continue;
+        }
         base = base.filter((p) => nextWeekIds!.has(p.id));
-      } else if (!thisWeekIds && !nextWeekIds) {
-        // Calendar not available — skip this config
-        results.push({ config_id: config.id, skipped: true, reason: "calendar_unavailable" });
-        continue;
       }
       patients = base;
     } else {
@@ -318,6 +364,7 @@ export async function GET(req: NextRequest) {
     chile_day: chileDay, chile_hour: chileHour, chile_minute: chileMinute,
     configs_matched: results.length,
     results,
+    ...(calendarError ? { top_error: `calendar: ${calendarError}` } : {}),
   });
 
   return NextResponse.json({ day: chileDay, hour: chileHour, minute: chileMinute, processed: results.length, results });

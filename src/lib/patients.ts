@@ -146,6 +146,10 @@ export const REMINDER_EMAIL_BODY_KEY = "crm_email_body";
 export const REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY = "crm_email_subject_sin_sesiones";
 export const REMINDER_EMAIL_BODY_SIN_SESIONES_KEY = "crm_email_body_sin_sesiones";
 
+// ── Admin alert contacts ─────────────────────────────────────────
+export const ALERT_PHONE_KEY = "crm_alert_phone";
+export const ALERT_EMAIL_KEY = "crm_alert_email";
+
 export const DEFAULT_EMAIL_SUBJECT =
   "Recuerda tus sesiones — Te quedan {sesiones}";
 

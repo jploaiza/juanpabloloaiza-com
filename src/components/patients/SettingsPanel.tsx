@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   Calendar, Check, RefreshCw, LogOut, AlertCircle, ChevronDown, Link2, Link2Off,
-  MessageCircle, Mail, Eye, EyeOff,
+  MessageCircle, Mail, Eye, EyeOff, Bell,
 } from "lucide-react";
 import {
   type Patient,
@@ -14,6 +14,7 @@ import {
   DEFAULT_EMAIL_SUBJECT_SIN_SESIONES, DEFAULT_EMAIL_BODY_SIN_SESIONES,
   REMINDER_EMAIL_SUBJECT_KEY, REMINDER_EMAIL_BODY_KEY,
   REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, REMINDER_EMAIL_BODY_SIN_SESIONES_KEY,
+  ALERT_PHONE_KEY, ALERT_EMAIL_KEY,
 } from "@/lib/patients";
 
 interface CalendarOption {
@@ -70,6 +71,11 @@ export default function SettingsPanel() {
   const [emailSaved, setEmailSaved] = useState(false);
   const [showEmailPreview, setShowEmailPreview] = useState(false);
 
+  // Alert contacts state
+  const [alertPhone, setAlertPhone] = useState("");
+  const [alertEmail, setAlertEmail] = useState("");
+  const [alertSaved, setAlertSaved] = useState(false);
+
   // Load status on mount
   useEffect(() => { checkStatus(); }, []);
 
@@ -84,6 +90,8 @@ export default function SettingsPanel() {
       if (settings[REMINDER_EMAIL_BODY_KEY]) { setEmailBody(settings[REMINDER_EMAIL_BODY_KEY]); localStorage.setItem(REMINDER_EMAIL_BODY_KEY, settings[REMINDER_EMAIL_BODY_KEY]); }
       if (settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY]) { setEmailSubjectSin(settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY]); localStorage.setItem(REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY, settings[REMINDER_EMAIL_SUBJECT_SIN_SESIONES_KEY]); }
       if (settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]) { setEmailBodySin(settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]); localStorage.setItem(REMINDER_EMAIL_BODY_SIN_SESIONES_KEY, settings[REMINDER_EMAIL_BODY_SIN_SESIONES_KEY]); }
+      if (settings[ALERT_PHONE_KEY]) setAlertPhone(settings[ALERT_PHONE_KEY]);
+      if (settings[ALERT_EMAIL_KEY]) setAlertEmail(settings[ALERT_EMAIL_KEY]);
     }).catch(() => {
       // Fallback: load from localStorage if API unavailable
       const t = localStorage.getItem(REMINDER_TEMPLATE_KEY); if (t) setTemplate(t);
@@ -133,6 +141,19 @@ export default function SettingsPanel() {
     }).catch(() => {});
     setEmailSaved(true);
     setTimeout(() => setEmailSaved(false), 2000);
+  }
+
+  async function saveAlertContacts() {
+    await fetch("/api/crm-settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([
+        { key: ALERT_PHONE_KEY, value: alertPhone },
+        { key: ALERT_EMAIL_KEY, value: alertEmail },
+      ]),
+    }).catch(() => {});
+    setAlertSaved(true);
+    setTimeout(() => setAlertSaved(false), 2000);
   }
 
   function insertVar(v: string) {
@@ -692,6 +713,52 @@ export default function SettingsPanel() {
               Restablecer por defecto
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* ── Alertas del sistema ───────────────────────────────────── */}
+      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-[#C5A059]/10">
+          <Bell size={14} className="text-[#C5A059]" />
+          <h3 className="font-cinzel text-white text-xs uppercase tracking-widest">Alertas del sistema</h3>
+        </div>
+        <div className="px-5 py-5 space-y-4">
+          <p className="text-gray-500 font-crimson text-sm leading-relaxed">
+            Si el cron de recordatorios falla por un problema con Google Calendar, recibirás una alerta por WhatsApp y correo en los contactos configurados aquí.
+          </p>
+          <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-[10px] font-cinzel uppercase tracking-widest text-gray-400">
+                <MessageCircle size={11} className="text-[#C5A059]" /> WhatsApp
+              </label>
+              <input
+                type="tel"
+                value={alertPhone}
+                onChange={(e) => setAlertPhone(e.target.value)}
+                placeholder="+56962081884"
+                className="w-full bg-[#020617] border border-[#C5A059]/20 text-gray-200 font-crimson text-sm px-3 py-2 focus:outline-none focus:border-[#C5A059]/50 placeholder:text-gray-700"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-[10px] font-cinzel uppercase tracking-widest text-gray-400">
+                <Mail size={11} className="text-[#C5A059]" /> Correo
+              </label>
+              <input
+                type="email"
+                value={alertEmail}
+                onChange={(e) => setAlertEmail(e.target.value)}
+                placeholder="contacto@juanpabloloaiza.com"
+                className="w-full bg-[#020617] border border-[#C5A059]/20 text-gray-200 font-crimson text-sm px-3 py-2 focus:outline-none focus:border-[#C5A059]/50 placeholder:text-gray-700"
+              />
+            </div>
+          </div>
+          <button
+            onClick={saveAlertContacts}
+            className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#020617] text-xs font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition"
+          >
+            {alertSaved ? <Check size={13} /> : null}
+            {alertSaved ? "Guardado" : "Guardar contactos de alerta"}
+          </button>
         </div>
       </div>
     </div>
