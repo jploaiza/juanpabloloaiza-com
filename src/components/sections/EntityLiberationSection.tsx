@@ -42,7 +42,7 @@ export default function EntityLiberationSection() {
   ];
 
   return (
-    <section id="liberacion" className="py-28 bg-[#050b1a] border-y border-[#C5A059]/5 relative">
+    <section id="liberacion" className="py-28 bg-[#0a1628] border-y border-[#C5A059]/5 relative">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <motion.div

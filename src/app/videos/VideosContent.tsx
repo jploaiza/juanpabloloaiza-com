@@ -77,7 +77,7 @@ function VideoCard({ video }: { video: Video }) {
           {playing ? (
             <video src={video.src} controls autoPlay className="w-full h-full object-contain" controlsList="nodownload" disablePictureInPicture />
           ) : (
-            <button onClick={() => setPlaying(true)} className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#16213e] to-[#050b1a] group/play" aria-label={`Reproducir: ${video.title}`}>
+            <button onClick={() => setPlaying(true)} className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#16213e] to-[#0a1628] group/play" aria-label={`Reproducir: ${video.title}`}>
               <div className="w-16 h-16 rounded-full border-2 border-[#C5A059]/60 flex items-center justify-center group-hover/play:bg-[#C5A059] group-hover/play:border-[#C5A059] transition duration-300">
                 <svg className="w-6 h-6 text-[#C5A059] group-hover/play:text-[#020617] ml-1 transition duration-300" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />

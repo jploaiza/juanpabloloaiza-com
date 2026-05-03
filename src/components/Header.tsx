@@ -20,7 +20,7 @@ export default function Header() {
   return (
     <header className="fixed top-0 w-full z-50 bg-[#0a1628]/95 backdrop-blur-xl border-b border-[#C5A059]/10 transition-all duration-300">
       {/* Top Bar */}
-      <div className="hidden lg:block bg-[#050b1a] border-b border-white/5 py-2">
+      <div className="hidden lg:block bg-[#0a1628] border-b border-white/5 py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <div className="flex items-center space-x-6 font-cinzel text-[13px] font-semibold uppercase tracking-widest text-gray-300">
             <span className="flex items-center gap-2">

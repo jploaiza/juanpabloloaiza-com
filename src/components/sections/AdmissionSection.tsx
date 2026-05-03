@@ -207,7 +207,7 @@ export default function AdmissionSection() {
                   required
                   aria-required="true"
                   aria-label="Nombre completo"
-                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
+                  className="w-full px-4 py-2.5 bg-[#0a1628] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
                 />
               </div>
 
@@ -223,7 +223,7 @@ export default function AdmissionSection() {
                   required
                   aria-required="true"
                   aria-label="Correo electrónico"
-                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
+                  className="w-full px-4 py-2.5 bg-[#0a1628] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
                 />
               </div>
 
@@ -234,7 +234,7 @@ export default function AdmissionSection() {
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
                     aria-label="Código de país"
-                    className="bg-[#050b1a] border border-[#C5A059]/30 text-white text-sm px-2 py-2.5 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition rounded-sm shrink-0"
+                    className="bg-[#0a1628] border border-[#C5A059]/30 text-white text-sm px-2 py-2.5 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition rounded-sm shrink-0"
                   >
                     {countryCodes.map((c) => (
                       <option key={c.code} value={c.code}>{c.label}</option>
@@ -250,7 +250,7 @@ export default function AdmissionSection() {
                     required
                     aria-required="true"
                     aria-label="Número de teléfono"
-                    className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
+                    className="w-full px-4 py-2.5 bg-[#0a1628] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition"
                   />
                 </div>
               </div>
@@ -267,7 +267,7 @@ export default function AdmissionSection() {
                   rows={3}
                   aria-required="true"
                   aria-label="Motivo de consulta"
-                  className="w-full px-4 py-2.5 bg-[#050b1a] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition resize-none"
+                  className="w-full px-4 py-2.5 bg-[#0a1628] border border-[#C5A059]/30 rounded-sm text-white placeholder-gray-600 focus:border-[#C5A059] focus:outline-none focus:ring-1 focus:ring-[#C5A059]/50 transition resize-none"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export default function AdmissionSection() {
               },
             ].map((step, index) => (
               <HeraldFrame key={index} size={40} className="h-full">
-                <div className="h-full text-center p-6 bg-[#050b1a] border border-[#C5A059]/20 group hover:border-[#C5A059]/40 transition duration-300">
+                <div className="h-full text-center p-6 bg-[#0a1628] border border-[#C5A059]/20 group hover:border-[#C5A059]/40 transition duration-300">
                   <div className="text-4xl font-cinzel text-[#C5A059] mb-3 opacity-80 group-hover:opacity-100 transition">
                     {step.number}
                   </div>

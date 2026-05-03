@@ -44,7 +44,7 @@ export default function OriginSection() {
   ];
 
   return (
-    <section id="QueEsTRVP" className="py-28 bg-[#050b1a] relative overflow-hidden">
+    <section id="QueEsTRVP" className="py-28 bg-[#0a1628] relative overflow-hidden">
       {/* Decorative background gradient */}
       <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-[#312e81]/5 to-transparent"></div>
 
