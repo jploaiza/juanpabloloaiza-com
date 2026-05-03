@@ -50,7 +50,7 @@ export default function AdminNotifyToggle({ courseId, field, value: initialValue
             value={value as string}
             onChange={handleEmailChange}
             onBlur={handleEmailBlur}
-            className="flex-1 bg-[#020d1f] border border-white/10 focus:border-[#C5A059]/60 text-gray-200 font-crimson text-sm px-3 py-1.5 outline-none transition-colors"
+            className="flex-1 bg-[#0e1b30] border border-white/10 focus:border-[#C5A059]/60 text-gray-200 font-crimson text-sm px-3 py-1.5 outline-none transition-colors"
           />
           {saving && <Loader2 className="w-3 h-3 animate-spin text-[#C5A059]/60" />}
         </div>

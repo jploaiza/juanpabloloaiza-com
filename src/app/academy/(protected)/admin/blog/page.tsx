@@ -80,7 +80,7 @@ export default async function AcademyBlogManagerPage() {
             { label: "Publicados", value: publishedCount, accent: "text-emerald-400" },
             { label: "Borradores", value: draftCount, accent: "text-gray-500" },
           ].map(({ label, value, icon: Icon, accent }) => (
-            <div key={label} className="relative bg-[#0a1628] border border-white/5 p-5 overflow-hidden">
+            <div key={label} className="relative bg-[#16213e] border border-white/5 p-5 overflow-hidden">
               <ScrollworkCorners size={36} opacity={0.7} />
               {Icon && <Icon className="w-4 h-4 text-[#C5A059] mb-3" />}
               <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>

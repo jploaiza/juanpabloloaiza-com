@@ -51,7 +51,7 @@ export default async function CompletadoPage({ searchParams }: Props) {
   const certUrl = certToken ? `${siteUrl}/academy/certificate/${certToken}` : null;
 
   return (
-    <div className="min-h-screen bg-[#020617]">
+    <div className="min-h-screen bg-[#0a1628]">
       <AcademyHeader user={profile} />
 
       {/* Ambient glow */}
@@ -93,7 +93,7 @@ export default async function CompletadoPage({ searchParams }: Props) {
         </p>
 
         {/* ── Completion checklist ── */}
-        <div className="relative w-full border border-[#C5A059]/15 bg-[#0a1628] p-6 mb-8 text-left overflow-hidden">
+        <div className="relative w-full border border-[#C5A059]/15 bg-[#16213e] p-6 mb-8 text-left overflow-hidden">
           <ScrollworkCorners size={32} opacity={0.6} />
           <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-4">
             Lo que lograste

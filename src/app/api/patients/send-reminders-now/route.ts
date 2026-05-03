@@ -167,7 +167,7 @@ function reminderEmailHtml({ name, sl, expiryDate, bodyText }: {
   const title = sl > 0 ? "Esta semana es tu sesión 🌟" : "Continúa tu proceso de sanación 🌟";
 
   const counterBlock = showCounter ? `
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#020d1f;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0e1b30;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
 <tr><td style="padding:18px;text-align:center;">
 <p style="margin:0 0 4px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b7280;">Sesiones disponibles</p>
 <p style="margin:0;font-size:40px;color:#C5A059;line-height:1;">${sl}</p>
@@ -175,10 +175,10 @@ function reminderEmailHtml({ name, sl, expiryDate, bodyText }: {
 </table>` : "";
 
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#020617;font-family:Georgia,serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#020617;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#0a1628;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a1628;padding:40px 20px;">
 <tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="background:#0a1628;border:1px solid #C5A059;max-width:560px;width:100%;">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#16213e;border:1px solid #C5A059;max-width:560px;width:100%;">
 <tr><td style="padding:32px 40px 24px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.2);">
 <img src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png" alt="Juan Pablo Loaiza" width="160" style="height:auto;"/>
 <p style="margin:8px 0 0;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(197,160,89,0.6);">Terapeuta Holístico</p>
@@ -190,7 +190,7 @@ ${counterBlock}
 <p style="margin:0 0 24px;font-size:15px;color:#9ca3af;line-height:1.8;">${bodyText.replace(/\n/g, "<br/>")}</p>
 <table cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
 <tr><td style="background:#C5A059;padding:13px 32px;">
-<a href="${AGENDA_URL}" style="color:#020617;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">${ctaLabel}</a>
+<a href="${AGENDA_URL}" style="color:#0a1628;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">${ctaLabel}</a>
 </td></tr>
 </table>
 </td></tr>

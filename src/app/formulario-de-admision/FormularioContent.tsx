@@ -26,7 +26,7 @@ export default function FormularioContent() {
   return (
     <>
       <Header />
-      <main className="min-h-screen w-full bg-[#020617] pt-24">
+      <main className="min-h-screen w-full bg-[#0a1628] pt-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -56,7 +56,7 @@ export default function FormularioContent() {
             <div className="absolute -bottom-6 -left-6 w-12 h-12 border-b-2 border-l-2 border-[#C5A059]/50 z-10"></div>
             <div className="absolute -bottom-6 -right-6 w-12 h-12 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
 
-            <div className="bg-[#0f172a] border border-[#C5A059]/30 p-4 sm:p-8 relative z-0">
+            <div className="bg-[#16213e] border border-[#C5A059]/30 p-4 sm:p-8 relative z-0">
               <iframe
                 id="JotFormIFrame-212815791546058"
                 title="Formulario de admisión TRVP"
@@ -80,7 +80,7 @@ export default function FormularioContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-12 p-6 bg-[#0f172a] border border-[#C5A059]/20 rounded-sm"
+            className="mt-12 p-6 bg-[#16213e] border border-[#C5A059]/20 rounded-sm"
           >
             <p className="font-crimson text-base text-gray-300 leading-relaxed">
               <span className="text-[#C5A059] font-semibold">Confidencialidad:</span> Toda la información que compartas en este formulario es estrictamente confidencial. Solo será utilizada para preparar tu proceso terapéutico. Si tienes alguna duda, contáctame por WhatsApp.

@@ -118,7 +118,7 @@ export default function EntityLiberationSection() {
                 {benefits.map((benefit, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-3 p-4 bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition"
+                    className="flex items-center gap-3 p-4 bg-[#16213e] border border-[#C5A059]/20 hover:border-[#C5A059]/40 transition"
                   >
                     {benefit.icon === "lightbulb" && <Lightbulb size={16} className="text-[#C5A059]" />}
                   {benefit.icon === "heart" && <Heart size={16} className="text-[#C5A059]" />}
@@ -142,7 +142,7 @@ export default function EntityLiberationSection() {
           >
             <motion.div variants={itemVariants}>
             <HeraldFrame size={48}>
-            <div className="bg-[#0f172a] border border-[#C5A059]/30 p-8">
+            <div className="bg-[#16213e] border border-[#C5A059]/30 p-8">
               <p className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold mb-6">Síntomas que pueden indicar presencia de entidades</p>
               <ul className="space-y-3">
                 {symptoms.map((symptom, index) => (

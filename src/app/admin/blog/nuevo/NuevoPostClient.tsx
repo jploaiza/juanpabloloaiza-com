@@ -128,7 +128,7 @@ function slugify(text: string): string {
 }
 
 const inputClass =
-  "w-full bg-[#020d1f] border border-white/10 text-gray-200 font-crimson text-base px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-[#C5A059]/60 transition-colors";
+  "w-full bg-[#0e1b30] border border-white/10 text-gray-200 font-crimson text-base px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-[#C5A059]/60 transition-colors";
 const labelClass =
   "block font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059]/80 mb-1.5";
 const errorClass = "text-red-400 text-xs font-crimson mt-1";
@@ -441,7 +441,7 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
       {/* Import .MD Modal */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-          <div className="relative bg-[#0a1628] border border-white/10 p-8 max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-[#16213e] border border-white/10 p-8 max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
             <ScrollworkCorners size={36} opacity={0.6} />
             <div className="flex items-center gap-3 mb-2">
               <FileUp className="w-4 h-4 text-[#C5A059]" />
@@ -545,7 +545,7 @@ Párrafos, listas, citas...`}</pre>
       {/* AI Improve Modal */}
       {showAiModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-          <div className="relative bg-[#0a1628] border border-[#C5A059]/20 p-8 max-w-md w-full overflow-hidden">
+          <div className="relative bg-[#16213e] border border-[#C5A059]/20 p-8 max-w-md w-full overflow-hidden">
             <ScrollworkCorners size={36} opacity={0.6} />
             <div className="flex items-center gap-3 mb-2">
               <Sparkles className="w-4 h-4 text-[#C5A059]" />
@@ -565,7 +565,7 @@ Párrafos, listas, citas...`}</pre>
                         : "border-white/20 group-hover:border-white/40"
                     }`}
                   >
-                    {aiFields.includes(key) && <div className="w-2 h-2 bg-[#020617]" />}
+                    {aiFields.includes(key) && <div className="w-2 h-2 bg-[#0a1628]" />}
                   </div>
                   <span className="font-cinzel text-[10px] uppercase tracking-widest text-gray-300">
                     {label}
@@ -622,7 +622,7 @@ Párrafos, listas, citas...`}</pre>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Card: Core fields */}
-        <div className="relative bg-[#0a1628] border border-white/5 p-6 overflow-hidden">
+        <div className="relative bg-[#16213e] border border-white/5 p-6 overflow-hidden">
           <ScrollworkCorners size={40} opacity={0.7} />
           <h2 className="font-cinzel text-xs uppercase tracking-widest text-white mb-6">
             Contenido principal
@@ -691,7 +691,7 @@ Párrafos, listas, citas...`}</pre>
         </div>
 
         {/* Card: Meta & Media */}
-        <div className="relative bg-[#0a1628] border border-white/5 p-6 overflow-hidden">
+        <div className="relative bg-[#16213e] border border-white/5 p-6 overflow-hidden">
           <ScrollworkCorners size={40} opacity={0.7} />
           <h2 className="font-cinzel text-xs uppercase tracking-widest text-white mb-6">
             Imagen & Tags
@@ -806,7 +806,7 @@ Párrafos, listas, citas...`}</pre>
         </div>
 
         {/* Card: SEO */}
-        <div className="relative bg-[#0a1628] border border-white/5 p-6 overflow-hidden">
+        <div className="relative bg-[#16213e] border border-white/5 p-6 overflow-hidden">
           <ScrollworkCorners size={40} opacity={0.7} />
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-cinzel text-xs uppercase tracking-widest text-white">SEO</h2>
@@ -859,7 +859,7 @@ Párrafos, listas, citas...`}</pre>
         </div>
 
         {/* Card: Status & Submit */}
-        <div className="relative bg-[#0a1628] border border-white/5 p-6 overflow-hidden">
+        <div className="relative bg-[#16213e] border border-white/5 p-6 overflow-hidden">
           <ScrollworkCorners size={40} opacity={0.7} />
           <h2 className="font-cinzel text-xs uppercase tracking-widest text-white mb-6">
             Publicación
@@ -875,7 +875,7 @@ Párrafos, listas, citas...`}</pre>
                   }`}
                   onClick={() => setStatus(s)}
                 >
-                  {status === s && <div className="w-2 h-2 bg-[#020617]" />}
+                  {status === s && <div className="w-2 h-2 bg-[#0a1628]" />}
                 </div>
                 <input
                   type="radio"

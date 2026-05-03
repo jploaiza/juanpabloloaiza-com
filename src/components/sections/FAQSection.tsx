@@ -102,7 +102,7 @@ function DesktopVideoPanel({ faq, index }: { faq: typeof faqs[0]; index: number 
       <HeraldFrame size={64} className="w-full max-w-[280px] sm:max-w-[320px]">
         <div
           className="border border-[#C5A059]/30 overflow-hidden w-full"
-          style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #020617)" }}
+          style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #0a1628)" }}
         >
           <video
             ref={videoRef}
@@ -140,7 +140,7 @@ function DesktopVideoPanel({ faq, index }: { faq: typeof faqs[0]; index: number 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
-          className="mt-4 w-full max-w-[320px] p-5 bg-[#0f172a] border border-[#C5A059]/20"
+          className="mt-4 w-full max-w-[320px] p-5 bg-[#16213e] border border-[#C5A059]/20"
         >
           <p className="text-gray-300 font-crimson text-base leading-relaxed">{faq.answer}</p>
         </motion.div>
@@ -164,7 +164,7 @@ function MobileAccordionItem({
   const videoRef = useVideoAutoplay(isOpen);
 
   return (
-    <div className={`border transition-all duration-300 ${isOpen ? "border-[#C5A059]/60 bg-[#0f172a]" : "border-[#C5A059]/15 bg-[#0f172a]/50"}`}>
+    <div className={`border transition-all duration-300 ${isOpen ? "border-[#C5A059]/60 bg-[#16213e]" : "border-[#C5A059]/15 bg-[#16213e]/50"}`}>
       {/* Header button */}
       <button
         onClick={onToggle}
@@ -200,7 +200,7 @@ function MobileAccordionItem({
               {/* Video inline */}
               <div
                 className="w-full max-w-[260px] border border-[#C5A059]/30 overflow-hidden"
-                style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #020617)" }}
+                style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #0a1628)" }}
               >
                 <video
                   ref={videoRef}
@@ -217,7 +217,7 @@ function MobileAccordionItem({
               </div>
 
               {/* Answer */}
-              <div className="w-full p-4 bg-[#020617] border border-[#C5A059]/10">
+              <div className="w-full p-4 bg-[#0a1628] border border-[#C5A059]/10">
                 <p className="text-gray-300 font-crimson text-base leading-relaxed">{faq.answer}</p>
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function FAQSection() {
   return (
     <section
       id="PreguntasFrecuentes"
-      className="py-20 sm:py-28 bg-[#020617] relative border-y border-[#C5A059]/5"
+      className="py-20 sm:py-28 bg-[#0a1628] relative border-y border-[#C5A059]/5"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
@@ -307,8 +307,8 @@ export default function FAQSection() {
                 onClick={() => handleSelect(index)}
                 className={`w-full text-left p-4 sm:p-5 border transition-all duration-300 group ${
                   activeIndex === index
-                    ? "border-[#C5A059]/60 bg-[#0f172a]"
-                    : "border-[#C5A059]/15 bg-[#0f172a]/50 hover:border-[#C5A059]/40"
+                    ? "border-[#C5A059]/60 bg-[#16213e]"
+                    : "border-[#C5A059]/15 bg-[#16213e]/50 hover:border-[#C5A059]/40"
                 }`}
               >
                 <div className="flex items-center gap-3">

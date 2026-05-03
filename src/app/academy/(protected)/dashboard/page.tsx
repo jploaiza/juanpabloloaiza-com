@@ -65,7 +65,7 @@ export default async function DashboardPage() {
   const lastLesson = (lastProgress?.lessons as any);
 
   return (
-    <div className="min-h-screen bg-[#020617]">
+    <div className="min-h-screen bg-[#0a1628]">
       <AcademyHeader user={profile} />
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_70%_50%_at_30%_0%,rgba(197,160,89,0.05),transparent)]" />
 
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
             { icon: BookOpen, label: "Inscrito el", value: enrolledDate },
             { icon: Award, label: "Certificado", value: isCompleted ? "Disponible" : `Falta ${TOTAL_LESSONS - completedCount}` },
           ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="relative bg-[#0a1628] border border-white/5 p-4 overflow-hidden">
+            <div key={label} className="relative bg-[#16213e] border border-white/5 p-4 overflow-hidden">
               <ScrollworkCorners size={36} opacity={0.7} />
               <Icon className="w-4 h-4 text-[#C5A059] mb-2" />
               <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
             href="https://api.whatsapp.com/send?phone=56962081884"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 hover:border-[#C5A059]/20 transition group overflow-hidden"
+            className="relative flex items-center gap-4 p-5 bg-[#16213e] border border-white/5 hover:border-[#C5A059]/20 transition group overflow-hidden"
           >
             <ScrollworkCorners size={40} opacity={0.65} />
             <MessageCircle className="w-8 h-8 text-green-400 flex-shrink-0" />
@@ -171,7 +171,7 @@ export default async function DashboardPage() {
           {isCompleted ? (
             <Link
               href="/agenda"
-              className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition overflow-hidden"
+              className="relative flex items-center gap-4 p-5 bg-[#16213e] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition overflow-hidden"
             >
               <ScrollworkCorners size={40} opacity={0.65} />
               <Calendar className="w-8 h-8 text-[#C5A059] flex-shrink-0" />
@@ -181,7 +181,7 @@ export default async function DashboardPage() {
               </div>
             </Link>
           ) : (
-            <div className="relative flex items-center gap-4 p-5 bg-[#0a1628] border border-white/5 overflow-hidden opacity-60">
+            <div className="relative flex items-center gap-4 p-5 bg-[#16213e] border border-white/5 overflow-hidden opacity-60">
               <ScrollworkCorners size={40} opacity={0.4} />
               <Calendar className="w-8 h-8 text-gray-600 flex-shrink-0" />
               <div>

@@ -64,7 +64,7 @@ export default function CalendarStatusBanner({
   // ── Loading ────────────────────────────────────────────────────
   if (connected === null || loading) {
     return (
-      <div className="bg-[#0a1628] border border-[#C5A059]/20 px-5 py-3 flex items-center gap-2">
+      <div className="bg-[#16213e] border border-[#C5A059]/20 px-5 py-3 flex items-center gap-2">
         <RefreshCw size={12} className="text-gray-500 animate-spin" />
         <span className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest">
           Verificando Google Calendar...
@@ -79,7 +79,7 @@ export default function CalendarStatusBanner({
       typeof window !== "undefined" ? window.location.pathname : "/admin/pacientes"
     )}`;
     return (
-      <div className="bg-[#0a1628] border border-[#C5A059]/20 px-5 py-3 flex items-center justify-between gap-3">
+      <div className="bg-[#16213e] border border-[#C5A059]/20 px-5 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <AlertCircle size={12} className="text-gray-600 flex-shrink-0" />
           <span className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest">
@@ -155,7 +155,7 @@ export default function CalendarStatusBanner({
               value={selectedId}
               onChange={(e) => handleCalendarChange(e.target.value)}
               disabled={saving}
-              className="w-full appearance-none bg-[#020617] border border-emerald-700/30 text-white text-[11px] font-cinzel px-3 py-1.5 pr-7 outline-none focus:border-emerald-500/50 transition cursor-pointer disabled:opacity-60"
+              className="w-full appearance-none bg-[#0a1628] border border-emerald-700/30 text-white text-[11px] font-cinzel px-3 py-1.5 pr-7 outline-none focus:border-emerald-500/50 transition cursor-pointer disabled:opacity-60"
             >
               {calendars.map((c) => (
                 <option key={c.id} value={c.id}>

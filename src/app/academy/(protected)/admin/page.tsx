@@ -186,7 +186,7 @@ export default async function AdminPage() {
                 : "Sin nuevos",
             },
           ].map(({ icon: Icon, label, value, sub }) => (
-            <div key={label} className="relative bg-[#0a1628] border border-white/5 p-5 overflow-hidden">
+            <div key={label} className="relative bg-[#16213e] border border-white/5 p-5 overflow-hidden">
               <ScrollworkCorners size={40} opacity={0.75} />
               <Icon className="w-5 h-5 text-[#C5A059] mb-3" />
               <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>
@@ -199,7 +199,7 @@ export default async function AdminPage() {
         {/* ── Charts row ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10">
           {/* Monthly enrollments */}
-          <div className="bg-[#0a1628] border border-white/5 p-5 relative overflow-hidden">
+          <div className="bg-[#16213e] border border-white/5 p-5 relative overflow-hidden">
             <ScrollworkCorners size={32} opacity={0.5} />
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-[#C5A059]" />
@@ -227,7 +227,7 @@ export default async function AdminPage() {
           </div>
 
           {/* Progress distribution */}
-          <div className="bg-[#0a1628] border border-white/5 p-5 relative overflow-hidden">
+          <div className="bg-[#16213e] border border-white/5 p-5 relative overflow-hidden">
             <ScrollworkCorners size={32} opacity={0.5} />
             <div className="flex items-center gap-2 mb-1">
               <BookOpen className="w-4 h-4 text-[#C5A059]" />
@@ -240,7 +240,7 @@ export default async function AdminPage() {
                 return (
                   <div key={label} className="flex items-center gap-3">
                     <span className="font-cinzel text-[9px] text-gray-500 w-12 flex-shrink-0">{label}</span>
-                    <div className="flex-1 h-2 bg-[#020617]">
+                    <div className="flex-1 h-2 bg-[#0a1628]">
                       <div
                         className="h-full bg-[#C5A059] transition-all duration-500"
                         style={{ width: `${pct}%`, opacity: count === 0 ? 0.1 : 0.8 }}
@@ -294,7 +294,7 @@ export default async function AdminPage() {
                           </td>
                           <td className="py-3 pr-4">
                             <div className="flex items-center gap-2">
-                              <div className="w-20 h-1 bg-[#0f172a] overflow-hidden">
+                              <div className="w-20 h-1 bg-[#16213e] overflow-hidden">
                                 <div
                                   className="h-full bg-gradient-to-r from-[#C5A059] to-[#F3E5AB]"
                                   style={{ width: `${u.progressPct}%` }}

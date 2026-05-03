@@ -108,7 +108,7 @@ export default function RemindersPanel() {
   return (
     <div className="space-y-6">
       {/* ── Enviar hoy ─────────────────────────────────────────── */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+      <div className="bg-[#16213e] border border-[#C5A059]/20">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10">
           <div className="flex items-center gap-2">
             <Bell size={15} className="text-[#C5A059]" />
@@ -219,13 +219,13 @@ export default function RemindersPanel() {
       </div>
 
       {/* ── Por día de la semana ────────────────────────────────── */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+      <div className="bg-[#16213e] border border-[#C5A059]/20">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10">
           <h2 className="font-cinzel text-white text-sm uppercase tracking-widest">Programación semanal</h2>
           <select
             value={dayFilter}
             onChange={(e) => setDayFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
-            className="bg-[#020617] border border-[#C5A059]/20 text-white text-xs font-cinzel px-2 py-1 outline-none"
+            className="bg-[#0a1628] border border-[#C5A059]/20 text-white text-xs font-cinzel px-2 py-1 outline-none"
           >
             <option value="all">Todos los días</option>
             {DAY_NAMES.map((d, i) => (
@@ -250,7 +250,7 @@ export default function RemindersPanel() {
                     <Link
                       key={p.id}
                       href={`/academy/admin/crm/${p.id}`}
-                      className="text-xs font-crimson text-gray-400 hover:text-[#C5A059] transition bg-[#020617] border border-[#C5A059]/10 px-2 py-0.5"
+                      className="text-xs font-crimson text-gray-400 hover:text-[#C5A059] transition bg-[#0a1628] border border-[#C5A059]/10 px-2 py-0.5"
                     >
                       {p.first_name} ({sessionsLeft(p)}s)
                     </Link>
@@ -263,7 +263,7 @@ export default function RemindersPanel() {
       </div>
 
       {/* ── Historial de recordatorios ──────────────────────────── */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+      <div className="bg-[#16213e] border border-[#C5A059]/20">
         <button
           onClick={() => setShowLogs((v) => !v)}
           className="w-full flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10"

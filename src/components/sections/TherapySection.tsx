@@ -18,7 +18,7 @@ export default function TherapySection() {
   };
 
   return (
-    <section className="py-28 bg-gradient-to-b from-[#020617] via-[#050b1a] to-[#020617] relative border-y border-[#C5A059]/5">
+    <section className="py-28 bg-gradient-to-b from-[#0a1628] via-[#0a1628] to-[#0a1628] relative border-y border-[#C5A059]/5">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -88,7 +88,7 @@ export default function TherapySection() {
               </div>
 
               <HeraldFrame size={56}>
-                <div className="bg-[#0f172a] border border-[#C5A059]/20 p-6">
+                <div className="bg-[#16213e] border border-[#C5A059]/20 p-6">
                   <p className="text-gray-300 italic font-crimson text-xl leading-relaxed text-center">
                     "Este potente proceso terapéutico es un viaje a tu vida actual, a tus vidas pasadas y a tu vida espiritual, en el cual te guiaré para que encuentres tu verdad y vivas la mejor versión de ti."
                   </p>

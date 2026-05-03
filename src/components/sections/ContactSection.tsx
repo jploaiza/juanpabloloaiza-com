@@ -41,7 +41,7 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contacto" className="py-28 bg-[#020617] relative border-t border-[#C5A059]/5">
+    <section id="contacto" className="py-28 bg-[#0a1628] relative border-t border-[#C5A059]/5">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -79,7 +79,7 @@ export default function ContactSection() {
                     href={method.href}
                     target={method.href.startsWith("http") ? "_blank" : "_self"}
                     rel={method.href.startsWith("http") ? "noopener noreferrer" : ""}
-                    className="group flex flex-col items-center bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/40 p-8 text-center transition duration-300 h-full"
+                    className="group flex flex-col items-center bg-[#16213e] border border-[#C5A059]/20 hover:border-[#C5A059]/40 p-8 text-center transition duration-300 h-full"
                   >
                     <div className="flex justify-center mb-6">
                       <Icon className="w-8 h-8 text-[#C5A059] group-hover:scale-110 transition-transform" />
@@ -99,7 +99,7 @@ export default function ContactSection() {
 
         <motion.div
           variants={itemVariants}
-          className="relative bg-[#0f172a] border border-[#C5A059]/20 p-12 text-center"
+          className="relative bg-[#16213e] border border-[#C5A059]/20 p-12 text-center"
         >
           {/* Decorative corners */}
           <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#C5A059]/60"></div>

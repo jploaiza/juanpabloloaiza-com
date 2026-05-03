@@ -150,7 +150,7 @@ export default function AssignPackPage() {
                 className={`relative p-4 border text-left transition overflow-hidden ${
                   packType === option.type
                     ? "border-[#C5A059] bg-[#C5A059]/10"
-                    : "border-white/10 bg-[#0a1628] hover:border-white/20"
+                    : "border-white/10 bg-[#16213e] hover:border-white/20"
                 }`}
               >
                 <p
@@ -181,7 +181,7 @@ export default function AssignPackPage() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             required
-            className="w-full bg-[#0a1628] border border-white/10 text-gray-200 font-cinzel text-sm px-4 py-3 focus:outline-none focus:border-[#C5A059]/40 transition [color-scheme:dark]"
+            className="w-full bg-[#16213e] border border-white/10 text-gray-200 font-cinzel text-sm px-4 py-3 focus:outline-none focus:border-[#C5A059]/40 transition [color-scheme:dark]"
           />
         </div>
 
@@ -191,7 +191,7 @@ export default function AssignPackPage() {
             Fecha de vencimiento
             <span className="ml-2 text-gray-600">(calculada automáticamente)</span>
           </label>
-          <div className="w-full bg-[#020617] border border-white/5 text-gray-500 font-cinzel text-sm px-4 py-3">
+          <div className="w-full bg-[#0a1628] border border-white/5 text-gray-500 font-cinzel text-sm px-4 py-3">
             {endDate
               ? formatDateDisplay(endDate)
               : "—"}
@@ -215,7 +215,7 @@ export default function AssignPackPage() {
               min={0}
               step={0.01}
               placeholder="0.00"
-              className="w-full bg-[#0a1628] border border-white/10 text-gray-200 font-cinzel text-sm pl-8 pr-4 py-3 focus:outline-none focus:border-[#C5A059]/40 transition"
+              className="w-full bg-[#16213e] border border-white/10 text-gray-200 font-cinzel text-sm pl-8 pr-4 py-3 focus:outline-none focus:border-[#C5A059]/40 transition"
             />
           </div>
         </div>
@@ -231,7 +231,7 @@ export default function AssignPackPage() {
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Observaciones sobre este pack..."
-            className="w-full bg-[#0a1628] border border-white/10 text-gray-300 font-crimson text-sm p-3 resize-none focus:outline-none focus:border-[#C5A059]/40 placeholder:text-gray-700 transition"
+            className="w-full bg-[#16213e] border border-white/10 text-gray-300 font-crimson text-sm p-3 resize-none focus:outline-none focus:border-[#C5A059]/40 placeholder:text-gray-700 transition"
           />
         </div>
 

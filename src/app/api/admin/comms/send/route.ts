@@ -19,12 +19,12 @@ function emailWrapper(content: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>JPL Academy</title>
 </head>
-<body style="margin:0;padding:0;background-color:#020617;font-family:Georgia,'Times New Roman',serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#020617;">
+<body style="margin:0;padding:0;background-color:#0a1628;font-family:Georgia,'Times New Roman',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a1628;">
     <tr>
       <td align="center" style="padding:32px 16px;">
         <table width="600" cellpadding="0" cellspacing="0" border="0"
-          style="max-width:600px;width:100%;background-color:#0a1628;border:1px solid rgba(197,160,89,0.25);">
+          style="max-width:600px;width:100%;background-color:#16213e;border:1px solid rgba(197,160,89,0.25);">
           <!-- Gold corner top -->
           <tr>
             <td width="12" height="12" style="border-top:1px solid #C5A059;border-left:1px solid #C5A059;"></td>
@@ -37,7 +37,7 @@ function emailWrapper(content: string): string {
               <!-- Header logo -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="background-color:#020d1f;padding:28px 32px 24px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.2);">
+                  <td style="background-color:#0e1b30;padding:28px 32px 24px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.2);">
                     <img src="${LOGO_URL}" width="180" alt="JPL Academy" style="display:inline-block;max-width:180px;border:0;opacity:0.9;"/>
                   </td>
                 </tr>
@@ -46,7 +46,7 @@ function emailWrapper(content: string): string {
               <!-- Footer -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="padding:24px 32px 28px;text-align:center;background-color:#020d1f;border-top:1px solid rgba(197,160,89,0.15);">
+                  <td style="padding:24px 32px 28px;text-align:center;background-color:#0e1b30;border-top:1px solid rgba(197,160,89,0.15);">
                     <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 12px;">JPL Academy</p>
                     <p style="color:#2d4a6e;font-size:11px;margin:0;font-family:Georgia,serif;">
                       <a href="mailto:academy@juanpabloloaiza.com" style="color:#4a6a8a;text-decoration:none;">academy@juanpabloloaiza.com</a>
@@ -153,7 +153,7 @@ function buildExpiry7dHtml(name: string, sessionsLeft: number, endDate: string):
       </tr>
       <tr>
         <td style="padding:8px 32px 32px;text-align:center;">
-          <a href="${WHATSAPP_URL}" style="display:inline-block;background-color:#f59e0b;color:#020617;padding:12px 36px;text-decoration:none;font-size:10px;text-transform:uppercase;letter-spacing:4px;font-family:Georgia,serif;font-weight:bold;">
+          <a href="${WHATSAPP_URL}" style="display:inline-block;background-color:#f59e0b;color:#0a1628;padding:12px 36px;text-decoration:none;font-size:10px;text-transform:uppercase;letter-spacing:4px;font-family:Georgia,serif;font-weight:bold;">
             Agendar sesión ahora
           </a>
         </td>

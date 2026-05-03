@@ -53,7 +53,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
   };
 
   return (
-    <main className="min-h-screen bg-[#020617] pt-28">
+    <main className="min-h-screen bg-[#0a1628] pt-28">
       {/* ── Full-width hero image ── */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -70,7 +70,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
         ) : (
           <div className={`${post.image} w-full h-full`} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/10 to-[#020617]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a1628]/10 to-[#0a1628]" />
       </motion.div>
 
       {/* ── Two-column layout ── */}
@@ -278,7 +278,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
                     href={`/blog/${related.slug}`}
                     className="group flex gap-3 items-start"
                   >
-                    <div className="relative w-20 h-14 flex-shrink-0 overflow-hidden bg-[#0f172a]">
+                    <div className="relative w-20 h-14 flex-shrink-0 overflow-hidden bg-[#16213e]">
                       {related.imageUrl ? (
                         <img
                           src={related.imageUrl}
@@ -341,7 +341,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
       {/* ── Story modal ── */}
       {storyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" onClick={() => setStoryModal(false)}>
-          <div className="relative bg-[#020d1f] border border-[#C5A059]/20 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+          <div className="relative bg-[#0e1b30] border border-[#C5A059]/20 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
               <p className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059]">Historia para Instagram</p>
               <button onClick={() => setStoryModal(false)} className="text-gray-500 hover:text-white">

@@ -1,5 +1,37 @@
 # Claude Code Configuration - RuFlo V3
 
+## Project: juanpabloloaiza.com
+
+Sitio web + plataforma de Juan Pablo Loaiza (psicoterapeuta TRVP).
+Stack: Next.js 16.2.2 App Router · Supabase · Cloudflare R2 · Vercel · Tailwind CSS.
+Colores: dorado `#C5A059`, fondo `#020617` / `#0a1628`. Fuentes: Cinzel (títulos), Crimson Text (cuerpo).
+
+### Módulos activos
+| Ruta | Descripción |
+|------|-------------|
+| `/admin/blog` | Gestión de posts — lista, crear, editar |
+| `/admin/pacientes` | CRM de pacientes con recordatorios |
+| `/admin/comunicaciones` | Comunicaciones |
+| `/admin/analytics` | Analytics |
+| `/academy` | Plataforma de aprendizaje (autenticada) |
+| `/blog` | Blog público |
+
+### Blog — campos de post
+`title` (req) · `slug` (req, auto) · `excerpt` (máx 300) · `content` (req, Markdown) · `featured_image_url` · `tags[]` · `status` (draft|published) · `seo_title` (máx 60) · `seo_description` (máx 160)
+
+### Blog — importación .MD
+El formulario de nuevo post (`NuevoPostClient.tsx`) acepta archivos `.md` con frontmatter YAML.
+El parser está inline en `parseMdFile()` (sin dependencias). Usar la skill `/crear-articulo-md` para generar artículos completos (1200-2000 palabras).
+
+### CRM — recordatorios
+El cron de recordatorios corre en **cron-job.org** (NO GitHub Actions — fue reemplazado).
+
+### Build — quirk importante
+`npm run build` falla con Turbopack en darwin/arm64. Siempre usar:
+```bash
+npm run build -- --webpack
+```
+
 ## Behavioral Rules (Always Enforced)
 
 - Do what has been asked; nothing more, nothing less

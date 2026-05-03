@@ -14,7 +14,7 @@ export default function ProgressBar({ value, showLabel, size = "normal", classNa
   const clamped = Math.min(100, Math.max(0, value));
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <div className={`flex-1 bg-[#0f172a] ${heights[size]} overflow-hidden`}>
+      <div className={`flex-1 bg-[#16213e] ${heights[size]} overflow-hidden`}>
         <motion.div
           className="h-full bg-gradient-to-r from-[#C5A059] to-[#F3E5AB]"
           initial={{ width: 0 }}

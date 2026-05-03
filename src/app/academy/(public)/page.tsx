@@ -33,7 +33,7 @@ const totalMinutes = Math.round(totalSeconds / 60);
 
 export default function AcademyLandingPage() {
   return (
-    <div className="min-h-screen bg-[#020617]">
+    <div className="min-h-screen bg-[#0a1628]">
       <AcademyHeader />
 
       {/* ── Hero ── */}
@@ -88,7 +88,7 @@ export default function AcademyLandingPage() {
             {/* Ambient glow */}
             <div className="pointer-events-none absolute -inset-4 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(197,160,89,0.06),transparent)]" />
 
-            <div className="relative bg-[#0a1628] border border-[#C5A059]/20">
+            <div className="relative bg-[#16213e] border border-[#C5A059]/20">
 
               {/* ── Scrollwork corners ── */}
               {/* Top-left */}
@@ -131,7 +131,7 @@ export default function AcademyLandingPage() {
                   alt="Curso de Hipnosis Regresiva"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#16213e] via-[#16213e]/20 to-transparent" />
               </div>
 
               {/* Scrollwork divider */}
@@ -182,7 +182,7 @@ export default function AcademyLandingPage() {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {WHAT_YOU_LEARN.map((item, i) => (
-              <div key={i} className="relative flex items-start gap-3 p-4 bg-[#0a1628] border border-white/5 overflow-hidden">
+              <div key={i} className="relative flex items-start gap-3 p-4 bg-[#16213e] border border-white/5 overflow-hidden">
                 <ScrollworkCorners size={28} opacity={0.6} />
                 <CheckCircle className="w-4 h-4 text-[#C5A059] mt-0.5 flex-shrink-0" />
                 <span className="font-crimson text-gray-300 text-base leading-relaxed">{item}</span>
@@ -216,7 +216,7 @@ export default function AcademyLandingPage() {
           <div className="grid md:grid-cols-3 gap-12 items-start">
             {/* Instructor photo with scrollwork */}
             <div className="md:col-span-1 relative">
-              <div className="relative bg-[#0a1628] border border-[#C5A059]/20">
+              <div className="relative bg-[#16213e] border border-[#C5A059]/20">
                 {/* Scrollwork corners */}
                 <div className="absolute -top-px -left-px">
                   <div className="absolute top-0 left-0 w-10 h-[2px] bg-gradient-to-r from-[#C5A059] to-transparent" />

@@ -67,7 +67,7 @@ function VideoCard({ video }: { video: Video }) {
 
   return (
     <motion.div variants={itemVariants} className="group relative overflow-hidden">
-      <div className="relative bg-[#0f172a] border-2 border-[#C5A059]/30 hover:border-[#C5A059]/60 transition duration-300 overflow-hidden h-full">
+      <div className="relative bg-[#16213e] border-2 border-[#C5A059]/30 hover:border-[#C5A059]/60 transition duration-300 overflow-hidden h-full">
         <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#C5A059] z-20"></div>
         <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#C5A059] z-20"></div>
         <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#C5A059] z-20"></div>
@@ -77,7 +77,7 @@ function VideoCard({ video }: { video: Video }) {
           {playing ? (
             <video src={video.src} controls autoPlay className="w-full h-full object-contain" controlsList="nodownload" disablePictureInPicture />
           ) : (
-            <button onClick={() => setPlaying(true)} className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#050b1a] group/play" aria-label={`Reproducir: ${video.title}`}>
+            <button onClick={() => setPlaying(true)} className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#16213e] to-[#050b1a] group/play" aria-label={`Reproducir: ${video.title}`}>
               <div className="w-16 h-16 rounded-full border-2 border-[#C5A059]/60 flex items-center justify-center group-hover/play:bg-[#C5A059] group-hover/play:border-[#C5A059] transition duration-300">
                 <svg className="w-6 h-6 text-[#C5A059] group-hover/play:text-[#020617] ml-1 transition duration-300" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
@@ -99,7 +99,7 @@ function VideoCard({ video }: { video: Video }) {
 
 export default function VideosContent() {
   return (
-    <main className="min-h-screen bg-[#020617] pt-32">
+    <main className="min-h-screen bg-[#0a1628] pt-32">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-6xl mx-auto px-4 sm:px-6 mb-20">
         <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Biblioteca de Videos</span>
         <h1 className="text-5xl md:text-6xl text-white mt-4 mb-6 font-cinzel font-bold">Explora tu Camino</h1>
@@ -147,7 +147,7 @@ export default function VideosContent() {
 
       {/* CTA */}
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-6xl mx-auto px-4 sm:px-6 mb-20 text-center">
-        <div className="border border-[#C5A059]/20 p-12 bg-[#0f172a]">
+        <div className="border border-[#C5A059]/20 p-12 bg-[#16213e]">
           <h3 className="text-3xl font-cinzel text-white mb-4">¿Listo para comenzar?</h3>
           <p className="text-gray-300 font-crimson text-lg mb-8 max-w-xl mx-auto">Si ya resolviste tus dudas, da el primer paso y completa el formulario de admisión.</p>
           <a href="/#ListaDeAdmision" className="btn-gold">Iniciar Proceso</a>

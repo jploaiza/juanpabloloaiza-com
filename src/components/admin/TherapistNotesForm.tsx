@@ -50,7 +50,7 @@ export default function TherapistNotesForm({ userId, initialNotes }: Props) {
         }}
         rows={6}
         placeholder="Notas clínicas privadas..."
-        className="w-full bg-[#020617] border border-white/10 text-gray-300 font-crimson text-sm p-3 resize-none focus:outline-none focus:border-[#C5A059]/40 placeholder:text-gray-700 transition"
+        className="w-full bg-[#0a1628] border border-white/10 text-gray-300 font-crimson text-sm p-3 resize-none focus:outline-none focus:border-[#C5A059]/40 placeholder:text-gray-700 transition"
       />
 
       {error && (

@@ -119,7 +119,7 @@ export default async function AnalyticsPage() {
       {/* KPI row */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
         {kpiCards.map(({ icon: Icon, label, value, sub }) => (
-          <div key={label} className="relative bg-[#0a1628] border border-white/5 p-5 overflow-hidden">
+          <div key={label} className="relative bg-[#16213e] border border-white/5 p-5 overflow-hidden">
             <ScrollworkCorners size={36} opacity={0.7} />
             <Icon className="w-4 h-4 text-[#C5A059] mb-3" />
             <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>
@@ -187,7 +187,7 @@ export default async function AnalyticsPage() {
                       </td>
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-20 h-1 bg-[#0f172a] overflow-hidden">
+                          <div className="w-20 h-1 bg-[#16213e] overflow-hidden">
                             <div className="h-full bg-gradient-to-r from-[#C5A059] to-[#F3E5AB]" style={{ width: `${s.progressPct}%` }} />
                           </div>
                           <span className="font-cinzel text-[10px] text-[#C5A059]">{s.progressPct}%</span>

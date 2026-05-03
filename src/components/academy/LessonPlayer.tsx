@@ -381,7 +381,7 @@ export default function LessonPlayer({
 
       <main className="pt-16 h-screen flex flex-col overflow-hidden">
         {/* ── Top breadcrumb bar ── */}
-        <div className="border-b border-white/5 bg-[#020617]/80 backdrop-blur-sm">
+        <div className="border-b border-white/5 bg-[#0a1628]/80 backdrop-blur-sm">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-10 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <Link
@@ -662,7 +662,7 @@ export default function LessonPlayer({
                     onChange={(e) => handleNoteChange(e.target.value)}
                     placeholder="Escribe tus notas sobre esta lección..."
                     rows={8}
-                    className="w-full bg-[#0a1628] border border-white/5 focus:border-[#C5A059]/30 text-gray-300 font-crimson text-sm p-4 resize-none outline-none transition placeholder:text-gray-600"
+                    className="w-full bg-[#16213e] border border-white/5 focus:border-[#C5A059]/30 text-gray-300 font-crimson text-sm p-4 resize-none outline-none transition placeholder:text-gray-600"
                   />
                   <div className="flex justify-end mt-2 h-4">
                     {savingNote && (
@@ -691,7 +691,7 @@ export default function LessonPlayer({
           </div>
 
           {/* ── Right: sidebar (desktop) ── */}
-          <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-white/5 bg-[#020617] overflow-y-auto scrollbar-gold">
+          <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-white/5 bg-[#0a1628] overflow-y-auto scrollbar-gold">
             <CourseSidebar
               sections={sections}
               currentLessonId={lesson.id}
@@ -704,7 +704,7 @@ export default function LessonPlayer({
 
       {/* ── Mobile sidebar drawer ── */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-[#020617] border-l border-white/5 z-50 overflow-y-auto transition-transform duration-300 lg:hidden scrollbar-gold ${
+        className={`fixed top-0 right-0 h-full w-80 bg-[#0a1628] border-l border-white/5 z-50 overflow-y-auto transition-transform duration-300 lg:hidden scrollbar-gold ${
           sidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -886,7 +886,7 @@ function QAPanel({
           onChange={(e) => setNewQuestion(e.target.value)}
           placeholder="Escribe tu pregunta sobre esta lección..."
           rows={3}
-          className="w-full bg-[#0a1628] border border-white/5 focus:border-[#C5A059]/30 text-gray-300 font-crimson text-sm p-4 resize-none outline-none transition placeholder:text-gray-600"
+          className="w-full bg-[#16213e] border border-white/5 focus:border-[#C5A059]/30 text-gray-300 font-crimson text-sm p-4 resize-none outline-none transition placeholder:text-gray-600"
         />
         <button
           onClick={handleSubmit}
@@ -909,7 +909,7 @@ function QAPanel({
       ) : (
         <div className="space-y-4">
           {questions.map((q) => (
-            <div key={q.id} className="relative bg-[#0a1628] border border-white/5 p-4 overflow-hidden">
+            <div key={q.id} className="relative bg-[#16213e] border border-white/5 p-4 overflow-hidden">
               <ScrollworkCorners size={28} opacity={0.55} />
               <p className="font-crimson text-sm text-gray-300">{q.content}</p>
               {q.answer && (

@@ -62,7 +62,7 @@ export default function BlogSection({ initialPosts = [] }: { initialPosts?: Disp
   if (posts.length === 0) return null;
 
   return (
-    <section id="blog" className="py-20 sm:py-28 bg-[#020617] relative border-y border-[#C5A059]/5">
+    <section id="blog" className="py-20 sm:py-28 bg-[#0a1628] relative border-y border-[#C5A059]/5">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div
@@ -98,7 +98,7 @@ export default function BlogSection({ initialPosts = [] }: { initialPosts?: Disp
             >
               {visiblePosts.map((post, idx) => (
                 <Link key={`${post.id}-${idx}`} href={`/blog/${post.slug}`} className={`group block${idx > 0 ? " hidden sm:block" : ""}`}>
-                  <div className="relative bg-[#0f172a] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition duration-300 overflow-hidden h-full">
+                  <div className="relative bg-[#16213e] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition duration-300 overflow-hidden h-full">
                     <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/40 z-10" />
                     <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/40 z-10" />
                     <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#C5A059]/40 z-10" />

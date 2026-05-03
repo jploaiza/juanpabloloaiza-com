@@ -115,7 +115,7 @@ export default function PoliticasPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#020617] pt-32 pb-20">
+      <main className="min-h-screen bg-[#0a1628] pt-32 pb-20">
         {/* Header */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-16">
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">
@@ -136,7 +136,7 @@ export default function PoliticasPage() {
         {/* Sections */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-10">
           {sections.map((section, i) => (
-            <div key={i} className="relative bg-[#0f172a] border border-[#C5A059]/20 p-8">
+            <div key={i} className="relative bg-[#16213e] border border-[#C5A059]/20 p-8">
               {/* Corner accents */}
               <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/50" />
               <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/50" />
@@ -168,7 +168,7 @@ export default function PoliticasPage() {
         </div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-10">
           {disclaimer.map((section, i) => (
-            <div key={i} className="relative bg-[#0f172a] border border-[#C5A059]/20 p-8">
+            <div key={i} className="relative bg-[#16213e] border border-[#C5A059]/20 p-8">
               <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/50" />
               <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/50" />
               <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#C5A059]/50" />

@@ -230,7 +230,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre o email..."
-                className="w-full sm:w-64 bg-[#0a1628] border border-[#C5A059]/15 text-white pl-9 pr-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                className="w-full sm:w-64 bg-[#16213e] border border-[#C5A059]/15 text-white pl-9 pr-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
               />
             </div>
 
@@ -252,7 +252,7 @@ export default function CrmDashboard({ initialPatients, lastSessions }: Props) {
                 {sortKey === "nombre" && "Nombre A-Z"}
               </button>
               {showSort && (
-                <div className="absolute top-full left-0 mt-1 z-20 bg-[#0a1628] border border-[#C5A059]/20 min-w-[160px] shadow-xl">
+                <div className="absolute top-full left-0 mt-1 z-20 bg-[#16213e] border border-[#C5A059]/20 min-w-[160px] shadow-xl">
                   {(
                     [
                       { key: "reciente", label: "Más reciente" },

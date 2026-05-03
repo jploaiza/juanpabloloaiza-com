@@ -7,8 +7,8 @@
 }
 
 :root {
-  --color-void: #020617;
-  --color-navy: #0f172a;
+  --color-void: #0a1628;
+  --color-navy: #16213e;
   --color-indigo: #312e81;
   --color-gold: #C5A059;
   --color-champagne: #F3E5AB;
@@ -26,13 +26,13 @@ html {
 }
 
 body {
-  background-color: #020617;
+  background-color: #0a1628;
   color: #E2E8F0;
 }
 
 /* Hero Section */
 .hero-gradient {
-  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 70%);
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0a1628 70%);
 }
 
 /* Glassmorphism Cards */
@@ -56,7 +56,7 @@ body {
 /* Buttons */
 .btn-gold {
   background-color: #C5A059;
-  color: #020617;
+  color: #0a1628;
   font-weight: 600;
   padding: 1rem 2rem;
   border-radius: 0.25rem;
@@ -88,7 +88,7 @@ body {
 
 .btn-gold-outline:hover {
   background-color: #C5A059;
-  color: #020617;
+  color: #0a1628;
 }
 
 .btn-gold-outline:disabled {
@@ -222,7 +222,7 @@ input::placeholder {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #0a1628;
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(197, 160, 89, 0.35);
@@ -233,7 +233,7 @@ input::placeholder {
 }
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(197, 160, 89, 0.35) #020617;
+  scrollbar-color: rgba(197, 160, 89, 0.35) #0a1628;
 }
 [data-admin-panel] .font-crimson {
   font-weight: 500;
@@ -253,7 +253,7 @@ input::placeholder {
   width: 4px;
 }
 .scrollbar-gold::-webkit-scrollbar-track {
-  background: #020617;
+  background: #0a1628;
 }
 .scrollbar-gold::-webkit-scrollbar-thumb {
   background: rgba(197, 160, 89, 0.3);
@@ -265,5 +265,5 @@ input::placeholder {
 /* Firefox */
 .scrollbar-gold {
   scrollbar-width: thin;
-  scrollbar-color: rgba(197, 160, 89, 0.3) #020617;
+  scrollbar-color: rgba(197, 160, 89, 0.3) #0a1628;
 }

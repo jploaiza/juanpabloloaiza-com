@@ -42,7 +42,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = "text-[#C5A059]" }: {
   icon: React.ElementType; label: string; value: string; sub?: string; color?: string;
 }) {
   return (
-    <div className="bg-[#0a1628] border border-[#C5A059]/10 p-4 relative overflow-hidden">
+    <div className="bg-[#16213e] border border-[#C5A059]/10 p-4 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-[#C5A059]/20" />
       <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t border-r border-[#C5A059]/20" />
       <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b border-l border-[#C5A059]/20" />
@@ -136,7 +136,7 @@ export default function SiteAnalyticsPanel() {
       </div>
 
       {/* Daily chart (last 30 days) */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+      <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
         <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Vistas diarias — últimos 30 días</h3>
         <p className="font-crimson text-xs text-gray-600 mb-4">Cada barra = un día. Pasa el cursor para ver la fecha.</p>
         <MiniBarChart
@@ -150,7 +150,7 @@ export default function SiteAnalyticsPanel() {
       </div>
 
       {/* Monthly chart */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+      <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
         <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-4">Vistas mensuales — últimos 6 meses</h3>
         <div className="flex items-end gap-2 h-20">
           {(() => {
@@ -171,7 +171,7 @@ export default function SiteAnalyticsPanel() {
       {/* Top pages + referrers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top pages */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Páginas más vistas</h3>
           <p className="font-crimson text-xs text-gray-600 mb-4">Últimos 30 días</p>
           {topPages.length === 0 ? (
@@ -184,7 +184,7 @@ export default function SiteAnalyticsPanel() {
                     <span className="font-crimson text-sm text-gray-200 truncate max-w-[70%]">{pageLabel(path)}</span>
                     <span className="font-cinzel text-[10px] text-[#C5A059] flex-shrink-0">{count}</span>
                   </div>
-                  <div className="h-1 bg-[#020617]">
+                  <div className="h-1 bg-[#0a1628]">
                     <div className="h-full bg-[#C5A059]/60 transition-all" style={{ width: `${Math.round((count / maxPage) * 100)}%` }} />
                   </div>
                 </div>
@@ -194,7 +194,7 @@ export default function SiteAnalyticsPanel() {
         </div>
 
         {/* Referrers */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Fuentes de tráfico</h3>
           <p className="font-crimson text-xs text-gray-600 mb-4">Dominio de origen (referrer)</p>
           {topReferrers.length === 0 ? (
@@ -210,7 +210,7 @@ export default function SiteAnalyticsPanel() {
                     </span>
                     <span className="font-cinzel text-[10px] text-blue-400 flex-shrink-0">{count}</span>
                   </div>
-                  <div className="h-1 bg-[#020617]">
+                  <div className="h-1 bg-[#0a1628]">
                     <div className="h-full bg-blue-400/50 transition-all" style={{ width: `${Math.round((count / maxRef) * 100)}%` }} />
                   </div>
                 </div>
@@ -221,7 +221,7 @@ export default function SiteAnalyticsPanel() {
       </div>
 
       {/* Blog articles */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+      <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
         <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Artículos del blog</h3>
         <p className="font-crimson text-xs text-gray-600 mb-4">Vistas por artículo — últimos 30 días</p>
         {blogViews.length === 0 ? (
@@ -241,7 +241,7 @@ export default function SiteAnalyticsPanel() {
                     {count}
                   </span>
                 </div>
-                <div className="h-1 bg-[#020617]">
+                <div className="h-1 bg-[#0a1628]">
                   <div className="h-full bg-purple-500/50 transition-all" style={{ width: `${maxBlog > 0 ? Math.round((count / maxBlog) * 100) : 0}%` }} />
                 </div>
               </div>

@@ -11,7 +11,7 @@ export default function AcademyCard({ children, className = "", gold, hover }: P
   return (
     <div
       className={`
-        relative bg-[#0a1628] border overflow-hidden
+        relative bg-[#16213e] border overflow-hidden
         ${gold ? "border-[#C5A059]/40" : "border-white/5"}
         ${hover ? "hover:border-[#C5A059]/30 transition-colors duration-200 cursor-pointer" : ""}
         p-6

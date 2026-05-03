@@ -393,7 +393,7 @@ export default function RemindersConsole() {
     <div className="grid lg:grid-cols-5 gap-6">
 
       {/* ── LEFT: Patient list ──────────────────────────────── */}
-      <div className="lg:col-span-2 bg-[#0a1628] border border-[#C5A059]/20 flex flex-col">
+      <div className="lg:col-span-2 bg-[#16213e] border border-[#C5A059]/20 flex flex-col">
         {/* Header */}
         <div className="px-4 py-3 border-b border-[#C5A059]/10 flex items-center justify-between gap-2">
           <span className="font-cinzel text-xs uppercase tracking-widest text-gray-400">Pacientes</span>
@@ -442,7 +442,7 @@ export default function RemindersConsole() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar..."
-            className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-1.5 text-xs font-crimson focus:border-[#C5A059]/40 outline-none"
+            className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-3 py-1.5 text-xs font-crimson focus:border-[#C5A059]/40 outline-none"
           />
         </div>
 
@@ -511,7 +511,7 @@ export default function RemindersConsole() {
       <div className="lg:col-span-3 space-y-4">
 
         {/* Google Calendar status indicator */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/15 px-4 py-2.5 flex items-center justify-between gap-3">
+        <div className="bg-[#16213e] border border-[#C5A059]/15 px-4 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             {calendarLoading ? (
               <RefreshCw size={11} className="text-gray-600 animate-spin" />
@@ -541,7 +541,7 @@ export default function RemindersConsole() {
         </div>
 
         {/* Message template */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/20">
+        <div className="bg-[#16213e] border border-[#C5A059]/20">
           <div className="flex items-center justify-between px-5 py-3 border-b border-[#C5A059]/10">
             <span className="font-cinzel text-xs uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
               <MessageCircle size={12} className="text-[#C5A059]" /> Mensaje WhatsApp
@@ -594,7 +594,7 @@ export default function RemindersConsole() {
                   key={label}
                   onClick={() => insertVar(label)}
                   title={desc}
-                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#020617] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#0a1628] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
                 >
                   {label}
                 </button>
@@ -607,7 +607,7 @@ export default function RemindersConsole() {
                 value={template}
                 onChange={(e) => setTemplate(e.target.value)}
                 rows={4}
-                className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
                 placeholder="Escribe el mensaje..."
               />
             ) : (
@@ -615,7 +615,7 @@ export default function RemindersConsole() {
                 value={templateSinSesiones}
                 onChange={(e) => setTemplateSinSesiones(e.target.value)}
                 rows={4}
-                className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
+                className="w-full bg-[#0a1628] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
                 placeholder="Escribe el mensaje para pacientes sin sesiones..."
               />
             )}
@@ -659,7 +659,7 @@ export default function RemindersConsole() {
         </div>
 
         {/* Send config */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/20">
+        <div className="bg-[#16213e] border border-[#C5A059]/20">
           <div className="px-5 py-3 border-b border-[#C5A059]/10">
             <span className="font-cinzel text-xs uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
               <Send size={12} className="text-[#C5A059]" /> Configuración de envío
@@ -727,7 +727,7 @@ export default function RemindersConsole() {
 
               {/* Delay config */}
               {sendMode === "human" && (
-                <div className="mt-3 flex items-center gap-3 bg-[#020617] border border-[#C5A059]/10 px-3 py-2">
+                <div className="mt-3 flex items-center gap-3 bg-[#0a1628] border border-[#C5A059]/10 px-3 py-2">
                   <Shuffle size={12} className="text-gray-500 flex-shrink-0" />
                   <span className="text-[10px] font-cinzel text-gray-500 flex-shrink-0">Delay entre envíos:</span>
                   <div className="flex items-center gap-2 flex-1">
@@ -776,7 +776,7 @@ export default function RemindersConsole() {
                     Detener
                   </button>
                 </div>
-                <div className="h-1.5 bg-[#020617] border border-[#C5A059]/10">
+                <div className="h-1.5 bg-[#0a1628] border border-[#C5A059]/10">
                   <div
                     className="h-full bg-[#C5A059] transition-all duration-500"
                     style={{ width: `${Math.round((progress.current / progress.total) * 100)}%` }}
@@ -814,7 +814,7 @@ export default function RemindersConsole() {
                 </div>
                 <div className="space-y-1 max-h-36 overflow-y-auto">
                   {progress.results.map((r, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs bg-[#020617] border border-[#C5A059]/8 px-3 py-1.5">
+                    <div key={i} className="flex items-center gap-2 text-xs bg-[#0a1628] border border-[#C5A059]/8 px-3 py-1.5">
                       <span className="text-gray-300 font-crimson flex-1 truncate">{r.name}</span>
                       <span className={`flex items-center gap-0.5 ${r.whatsapp ? "text-emerald-400" : "text-gray-700"}`}>
                         <MessageCircle size={10} /> {r.whatsapp ? "OK" : "—"}
@@ -835,7 +835,7 @@ export default function RemindersConsole() {
         <AutoSchedulePanel />
 
         {/* History */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/20">
+        <div className="bg-[#16213e] border border-[#C5A059]/20">
           <button
             onClick={() => setShowHistory((v) => !v)}
             className="w-full flex items-center justify-between px-5 py-3 border-b border-[#C5A059]/10"

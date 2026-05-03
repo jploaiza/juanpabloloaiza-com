@@ -197,7 +197,7 @@ export default function AutoSchedulePanel() {
   );
 
   return (
-    <div className="bg-[#0a1628] border border-[#C5A059]/20">
+    <div className="bg-[#16213e] border border-[#C5A059]/20">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-3 border-b border-[#C5A059]/10"
@@ -229,7 +229,7 @@ export default function AutoSchedulePanel() {
                 <div
                   key={config.id}
                   className={`flex items-center gap-3 px-3 py-2.5 border text-xs transition ${
-                    config.is_active ? "border-[#C5A059]/20 bg-[#020617]" : "border-gray-800 bg-[#020617] opacity-50"
+                    config.is_active ? "border-[#C5A059]/20 bg-[#0a1628]" : "border-gray-800 bg-[#0a1628] opacity-50"
                   }`}
                 >
                   <Calendar size={12} className={config.is_active ? "text-[#C5A059]" : "text-gray-600"} />
@@ -266,7 +266,7 @@ export default function AutoSchedulePanel() {
 
           {/* Form */}
           {showForm && (
-            <div className="border border-[#C5A059]/20 p-4 space-y-3 bg-[#020617]">
+            <div className="border border-[#C5A059]/20 p-4 space-y-3 bg-[#0a1628]">
               <p className="font-cinzel text-[11px] uppercase tracking-widest text-[#C5A059]">
                 {editingId ? "Editar regla" : "Nueva regla"}
               </p>
@@ -278,7 +278,7 @@ export default function AutoSchedulePanel() {
                   value={form.label}
                   onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
                   placeholder="ej. Lunes activos"
-                  className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-crimson px-3 py-1.5 outline-none focus:border-[#C5A059]/40"
+                  className="w-full bg-[#16213e] border border-[#C5A059]/15 text-white text-xs font-crimson px-3 py-1.5 outline-none focus:border-[#C5A059]/40"
                 />
               </div>
 
@@ -289,7 +289,7 @@ export default function AutoSchedulePanel() {
                   <select
                     value={form.day_of_week}
                     onChange={(e) => setForm((f) => ({ ...f, day_of_week: Number(e.target.value) }))}
-                    className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none"
+                    className="w-full bg-[#16213e] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none"
                   >
                     {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
                   </select>
@@ -300,7 +300,7 @@ export default function AutoSchedulePanel() {
                     type="time"
                     value={form.time_chile}
                     onChange={(e) => setForm((f) => ({ ...f, time_chile: e.target.value }))}
-                    className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none focus:border-[#C5A059]/40 [color-scheme:dark]"
+                    className="w-full bg-[#16213e] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none focus:border-[#C5A059]/40 [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -311,7 +311,7 @@ export default function AutoSchedulePanel() {
                 <select
                   value={form.patient_filter}
                   onChange={(e) => setForm((f) => ({ ...f, patient_filter: e.target.value, patient_ids: [] }))}
-                  className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none"
+                  className="w-full bg-[#16213e] border border-[#C5A059]/15 text-white text-xs font-cinzel px-2 py-1.5 outline-none"
                 >
                   <option value="active">Activos</option>
                   <option value="paused">Pausados</option>
@@ -327,7 +327,7 @@ export default function AutoSchedulePanel() {
 
               {/* Specific patient picker */}
               {form.patient_filter === "specific" && (
-                <div className="border border-[#C5A059]/15 bg-[#0a1628]">
+                <div className="border border-[#C5A059]/15 bg-[#16213e]">
                   <div className="px-3 pt-2.5 pb-1.5 border-b border-[#C5A059]/10 flex items-center justify-between gap-2">
                     <span className="text-[10px] font-cinzel text-gray-500 uppercase tracking-widest">
                       {form.patient_ids.length} seleccionado{form.patient_ids.length !== 1 ? "s" : ""}
@@ -336,7 +336,7 @@ export default function AutoSchedulePanel() {
                       value={patientSearch}
                       onChange={(e) => setPatientSearch(e.target.value)}
                       placeholder="Buscar..."
-                      className="bg-[#020617] border border-[#C5A059]/10 text-white text-[10px] font-crimson px-2 py-1 outline-none w-32"
+                      className="bg-[#0a1628] border border-[#C5A059]/10 text-white text-[10px] font-crimson px-2 py-1 outline-none w-32"
                     />
                   </div>
                   <div className="max-h-40 overflow-y-auto divide-y divide-[#C5A059]/6">
@@ -427,7 +427,7 @@ export default function AutoSchedulePanel() {
                         min={5}
                         value={form[field]}
                         onChange={(e) => setForm((f) => ({ ...f, [field]: Number(e.target.value) }))}
-                        className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-crimson px-3 py-1.5 outline-none focus:border-[#C5A059]/40"
+                        className="w-full bg-[#16213e] border border-[#C5A059]/15 text-white text-xs font-crimson px-3 py-1.5 outline-none focus:border-[#C5A059]/40"
                       />
                     </div>
                   ))}
@@ -450,7 +450,7 @@ export default function AutoSchedulePanel() {
                     onChange={(e) => setForm((f) => ({ ...f, whatsapp_template: e.target.value }))}
                     placeholder="Dejar vacío para usar template por defecto. Variables: {nombre} {sesiones} {vencimiento} {dias}"
                     rows={3}
-                    className="mt-2 w-full bg-[#0a1628] border border-[#C5A059]/15 text-white text-xs font-crimson px-3 py-2 outline-none focus:border-[#C5A059]/40 resize-none"
+                    className="mt-2 w-full bg-[#16213e] border border-[#C5A059]/15 text-white text-xs font-crimson px-3 py-2 outline-none focus:border-[#C5A059]/40 resize-none"
                   />
                 )}
               </div>

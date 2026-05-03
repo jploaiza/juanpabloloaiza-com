@@ -147,10 +147,10 @@ function studentCompletionEmail({
   return `<!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>¡Curso completado!</title></head>
-<body style="margin:0;padding:0;background:#020617;font-family:Georgia,serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#020617;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#0a1628;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a1628;padding:40px 20px;">
   <tr><td align="center">
-    <table width="560" cellpadding="0" cellspacing="0" style="background:#0a1628;border:1px solid #C5A059;max-width:560px;width:100%;">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#16213e;border:1px solid #C5A059;max-width:560px;width:100%;">
       <tr><td style="padding:40px 40px 32px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.2);">
         <img src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png" alt="JPL Academy" width="160" style="height:auto;margin-bottom:8px;"/>
         <p style="margin:0;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(197,160,89,0.6);">Academy</p>
@@ -166,7 +166,7 @@ function studentCompletionEmail({
         ${certUrl ? `
         <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
           <tr><td style="background:#C5A059;padding:14px 32px;">
-            <a href="${certUrl}" style="color:#020617;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">
+            <a href="${certUrl}" style="color:#0a1628;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">
               Ver mi certificado →
             </a>
           </td></tr>
@@ -208,16 +208,16 @@ function adminNotificationEmail({
   return `<!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><title>Estudiante completó el curso</title></head>
-<body style="margin:0;padding:0;background:#020617;font-family:Georgia,serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#020617;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#0a1628;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a1628;padding:40px 20px;">
   <tr><td align="center">
-    <table width="560" cellpadding="0" cellspacing="0" style="background:#0a1628;border:1px solid rgba(197,160,89,0.3);max-width:560px;width:100%;">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#16213e;border:1px solid rgba(197,160,89,0.3);max-width:560px;width:100%;">
       <tr><td style="padding:32px 40px;border-bottom:1px solid rgba(197,160,89,0.2);">
         <p style="margin:0;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#C5A059;">JPL Academy · Admin</p>
       </td></tr>
       <tr><td style="padding:40px;">
         <h1 style="margin:0 0 24px;font-size:20px;color:#ffffff;font-weight:400;">📚 Nuevo estudiante completó el curso</h1>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#020d1f;border:1px solid rgba(255,255,255,0.05);margin-bottom:32px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#0e1b30;border:1px solid rgba(255,255,255,0.05);margin-bottom:32px;">
           <tr><td style="padding:20px;">
             <p style="margin:0 0 8px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b7280;">Estudiante</p>
             <p style="margin:0 0 16px;font-size:16px;color:#e5e7eb;">${studentName}</p>
@@ -229,7 +229,7 @@ function adminNotificationEmail({
         </table>
         <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
           <tr><td style="background:#C5A059;padding:12px 28px;margin-right:12px;">
-            <a href="${adminUrl}" style="color:#020617;text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">
+            <a href="${adminUrl}" style="color:#0a1628;text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">
               Ver analytics →
             </a>
           </td></tr>

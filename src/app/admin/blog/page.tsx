@@ -87,7 +87,7 @@ export default async function BlogManagerPage() {
         ].map(({ label, value, icon: Icon, accent }) => (
           <div
             key={label}
-            className="relative bg-[#0a1628] border border-white/5 p-5 overflow-hidden"
+            className="relative bg-[#16213e] border border-white/5 p-5 overflow-hidden"
           >
             <ScrollworkCorners size={36} opacity={0.7} />
             {Icon && <Icon className="w-4 h-4 text-[#C5A059] mb-3" />}

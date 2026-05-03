@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center p-6 text-center">
+    <div className="min-h-screen bg-[#0a1628] flex flex-col items-center justify-center p-6 text-center">
       <img
         src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png"
         alt="Juan Pablo Loaiza"

@@ -105,7 +105,7 @@ export default async function LessonPage({ params }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-[#020617]">
+    <div className="min-h-screen bg-[#0a1628]">
       <AcademyHeader user={profile} />
       <LessonPlayer
         lesson={lessonWithSection}

@@ -140,10 +140,10 @@ function weeklyReminderEmail({
   return `<!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Recuerda tus sesiones</title></head>
-<body style="margin:0;padding:0;background:#020617;font-family:Georgia,serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#020617;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#0a1628;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a1628;padding:40px 20px;">
   <tr><td align="center">
-    <table width="560" cellpadding="0" cellspacing="0" style="background:#0a1628;border:1px solid #C5A059;max-width:560px;width:100%;">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#16213e;border:1px solid #C5A059;max-width:560px;width:100%;">
 
       <tr><td style="padding:40px 40px 32px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.2);">
         <img src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png" alt="Juan Pablo Loaiza" width="160" style="height:auto;margin-bottom:8px;"/>
@@ -154,7 +154,7 @@ function weeklyReminderEmail({
         <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#C5A059;">Hola, ${firstName}</p>
         <h1 style="margin:0 0 24px;font-size:24px;color:#ffffff;font-weight:400;line-height:1.4;">Tienes sesiones disponibles</h1>
 
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#020d1f;border:1px solid rgba(197,160,89,0.3);margin-bottom:32px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#0e1b30;border:1px solid rgba(197,160,89,0.3);margin-bottom:32px;">
           <tr><td style="padding:24px;text-align:center;">
             <p style="margin:0 0 8px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b7280;">Sesiones disponibles</p>
             <p style="margin:0;font-size:48px;color:#C5A059;font-weight:400;line-height:1;">${sessionsRemaining}</p>
@@ -170,7 +170,7 @@ function weeklyReminderEmail({
 
         <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
           <tr><td style="background:#C5A059;padding:16px 40px;">
-            <a href="${AGENDA_URL}" style="color:#020617;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">
+            <a href="${AGENDA_URL}" style="color:#0a1628;text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">
               Agenda tu sesión →
             </a>
           </td></tr>

@@ -17,7 +17,7 @@ interface Props {
 }
 
 const selectClass =
-  "w-full bg-[#020d1f] border border-white/10 text-gray-200 font-crimson text-base px-4 py-3 focus:outline-none focus:border-[#C5A059]/60 transition-colors appearance-none";
+  "w-full bg-[#0e1b30] border border-white/10 text-gray-200 font-crimson text-base px-4 py-3 focus:outline-none focus:border-[#C5A059]/60 transition-colors appearance-none";
 
 export default function CommsManualSend({ patients, commTypes, typeLabels }: Props) {
   const [selectedPatientId, setSelectedPatientId] = useState("");
@@ -58,7 +58,7 @@ export default function CommsManualSend({ patients, commTypes, typeLabels }: Pro
   };
 
   return (
-    <div className="relative bg-[#0a1628] border border-[#C5A059]/20 p-6 overflow-hidden">
+    <div className="relative bg-[#16213e] border border-[#C5A059]/20 p-6 overflow-hidden">
       <ScrollworkCorners size={40} opacity={0.75} />
 
       <div className="flex items-center gap-2 mb-6">

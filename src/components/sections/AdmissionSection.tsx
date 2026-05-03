@@ -111,7 +111,7 @@ export default function AdmissionSection() {
   };
 
   return (
-    <section id="ListaDeAdmision" className="py-28 bg-[#020617] relative border-t border-[#C5A059]/5">
+    <section id="ListaDeAdmision" className="py-28 bg-[#0a1628] relative border-t border-[#C5A059]/5">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -153,7 +153,7 @@ export default function AdmissionSection() {
               ))}
             </ul>
 
-            <div className="bg-[#0f172a]/60 border border-[#C5A059]/30 p-6 backdrop-blur-sm">
+            <div className="bg-[#16213e]/60 border border-[#C5A059]/30 p-6 backdrop-blur-sm">
               <p className="font-cinzel font-semibold text-[#C5A059] mb-3 uppercase text-sm tracking-widest">
                 Nota Importante
               </p>
@@ -165,7 +165,7 @@ export default function AdmissionSection() {
 
           <motion.div variants={itemVariants}>
             <HeraldFrame size={60}>
-            <div className="bg-[#0f172a] border border-[#C5A059]/30 p-8">
+            <div className="bg-[#16213e] border border-[#C5A059]/30 p-8">
             {submitted && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -286,7 +286,7 @@ export default function AdmissionSection() {
 
         <motion.div
           variants={itemVariants}
-          className="bg-[#0f172a] border border-[#C5A059]/20 p-12"
+          className="bg-[#16213e] border border-[#C5A059]/20 p-12"
         >
           <h3 className="text-3xl font-cinzel text-center mb-10 text-white">
             Próximos Pasos

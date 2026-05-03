@@ -40,7 +40,7 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section id="ComoFunciona" className="py-20 sm:py-28 bg-[#020617] relative border-t border-[#C5A059]/5">
+    <section id="ComoFunciona" className="py-20 sm:py-28 bg-[#0a1628] relative border-t border-[#C5A059]/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div
@@ -94,9 +94,9 @@ export default function ProcessSection() {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="bg-[#0f172a] p-8 sm:p-10 relative z-10 text-center group"
+              className="bg-[#16213e] p-8 sm:p-10 relative z-10 text-center group"
             >
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#020617] border border-[#C5A059] rounded-full flex items-center justify-center text-[#C5A059] text-xs font-bold font-cinzel">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#0a1628] border border-[#C5A059] rounded-full flex items-center justify-center text-[#C5A059] text-xs font-bold font-cinzel">
                 {step.number}
               </div>
               <div className="mb-6 mt-4 flex justify-center text-[#C5A059] opacity-80">

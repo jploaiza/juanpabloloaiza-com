@@ -168,7 +168,7 @@ export default function PatientCard({ patient, lastSessionAt, calendarStatus, on
     : daysLeftColor(dl);
 
   return (
-    <div className="relative bg-[#0a1628] border border-[#C5A059]/15 hover:border-[#C5A059]/35 transition-all duration-300 p-4">
+    <div className="relative bg-[#16213e] border border-[#C5A059]/15 hover:border-[#C5A059]/35 transition-all duration-300 p-4">
       {/* Corner accents */}
       <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#C5A059]/30" />
       <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#C5A059]/30" />
@@ -198,7 +198,7 @@ export default function PatientCard({ patient, lastSessionAt, calendarStatus, on
             {expiryLabel}
           </span>
         </div>
-        <div className="h-1.5 bg-[#020617] border border-[#C5A059]/10">
+        <div className="h-1.5 bg-[#0a1628] border border-[#C5A059]/10">
           <div
             className="h-full bg-[#C5A059] transition-all duration-500"
             style={{ width: `${progress}%` }}
@@ -348,7 +348,7 @@ export default function PatientCard({ patient, lastSessionAt, calendarStatus, on
 
       {/* Extend deadline inline form */}
       {showExtend && (
-        <div className="mt-3 p-3 bg-[#020617] border border-blue-400/20 space-y-2">
+        <div className="mt-3 p-3 bg-[#0a1628] border border-blue-400/20 space-y-2">
           <p className="text-[10px] font-cinzel text-blue-400/70 uppercase tracking-widest">Extender plazo</p>
           <div className="flex gap-1 flex-wrap">
             {[7, 14, 21, 30].map((d) => (
@@ -368,7 +368,7 @@ export default function PatientCard({ patient, lastSessionAt, calendarStatus, on
               min={1}
               value={extendDays}
               onChange={(e) => setExtendDays(Math.max(1, Number(e.target.value)))}
-              className="w-14 bg-[#0a1628] border border-blue-400/20 text-white px-2 py-0.5 text-xs font-crimson outline-none"
+              className="w-14 bg-[#16213e] border border-blue-400/20 text-white px-2 py-0.5 text-xs font-crimson outline-none"
             />
           </div>
           <div className="flex gap-2">
@@ -392,7 +392,7 @@ export default function PatientCard({ patient, lastSessionAt, calendarStatus, on
 
       {/* Add sessions inline form */}
       {showAddSessions && (
-        <div className="mt-3 p-3 bg-[#020617] border border-[#C5A059]/20 space-y-2">
+        <div className="mt-3 p-3 bg-[#0a1628] border border-[#C5A059]/20 space-y-2">
           <p className="text-[10px] font-cinzel text-[#C5A059]/70 uppercase tracking-widest">Registrar compra</p>
           <div className="flex gap-1 flex-wrap">
             {PRESETS.map((q) => (
@@ -412,21 +412,21 @@ export default function PatientCard({ patient, lastSessionAt, calendarStatus, on
               min={1}
               value={addQty}
               onChange={(e) => setAddQty(Math.max(1, Number(e.target.value)))}
-              className="w-14 bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-0.5 text-xs font-crimson outline-none"
+              className="w-14 bg-[#16213e] border border-[#C5A059]/20 text-white px-2 py-0.5 text-xs font-crimson outline-none"
             />
           </div>
           <input
             type="date"
             value={addStartDate}
             onChange={(e) => setAddStartDate(e.target.value)}
-            className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-2 py-1 text-xs font-crimson outline-none"
+            className="w-full bg-[#16213e] border border-[#C5A059]/15 text-white px-2 py-1 text-xs font-crimson outline-none"
           />
           <input
             type="text"
             value={addNotes}
             onChange={(e) => setAddNotes(e.target.value)}
             placeholder="Nota (opcional)"
-            className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-2 py-1 text-xs font-crimson outline-none"
+            className="w-full bg-[#16213e] border border-[#C5A059]/15 text-white px-2 py-1 text-xs font-crimson outline-none"
           />
           <div className="flex gap-2">
             <button

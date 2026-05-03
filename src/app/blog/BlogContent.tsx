@@ -31,10 +31,10 @@ export default function BlogContent({ posts }: Props) {
   const gridPosts = page === 1 ? pagePosts.filter((p) => p.id !== filtered[0]?.id) : pagePosts;
 
   return (
-    <main className="min-h-screen bg-[#020617] pt-28">
+    <main className="min-h-screen bg-[#0a1628] pt-28">
       {/* ── Hero Header ── */}
       <div className="relative border-b border-[#C5A059]/10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0c1627]/70 to-[#020617] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c1627]/70 to-[#0a1628] pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-14 grid lg:grid-cols-2 gap-12 items-start">
 
           {/* Left: title + search + filters */}
@@ -58,7 +58,7 @@ export default function BlogContent({ posts }: Props) {
               <input
                 type="text"
                 placeholder="Buscar artículo..."
-                className="flex-1 bg-[#0f172a] border border-[#C5A059]/20 text-gray-300 font-crimson px-4 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600"
+                className="flex-1 bg-[#16213e] border border-[#C5A059]/20 text-gray-300 font-crimson px-4 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600"
               />
               <button className="bg-[#C5A059] hover:bg-[#d4b06a] px-4 py-2.5 transition text-[#020617]">
                 <Search className="w-4 h-4" />
@@ -105,9 +105,9 @@ export default function BlogContent({ posts }: Props) {
                     ) : (
                       <div className={`${featuredPost.image} w-full h-full`} />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628]/80 via-transparent to-transparent" />
                   </div>
-                  <div className="bg-[#0b1120] p-5">
+                  <div className="bg-[#16213e] p-5">
                     <span className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]">
                       {featuredPost.category}
                     </span>
@@ -145,7 +145,7 @@ export default function BlogContent({ posts }: Props) {
               transition={{ duration: 0.5, delay: idx * 0.06 }}
             >
               <Link href={`/blog/${post.slug}`} className="group block h-full">
-                <div className="relative overflow-hidden h-full bg-[#0b1120] border border-[#C5A059]/10 hover:border-[#C5A059]/35 transition duration-300 flex flex-col">
+                <div className="relative overflow-hidden h-full bg-[#16213e] border border-[#C5A059]/10 hover:border-[#C5A059]/35 transition duration-300 flex flex-col">
                   <div className="relative h-48 overflow-hidden flex-shrink-0">
                     {post.imageUrl ? (
                       <img
@@ -164,7 +164,7 @@ export default function BlogContent({ posts }: Props) {
                       className={`${post.image} w-full h-full`}
                       style={{ display: post.imageUrl ? "none" : "block" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b1120] via-transparent to-transparent opacity-70" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#16213e] via-transparent to-transparent opacity-70" />
                     <div className="absolute bottom-3 left-3">
                       <span className="font-cinzel text-[9px] uppercase tracking-widest bg-[#C5A059] text-[#020617] px-2 py-0.5">
                         {post.category}

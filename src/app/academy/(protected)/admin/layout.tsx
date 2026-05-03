@@ -21,13 +21,13 @@ export default async function AcademyAdminLayout({ children }: { children: React
 
   return (
     <div
-      className={`${jakarta.variable} min-h-screen bg-[#020617]`}
+      className={`${jakarta.variable} min-h-screen bg-[#0a1628]`}
       style={{ "--font-cinzel": "var(--font-admin)", "--font-crimson": "var(--font-admin)" } as React.CSSProperties}
     >
       <AcademyHeader user={profile} />
 
       {/* Sidebar — desktop */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-0 w-52 bg-[#020617] border-r border-white/5 z-40 pt-8 pb-6 px-3">
+      <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-0 w-52 bg-[#0a1628] border-r border-white/5 z-40 pt-8 pb-6 px-3">
         <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/50 mb-5 px-2">
           Admin
         </p>
@@ -41,7 +41,7 @@ export default async function AcademyAdminLayout({ children }: { children: React
       </aside>
 
       {/* Bottom nav — mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#020617]/98 backdrop-blur-xl border-t border-white/5 flex">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a1628]/98 backdrop-blur-xl border-t border-white/5 flex">
         <AdminBottomNav />
       </nav>
 

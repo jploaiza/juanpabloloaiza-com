@@ -31,7 +31,7 @@ export default function AcademyLandingClient({ sections }: { sections: Section[]
           <div key={si} className="relative border border-[#C5A059]/15 overflow-hidden">
             <ScrollworkCorners size={36} opacity={0.65} />
             <button
-              className="w-full flex items-center justify-between px-5 py-4 bg-[#0a1628] hover:bg-[#0d1f3a] transition text-left"
+              className="w-full flex items-center justify-between px-5 py-4 bg-[#16213e] hover:bg-[#0d1f3a] transition text-left"
               onClick={() => toggle(si)}
             >
               <div>

@@ -81,14 +81,14 @@ export default function ProfileClient() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-[#C5A059] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#020617]">
+    <div className="min-h-screen bg-[#0a1628]">
       <AcademyHeader user={profile} />
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(197,160,89,0.05),transparent)]" />
 
@@ -109,7 +109,7 @@ export default function ProfileClient() {
               <label className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1.5 flex items-center gap-1.5">
                 <Mail className="w-3 h-3" /> Email
               </label>
-              <div className="bg-[#020617] border border-white/5 px-4 py-2.5 font-crimson text-sm text-gray-500 select-none">
+              <div className="bg-[#0a1628] border border-white/5 px-4 py-2.5 font-crimson text-sm text-gray-500 select-none">
                 {profile.email}
               </div>
             </div>
@@ -123,7 +123,7 @@ export default function ProfileClient() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-[#020617] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
+                className="w-full bg-[#0a1628] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
                 placeholder="Tu nombre"
               />
             </div>
@@ -137,7 +137,7 @@ export default function ProfileClient() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-[#020617] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
+                className="w-full bg-[#0a1628] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
                 placeholder="+56 9 1234 5678"
               />
             </div>
@@ -177,7 +177,7 @@ export default function ProfileClient() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-[#020617] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
+                  className="w-full bg-[#0a1628] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
                   placeholder="Mínimo 8 caracteres"
                   autoComplete="new-password"
                 />
@@ -190,7 +190,7 @@ export default function ProfileClient() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#020617] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
+                  className="w-full bg-[#0a1628] border border-white/10 focus:border-[#C5A059]/40 px-4 py-2.5 font-crimson text-sm text-gray-200 outline-none transition"
                   placeholder="Repite la nueva contraseña"
                   autoComplete="new-password"
                 />

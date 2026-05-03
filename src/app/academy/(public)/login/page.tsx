@@ -112,7 +112,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-[#0a1628] flex flex-col items-center justify-center px-4 py-16">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(197,160,89,0.07),transparent)]" />
 
       <motion.div
@@ -135,7 +135,7 @@ function LoginForm() {
           <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/60">Academy</p>
         </div>
 
-        <div className="relative bg-[#0a1628] border border-[#C5A059]/15 p-8 overflow-hidden">
+        <div className="relative bg-[#16213e] border border-[#C5A059]/15 p-8 overflow-hidden">
           <ScrollworkCorners size={52} opacity={0.9} />
 
           <AnimatePresence mode="wait">
@@ -226,7 +226,7 @@ function LoginForm() {
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
                       disabled={loading}
-                      className="w-11 h-14 text-center text-2xl font-cinzel text-white bg-[#020d1f] border border-white/10 focus:border-[#C5A059]/60 focus:outline-none transition-colors disabled:opacity-50"
+                      className="w-11 h-14 text-center text-2xl font-cinzel text-white bg-[#0e1b30] border border-white/10 focus:border-[#C5A059]/60 focus:outline-none transition-colors disabled:opacity-50"
                     />
                   ))}
                 </div>

@@ -16,12 +16,12 @@ const emailWrapper = (content: string) => `
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <title>Juan Pablo Loaiza</title>
 </head>
-<body style="margin:0;padding:0;background-color:#020617;font-family:Georgia,'Times New Roman',serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#020617;">
+<body style="margin:0;padding:0;background-color:#0a1628;font-family:Georgia,'Times New Roman',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a1628;">
     <tr>
       <td align="center" style="padding:32px 16px;">
         <!-- Outer container -->
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#0a1628;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#16213e;">
           ${content}
         </table>
         <!-- Bottom space -->
@@ -53,14 +53,14 @@ const goldDivider = () => `
 
 const headerBlock = () => `
 <tr>
-  <td style="background-color:#020d1f;padding:36px 32px 24px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.3);">
+  <td style="background-color:#0e1b30;padding:36px 32px 24px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.3);">
     <img src="${LOGO_URL}" width="220" alt="Juan Pablo Loaiza" style="display:inline-block;max-width:220px;border:0;opacity:0.95;"/>
   </td>
 </tr>`;
 
 const socialFooter = () => `
 <tr>
-  <td style="padding:28px 32px 32px;text-align:center;background-color:#020d1f;">
+  <td style="padding:28px 32px 32px;text-align:center;background-color:#0e1b30;">
     <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 16px;">Sígueme en redes</p>
     <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
       <tr>

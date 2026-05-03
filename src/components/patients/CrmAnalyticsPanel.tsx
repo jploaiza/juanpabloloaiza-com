@@ -49,7 +49,7 @@ function KpiCard({
   icon: React.ElementType; label: string; value: string; sub?: string; color?: string;
 }) {
   return (
-    <div className="relative bg-[#0a1628] border border-[#C5A059]/10 p-4 overflow-hidden">
+    <div className="relative bg-[#16213e] border border-[#C5A059]/10 p-4 overflow-hidden">
       <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-[#C5A059]/20" />
       <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t border-r border-[#C5A059]/20" />
       <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b border-l border-[#C5A059]/20" />
@@ -77,7 +77,7 @@ function StatusDonut({ active, paused, finished }: { active: number; paused: num
           { label: "Finalizados", count: finished, pct: Math.max(0, fp), color: "bg-gray-600" },
         ].map(({ label, count, pct, color }) => (
           <div key={label} className="flex items-center gap-2">
-            <div className="w-16 h-1.5 bg-[#020617] overflow-hidden">
+            <div className="w-16 h-1.5 bg-[#0a1628] overflow-hidden">
               <div className={`h-full ${color} transition-all duration-700`} style={{ width: `${pct}%` }} />
             </div>
             <span className="font-cinzel text-[9px] text-gray-500 w-16">{label}</span>
@@ -165,7 +165,7 @@ export default function CrmAnalyticsPanel() {
       {/* Row: status breakdown + sessions bar */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Status breakdown */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-4">Distribución de estado</h3>
           <StatusDonut active={byStatus.active} paused={byStatus.paused} finished={byStatus.finished} />
           <div className="mt-4 grid grid-cols-3 gap-2 pt-4 border-t border-white/5">
@@ -183,7 +183,7 @@ export default function CrmAnalyticsPanel() {
         </div>
 
         {/* Sessions bar chart */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-4">Sesiones registradas / mes</h3>
           <BarChart data={monthlySessions.map((d) => ({ label: d.month, count: d.count }))} />
         </div>
@@ -191,11 +191,11 @@ export default function CrmAnalyticsPanel() {
 
       {/* Row: new patients + purchases */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-4">Nuevos pacientes / mes</h3>
           <BarChart data={monthlyNewPatients.map((d) => ({ label: d.month, count: d.count }))} color="#60a5fa" />
         </div>
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-4">Sesiones compradas / mes</h3>
           <BarChart data={monthlyPurchases.map((d) => ({ label: d.month, count: d.count }))} color="#34d399" />
         </div>
@@ -204,7 +204,7 @@ export default function CrmAnalyticsPanel() {
       {/* Row: expiring soon + recent purchases */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Expiring soon */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Vencen pronto</h3>
           <p className="font-crimson text-xs text-gray-600 mb-4">Activos con ≤ 30 días restantes</p>
           {expiringSoon.length === 0 ? (
@@ -248,7 +248,7 @@ export default function CrmAnalyticsPanel() {
         </div>
 
         {/* Recent purchases */}
-        <div className="bg-[#0a1628] border border-[#C5A059]/10 p-5">
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
           <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Últimas compras</h3>
           <p className="font-crimson text-xs text-gray-600 mb-4">Nuevos packs registrados recientemente</p>
           {recentPurchases.length === 0 ? (

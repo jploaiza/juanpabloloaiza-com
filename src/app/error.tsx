@@ -31,7 +31,7 @@ export default function GlobalError({
 
   return (
     <html lang="es">
-      <body className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
+      <body className="min-h-screen bg-[#0a1628] flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center">
           <img
             src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png"

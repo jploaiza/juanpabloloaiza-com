@@ -227,7 +227,7 @@ export default function ContentEditor({ value, onChange, onFullGenerate }: Props
   if (!editor) return null;
 
   return (
-    <div className="border border-white/10 bg-[#020d1f]">
+    <div className="border border-white/10 bg-[#0e1b30]">
       {/* ── AI toolbar ─────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-white/5">
         <button
@@ -309,7 +309,7 @@ export default function ContentEditor({ value, onChange, onFullGenerate }: Props
             onChange={(e) => setIdea(e.target.value)}
             placeholder="Ej: La conexión entre traumas de vidas pasadas y las relaciones tóxicas actuales..."
             rows={3}
-            className="w-full bg-[#020d1f] border border-white/10 text-gray-200 font-crimson text-sm px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-[#C5A059]/40 resize-none"
+            className="w-full bg-[#0e1b30] border border-white/10 text-gray-200 font-crimson text-sm px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-[#C5A059]/40 resize-none"
           />
           <div className="flex items-center gap-3 mt-3">
             <button

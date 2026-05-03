@@ -172,7 +172,7 @@ export default async function PatientDetailPage({
         {/* Left column — 2/3 */}
         <div className="lg:col-span-2 space-y-6">
           {/* Course progress */}
-          <div className="relative bg-[#0a1628] border border-white/5 p-5 overflow-hidden">
+          <div className="relative bg-[#16213e] border border-white/5 p-5 overflow-hidden">
             <ScrollworkCorners size={36} opacity={0.6} />
             <div className="flex items-center justify-between mb-3">
               <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500">
@@ -180,7 +180,7 @@ export default async function PatientDetailPage({
               </p>
               <span className="font-cinzel text-[11px] text-[#C5A059]">{progressPct}%</span>
             </div>
-            <div className="w-full h-1.5 bg-[#0f172a] overflow-hidden mb-2">
+            <div className="w-full h-1.5 bg-[#16213e] overflow-hidden mb-2">
               <div
                 className="h-full bg-gradient-to-r from-[#C5A059] to-[#F3E5AB] transition-all"
                 style={{ width: `${progressPct}%` }}
@@ -251,7 +251,7 @@ export default async function PatientDetailPage({
                     {activePack.sessions_used}/{activePack.sessions_total}
                   </span>
                 </div>
-                <div className="w-full h-2 bg-[#0f172a] overflow-hidden">
+                <div className="w-full h-2 bg-[#16213e] overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-[#C5A059] to-[#F3E5AB]"
                     style={{ width: `${activeProgressPct}%` }}
@@ -266,7 +266,7 @@ export default async function PatientDetailPage({
               )}
             </AcademyCard>
           ) : (
-            <div className="relative bg-[#0a1628] border border-dashed border-white/10 p-6 text-center">
+            <div className="relative bg-[#16213e] border border-dashed border-white/10 p-6 text-center">
               <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600 mb-3">
                 Sin pack activo
               </p>
@@ -462,7 +462,7 @@ export default async function PatientDetailPage({
           </AcademyCard>
 
           {/* Quick actions */}
-          <div className="relative bg-[#0a1628] border border-white/5 p-5 overflow-hidden">
+          <div className="relative bg-[#16213e] border border-white/5 p-5 overflow-hidden">
             <ScrollworkCorners size={32} opacity={0.5} />
             <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-4">
               Acciones rápidas

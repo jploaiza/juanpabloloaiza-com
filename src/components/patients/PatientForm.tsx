@@ -72,7 +72,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-[#0a1628] border border-[#C5A059]/30 relative">
+      <div className="w-full max-w-lg bg-[#16213e] border border-[#C5A059]/30 relative">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#C5A059]/15">
           <h2 className="font-cinzel text-[#C5A059] uppercase tracking-widest text-sm">
@@ -94,7 +94,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
                 required
                 value={form.first_name}
                 onChange={(e) => set("first_name", e.target.value)}
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
                 placeholder="María Fernanda"
               />
             </div>
@@ -105,7 +105,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
               <input
                 value={form.last_name}
                 onChange={(e) => set("last_name", e.target.value)}
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
                 placeholder="González"
               />
             </div>
@@ -122,7 +122,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
                 type="email"
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
                 placeholder="maria@email.com"
               />
             </div>
@@ -134,7 +134,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
                 required
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
                 placeholder="+56912345678"
               />
             </div>
@@ -168,7 +168,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
                 min={1}
                 value={form.pack_size}
                 onChange={(e) => set("pack_size", Math.max(1, Number(e.target.value)))}
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
               />
             </div>
             <div>
@@ -180,13 +180,13 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
                 type="date"
                 value={form.start_date}
                 onChange={(e) => set("start_date", e.target.value)}
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none"
               />
             </div>
           </div>
 
           {/* End date (calculated, read-only) */}
-          <div className="bg-[#020617] border border-[#C5A059]/10 px-3 py-2 flex items-center justify-between">
+          <div className="bg-[#0a1628] border border-[#C5A059]/10 px-3 py-2 flex items-center justify-between">
             <span className="text-xs font-cinzel text-gray-500 uppercase tracking-widest">Fecha de vencimiento</span>
             <span className="text-[#C5A059] font-crimson text-sm">
               {endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" }) : "—"}
@@ -202,7 +202,7 @@ export default function PatientForm({ patient, onClose, onSaved }: Props) {
               value={form.notes}
               onChange={(e) => set("notes", e.target.value)}
               rows={3}
-              className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none resize-none"
+              className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/60 outline-none resize-none"
               placeholder="Observaciones, contexto del paciente..."
             />
           </div>

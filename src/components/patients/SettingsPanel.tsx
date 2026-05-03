@@ -255,7 +255,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* ── Google Calendar ───────────────────────────────────────── */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+      <div className="bg-[#16213e] border border-[#C5A059]/20">
         {/* Section header */}
         <div className="flex items-center gap-2 px-5 py-4 border-b border-[#C5A059]/10">
           <Calendar size={14} className="text-[#C5A059]" />
@@ -273,7 +273,7 @@ export default function SettingsPanel() {
           {/* Not connected */}
           {connected === false && (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-4 bg-[#020617] border border-yellow-700/20">
+              <div className="flex items-start gap-3 p-4 bg-[#0a1628] border border-yellow-700/20">
                 <AlertCircle size={14} className="text-yellow-500/70 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-gray-400 font-crimson text-sm leading-relaxed">
@@ -371,7 +371,7 @@ export default function SettingsPanel() {
                         value={selectedId}
                         onChange={(e) => handleCalendarChange(e.target.value)}
                         disabled={saving}
-                        className="w-full appearance-none bg-[#020617] border border-[#C5A059]/25 text-white text-sm font-crimson px-4 py-2.5 pr-9 outline-none focus:border-[#C5A059]/50 transition cursor-pointer disabled:opacity-60"
+                        className="w-full appearance-none bg-[#0a1628] border border-[#C5A059]/25 text-white text-sm font-crimson px-4 py-2.5 pr-9 outline-none focus:border-[#C5A059]/50 transition cursor-pointer disabled:opacity-60"
                       >
                         {calendars.map((c) => (
                           <option key={c.id} value={c.id}>
@@ -409,7 +409,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* ── Plantillas de Recordatorio WhatsApp ─────────────────── */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+      <div className="bg-[#16213e] border border-[#C5A059]/20">
         {/* Section header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10">
           <div className="flex items-center gap-2">
@@ -469,7 +469,7 @@ export default function SettingsPanel() {
                   key={label}
                   onClick={() => insertVar(label)}
                   title={desc}
-                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#020617] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#0a1628] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
                 >
                   {label}
                 </button>
@@ -483,7 +483,7 @@ export default function SettingsPanel() {
               value={template}
               onChange={(e) => setTemplate(e.target.value)}
               rows={4}
-              className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
+              className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
               placeholder="Plantilla para pacientes con sesiones disponibles..."
             />
           ) : (
@@ -491,7 +491,7 @@ export default function SettingsPanel() {
               value={templateSinSesiones}
               onChange={(e) => setTemplateSinSesiones(e.target.value)}
               rows={4}
-              className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
+              className="w-full bg-[#0a1628] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
               placeholder="Plantilla para pacientes sin sesiones restantes..."
             />
           )}
@@ -537,7 +537,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* ── Plantillas de Recordatorio Email ────────────────────── */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+      <div className="bg-[#16213e] border border-[#C5A059]/20">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A059]/10">
           <div className="flex items-center gap-2">
             <Mail size={14} className="text-[#C5A059]" />
@@ -595,7 +595,7 @@ export default function SettingsPanel() {
                 <button
                   key={label}
                   title={desc}
-                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#020617] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
+                  className="text-[10px] font-cinzel px-2 py-0.5 bg-[#0a1628] border border-[#C5A059]/20 text-[#C5A059] hover:border-[#C5A059]/50 transition"
                 >
                   <span
                     onClick={() => insertEmailVar(label, "subject")}
@@ -615,14 +615,14 @@ export default function SettingsPanel() {
               <input
                 value={emailSubject}
                 onChange={(e) => setEmailSubject(e.target.value)}
-                className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
                 placeholder="Asunto del email con sesiones..."
               />
             ) : (
               <input
                 value={emailSubjectSin}
                 onChange={(e) => setEmailSubjectSin(e.target.value)}
-                className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2 text-sm font-crimson focus:border-amber-500/40 outline-none"
+                className="w-full bg-[#0a1628] border border-amber-500/20 text-white px-3 py-2 text-sm font-crimson focus:border-amber-500/40 outline-none"
                 placeholder="Asunto del email sin sesiones..."
               />
             )}
@@ -640,7 +640,7 @@ export default function SettingsPanel() {
                     key={label}
                     onClick={() => insertEmailVar(label, "body")}
                     title={`Insertar en cuerpo: ${desc}`}
-                    className="text-[9px] font-cinzel px-1.5 py-0.5 bg-[#020617] border border-[#C5A059]/15 text-[#C5A059]/70 hover:text-[#C5A059] hover:border-[#C5A059]/40 transition"
+                    className="text-[9px] font-cinzel px-1.5 py-0.5 bg-[#0a1628] border border-[#C5A059]/15 text-[#C5A059]/70 hover:text-[#C5A059] hover:border-[#C5A059]/40 transition"
                   >
                     {label}
                   </button>
@@ -652,7 +652,7 @@ export default function SettingsPanel() {
                 value={emailBody}
                 onChange={(e) => setEmailBody(e.target.value)}
                 rows={3}
-                className="w-full bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white px-3 py-2.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none leading-relaxed"
                 placeholder="Texto del email para pacientes con sesiones..."
               />
             ) : (
@@ -660,7 +660,7 @@ export default function SettingsPanel() {
                 value={emailBodySin}
                 onChange={(e) => setEmailBodySin(e.target.value)}
                 rows={3}
-                className="w-full bg-[#020617] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
+                className="w-full bg-[#0a1628] border border-amber-500/20 text-white px-3 py-2.5 text-sm font-crimson focus:border-amber-500/40 outline-none resize-none leading-relaxed"
                 placeholder="Texto del email para pacientes sin sesiones..."
               />
             )}
@@ -717,7 +717,7 @@ export default function SettingsPanel() {
       </div>
 
       {/* ── Alertas del sistema ───────────────────────────────────── */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20">
+      <div className="bg-[#16213e] border border-[#C5A059]/20">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-[#C5A059]/10">
           <Bell size={14} className="text-[#C5A059]" />
           <h3 className="font-cinzel text-white text-xs uppercase tracking-widest">Alertas del sistema</h3>
@@ -736,7 +736,7 @@ export default function SettingsPanel() {
                 value={alertPhone}
                 onChange={(e) => setAlertPhone(e.target.value)}
                 placeholder="+56962081884"
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-gray-200 font-crimson text-sm px-3 py-2 focus:outline-none focus:border-[#C5A059]/50 placeholder:text-gray-700"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson text-sm px-3 py-2 focus:outline-none focus:border-[#C5A059]/50 placeholder:text-gray-700"
               />
             </div>
             <div className="space-y-1.5">
@@ -748,7 +748,7 @@ export default function SettingsPanel() {
                 value={alertEmail}
                 onChange={(e) => setAlertEmail(e.target.value)}
                 placeholder="contacto@juanpabloloaiza.com"
-                className="w-full bg-[#020617] border border-[#C5A059]/20 text-gray-200 font-crimson text-sm px-3 py-2 focus:outline-none focus:border-[#C5A059]/50 placeholder:text-gray-700"
+                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson text-sm px-3 py-2 focus:outline-none focus:border-[#C5A059]/50 placeholder:text-gray-700"
               />
             </div>
           </div>

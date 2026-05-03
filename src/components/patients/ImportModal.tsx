@@ -119,7 +119,7 @@ export default function ImportModal({ onClose, onImported }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-[#0a1628] border border-[#C5A059]/30 flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-[#16213e] border border-[#C5A059]/30 flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#C5A059]/15 flex-shrink-0">
           <div>
@@ -162,7 +162,7 @@ export default function ImportModal({ onClose, onImported }: Props) {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar..."
-                  className="w-full bg-[#020617] border border-[#C5A059]/15 text-white pl-8 pr-3 py-1.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                  className="w-full bg-[#0a1628] border border-[#C5A059]/15 text-white pl-8 pr-3 py-1.5 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
                 />
               </div>
               <button
@@ -217,7 +217,7 @@ export default function ImportModal({ onClose, onImported }: Props) {
                           <select
                             value={sel.pack_size}
                             onChange={(e) => updateSelected(user.id, "pack_size", Number(e.target.value) as PackSize)}
-                            className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
+                            className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
                           >
                             {PACK_OPTIONS.map((p) => (
                               <option key={p} value={p}>Pack {p} ({PACK_WEEKS[p]}s)</option>
@@ -230,7 +230,7 @@ export default function ImportModal({ onClose, onImported }: Props) {
                             type="date"
                             value={sel.start_date}
                             onChange={(e) => updateSelected(user.id, "start_date", e.target.value)}
-                            className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
+                            className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
                           />
                         </div>
                         <div>
@@ -238,7 +238,7 @@ export default function ImportModal({ onClose, onImported }: Props) {
                           <select
                             value={sel.reminder_day}
                             onChange={(e) => updateSelected(user.id, "reminder_day", Number(e.target.value))}
-                            className="w-full bg-[#020617] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
+                            className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
                           >
                             {REMINDER_DAYS.map((d, i) => (
                               <option key={i} value={i}>{d}</option>

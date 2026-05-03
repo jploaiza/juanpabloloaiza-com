@@ -168,7 +168,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
       </Link>
 
       {/* Header card */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/20 p-5 mb-6 relative">
+      <div className="bg-[#16213e] border border-[#C5A059]/20 p-5 mb-6 relative">
         <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/40" />
         <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/40" />
         <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#C5A059]/40" />
@@ -196,19 +196,19 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
-          <div className="bg-[#020617] border border-[#C5A059]/10 p-3 text-center">
+          <div className="bg-[#0a1628] border border-[#C5A059]/10 p-3 text-center">
             <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Total</p>
             <p className="text-[#C5A059] font-cinzel font-bold text-lg">{patient.total_sessions}</p>
           </div>
-          <div className="bg-[#020617] border border-[#C5A059]/10 p-3 text-center">
+          <div className="bg-[#0a1628] border border-[#C5A059]/10 p-3 text-center">
             <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Usadas</p>
             <p className="text-white font-cinzel font-bold text-lg">{patient.sessions_used}/{patient.total_sessions}</p>
           </div>
-          <div className="bg-[#020617] border border-[#C5A059]/10 p-3 text-center">
+          <div className="bg-[#0a1628] border border-[#C5A059]/10 p-3 text-center">
             <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Restantes</p>
             <p className={`font-cinzel font-bold text-lg ${sl === 0 ? "text-gray-500" : sl <= 2 ? "text-yellow-400" : "text-emerald-400"}`}>{sl}</p>
           </div>
-          <div className="bg-[#020617] border border-[#C5A059]/10 p-3 text-center">
+          <div className="bg-[#0a1628] border border-[#C5A059]/10 p-3 text-center">
             <p className="text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Vence</p>
             <p className={`font-cinzel font-bold text-sm ${sl === 0 ? "text-gray-500" : daysLeftColor(dl)}`}>
               {sl === 0 ? "Sin ses." : dl > 0 ? `${dl}d` : "Vencido"}
@@ -217,7 +217,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
         </div>
 
         {/* Progress bar */}
-        <div className="mt-4 h-1.5 bg-[#020617] border border-[#C5A059]/10">
+        <div className="mt-4 h-1.5 bg-[#0a1628] border border-[#C5A059]/10">
           <div
             className="h-full bg-[#C5A059] transition-all duration-500"
             style={{ width: `${patient.total_sessions > 0 ? Math.min(100, Math.round((patient.sessions_used / patient.total_sessions) * 100)) : 0}%` }}
@@ -228,7 +228,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
 
         {/* Notes */}
         {patient.notes && (
-          <div className="mt-4 p-3 bg-[#020617] border border-[#C5A059]/10">
+          <div className="mt-4 p-3 bg-[#0a1628] border border-[#C5A059]/10">
             <p className="text-xs font-cinzel text-gray-500 uppercase tracking-wide mb-1">Notas</p>
             <p className="text-gray-300 font-crimson text-sm leading-relaxed whitespace-pre-line">{patient.notes}</p>
           </div>
@@ -292,7 +292,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
 
         {/* Extend deadline inline form */}
         {showExtend && (
-          <div className="mt-4 p-4 bg-[#020617] border border-blue-400/20 space-y-3">
+          <div className="mt-4 p-4 bg-[#0a1628] border border-blue-400/20 space-y-3">
             <p className="text-[10px] font-cinzel text-blue-400 uppercase tracking-widest">Extender plazo de vencimiento</p>
             <div className="flex gap-3 items-end flex-wrap">
               <div>
@@ -302,7 +302,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
                   min={1}
                   value={extendDays}
                   onChange={(e) => setExtendDays(Math.max(1, Number(e.target.value)))}
-                  className="w-20 bg-[#0a1628] border border-blue-400/20 text-white px-3 py-2 text-sm font-crimson focus:border-blue-400/40 outline-none"
+                  className="w-20 bg-[#16213e] border border-blue-400/20 text-white px-3 py-2 text-sm font-crimson focus:border-blue-400/40 outline-none"
                 />
               </div>
               <div className="flex gap-1 flex-wrap">
@@ -341,7 +341,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
 
         {/* Add sessions inline form */}
         {showAddSessions && (
-          <div className="mt-4 p-4 bg-[#020617] border border-[#C5A059]/20 space-y-3">
+          <div className="mt-4 p-4 bg-[#0a1628] border border-[#C5A059]/20 space-y-3">
             <p className="text-[10px] font-cinzel text-[#C5A059] uppercase tracking-widest">Registrar compra de sesiones</p>
             <div className="flex gap-3 items-end">
               <div>
@@ -351,7 +351,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
                   min={1}
                   value={addQty}
                   onChange={(e) => setAddQty(Math.max(1, Number(e.target.value)))}
-                  className="w-20 bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                  className="w-20 bg-[#16213e] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
                 />
               </div>
               <div className="flex gap-1">
@@ -375,7 +375,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
                 type="date"
                 value={addStartDate}
                 onChange={(e) => setAddStartDate(e.target.value)}
-                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                className="w-full bg-[#16213e] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
               />
             </div>
             <div>
@@ -385,7 +385,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
                 value={addNotes}
                 onChange={(e) => setAddNotes(e.target.value)}
                 placeholder="Ej: Compra sesión suelta, Pack renovado..."
-                className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                className="w-full bg-[#16213e] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
               />
             </div>
             <div className="flex gap-2">
@@ -409,7 +409,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
       </div>
 
       {/* Add note */}
-      <div className="bg-[#0a1628] border border-[#C5A059]/10 p-4 mb-6">
+      <div className="bg-[#16213e] border border-[#C5A059]/10 p-4 mb-6">
         <p className="text-xs font-cinzel text-gray-500 uppercase tracking-widest mb-2">Agregar nota</p>
         <div className="flex gap-2">
           <textarea
@@ -417,7 +417,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
             onChange={(e) => setNoteText(e.target.value)}
             rows={2}
             placeholder="Escribe una observación..."
-            className="flex-1 bg-[#020617] border border-[#C5A059]/15 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none"
+            className="flex-1 bg-[#0a1628] border border-[#C5A059]/15 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none resize-none"
           />
           <button
             onClick={saveNote}
@@ -437,7 +437,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
         )}
         <div className="space-y-2">
           {logs.map((log) => (
-            <div key={log.id} className="flex gap-3 bg-[#0a1628] border border-[#C5A059]/8 px-4 py-3">
+            <div key={log.id} className="flex gap-3 bg-[#16213e] border border-[#C5A059]/8 px-4 py-3">
               <div className="flex-shrink-0 mt-0.5">{LOG_ICONS[log.type] ?? <StickyNote size={14} className="text-gray-500" />}</div>
               <div className="flex-1 min-w-0">
                 <p className="text-gray-300 font-crimson text-sm leading-relaxed">{log.content}</p>

@@ -24,7 +24,7 @@ const AcademyInput = forwardRef<HTMLInputElement, Props>(
           <input
             ref={ref}
             className={`
-              w-full bg-[#020d1f] border text-gray-200 font-crimson text-base
+              w-full bg-[#0e1b30] border text-gray-200 font-crimson text-base
               px-4 py-3 ${icon ? "pl-10" : ""}
               placeholder-gray-600 focus:outline-none transition-colors
               ${error
