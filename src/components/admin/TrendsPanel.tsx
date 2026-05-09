@@ -130,9 +130,9 @@ export default function TrendsPanel() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await fetch("/api/cron/sync-trends", { method: "GET", headers: { "x-cron-secret": "" } });
+      await fetch("/api/admin/trends/sync", { method: "POST" });
     } catch {
-      // trigger will fail without secret — just refetch display data
+      // ignore errors — UI will show last run errors in the log section
     }
     await fetchData(geo, tab);
     setRefreshing(false);

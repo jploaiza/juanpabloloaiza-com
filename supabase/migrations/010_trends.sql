@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS trends_snapshots (
   geo text NOT NULL,
   keyword text NOT NULL,
   source text NOT NULL,           -- 'daily_trend' | 'related_query' | 'interest_over_time'
-  seed_keyword text,              -- NULL for daily_trends; seed keyword for related/interest
+  seed_keyword text NOT NULL DEFAULT '',  -- '' for daily_trends; seed keyword for related/interest
   interest_score int,             -- 0-100 from Trends
   rising boolean DEFAULT false,
   raw jsonb,
