@@ -80,8 +80,8 @@ export default function AdmissionSection() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
   };
 
-  const handleTurnstileLoad = () => {
-    if (turnstileRef.current && window.turnstile) {
+  const renderTurnstile = () => {
+    if (turnstileRef.current && window.turnstile && !turnstileWidgetId.current) {
       turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
         sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "",
         theme: "dark",
@@ -90,6 +90,20 @@ export default function AdmissionSection() {
       });
     }
   };
+
+  useEffect(() => {
+    // Render immediately if turnstile already loaded (e.g. navigating back)
+    renderTurnstile();
+
+    // Poll as fallback for when the script hasn't loaded yet
+    const interval = setInterval(() => {
+      if (turnstileWidgetId.current) { clearInterval(interval); return; }
+      renderTurnstile();
+    }, 300);
+
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -368,8 +382,8 @@ export default function AdmissionSection() {
 
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        strategy="lazyOnload"
-        onLoad={handleTurnstileLoad}
+        strategy="afterInteractive"
+        onLoad={renderTurnstile}
       />
     </section>
   );
