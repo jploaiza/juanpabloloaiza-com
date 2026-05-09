@@ -6,9 +6,15 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/panelcliente/', '/formulario-de-admision/'],
+        disallow: [
+          '/.next/',
+          '/api/',
+          '/panelcliente/',
+          '/formulario-de-admision/',
+          '/academy/admin/',
+        ],
       },
     ],
-    sitemap: 'https://www.juanpabloloaiza.com/sitemap.xml',
+    sitemap: 'https://juanpabloloaiza.com/sitemap.xml',
   }
 }

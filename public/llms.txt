@@ -1,27 +1,33 @@
 # Juan Pablo Loaiza - Terapeuta de Regresión a Vidas Pasadas
 
-> Juan Pablo Loaiza es un terapeuta especializado en hipnosis y regresión a vidas pasadas. Ofrece sesiones individuales en línea para ayudar a sus clientes a sanar traumas, superar miedos, liberar patrones kármicos y descubrir su propósito de vida a través de técnicas validadas por referentes como el Dr. Brian Weiss y Dolores Cannon.
+> Juan Pablo Loaiza es un terapeuta especializado en hipnosis clínica y regresión a vidas pasadas. Ofrece sesiones individuales en línea para ayudar a sus clientes a sanar traumas, superar miedos, liberar patrones kármicos y descubrir su propósito de vida a través de técnicas validadas por referentes como el Dr. Brian Weiss y Dolores Cannon.
 
 ## Páginas Principales
 
-- [Inicio](https://www.juanpabloloaiza.com/): Presentación del terapeuta y sus servicios de regresión a vidas pasadas e hipnosis.
-- [Admisión](https://www.juanpabloloaiza.com/admision/): Proceso de admisión para nuevos clientes interesados en iniciar una terapia.
-- [Formulario de Admisión](https://www.juanpabloloaiza.com/formulario-de-admision/): Formulario de contacto para solicitar una sesión o consulta inicial.
-- [Agenda](https://www.juanpabloloaiza.com/agenda/): Reserva de sesiones en línea con Juan Pablo Loaiza.
-- [Blog](https://www.juanpabloloaiza.com/blog/): Artículos educativos sobre regresión a vidas pasadas, hipnosis y sanación holística.
-- [Políticas de Servicio](https://www.juanpabloloaiza.com/politicas-de-servicio/): Términos, condiciones y políticas de las sesiones terapéuticas.
+- [Inicio](https://juanpabloloaiza.com/): Presentación del terapeuta y sus servicios de regresión a vidas pasadas e hipnosis.
+- [Agenda](https://juanpabloloaiza.com/agenda/): Reserva de sesiones en línea con Juan Pablo Loaiza.
+- [Entrevista](https://juanpabloloaiza.com/entrevista/): Entrevista en profundidad con Juan Pablo Loaiza sobre su trabajo y metodología.
+- [Blog](https://juanpabloloaiza.com/blog/): Artículos educativos sobre regresión a vidas pasadas, hipnosis y sanación holística.
+- [Videos](https://juanpabloloaiza.com/videos/): Contenido audiovisual educativo sobre terapia de regresión.
+- [Formulario de Admisión](https://juanpabloloaiza.com/formulario-de-admision/): Formulario de contacto para solicitar una sesión o consulta inicial.
+- [Políticas de Servicio](https://juanpabloloaiza.com/politicas-de-servicio/): Términos, condiciones y políticas de las sesiones terapéuticas.
+
+## Academy (Plataforma de Aprendizaje)
+
+- [JPL Academy](https://juanpabloloaiza.com/academy/): Plataforma de cursos en línea sobre preparación para regresión a vidas pasadas.
+- Curso principal: "Preparación para Hipnosis Regresiva" — disponible gratuitamente para nuevos estudiantes.
 
 ## Artículos del Blog
 
-- [La Ciencia Detrás de la Regresión a Vidas Pasadas](https://www.juanpabloloaiza.com/2024/07/la-ciencia-detras-de-la-regresion-a-vidas-pasadas/): Fundamentos científicos y evidencia que respalda la terapia de regresión, con referencias al trabajo del Dr. Brian Weiss.
-- [Superando la Depresión a Través de la Regresión a Vidas Pasadas](https://www.juanpabloloaiza.com/2024/07/superando-depresion-terapia-regresion-a-vidas-pasadas/): Cómo la terapia de regresión puede ser un complemento en el tratamiento de la depresión.
-- [La Conexión Entre Miedos Actuales y Vidas Pasadas](https://www.juanpabloloaiza.com/2024/10/12/la-conexion-entre-miedos-actuales-y-vidas-pasadas/): Exploración de cómo traumas de vidas anteriores pueden manifestarse como fobias o miedos irracionales en el presente.
-- [Sanación de Traumas a Través de la Regresión](https://www.juanpabloloaiza.com/2024/10/12/sanacion-de-traumas-a-traves-de-la-regresion/): El proceso terapéutico para identificar y sanar traumas profundos mediante hipnosis regresiva.
-- [Entendiendo y Liberando Posesiones Espirituales](https://www.juanpabloloaiza.com/2024/10/12/entendiendo-y-liberando-posesiones-espirituales/): Abordaje terapéutico de la liberación de entidades espirituales y su impacto en el bienestar.
-- [Rompiendo Ciclos de Adicción con Ayuda del Pasado](https://www.juanpabloloaiza.com/2024/10/12/rompiendo-ciclos-de-adiccion-con-ayuda-del-pasado/): Cómo la regresión puede revelar las raíces kármicas o emocionales detrás de conductas adictivas.
-- [Descubriendo Tu Propósito de Vida a Través de la Regresión](https://www.juanpabloloaiza.com/2024/10/12/descubriendo-tu-proposito-de-vida-a-traves-de-la-regresion-a-vidas-pasadas/): Guía para usar la terapia regresiva como herramienta de autodescubrimiento y alineación con el propósito personal.
-- [Cómo la Regresión a Vidas Pasadas Puede Transformar Tus Relaciones](https://www.juanpabloloaiza.com/2024/10/12/como-la-regresion-a-vidas-pasadas-puede-transformar-tus-relaciones-actuales/): Impacto de los vínculos kármicos en las relaciones actuales y cómo sanarlos.
-- [Sanación Kármica: Liberándote de Contratos Antiguos](https://www.juanpabloloaiza.com/2024/10/12/sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud/): Qué son los contratos kármicos, cómo identificarlos y cómo liberarse de ellos para vivir con mayor plenitud.
+- [La Ciencia Detrás de la Regresión a Vidas Pasadas](https://juanpabloloaiza.com/blog/la-ciencia-detras-de-la-regresion-a-vidas-pasadas-explorando-evidencias-y-estudios/): Fundamentos científicos y evidencia que respalda la terapia de regresión, con referencias al trabajo del Dr. Brian Weiss.
+- [Superando la Depresión con Terapia de Regresión](https://juanpabloloaiza.com/blog/superando-la-depresion-con-terapia-de-regresion-a-vidas-pasadas/): Cómo la terapia de regresión puede ser un complemento en el tratamiento de la depresión.
+- [La Conexión Entre Miedos Actuales y Vidas Pasadas](https://juanpabloloaiza.com/blog/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores/): Exploración de cómo traumas de vidas anteriores pueden manifestarse como fobias o miedos irracionales en el presente.
+- [Sanación de Traumas a Través de la Regresión](https://juanpabloloaiza.com/blog/sanacion-de-traumas-a-traves-de-la-regresion-descubriendo-el-poder-curativo-de-las-vidas-pasadas/): El proceso terapéutico para identificar y sanar traumas profundos mediante hipnosis regresiva.
+- [Entendiendo y Liberando Posesiones Espirituales](https://juanpabloloaiza.com/blog/entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser/): Abordaje terapéutico de la liberación de entidades espirituales y su impacto en el bienestar.
+- [Rompiendo Ciclos de Adicción con Ayuda del Pasado](https://juanpabloloaiza.com/blog/rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas/): Cómo la regresión puede revelar las raíces kármicas o emocionales detrás de conductas adictivas.
+- [Descubriendo Tu Propósito de Vida a Través de la Regresión](https://juanpabloloaiza.com/blog/descubriendo-tu-proposito-de-vida-a-traves-de-la-regresion-a-vidas-pasadas/): Guía para usar la terapia regresiva como herramienta de autodescubrimiento y alineación con el propósito personal.
+- [Cómo la Regresión Puede Transformar Tus Relaciones](https://juanpabloloaiza.com/blog/como-la-regresion-a-vidas-pasadas-puede-transformar-tus-relaciones-actuales/): Impacto de los vínculos kármicos en las relaciones actuales y cómo sanarlos.
+- [Sanación Kármica: Liberándote de Contratos Antiguos](https://juanpabloloaiza.com/blog/sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud/): Qué son los contratos kármicos, cómo identificarlos y cómo liberarse de ellos para vivir con mayor plenitud.
 
 ## Información del Terapeuta
 
@@ -30,8 +36,8 @@
 - **Modalidad:** Sesiones individuales en línea (Zoom)
 - **Idioma:** Español
 - **Influencias terapéuticas:** Dr. Brian Weiss, Dolores Cannon
-- **Sitio web:** https://www.juanpabloloaiza.com
+- **Sitio web:** https://juanpabloloaiza.com
 
 ## Áreas Temáticas
 
-Regresión a vidas pasadas, hipnosis terapéutica, sanación kármica, liberación de traumas, propósito de vida, desarrollo personal, espiritualidad, sanación holística, miedos y fobias, depresión, adicciones, relaciones, posesiones espirituales, liberación de entidades, contratos kármicos, vidas anteriores, alma, conciencia, transformación personal.
+Regresión a vidas pasadas, hipnosis terapéutica, sanación kármica, liberación de traumas, propósito de vida, desarrollo personal, espiritualidad, sanación holística, miedos y fobias, depresión, adicciones, relaciones, posesiones espirituales, liberación de entidades, contratos kármicos, vidas anteriores, alma, conciencia, transformación personal, TRVP.
