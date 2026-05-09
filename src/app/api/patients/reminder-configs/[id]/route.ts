@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -42,6 +43,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   const { error } = await adminSb.from("reminder_configs").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:reminder-configs:id", error);
   return NextResponse.json({ ok: true });
 }

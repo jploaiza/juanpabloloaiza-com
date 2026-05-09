@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { type GCalTokenData, getValidToken } from "@/lib/google-calendar";
+import { dbErr } from "@/lib/db-error";
 
 export const maxDuration = 25;
 
@@ -128,7 +129,7 @@ export async function PATCH(req: NextRequest) {
     .update({ calendar_id, updated_at: new Date().toISOString() })
     .eq("user_id", stored.user_id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("calendar:calendars", error);
   return NextResponse.json({ updated: true, calendar_id });
   } catch (err) {
     return NextResponse.json(

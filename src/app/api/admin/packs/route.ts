@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 function addDays(date: Date, days: number): Date {
   const result = new Date(date);

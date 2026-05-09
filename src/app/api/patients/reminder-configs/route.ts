@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export async function GET() {
     .order("day_of_week")
     .order("hour_chile");
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:reminder-configs", error);
   return NextResponse.json({ configs: data ?? [] });
 }
 

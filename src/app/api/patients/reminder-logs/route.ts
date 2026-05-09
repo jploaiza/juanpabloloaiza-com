@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 // GET /api/patients/reminder-logs — recent reminder_sent logs with patient name
 export async function GET() {
@@ -19,7 +20,7 @@ export async function GET() {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:reminder-logs", error);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formatted = (logs ?? []).map((l: any) => ({

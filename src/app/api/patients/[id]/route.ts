@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { calcEndDate, type PackSize, type PatientStatus } from "@/lib/patients";
+import { dbErr } from "@/lib/db-error";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -49,7 +50,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
       const newEndDate = base.toISOString().split("T")[0];
 
       const { data, error } = await adminSb.from("patients").update({ end_date: newEndDate }).eq("id", id).select().single();
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return dbErr("patients:id", error);
 
       const formatted = base.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" });
       await adminSb.from("patient_logs").insert({
@@ -70,7 +71,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
     if (!newStatus) return NextResponse.json({ error: "Acción inválida" }, { status: 400 });
 
     const { data, error } = await adminSb.from("patients").update({ status: newStatus }).eq("id", id).select().single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return dbErr("patients:id", error);
 
     const labels: Record<PatientStatus, string> = { active: "Reactivado", paused: "Pausado", finished: "Finalizado" };
     await adminSb.from("patient_logs").insert({
@@ -104,7 +105,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   }
 
   const { data, error } = await adminSb.from("patients").update(updates).eq("id", id).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:id", error);
 
   await adminSb.from("patient_logs").insert({
     patient_id: id,

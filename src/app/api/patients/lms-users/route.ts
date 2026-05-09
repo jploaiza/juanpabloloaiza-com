@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 // GET /api/patients/lms-users
 // Returns LMS profiles not yet imported as patients
@@ -24,7 +25,7 @@ export async function GET() {
     .neq("role", "admin")
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:lms-users", error);
 
   const available = (profiles ?? []).filter(
     (p: { email: string }) => !existingEmails.has(p.email?.toLowerCase())

@@ -6,6 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 export async function DELETE() {
   const supabase = await createClient();
@@ -21,6 +22,6 @@ export async function DELETE() {
     .delete()
     .eq("user_id", user.id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("calendar:disconnect", error);
   return NextResponse.json({ disconnected: true });
 }

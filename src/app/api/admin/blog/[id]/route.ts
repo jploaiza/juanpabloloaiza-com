@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 export async function PATCH(
   req: NextRequest,
@@ -70,7 +71,7 @@ export async function PATCH(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return dbErr("admin:blog:id", error);
   }
 
   return NextResponse.json({ post });
@@ -103,7 +104,7 @@ export async function DELETE(
   const { error } = await adminSb.from("blog_posts").delete().eq("id", id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return dbErr("admin:blog:id", error);
   }
 
   return NextResponse.json({ success: true });

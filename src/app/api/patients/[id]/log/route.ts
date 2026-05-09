@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import type { LogType } from "@/lib/patients";
+import { dbErr } from "@/lib/db-error";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .eq("patient_id", id)
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:id:log", error);
 
   return NextResponse.json({ logs: logs ?? [] });
 }
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     content: content.trim(),
   }).select().single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:id:log", error);
 
   return NextResponse.json({ log: data }, { status: 201 });
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 export async function GET() {
   const supabase = await createClient();
@@ -15,6 +16,6 @@ export async function GET() {
     .order("run_at", { ascending: false })
     .limit(50);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:reminder-run-logs", error);
   return NextResponse.json({ logs: data ?? [] });
 }

@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
+import { dbErr } from "@/lib/db-error";
 import {
   type Patient, sessionsLeft,
   DEFAULT_REMINDER_TEMPLATE, DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY,
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
     .select("*")
     .in("id", patient_ids);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients:send-reminders-now", error);
 
   const results: {
     id: string; name: string; email: boolean; whatsapp: boolean; error?: string;

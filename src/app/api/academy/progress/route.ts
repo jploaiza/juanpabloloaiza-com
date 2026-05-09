@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 export async function PATCH(req: NextRequest) {
   const supabase = await createClient();
@@ -25,6 +26,6 @@ export async function PATCH(req: NextRequest) {
       { onConflict: "user_id,lesson_id" }
     );
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("academy:progress", error);
   return NextResponse.json({ success: true });
 }

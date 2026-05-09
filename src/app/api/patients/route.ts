@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { calcEndDate, type PackSize } from "@/lib/patients";
+import { dbErr } from "@/lib/db-error";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
     status: "active",
   }).select().single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("patients", error);
 
   // Register initial purchase in history
   await adminSb.from("patient_session_purchases").insert({

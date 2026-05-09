@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export async function GET() {
   if (!adminSb) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data, error } = await adminSb.from("crm_settings").select("key, value");
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("crm-settings", error);
 
   const settings: Record<string, string> = {};
   for (const row of data ?? []) settings[row.key] = row.value;
@@ -44,6 +45,6 @@ export async function PATCH(req: NextRequest) {
     .from("crm_settings")
     .upsert(rows, { onConflict: "key" });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErr("crm-settings", error);
   return NextResponse.json({ ok: true });
 }

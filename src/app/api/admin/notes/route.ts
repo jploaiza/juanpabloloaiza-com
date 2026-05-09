@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { dbErr } from "@/lib/db-error";
 
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient();

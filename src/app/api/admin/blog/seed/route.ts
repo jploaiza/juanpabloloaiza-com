@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { blogPosts } from "@/lib/blog-data";
+import { dbErr } from "@/lib/db-error";
 
 export async function POST() {
   const supabase = await createClient();
@@ -53,7 +54,7 @@ export async function POST() {
     .select("id, slug");
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return dbErr("admin:blog:seed", error);
   }
 
   return NextResponse.json({
