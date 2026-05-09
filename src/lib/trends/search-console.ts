@@ -10,9 +10,19 @@ export interface GscRow {
 }
 
 function getAuth() {
+  const refreshToken = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+
+  if (refreshToken && clientId && clientSecret) {
+    const oauth2 = new google.auth.OAuth2(clientId, clientSecret);
+    oauth2.setCredentials({ refresh_token: refreshToken });
+    return oauth2;
+  }
+
+  // Fallback: service account JWT (only works if account is added to GSC)
   const email = process.env.GOOGLE_SA_EMAIL ?? "";
   const key = (process.env.GOOGLE_SA_PRIVATE_KEY ?? "").replace(/\\n/g, "\n");
-
   if (!email || !key) return null;
 
   return new google.auth.JWT({
