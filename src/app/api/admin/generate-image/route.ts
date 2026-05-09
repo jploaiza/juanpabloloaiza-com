@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         { role: "user", content: `Title: ${title}\nExcerpt: ${excerpt ?? ""}\nContent preview: ${(content ?? "").slice(0, 500)}` },
       ],
     });
-    imagePrompt = res.choices[0]?.message?.content?.trim() ?? title;
+    imagePrompt = (res.choices[0]?.message?.content?.trim() ?? title).slice(0, 500);
   } catch {
     imagePrompt = `${title}, spiritual healing, ethereal light, mystical atmosphere`;
   }
@@ -94,5 +94,5 @@ export async function POST(req: NextRequest) {
   }
 
   const url = `${process.env.R2_PUBLIC_URL!.replace(/\/$/, "")}/${key}`;
-  return NextResponse.json({ url, prompt: imagePrompt });
+  return NextResponse.json({ url });
 }

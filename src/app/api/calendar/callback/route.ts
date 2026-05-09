@@ -34,8 +34,11 @@ export async function GET(req: NextRequest) {
     if (!storedCsrf || storedCsrf !== decoded.csrf) {
       return NextResponse.redirect(new URL(`${returnFallback}?gcal_error=state_mismatch`, req.url));
     }
-    // Only allow same-origin relative paths to prevent open redirect
-    if (decoded.returnTo && /^\/[^/]/.test(decoded.returnTo)) returnTo = decoded.returnTo;
+    // Allowlist known admin prefixes to prevent open redirect
+    const ALLOWED = ["/admin", "/academy"];
+    if (decoded.returnTo && ALLOWED.some((p) => decoded.returnTo.startsWith(p))) {
+      returnTo = decoded.returnTo;
+    }
   } catch {
     return NextResponse.redirect(new URL(`${returnFallback}?gcal_error=invalid_state`, req.url));
   }

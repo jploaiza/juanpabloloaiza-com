@@ -1,5 +1,6 @@
 import { Resend } from "resend";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 const LOGO_URL = "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png";
 const PHOTO_URL = "https://media.juanpabloloaiza.com/images/jpl-newwsp.jpeg";
@@ -247,12 +248,21 @@ function clientHtml(name: string) {
 
 // ── Route handler ──────────────────────────────────────────────────────────
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  if (!rateLimit(getIp(request.headers), 5, 60 * 60_000)) {
+    return NextResponse.json({ error: "Demasiados intentos. Intenta en una hora." }, { status: 429 });
+  }
+
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { name, email, phone, reason } = await request.json();
 
   if (!name || !email || !reason) {
     return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
+  }
+
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!EMAIL_REGEX.test(String(email))) {
+    return NextResponse.json({ error: "Email inválido." }, { status: 400 });
   }
 
   const safeName = esc(String(name));

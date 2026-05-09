@@ -583,7 +583,7 @@ export default function SettingsPanel() {
 
           {activeEmailTab === "sin_sesiones" && (
             <p className="text-[10px] font-crimson text-amber-400/70 italic">
-              Para esta variante el botón dice "Renovar sesiones" y se oculta el contador de sesiones.
+              Para esta variante el botón dice &ldquo;Renovar sesiones&rdquo; y se oculta el contador de sesiones.
             </p>
           )}
 

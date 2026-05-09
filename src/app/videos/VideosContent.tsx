@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import Link from "next/link";
 
 const R2_BASE = "https://media.juanpabloloaiza.com";
 
@@ -150,7 +151,7 @@ export default function VideosContent() {
         <div className="border border-[#C5A059]/20 p-12 bg-[#16213e]">
           <h3 className="text-3xl font-cinzel text-white mb-4">¿Listo para comenzar?</h3>
           <p className="text-gray-300 font-crimson text-lg mb-8 max-w-xl mx-auto">Si ya resolviste tus dudas, da el primer paso y completa el formulario de admisión.</p>
-          <a href="/#ListaDeAdmision" className="btn-gold">Iniciar Proceso</a>
+          <Link href="/#ListaDeAdmision" className="btn-gold">Iniciar Proceso</Link>
         </div>
       </motion.div>
     </main>

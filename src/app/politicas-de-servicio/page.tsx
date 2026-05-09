@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import WhatsAppCta from "@/components/WhatsAppCta";
 
 export const metadata: Metadata = {
   title: "Políticas de Servicio | Juan Pablo Loaiza",
@@ -189,14 +190,9 @@ export default function PoliticasPage() {
           <p className="font-crimson text-gray-400 text-lg mb-6">
             ¿Tienes alguna pregunta sobre estas políticas?
           </p>
-          <a
-            href="https://api.whatsapp.com/send?phone=56962081884"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-gold"
-          >
+          <WhatsAppCta location="politicas" className="btn-gold">
             Contáctame por WhatsApp
-          </a>
+          </WhatsAppCta>
         </div>
       </main>
       <Footer />

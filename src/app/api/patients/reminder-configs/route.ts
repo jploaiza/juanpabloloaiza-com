@@ -28,13 +28,22 @@ export async function POST(req: NextRequest) {
   const { adminSb, status } = await requireAdmin();
   if (!adminSb) return NextResponse.json({ error: "Forbidden" }, { status });
 
-  const body = await req.json().catch(() => ({}));
+  const raw = await req.json().catch(() => ({}));
+  const { label, day_of_week, hour_chile, patient_filter, channels,
+          send_mode, delay_min, delay_max, is_active, whatsapp_template,
+          patient_ids, filter_values, patient_filter_config } = raw;
+
   const { data, error } = await adminSb
     .from("reminder_configs")
-    .insert(body)
+    .insert({ label, day_of_week, hour_chile, patient_filter, channels,
+               send_mode, delay_min, delay_max, is_active, whatsapp_template,
+               patient_ids, filter_values, patient_filter_config })
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[reminder-configs:post]", error.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
   return NextResponse.json({ config: data }, { status: 201 });
 }

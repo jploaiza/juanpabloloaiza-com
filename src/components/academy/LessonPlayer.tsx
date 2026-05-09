@@ -254,8 +254,6 @@ export default function LessonPlayer({
       video.currentTime = lastSeconds;
     }
 
-    let saveTimer: ReturnType<typeof setInterval>;
-
     // ── Real play time accumulation ──────────────────────────────────────────
     const WATCH_INTEGRITY = 0.65; // 65% real watch time required for auto-complete
 
@@ -312,7 +310,7 @@ export default function LessonPlayer({
     video.addEventListener("ended", onEnded);
 
     // Periodic save every 5s during playback
-    saveTimer = setInterval(() => {
+    const saveTimer = setInterval(() => {
       if (!video.paused && !video.ended) {
         saveProgress(Math.floor(video.currentTime), isCompleted);
       }

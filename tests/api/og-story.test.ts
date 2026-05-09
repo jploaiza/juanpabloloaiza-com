@@ -6,6 +6,7 @@ const { MockImageResponse } = vi.hoisted(() => {
     static lastOptions: unknown = {};
     constructor(element: unknown, options?: unknown) {
       // Serialize the React element to HTML for inspection
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { renderToStaticMarkup: render } = require("react-dom/server");
       const html = render(element as React.ReactElement);
       super(html, { headers: { "content-type": "image/png" } });

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 const navItems = [
   { label: "EL PROCESO", href: "/#ComoFunciona" },
@@ -66,12 +67,12 @@ export default function Header() {
                 {item.label}
               </a>
             ))}
-            <a
+            <Link
               href="/#ListaDeAdmision"
               className="font-cinzel font-bold border border-[#C5A059] text-[#C5A059] px-6 py-2.5 text-[12px] uppercase tracking-widest hover:bg-[#C5A059] hover:text-[#020617] transition duration-500 shadow-[0_0_15px_rgba(197,160,89,0.1)]"
             >
               Comienza Ahora
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -104,13 +105,13 @@ export default function Header() {
                 {item.label}
               </a>
             ))}
-            <a
+            <Link
               href="/#ListaDeAdmision"
               className="font-cinzel mt-2 border border-[#C5A059] text-[#C5A059] px-4 py-3 text-sm uppercase tracking-widest text-center hover:bg-[#C5A059] hover:text-[#020617] transition"
               onClick={() => setIsOpen(false)}
             >
               Comienza Ahora
-            </a>
+            </Link>
             {/* Mobile social links */}
             <div className="flex gap-6 justify-center pt-2 font-cinzel text-xs uppercase tracking-widest text-gray-500">
               <a href="https://www.instagram.com/jploaizao" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A059] transition">Instagram</a>

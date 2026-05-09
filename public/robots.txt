@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /.next/
-Disallow: /api/
-
-Sitemap: https://juanpabloloaiza.com/sitemap.xml

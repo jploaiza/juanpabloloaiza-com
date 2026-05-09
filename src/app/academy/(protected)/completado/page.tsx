@@ -76,7 +76,7 @@ export default async function CompletadoPage({ searchParams }: Props) {
           ¡Lo lograste, {firstName}!
         </h1>
         <p className="font-crimson text-lg text-gray-400 mb-2 italic">
-          "{courseTitle}"
+          &ldquo;{courseTitle}&rdquo;
         </p>
 
         {/* ── Divider ── */}

@@ -87,7 +87,7 @@ export default async function CertificatePage({ params }: Props) {
           </p>
 
           <p className="font-cinzel text-lg text-[#C5A059] mb-6 italic leading-snug">
-            "{courseTitle}"
+            &ldquo;{courseTitle}&rdquo;
           </p>
 
           <div className="flex items-center gap-3 justify-center my-6">

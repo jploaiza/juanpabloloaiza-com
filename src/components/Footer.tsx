@@ -1,7 +1,9 @@
 "use client";
 
 import { Mail, Phone, Globe } from "lucide-react";
+import { trackEvent } from "@/lib/track";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -60,9 +62,9 @@ export default function Footer() {
               "Liberación de Entidades",
             ].map((service) => (
               <li key={service}>
-                <a href="/#ListaDeAdmision" className="font-crimson text-base text-gray-400 hover:text-[#C5A059] transition">
+                <Link href="/#ListaDeAdmision" className="font-crimson text-base text-gray-400 hover:text-[#C5A059] transition">
                   {service}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -76,7 +78,7 @@ export default function Footer() {
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
               <Phone className="w-4 h-4 text-[#C5A059] mt-1 flex-shrink-0" />
-              <a href="https://api.whatsapp.com/send?phone=56962081884" className="font-crimson text-base text-gray-400 hover:text-[#C5A059] transition">
+              <a href="https://api.whatsapp.com/send?phone=56962081884" className="font-crimson text-base text-gray-400 hover:text-[#C5A059] transition" onClick={() => trackEvent("whatsapp_click", { location: "footer" })}>
                 +56 9 6208 1884
               </a>
             </li>

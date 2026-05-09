@@ -49,6 +49,7 @@ export default async function AdminPage() {
     adminSb.from("profiles").select("id, email, full_name, created_at, role", { count: "exact" }).order("created_at", { ascending: false }),
     adminSb.from("enrollments").select("user_id, course_id, enrolled_at, completed_at"),
     adminSb.from("enrollments").select("user_id, completed_at").not("completed_at", "is", null),
+    // eslint-disable-next-line react-hooks/purity
     adminSb.from("profiles").select("id, email, full_name, created_at").gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString()).order("created_at", { ascending: false }),
     adminSb.from("lesson_progress").select("user_id, course_id, is_completed, watch_seconds, last_watched_at"),
     adminSb.from("courses").select("id, slug, title, notify_completion_user, notify_completion_admin, admin_notify_email"),

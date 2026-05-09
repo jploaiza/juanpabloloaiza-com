@@ -4,7 +4,7 @@ import ScrollDivider from "@/components/ScrollDivider";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Tag, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { type toDisplayPost } from "@/lib/supabase/blog";
 
 type DisplayPost = ReturnType<typeof toDisplayPost>;
@@ -13,12 +13,16 @@ const CARDS = 3;
 const AUTO_INTERVAL = 5000;
 
 export default function BlogSection({ initialPosts = [] }: { initialPosts?: DisplayPost[] }) {
-  // Latest post first, then up to 5 random from the rest — max 6 total
-  const posts = useMemo(() => {
-    if (initialPosts.length === 0) return [];
+  // SSR-safe: start with first 6 in order, shuffle client-side after mount
+  const [posts, setPosts] = useState<DisplayPost[]>(() => initialPosts.slice(0, 6));
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (initialPosts.length === 0) { setPosts([]); return; }
     const latest = initialPosts[0];
     const rest = [...initialPosts.slice(1)].sort(() => Math.random() - 0.5).slice(0, 5);
-    return [latest, ...rest];
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPosts([latest, ...rest]);
   }, [initialPosts]);
 
   const [current, setCurrent] = useState(0);

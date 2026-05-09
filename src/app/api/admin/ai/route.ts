@@ -131,10 +131,17 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { action, input } = body as { action: "generate" | "generate-full" | "improve" | "seo" | "improve-fields"; input: string };
+  const { action, input } = body as { action: string; input: string };
 
-  if (!action || !input?.trim()) {
+  const VALID_ACTIONS = new Set(["generate", "generate-full", "improve", "seo", "improve-fields"]);
+  if (!action || !VALID_ACTIONS.has(action)) {
+    return NextResponse.json({ error: "Acción inválida." }, { status: 400 });
+  }
+  if (!input?.trim()) {
     return NextResponse.json({ error: "Faltan campos requeridos." }, { status: 400 });
+  }
+  if (typeof input !== "string" || input.length > 50_000) {
+    return NextResponse.json({ error: "Input demasiado largo." }, { status: 400 });
   }
 
   let prompt: string;

@@ -56,7 +56,9 @@ export default async function AnalyticsPage() {
 
   const adminSb = await createAdminClient();
 
+  // eslint-disable-next-line react-hooks/purity
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  // eslint-disable-next-line react-hooks/purity
   const sixMonthsAgo = new Date(Date.now() - 6 * 30 * 86400000).toISOString();
 
   const [

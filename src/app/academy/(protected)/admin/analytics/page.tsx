@@ -32,6 +32,7 @@ export default async function AnalyticsPage() {
   if (profile?.role !== "admin") redirect("/academy/login");
 
   const adminSb = createAdminClient();
+  // eslint-disable-next-line react-hooks/purity
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
   const [

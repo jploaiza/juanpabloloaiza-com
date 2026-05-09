@@ -82,6 +82,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "userId, packType, startDate are required" }, { status: 400 });
   }
 
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_REGEX.test(String(userId))) {
+    return NextResponse.json({ error: "userId inválido." }, { status: 400 });
+  }
+
   if (![1, 3, 5].includes(packType)) {
     return NextResponse.json({ error: "packType must be 1, 3, or 5" }, { status: 400 });
   }
@@ -108,8 +113,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (insertError) {
-    console.error("Pack insert error:", insertError);
-    return NextResponse.json({ error: insertError.message }, { status: 500 });
+    console.error("[packs:insert]", insertError.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   // Update patient status to active

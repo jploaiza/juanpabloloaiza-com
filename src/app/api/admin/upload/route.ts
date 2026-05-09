@@ -21,7 +21,13 @@ function hasValidMagicBytes(buf: Buffer, mimeType: string): boolean {
     case "image/png": return buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47;
     case "image/gif": return buf.subarray(0, 6).toString("ascii") === "GIF87a" || buf.subarray(0, 6).toString("ascii") === "GIF89a";
     case "image/webp": return buf.length >= 12 && buf.subarray(0, 4).toString("ascii") === "RIFF" && buf.subarray(8, 12).toString("ascii") === "WEBP";
-    case "image/avif": return true; // ISO BMFF container — complex to validate, trust ALLOWED_TYPES check
+    case "image/avif": {
+      // ISO BMFF container: bytes 4-7 must be 'ftyp', brand at 8-11 starts with avif/avis/mif1
+      if (buf.length < 12) return false;
+      const ftyp = buf.subarray(4, 8).toString("ascii");
+      const brand = buf.subarray(8, 12).toString("ascii");
+      return ftyp === "ftyp" && (brand.startsWith("avif") || brand.startsWith("avis") || brand.startsWith("mif1"));
+    }
     default: return false;
   }
 }

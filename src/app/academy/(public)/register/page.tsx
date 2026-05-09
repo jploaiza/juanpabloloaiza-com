@@ -81,6 +81,8 @@ function RegisterForm() {
           .upsert({ user_id: data.user.id, course_id: course.id }, { onConflict: "user_id,course_id", ignoreDuplicates: true });
       }
     }
+    // Full reload needed after registration to reinitialize server-side session
+    // eslint-disable-next-line react-hooks/immutability
     window.location.href = "/academy/dashboard";
   };
 

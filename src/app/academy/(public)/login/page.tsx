@@ -73,6 +73,8 @@ function LoginForm() {
       inputRefs.current[0]?.focus();
       return;
     }
+    // Full reload needed after auth to reinitialize server-side session
+    // eslint-disable-next-line react-hooks/immutability
     window.location.href = redirectTo;
   };
 
