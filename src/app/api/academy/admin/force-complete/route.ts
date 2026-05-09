@@ -51,7 +51,8 @@ export async function POST(req: NextRequest) {
     .upsert(progressRows, { onConflict: "user_id,lesson_id" });
 
   if (progressError) {
-    return NextResponse.json({ error: progressError.message }, { status: 500 });
+    console.error("[force-complete] progress:", progressError.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   const { error: enrollError } = await adminSb
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
     .is("completed_at", null);
 
   if (enrollError) {
-    return NextResponse.json({ error: `Enrollment update failed: ${enrollError.message}` }, { status: 500 });
+    console.error("[force-complete] enrollment:", enrollError.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   const { data: existing, error: certFetchError } = await adminSb
@@ -73,7 +75,8 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (certFetchError) {
-    return NextResponse.json({ error: `Certificate fetch failed: ${certFetchError.message}` }, { status: 500 });
+    console.error("[force-complete] cert-fetch:", certFetchError.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   let certificateToken = existing?.verify_token ?? null;
@@ -84,7 +87,8 @@ export async function POST(req: NextRequest) {
       .select("verify_token")
       .single();
     if (certInsertError) {
-      return NextResponse.json({ error: `Certificate creation failed: ${certInsertError.message}` }, { status: 500 });
+      console.error("[force-complete] cert-insert:", certInsertError.code);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
     certificateToken = cert?.verify_token ?? null;
   }

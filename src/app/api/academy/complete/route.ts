@@ -17,6 +17,14 @@ export async function POST(req: NextRequest) {
   const { lessonId, courseId } = await req.json();
   if (!lessonId || !courseId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
+  // Verify enrollment and lesson ownership before writing progress
+  const [{ data: enrollment }, { data: lesson }] = await Promise.all([
+    supabase.from("enrollments").select("id").eq("user_id", user.id).eq("course_id", courseId).maybeSingle(),
+    supabase.from("lessons").select("id").eq("id", lessonId).eq("course_id", courseId).eq("is_published", true).maybeSingle(),
+  ]);
+  if (!enrollment) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!lesson) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   // Mark lesson as completed
   const { error } = await supabase
     .from("lesson_progress")
@@ -32,7 +40,10 @@ export async function POST(req: NextRequest) {
       { onConflict: "user_id,lesson_id" }
     );
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[lesson-complete] upsert error:", error.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 
   // Track lesson completed (anon/authenticated can insert — fire and forget)
   void supabase.from("events").insert({

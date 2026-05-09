@@ -4,7 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/academy/dashboard";
+  // Validate next is a safe internal path — prevent open redirect via //evil.com or external URLs
+  const rawNext = searchParams.get("next") ?? "/academy/dashboard";
+  const next = /^\/[^/]/.test(rawNext) || rawNext === "/" ? rawNext : "/academy/dashboard";
 
   if (code) {
     const supabase = await createClient();

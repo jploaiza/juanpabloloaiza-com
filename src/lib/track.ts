@@ -24,7 +24,7 @@ export function getSessionId(): string {
   if (typeof window === "undefined") return "";
   let sid = sessionStorage.getItem(SESSION_KEY);
   if (!sid) {
-    sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    sid = crypto.randomUUID();
     sessionStorage.setItem(SESSION_KEY, sid);
   }
   return sid;

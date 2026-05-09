@@ -53,6 +53,13 @@ function verifySignature(rawBody: string, signature: string | null, secret: stri
   }
 }
 
+// ── ICS field sanitizer ───────────────────────────────────────────────────────
+
+function escapeIcs(value: string): string {
+  // Prevent CRLF injection and escape iCalendar special characters
+  return value.replace(/[\r\n]+/g, " ").replace(/,/g, "\\,").replace(/;/g, "\\;");
+}
+
 // ── ICS generator ──────────────────────────────────────────────────────────────
 
 function buildIcs(payload: CalPayload): string {
@@ -74,10 +81,10 @@ function buildIcs(payload: CalPayload): string {
     `DTSTAMP:${dtStamp}`,
     `DTSTART:${dtStart}`,
     `DTEND:${dtEnd}`,
-    `SUMMARY:${payload.title}`,
-    location ? `LOCATION:${location}` : "",
+    `SUMMARY:${escapeIcs(payload.title)}`,
+    location ? `LOCATION:${escapeIcs(location)}` : "",
     `ORGANIZER;CN=Juan Pablo Loaiza:mailto:academy@juanpabloloaiza.com`,
-    attendee ? `ATTENDEE;CN=${attendee.name};RSVP=TRUE:mailto:${attendee.email}` : "",
+    attendee ? `ATTENDEE;CN=${escapeIcs(attendee.name)};RSVP=TRUE:mailto:${attendee.email}` : "",
     "END:VEVENT",
     "END:VCALENDAR",
   ]
@@ -347,8 +354,8 @@ export async function POST(req: NextRequest) {
   }
 
   const attendee = payload.attendees?.[0];
-  if (!attendee?.email) {
-    return NextResponse.json({ skipped: true, reason: "no attendee email" });
+  if (!attendee?.email || !attendee.email.includes("@")) {
+    return NextResponse.json({ skipped: true, reason: "no valid attendee email" });
   }
 
   const firstName = attendee.firstName ?? attendee.name.split(" ")[0];
@@ -392,11 +399,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (sendResult.error) {
-      console.error("[calcom-webhook] Resend error:", sendResult.error);
+      console.error("[calcom-webhook] Resend error:", sendResult.error.name ?? "unknown");
       emailStatus = "failed";
     }
   } catch (err) {
-    console.error("[calcom-webhook] Send failed:", err);
+    console.error("[calcom-webhook] Send failed:", err instanceof Error ? err.message : "unknown");
     emailStatus = "failed";
   }
 

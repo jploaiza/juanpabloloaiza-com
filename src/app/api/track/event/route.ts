@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 const ALLOWED_EVENTS = new Set([
   "whatsapp_click",
@@ -17,6 +18,11 @@ const ALLOWED_EVENTS = new Set([
 ]);
 
 export async function POST(req: NextRequest) {
+  // 30 events per minute per IP
+  if (!rateLimit(getIp(req.headers), 30, 60_000)) {
+    return NextResponse.json({ ok: false }, { status: 429 });
+  }
+
   try {
     const body = await req.json();
     const { name, path, sessionId, props, utm } = body;
