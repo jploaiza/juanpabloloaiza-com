@@ -49,8 +49,11 @@ export async function GET() {
     adminSb.from("events").select("event_name, utm_source, utm_medium, utm_campaign, created_at").gte("created_at", thirtyDaysAgo),
   ]);
 
-  const allViews30 = views30d ?? [];
-  const allViewsAll = viewsAll ?? [];
+  const SKIP_PREFIXES = ["/admin", "/api", "/academy/admin", "/_next"];
+  const isPublic = (path: string) => !SKIP_PREFIXES.some((p) => path.startsWith(p));
+
+  const allViews30 = (views30d ?? []).filter((v) => isPublic(v.path));
+  const allViewsAll = (viewsAll ?? []).filter((v) => isPublic(v.path));
 
   // Total views
   const totalViews = allViews30.length;

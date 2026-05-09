@@ -22,22 +22,35 @@ function MiniBarChart({ data, color = "#C5A059", height = 40 }: {
   color?: string;
   height?: number;
 }) {
+  const [hovered, setHovered] = useState<number | null>(null);
   const max = Math.max(...data.map((d) => d.count), 1);
   return (
-    <div className="flex items-end gap-px" style={{ height: `${height + 16}px` }}>
-      {data.map((d) => (
+    <div className="relative">
+      {hovered !== null && (
         <div
-          key={d.label}
-          title={`${d.label}: ${d.count}`}
-          className="flex-1 transition-all duration-300 cursor-default"
-          style={{
-            height: `${Math.max(1, Math.round((d.count / max) * height))}px`,
-            backgroundColor: color,
-            opacity: d.count === 0 ? 0.1 : 0.75,
-            alignSelf: "flex-end",
-          }}
-        />
-      ))}
+          className="absolute z-10 px-2 py-1 bg-[#0a1628] border border-[#C5A059]/30 pointer-events-none whitespace-nowrap"
+          style={{ bottom: `${height + 20}px`, left: `${(hovered / data.length) * 100}%`, transform: "translateX(-50%)" }}
+        >
+          <p className="font-cinzel text-[10px] text-[#C5A059]">{data[hovered].label}</p>
+          <p className="font-cinzel text-[10px] text-white text-center">{data[hovered].count}</p>
+        </div>
+      )}
+      <div className="flex items-end gap-px" style={{ height: `${height + 16}px` }}>
+        {data.map((d, i) => (
+          <div
+            key={d.label}
+            className="flex-1 transition-all duration-150 cursor-default"
+            style={{
+              height: `${Math.max(1, Math.round((d.count / max) * height))}px`,
+              backgroundColor: color,
+              opacity: hovered === i ? 1 : d.count === 0 ? 0.1 : 0.75,
+              alignSelf: "flex-end",
+            }}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
