@@ -295,12 +295,20 @@ export default async function AdminPage() {
                       {userRows.map((u) => (
                         <tr key={u.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition">
                           <td className="py-3 pr-4">
-                            <p className="font-crimson text-sm text-gray-200 leading-tight">
-                              {u.full_name ?? "—"}
-                            </p>
-                            <p className="font-cinzel text-[9px] text-gray-600 truncate max-w-[140px]">
-                              {u.email}
-                            </p>
+                            <Link
+                              href={`/academy/admin/student/${u.id}`}
+                              className="block group"
+                            >
+                              <p className="font-crimson text-sm text-gray-200 leading-tight group-hover:text-[#C5A059] transition">
+                                {u.full_name ?? "—"}
+                              </p>
+                              <p className="font-cinzel text-[9px] text-gray-600 truncate max-w-[140px]">
+                                {u.email}
+                              </p>
+                              <p className="font-cinzel text-[9px] text-[#C5A059]/50 group-hover:text-[#C5A059] transition mt-0.5">
+                                Ver detalle →
+                              </p>
+                            </Link>
                           </td>
                           <td className="py-3 pr-4">
                             <div className="flex items-center gap-2">
