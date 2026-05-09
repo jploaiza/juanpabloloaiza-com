@@ -17,10 +17,24 @@ export default async function AcademyNuevoPostPage({
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/academy/dashboard");
 
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const VALID_GEOS = new Set(["ES", "US", "MX", "CL", "ALL"]);
+
   const params = await searchParams;
+  const rawKeyword = params.keyword ?? "";
+  const rawIdea = params.idea ?? "";
+  const rawGeo = params.geo ?? "ES";
+
   const fromTrend =
-    params.from === "trend" && params.keyword && params.idea
-      ? { keyword: params.keyword, geo: params.geo ?? "ES", ideaId: params.idea }
+    params.from === "trend" &&
+    rawKeyword.length > 0 &&
+    rawKeyword.length <= 200 &&
+    UUID_RE.test(rawIdea)
+      ? {
+          keyword: rawKeyword.replace(/[<>"'&]/g, "").slice(0, 200),
+          geo: VALID_GEOS.has(rawGeo) ? rawGeo : "ES",
+          ideaId: rawIdea,
+        }
       : undefined;
 
   return (

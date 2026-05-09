@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { fetchDailyTrends, fetchRelatedQueries, type TrendGeo } from "@/lib/trends/google-trends";
 import { fetchTopQueries } from "@/lib/trends/search-console";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 const GEOS: TrendGeo[] = ["ES", "US", "MX", "CL"];
 
@@ -26,7 +27,12 @@ const GEO_TO_COUNTRY: Record<TrendGeo, string> = {
 };
 
 // POST /api/admin/trends/sync — admin-authenticated manual trigger
-export async function POST() {
+export async function POST(req: NextRequest) {
+  const ip = getIp(req.headers);
+  if (!rateLimit(`trends-sync:${ip}`, 3, 5 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -118,7 +124,8 @@ export async function POST() {
       .from("trends_snapshots")
       .select("id,keyword,geo,rising,interest_score")
       .gte("captured_at", sevenDaysAgo)
-      .order("captured_at", { ascending: false }),
+      .order("captured_at", { ascending: false })
+      .limit(2000),
     adminSb
       .from("gsc_queries")
       .select("id,query,country,impressions,position")
@@ -152,17 +159,18 @@ export async function POST() {
     }));
 
   const gscIdeas = (strikingGsc ?? [])
-    .map((r) => {
-      const geoFromCountry = Object.entries(GEO_TO_COUNTRY).find(([, c]) => c === r.country)?.[0] ?? r.country.toUpperCase();
+    .flatMap((r) => {
+      const geoEntry = Object.entries(GEO_TO_COUNTRY).find(([, c]) => c === r.country);
+      if (!geoEntry) return [];
       const score = r.impressions / 10 + (32 - r.position) * 5;
-      return {
+      return [{
         seed_keyword: r.query,
-        geo: geoFromCountry,
+        geo: geoEntry[0],
         source: "gsc",
         source_ref: { gsc_query_id: r.id, position: r.position, impressions: r.impressions },
         opportunity_score: score,
         status: "new",
-      };
+      }];
     })
     .slice(0, 20);
 

@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
+const VALID_GEOS = new Set(["ES", "US", "MX", "CL", "ALL"]);
+const VALID_TABS = new Set(["trends", "gsc", "ideas", "all"]);
+
 async function assertAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return null;
-  return await createAdminClient();
+  return createAdminClient();
 }
 
 // GET /api/admin/trends?geo=ES&tab=all
@@ -16,11 +19,32 @@ export async function GET(req: NextRequest) {
   if (!adminSb) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const geo = searchParams.get("geo") ?? "ES";
-  const tab = searchParams.get("tab") ?? "all";
+  const rawGeo = searchParams.get("geo") ?? "ES";
+  const rawTab = searchParams.get("tab") ?? "all";
+  const geo = VALID_GEOS.has(rawGeo) ? rawGeo : "ES";
+  const tab = VALID_TABS.has(rawTab) ? rawTab : "all";
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+
+  // Build geo-aware trend queries (geo="ALL" skips the geo filter)
+  let topTrendsQ = adminSb
+    .from("trends_snapshots")
+    .select("keyword,interest_score,rising,captured_at,source,geo")
+    .gte("captured_at", sevenDaysAgo)
+    .order("captured_at", { ascending: false })
+    .limit(100);
+  if (geo !== "ALL") topTrendsQ = topTrendsQ.eq("geo", geo);
+
+  let risingQ = adminSb
+    .from("trends_snapshots")
+    .select("keyword,geo,seed_keyword,interest_score,captured_at")
+    .eq("rising", true)
+    .eq("source", "related_query")
+    .gte("captured_at", sevenDaysAgo)
+    .order("interest_score", { ascending: false })
+    .limit(20);
+  if (geo !== "ALL") risingQ = risingQ.eq("geo", geo);
 
   const [
     { data: topTrendsData },
@@ -30,39 +54,17 @@ export async function GET(req: NextRequest) {
     { data: contentIdeasData },
     { data: lastRunData },
   ] = await Promise.all([
-    // Top trending keywords (last 7 days, requested geo)
-    tab === "ideas" ? { data: [] } :
-    adminSb
-      .from("trends_snapshots")
-      .select("keyword,interest_score,rising,captured_at,source,geo")
-      .eq("geo", geo)
-      .gte("captured_at", sevenDaysAgo)
-      .order("captured_at", { ascending: false })
-      .limit(100),
-
-    // Rising related queries
-    tab === "gsc" || tab === "ideas" ? { data: [] } :
-    adminSb
-      .from("trends_snapshots")
-      .select("keyword,geo,seed_keyword,interest_score,captured_at")
-      .eq("geo", geo)
-      .eq("rising", true)
-      .eq("source", "related_query")
-      .gte("captured_at", sevenDaysAgo)
-      .order("interest_score", { ascending: false })
-      .limit(20),
-
-    // GSC top queries by clicks
-    tab === "trends" || tab === "ideas" ? { data: [] } :
+    tab === "ideas" ? Promise.resolve({ data: [] }) : topTrendsQ,
+    // Always fetch rising for KPI — skip display only on gsc tab
+    tab === "gsc" ? Promise.resolve({ data: [] }) : risingQ,
+    // Always fetch GSC for KPI
     adminSb
       .from("gsc_queries")
       .select("query,country,clicks,impressions,ctr,position,date")
       .gte("date", thirtyDaysAgo)
       .order("clicks", { ascending: false })
       .limit(50),
-
-    // GSC striking distance
-    tab === "trends" || tab === "ideas" ? { data: [] } :
+    // Always fetch striking for KPI
     adminSb
       .from("gsc_queries")
       .select("query,country,clicks,impressions,ctr,position,date")
@@ -72,16 +74,12 @@ export async function GET(req: NextRequest) {
       .lte("position", 30)
       .order("impressions", { ascending: false })
       .limit(30),
-
-    // Content ideas
     adminSb
       .from("content_ideas")
       .select("*")
       .eq("status", "new")
       .order("opportunity_score", { ascending: false })
       .limit(30),
-
-    // Last cron run
     adminSb
       .from("trends_run_logs")
       .select("run_at,duration_ms,trends_inserted,gsc_inserted,ideas_inserted,errors")
@@ -89,7 +87,7 @@ export async function GET(req: NextRequest) {
       .limit(1),
   ]);
 
-  // Aggregate top trends: deduplicate by keyword, pick max score
+  // Deduplicate top trends by keyword, pick max score
   const trendMap: Record<string, { keyword: string; geo: string; interest_score: number; rising: boolean; captured_at: string; source: string }> = {};
   for (const t of topTrendsData ?? []) {
     const k = `${t.keyword}::${t.geo}`;
@@ -97,17 +95,21 @@ export async function GET(req: NextRequest) {
       trendMap[k] = t as typeof trendMap[string];
     }
   }
-  const topTrends = Object.values(trendMap).sort((a, b) => (b.interest_score ?? 0) - (a.interest_score ?? 0)).slice(0, 20);
+  const topTrends = Object.values(trendMap)
+    .sort((a, b) => (b.interest_score ?? 0) - (a.interest_score ?? 0))
+    .slice(0, 20);
 
   const risingQueries = (risingData ?? []).slice(0, 20);
-  const gscTopQueries = gscTopData ?? [];
-  const gscStriking = gscStrikingData ?? [];
   const contentIdeas = contentIdeasData ?? [];
   const lastRun = lastRunData?.[0] ?? null;
 
-  // KPI calculations
+  // Tab-filtered display data
+  const gscTopQueries = (tab === "trends" || tab === "ideas") ? [] : (gscTopData ?? []);
+  const gscStriking = (tab === "trends" || tab === "ideas") ? [] : (gscStrikingData ?? []);
+
+  // KPI calculations — always based on full data, not tab-filtered display data
   const newIdeasCount = contentIdeas.length;
-  const strikingCount = gscStriking.length;
+  const strikingCount = (gscStrikingData ?? []).length;
   const risingCount = (risingData ?? []).length;
   const totalClicks = (gscTopData ?? []).reduce((sum, r) => sum + (r.clicks ?? 0), 0);
 

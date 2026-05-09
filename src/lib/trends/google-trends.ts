@@ -52,14 +52,15 @@ export async function fetchRelatedQueries(
     const parsed = JSON.parse(raw);
     const defaultData = parsed?.default?.rankedList ?? [];
     const results: TrendKeyword[] = [];
-    for (const rankedList of defaultData) {
-      const isRising = rankedList.rankedKeyword?.[0]?.hasOwnProperty("value") === false;
-      for (const item of rankedList.rankedKeyword ?? []) {
+    // rankedList[0] = "Top" queries, rankedList[1] = "Rising" queries
+    for (let listIdx = 0; listIdx < defaultData.length; listIdx++) {
+      const isRisingList = listIdx === 1;
+      for (const item of defaultData[listIdx].rankedKeyword ?? []) {
         const keyword = item?.query;
         if (!keyword) continue;
-        const rising = typeof item.value === "string" && item.value.startsWith("Breakout")
-          ? true
-          : isRising;
+        const rising =
+          isRisingList ||
+          (typeof item.value === "string" && item.value.startsWith("Breakout"));
         results.push({
           keyword,
           geo,

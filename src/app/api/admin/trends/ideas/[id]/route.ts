@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function assertAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return null;
-  return await createAdminClient();
+  return createAdminClient();
 }
 
 // PATCH /api/admin/trends/ideas/[id]
@@ -20,6 +22,10 @@ export async function PATCH(
   if (!adminSb) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ error: "Invalid idea id" }, { status: 400 });
+  }
+
   const body = await req.json().catch(() => ({}));
 
   const update: Record<string, unknown> = {};
@@ -27,6 +33,9 @@ export async function PATCH(
     update.status = body.status;
   }
   if (body.blog_post_id) {
+    if (!UUID_RE.test(String(body.blog_post_id))) {
+      return NextResponse.json({ error: "Invalid blog_post_id" }, { status: 400 });
+    }
     update.blog_post_id = body.blog_post_id;
   }
 
@@ -40,7 +49,8 @@ export async function PATCH(
     .eq("id", id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[trends/ideas PATCH]", error.message);
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

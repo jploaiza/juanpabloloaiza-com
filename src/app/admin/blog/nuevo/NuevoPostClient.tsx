@@ -63,10 +63,10 @@ function parseMdFile(raw: string): ParsedMd {
     title: typeof fm["title"] === "string" ? fm["title"] : undefined,
     slug: typeof fm["slug"] === "string" ? fm["slug"] : undefined,
     excerpt: typeof fm["excerpt"] === "string" ? fm["excerpt"] : undefined,
-    featured_image_url:
-      typeof fm["featured_image_url"] === "string"
-        ? fm["featured_image_url"]
-        : undefined,
+    featured_image_url: (() => {
+      const raw = typeof fm["featured_image_url"] === "string" ? fm["featured_image_url"] : "";
+      return raw.startsWith("https://") || raw.startsWith("http://") ? raw : undefined;
+    })(),
     tags,
     status,
     seo_title: typeof fm["seo_title"] === "string" ? fm["seo_title"] : undefined,
@@ -409,11 +409,14 @@ export default function NuevoPostClient({ basePath = "/admin/blog", initialFromT
 
       // Link the blog post to the content idea if coming from trends
       if (initialFromTrend?.ideaId && data.post?.id) {
-        await fetch(`/api/admin/trends/ideas/${initialFromTrend.ideaId}`, {
+        const ideaRes = await fetch(`/api/admin/trends/ideas/${initialFromTrend.ideaId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: "published", blog_post_id: data.post.id }),
-        }).catch(() => {});
+        }).catch(() => null);
+        if (!ideaRes?.ok) {
+          console.warn("[trends] Failed to mark idea as published:", initialFromTrend.ideaId);
+        }
       }
 
       router.push(basePath);

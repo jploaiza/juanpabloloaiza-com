@@ -27,8 +27,12 @@ const GEO_TO_COUNTRY: Record<TrendGeo, string> = {
 };
 
 export async function GET(req: NextRequest) {
+  if (!process.env.CRON_SECRET) {
+    console.error("[sync-trends] CRON_SECRET env var is not set");
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
   const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");
-  const expected = Buffer.from(process.env.CRON_SECRET ?? "");
+  const expected = Buffer.from(process.env.CRON_SECRET);
   if (
     secret.length === 0 ||
     secret.length !== expected.length ||
@@ -122,7 +126,8 @@ export async function GET(req: NextRequest) {
       .from("trends_snapshots")
       .select("id,keyword,geo,rising,interest_score")
       .gte("captured_at", sevenDaysAgo)
-      .order("captured_at", { ascending: false }),
+      .order("captured_at", { ascending: false })
+      .limit(2000),
     adminSb
       .from("gsc_queries")
       .select("id,query,country,impressions,position")
@@ -157,19 +162,20 @@ export async function GET(req: NextRequest) {
       status: "new",
     }));
 
-  // Add striking distance GSC ideas
+  // Add striking distance GSC ideas (skip rows with unmapped country codes)
   const gscIdeas = (strikingGsc ?? [])
-    .map((r) => {
-      const geoFromCountry = Object.entries(GEO_TO_COUNTRY).find(([, c]) => c === r.country)?.[0] ?? r.country.toUpperCase();
+    .flatMap((r) => {
+      const geoEntry = Object.entries(GEO_TO_COUNTRY).find(([, c]) => c === r.country);
+      if (!geoEntry) return [];
       const score = r.impressions / 10 + (32 - r.position) * 5;
-      return {
+      return [{
         seed_keyword: r.query,
-        geo: geoFromCountry,
+        geo: geoEntry[0],
         source: "gsc",
         source_ref: { gsc_query_id: r.id, position: r.position, impressions: r.impressions },
         opportunity_score: score,
         status: "new",
-      };
+      }];
     })
     .slice(0, 20);
 

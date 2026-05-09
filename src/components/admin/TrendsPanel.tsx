@@ -109,7 +109,9 @@ export default function TrendsPanel() {
   const [data, setData] = useState<ApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectError, setRejectError] = useState<string | null>(null);
 
   const fetchData = useCallback(async (currentGeo: Geo, currentTab: Tab) => {
     try {
@@ -129,10 +131,25 @@ export default function TrendsPanel() {
 
   const handleRefresh = async () => {
     setRefreshing(true);
+    setRefreshError(null);
     try {
-      await fetch("/api/admin/trends/sync", { method: "POST" });
-    } catch {
-      // ignore errors — UI will show last run errors in the log section
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90_000);
+      const res = await fetch("/api/admin/trends/sync", {
+        method: "POST",
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setRefreshError(json.error ?? "Error en sincronización");
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        setRefreshError("La sincronización tardó demasiado. Revisa los logs.");
+      } else {
+        setRefreshError("Error de conexión al sincronizar.");
+      }
     }
     await fetchData(geo, tab);
     setRefreshing(false);
@@ -155,11 +172,24 @@ export default function TrendsPanel() {
 
   const handleReject = async (idea: ContentIdea) => {
     setRejectingId(idea.id);
-    await fetch(`/api/admin/trends/ideas/${idea.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "rejected" }),
-    }).catch(() => {});
+    setRejectError(null);
+    try {
+      const res = await fetch(`/api/admin/trends/ideas/${idea.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "rejected" }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setRejectError(json.error ?? "No se pudo rechazar la idea.");
+        setRejectingId(null);
+        return;
+      }
+    } catch {
+      setRejectError("Error de conexión al rechazar.");
+      setRejectingId(null);
+      return;
+    }
     setData((prev) =>
       prev ? { ...prev, contentIdeas: prev.contentIdeas.filter((i) => i.id !== idea.id) } : prev
     );
@@ -180,11 +210,13 @@ export default function TrendsPanel() {
             Inteligencia de contenido
           </p>
           <h1 className="font-cinzel text-2xl text-white pt-8">Tendencias</h1>
-          {data?.lastRun && (
-            <p className="font-cinzel text-[9px] text-gray-600 mt-1 uppercase tracking-widest">
-              Última sincronización: {formatDate(data.lastRun.run_at)}
-            </p>
-          )}
+          <p className="font-cinzel text-[9px] text-gray-600 mt-1 uppercase tracking-widest">
+            {data?.lastRun
+              ? `Última sincronización: ${formatDate(data.lastRun.run_at)}`
+              : data
+              ? "Sin sincronización — ejecuta una para cargar datos"
+              : ""}
+          </p>
         </div>
         <button
           onClick={handleRefresh}
@@ -195,6 +227,18 @@ export default function TrendsPanel() {
           Refrescar
         </button>
       </div>
+
+      {/* Inline error banners */}
+      {refreshError && (
+        <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 font-crimson text-sm text-red-300">
+          {refreshError}
+        </div>
+      )}
+      {rejectError && (
+        <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 font-crimson text-sm text-red-300">
+          {rejectError}
+        </div>
+      )}
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
