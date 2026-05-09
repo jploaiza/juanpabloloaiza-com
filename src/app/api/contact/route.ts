@@ -5,6 +5,10 @@ const LOGO_URL = "https://media.juanpabloloaiza.com/images/Logo%20transparente%2
 const PHOTO_URL = "https://media.juanpabloloaiza.com/images/jpl-newwsp.jpeg";
 const WHATSAPP_URL = "https://api.whatsapp.com/send?phone=56962081884";
 
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 // ── Reusable HTML fragments ─────────────────────────────────────────────────
 
 const emailWrapper = (content: string) => `
@@ -251,19 +255,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
   }
 
+  const safeName = esc(String(name));
+  const safeEmail = esc(String(email));
+  const safePhone = esc(String(phone ?? ""));
+  const safeReason = esc(String(reason));
+
   try {
     await resend.emails.send({
       from: "Formulario Web <contacto@juanpabloloaiza.com>",
       to: "contacto@juanpabloloaiza.com",
-      subject: `Nuevo primer contacto — ${name}`,
-      html: therapistHtml(name, email, phone, reason),
+      subject: `Nuevo primer contacto — ${safeName}`,
+      html: therapistHtml(safeName, safeEmail, safePhone, safeReason),
     });
 
     await resend.emails.send({
       from: "Juan Pablo Loaiza <contacto@juanpabloloaiza.com>",
       to: email,
       subject: "Tu mensaje ha sido recibido — Juan Pablo Loaiza",
-      html: clientHtml(name),
+      html: clientHtml(safeName),
     });
 
     return NextResponse.json({ success: true });

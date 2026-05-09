@@ -4,6 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const FROM_EMAIL = "JPL Academy <academy@juanpabloloaiza.com>";
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 const LOGO_URL =
   "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png";
 const WHATSAPP_URL = "https://api.whatsapp.com/send?phone=56962081884";
@@ -302,7 +306,7 @@ export async function POST(req: NextRequest) {
     ? (activePack.sessions_total ?? 0) - (activePack.sessions_used ?? 0)
     : 0;
   const endDate = activePack?.end_date ?? "";
-  const recipientName = patientProfile.full_name?.split(" ")[0] ?? "Paciente";
+  const recipientName = esc(patientProfile.full_name?.split(" ")[0] ?? "Paciente");
 
   const { subject, html } = getSubjectAndHtml(type, recipientName, sessionsLeft, endDate);
 

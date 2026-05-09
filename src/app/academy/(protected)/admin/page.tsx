@@ -16,6 +16,7 @@ import {
   Circle,
   FileText,
 } from "lucide-react";
+import ForceCompleteButton from "@/components/academy/ForceCompleteButton";
 import { formatDuration } from "@/lib/academy-data";
 
 export const metadata: Metadata = { title: "Admin — JPL Academy" };
@@ -55,8 +56,12 @@ export default async function AdminPage() {
   ]);
 
   // ── Compute stats ────────────────────────────────────────────
-  const totalEnrollments = enrollments?.length ?? 0;
-  const totalCompletions = completions?.length ?? 0;
+  // Exclude admin accounts from student-facing metrics
+  const adminIds = new Set((allProfiles ?? []).filter((p) => p.role === "admin").map((p) => p.id));
+  const studentEnrollments = (enrollments ?? []).filter((e) => !adminIds.has(e.user_id));
+  const studentCompletions = (completions ?? []).filter((e) => !adminIds.has(e.user_id));
+  const totalEnrollments = studentEnrollments.length;
+  const totalCompletions = studentCompletions.length;
   const completionRate = totalEnrollments > 0
     ? Math.round((totalCompletions / totalEnrollments) * 100)
     : 0;
@@ -74,11 +79,12 @@ export default async function AdminPage() {
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
   const { data: monthlyEnrollData } = await adminSb
     .from("enrollments")
-    .select("enrolled_at")
+    .select("user_id, enrolled_at")
     .gte("enrolled_at", sixMonthsAgo);
 
   const monthlyEnrollMap: Record<string, number> = Object.fromEntries(months6.map((m) => [m, 0]));
   for (const e of monthlyEnrollData ?? []) {
+    if (adminIds.has(e.user_id)) continue;
     const mk = (e.enrolled_at ?? "").slice(0, 7);
     if (mk in monthlyEnrollMap) monthlyEnrollMap[mk]++;
   }
@@ -98,9 +104,12 @@ export default async function AdminPage() {
     }
   }
 
-  // Enrollment map
-  const enrolledSet = new Set(enrollments?.map((e) => e.user_id));
-  const completedSet = new Set(completions?.map((e) => e.user_id));
+  // Enrollment map (student-only, admin excluded)
+  const enrolledSet = new Set(studentEnrollments.map((e) => e.user_id));
+  const completedSet = new Set(studentCompletions.map((e) => e.user_id));
+  const enrollmentCourseMap: Record<string, string> = Object.fromEntries(
+    studentEnrollments.map((e) => [e.user_id, e.course_id])
+  );
 
   // Build user rows (only enrolled students, exclude admins)
   const userRows = (allProfiles ?? [])
@@ -115,6 +124,7 @@ export default async function AdminPage() {
         watchSeconds: prog?.watchSeconds ?? 0,
         lastActive: prog?.lastActive ?? null,
         isCompleted: completedSet.has(p.id),
+        courseId: enrollmentCourseMap[p.id] ?? null,
       };
     })
     .sort((a, b) => b.progressPct - a.progressPct);
@@ -326,13 +336,23 @@ export default async function AdminPage() {
                                 <CheckCircle className="w-3 h-3" /> Completo
                               </span>
                             ) : u.progressPct > 0 ? (
-                              <span className="flex items-center gap-1 font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]">
-                                <Clock className="w-3 h-3" /> En curso
-                              </span>
+                              <div className="flex flex-col gap-1.5">
+                                <span className="flex items-center gap-1 font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]">
+                                  <Clock className="w-3 h-3" /> En curso
+                                </span>
+                                {u.courseId && (
+                                  <ForceCompleteButton userId={u.id} courseId={u.courseId} />
+                                )}
+                              </div>
                             ) : (
-                              <span className="flex items-center gap-1 font-cinzel text-[9px] uppercase tracking-widest text-gray-600">
-                                <Circle className="w-3 h-3" /> Sin iniciar
-                              </span>
+                              <div className="flex flex-col gap-1.5">
+                                <span className="flex items-center gap-1 font-cinzel text-[9px] uppercase tracking-widest text-gray-600">
+                                  <Circle className="w-3 h-3" /> Sin iniciar
+                                </span>
+                                {u.courseId && (
+                                  <ForceCompleteButton userId={u.id} courseId={u.courseId} />
+                                )}
+                              </div>
                             )}
                           </td>
                         </tr>

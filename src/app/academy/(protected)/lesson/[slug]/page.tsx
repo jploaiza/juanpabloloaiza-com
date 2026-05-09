@@ -64,7 +64,7 @@ export default async function LessonPage({ params }: Props) {
         .order("order_index"),
       supabase
         .from("lesson_progress")
-        .select("lesson_id, watch_seconds, duration_seconds, is_completed")
+        .select("lesson_id, watch_seconds, duration_seconds, is_completed, real_play_seconds")
         .eq("user_id", user.id)
         .eq("course_id", lesson.course_id),
       supabase

@@ -7,16 +7,19 @@ import AcademyCard from "@/components/academy/AcademyCard";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import { BookOpen, Clock, CheckCircle, Award, MessageCircle, Calendar } from "lucide-react";
 import { TOTAL_LESSONS } from "@/lib/academy-data";
+import LessonsProgressDetail from "@/components/academy/LessonsProgressDetail";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/academy/login");
 
-  const [{ data: profile }, { data: enrollment }, { data: progressRows }] = await Promise.all([
+  const [{ data: profile }, { data: enrollment }, { data: progressRows }, { data: allProgressRows }, { data: sectionsData }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("enrollments").select("*, courses(*)").eq("user_id", user.id).maybeSingle(),
-    supabase.from("lesson_progress").select("*, lessons(slug,title,order_index,duration_seconds,section_id,sections(order_index))").eq("user_id", user.id).eq("is_completed", true),
+    supabase.from("lesson_progress").select("lesson_id").eq("user_id", user.id).eq("is_completed", true),
+    supabase.from("lesson_progress").select("lesson_id, is_completed, watch_seconds, duration_seconds").eq("user_id", user.id),
+    supabase.from("sections").select("id, title, order_index, lessons(id, slug, title, duration_seconds, order_index)").order("order_index"),
   ]);
 
   let activeEnrollment = enrollment;
@@ -34,6 +37,8 @@ export default async function DashboardPage() {
   }
 
   const completedCount = progressRows?.length ?? 0;
+  const lessonProgressMap: Record<string, { is_completed: boolean; watch_seconds: number; duration_seconds: number }> =
+    Object.fromEntries((allProgressRows ?? []).map((p) => [p.lesson_id, p]));
   const progressPercent = Math.round((completedCount / TOTAL_LESSONS) * 100);
   const isCompleted = completedCount >= TOTAL_LESSONS;
 
@@ -53,10 +58,7 @@ export default async function DashboardPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const totalWatchSeconds = (await supabase
-    .from("lesson_progress")
-    .select("watch_seconds")
-    .eq("user_id", user.id)).data?.reduce((a, r) => a + (r.watch_seconds ?? 0), 0) ?? 0;
+  const totalWatchSeconds = (allProgressRows ?? []).reduce((a, r) => a + (r.watch_seconds ?? 0), 0);
 
   const enrolledDate = activeEnrollment?.enrolled_at
     ? new Date(activeEnrollment.enrolled_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
@@ -153,8 +155,19 @@ export default async function DashboardPage() {
           ))}
         </div>
 
+        {/* Lesson detail toggle */}
+        {sectionsData && sectionsData.length > 0 && (
+          <LessonsProgressDetail
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            sections={sectionsData as any}
+            progressMap={lessonProgressMap}
+            totalLessons={TOTAL_LESSONS}
+            completedCount={completedCount}
+          />
+        )}
+
         {/* Contact CTAs */}
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4 mt-8">
           <a
             href="https://api.whatsapp.com/send?phone=56962081884"
             target="_blank"

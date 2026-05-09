@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
 
   // CSRF state: encode csrf token + return URL
   const csrf = randomBytes(16).toString("hex");
-  const returnTo = req.nextUrl.searchParams.get("returnTo") ?? "/admin/pacientes";
+  const rawReturnTo = req.nextUrl.searchParams.get("returnTo") ?? "";
+  const returnTo = /^\/[^/]/.test(rawReturnTo) ? rawReturnTo : "/admin/pacientes";
   const state = Buffer.from(JSON.stringify({ csrf, returnTo })).toString("base64url");
 
   const redirectUri = getRedirectUri(req.url);

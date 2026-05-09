@@ -76,7 +76,7 @@ export const COURSE_SECTIONS = [
 export const TOTAL_LESSONS = COURSE_SECTIONS.reduce(
   (acc, s) => acc + s.lessons.length,
   0
-); // 28
+); // 29
 
 export function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);

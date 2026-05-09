@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
-import { TOTAL_LESSONS } from "@/lib/academy-data";
 
 const FROM_EMAIL = "JPL Academy <academy@juanpabloloaiza.com>";
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -31,18 +34,26 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Check total completed lessons
-  const { data: completedRows } = await supabase
-    .from("lesson_progress")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("course_id", courseId)
-    .eq("is_completed", true);
+  // Check total completed lessons vs actual published lessons in course
+  const [{ data: completedRows }, { count: totalPublished }] = await Promise.all([
+    supabase
+      .from("lesson_progress")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .eq("is_completed", true),
+    supabase
+      .from("lessons")
+      .select("id", { count: "exact", head: true })
+      .eq("course_id", courseId)
+      .eq("is_published", true),
+  ]);
 
   const completedCount = completedRows?.length ?? 0;
+  const totalLessons = totalPublished ?? 0;
   let certificateToken: string | null = null;
 
-  if (completedCount < TOTAL_LESSONS) {
+  if (totalLessons === 0 || completedCount < totalLessons) {
     return NextResponse.json({ success: true, certificateToken: null });
   }
 
@@ -88,7 +99,7 @@ export async function POST(req: NextRequest) {
 
   if (!profile || !course) return NextResponse.json({ success: true, certificateToken });
 
-  const firstName = profile.full_name?.split(" ")[0] ?? "estudiante";
+  const firstName = esc(profile.full_name?.split(" ")[0] ?? "estudiante");
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
   const certUrl = certificateToken
     ? `${siteUrl}/academy/certificate/${certificateToken}`
@@ -104,7 +115,7 @@ export async function POST(req: NextRequest) {
         from: FROM_EMAIL,
         to: profile.email,
         subject: `🎓 ¡Completaste "${course.title}"!`,
-        html: studentCompletionEmail({ firstName, courseTitle: course.title, certUrl, siteUrl }),
+        html: studentCompletionEmail({ firstName, courseTitle: esc(course.title), certUrl, siteUrl }),
       })
     );
   }
@@ -116,9 +127,9 @@ export async function POST(req: NextRequest) {
         to: course.admin_notify_email,
         subject: `📚 ${profile.full_name ?? profile.email} completó el curso`,
         html: adminNotificationEmail({
-          studentName: profile.full_name ?? "N/A",
-          studentEmail: profile.email,
-          courseTitle: course.title,
+          studentName: esc(profile.full_name ?? "N/A"),
+          studentEmail: esc(profile.email),
+          courseTitle: esc(course.title),
           certUrl,
           adminUrl: `${siteUrl}/academy/admin`,
         }),

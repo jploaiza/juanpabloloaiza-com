@@ -148,6 +148,11 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
 
+  const validStatuses = ["scheduled", "completed", "cancelled", "rescheduled"];
+  if (status !== undefined && !validStatuses.includes(status)) {
+    return NextResponse.json({ error: `status must be one of: ${validStatuses.join(", ")}` }, { status: 400 });
+  }
+
   const updateFields: Record<string, unknown> = {};
   if (status !== undefined) updateFields.status = status;
   if (therapistNotes !== undefined) updateFields.therapist_notes = therapistNotes;

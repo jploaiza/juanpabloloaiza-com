@@ -8,6 +8,9 @@ export async function PATCH(req: NextRequest) {
 
   const { lessonId, watchSeconds, courseId } = await req.json();
   if (!lessonId || !courseId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  if (watchSeconds !== undefined && (typeof watchSeconds !== "number" || watchSeconds < 0 || watchSeconds > 86400)) {
+    return NextResponse.json({ error: "Invalid watchSeconds" }, { status: 400 });
+  }
 
   const { error } = await supabase
     .from("lesson_progress")

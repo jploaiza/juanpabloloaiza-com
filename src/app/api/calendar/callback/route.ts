@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
     if (!storedCsrf || storedCsrf !== decoded.csrf) {
       return NextResponse.redirect(new URL(`${returnFallback}?gcal_error=state_mismatch`, req.url));
     }
-    if (decoded.returnTo) returnTo = decoded.returnTo;
+    // Only allow same-origin relative paths to prevent open redirect
+    if (decoded.returnTo && /^\/[^/]/.test(decoded.returnTo)) returnTo = decoded.returnTo;
   } catch {
     return NextResponse.redirect(new URL(`${returnFallback}?gcal_error=invalid_state`, req.url));
   }
