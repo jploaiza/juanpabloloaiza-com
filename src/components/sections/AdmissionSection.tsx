@@ -3,7 +3,17 @@ import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import Script from "next/script";
+import { useState, useEffect, useRef } from "react";
+
+declare global {
+  interface Window {
+    turnstile: {
+      render: (container: HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+    };
+  }
+}
 
 export default function AdmissionSection() {
   const [formData, setFormData] = useState({
@@ -16,6 +26,9 @@ export default function AdmissionSection() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string>("");
 
   const countryCodes = [
     { code: "+54", label: "🇦🇷 Argentina (+54)" },
@@ -67,6 +80,17 @@ export default function AdmissionSection() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
   };
 
+  const handleTurnstileLoad = () => {
+    if (turnstileRef.current && window.turnstile) {
+      turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "",
+        theme: "dark",
+        callback: (token: string) => setTurnstileToken(token),
+        "expired-callback": () => setTurnstileToken(""),
+      });
+    }
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -78,30 +102,37 @@ export default function AdmissionSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!turnstileToken) {
+      setError("Por favor completa la verificación de seguridad.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...formData, phone: formData.phone ? `${countryCode} ${formData.phone}` : "" }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          phone: formData.phone ? `${countryCode} ${formData.phone}` : "",
+          turnstileToken,
+        }),
       });
 
       if (response.ok) {
         setSubmitted(true);
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          reason: "",
-        });
+        setFormData({ name: "", email: "", phone: "", reason: "" });
+        setTurnstileToken("");
+        if (turnstileWidgetId.current) window.turnstile.reset(turnstileWidgetId.current);
         setTimeout(() => setSubmitted(false), 8000);
       } else {
         const data = await response.json().catch(() => ({}));
         setError(data.error || "Hubo un problema al enviar tu solicitud. Por favor intenta de nuevo.");
+        if (turnstileWidgetId.current) window.turnstile.reset(turnstileWidgetId.current);
+        setTurnstileToken("");
       }
     } catch {
       setError("No se pudo conectar con el servidor. Verifica tu conexión e intenta de nuevo.");
@@ -271,9 +302,11 @@ export default function AdmissionSection() {
                 />
               </div>
 
+              <div ref={turnstileRef} className="flex justify-center" />
+
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !turnstileToken}
                 className="btn-gold w-full disabled:opacity-50"
               >
                 {loading ? "Enviando..." : "Enviar Solicitud"}
@@ -332,6 +365,12 @@ export default function AdmissionSection() {
           </div>
         </motion.div>
       </motion.div>
+
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="lazyOnload"
+        onLoad={handleTurnstileLoad}
+      />
     </section>
   );
 }

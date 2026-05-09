@@ -254,7 +254,27 @@ export async function POST(request: NextRequest) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const { name, email, phone, reason } = await request.json();
+  const { name, email, phone, reason, turnstileToken } = await request.json();
+
+  // Verify Turnstile token
+  if (!turnstileToken) {
+    return NextResponse.json({ error: "Verificación de seguridad requerida." }, { status: 400 });
+  }
+  if (process.env.TURNSTILE_SECRET_KEY) {
+    const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        secret: process.env.TURNSTILE_SECRET_KEY,
+        response: turnstileToken,
+        remoteip: getIp(request.headers),
+      }),
+    });
+    const verifyData = await verifyRes.json() as { success: boolean };
+    if (!verifyData.success) {
+      return NextResponse.json({ error: "Verificación de seguridad fallida. Intenta de nuevo." }, { status: 400 });
+    }
+  }
 
   if (!name || !email || !reason) {
     return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
