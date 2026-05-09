@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
@@ -7,9 +8,9 @@ const AGENDA_URL = "https://www.juanpabloloaiza.com/agenda";
 const SITE_URL = "https://www.juanpabloloaiza.com";
 
 export async function GET(req: NextRequest) {
-  // Verify cron secret
-  const secret = req.headers.get("x-cron-secret");
-  if (secret !== process.env.CRON_SECRET) {
+  const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");
+  const expected = Buffer.from(process.env.CRON_SECRET ?? "");
+  if (secret.length === 0 || secret.length !== expected.length || !timingSafeEqual(secret, expected)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

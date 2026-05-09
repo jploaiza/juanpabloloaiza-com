@@ -343,10 +343,8 @@ export async function POST(req: NextRequest) {
   });
 
   if (emailStatus === "failed") {
-    return NextResponse.json(
-      { error: `Email fallido: ${sendError}` },
-      { status: 500 }
-    );
+    console.error("[comms-send]", sendError);
+    return NextResponse.json({ error: "Error al enviar el email" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

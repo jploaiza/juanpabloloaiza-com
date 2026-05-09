@@ -45,8 +45,8 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (updateError) {
-    console.error("Notes update error:", updateError);
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+    console.error("[notes-update]", updateError.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   return NextResponse.json(updated);

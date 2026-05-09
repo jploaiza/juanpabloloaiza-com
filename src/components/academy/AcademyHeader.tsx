@@ -19,6 +19,8 @@ export default function AcademyHeader({ user }: Props) {
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+    sessionStorage.removeItem("jpl_sid");
+    sessionStorage.removeItem("jpl_utm");
     router.push("/academy");
     router.refresh();
   };

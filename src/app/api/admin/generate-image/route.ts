@@ -70,6 +70,8 @@ export async function POST(req: NextRequest) {
   try {
     const imgRes = await fetch(pollinationsUrl, { signal: AbortSignal.timeout(30000) });
     if (!imgRes.ok) throw new Error(`Pollinations returned ${imgRes.status}`);
+    const ct = imgRes.headers.get("content-type") ?? "";
+    if (!ct.startsWith("image/")) throw new Error(`Unexpected content-type: ${ct}`);
     imageBuffer = Buffer.from(await imgRes.arrayBuffer());
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

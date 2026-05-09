@@ -31,10 +31,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
 
-    const propsJson = props ?? {};
-    if (JSON.stringify(propsJson).length > 2048) {
+    const rawProps = props ?? {};
+    if (JSON.stringify(rawProps).length > 2048) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
+    const BLOCKED_KEYS = new Set(["user_id", "email", "password", "token", "secret", "api_key"]);
+    const propsJson = typeof rawProps === "object" && rawProps !== null
+      ? Object.fromEntries(Object.entries(rawProps as Record<string, unknown>).filter(([k]) => !BLOCKED_KEYS.has(k)))
+      : {};
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

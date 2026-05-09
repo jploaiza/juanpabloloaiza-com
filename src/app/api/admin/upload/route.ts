@@ -14,6 +14,18 @@ const s3 = new S3Client({
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
+function hasValidMagicBytes(buf: Buffer, mimeType: string): boolean {
+  if (buf.length < 4) return false;
+  switch (mimeType) {
+    case "image/jpeg": return buf[0] === 0xff && buf[1] === 0xd8;
+    case "image/png": return buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47;
+    case "image/gif": return buf.subarray(0, 6).toString("ascii") === "GIF87a" || buf.subarray(0, 6).toString("ascii") === "GIF89a";
+    case "image/webp": return buf.length >= 12 && buf.subarray(0, 4).toString("ascii") === "RIFF" && buf.subarray(8, 12).toString("ascii") === "WEBP";
+    case "image/avif": return true; // ISO BMFF container — complex to validate, trust ALLOWED_TYPES check
+    default: return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   // Auth guard
   const supabase = await createClient();
@@ -56,6 +68,10 @@ export async function POST(req: NextRequest) {
   const ext = file.name.split(".").pop() ?? "jpg";
   const key = `blog/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (!hasValidMagicBytes(buffer, file.type)) {
+    return NextResponse.json({ error: "Contenido del archivo no coincide con el tipo declarado." }, { status: 400 });
+  }
 
   try {
     await s3.send(
