@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import TrackedLink from "@/components/TrackedLink";
 import { createClient } from "@/lib/supabase/server";
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
@@ -116,13 +117,14 @@ export default async function CompletadoPage({ searchParams }: Props) {
         {/* ── CTAs ── */}
         <div className="flex flex-col sm:flex-row gap-4 w-full">
           {/* Primary: Schedule session */}
-          <Link
+          <TrackedLink
             href="/agenda"
             className="flex-1 flex items-center justify-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-xs uppercase tracking-widest px-6 py-4 hover:bg-white transition"
+            trackingEvent={{ name: "agendar_click", props: { source: "completado" } }}
           >
             <Calendar className="w-4 h-4" />
             Agendar mi sesión
-          </Link>
+          </TrackedLink>
 
           {/* Secondary: View certificate */}
           {certUrl && (

@@ -1,0 +1,52 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const ALLOWED_EVENTS = new Set([
+  "whatsapp_click",
+  "agendar_click",
+  "booking_confirmed",
+  "enrollment_started",
+  "lesson_completed",
+  "course_completed",
+  "scroll_50",
+  "scroll_75",
+  "scroll_100",
+  "time_30s",
+  "time_60s",
+  "time_180s",
+]);
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { name, path, sessionId, props, utm } = body;
+
+    if (!name || typeof name !== "string" || !ALLOWED_EVENTS.has(name)) {
+      return NextResponse.json({ ok: false }, { status: 400 });
+    }
+
+    const propsJson = props ?? {};
+    if (JSON.stringify(propsJson).length > 2048) {
+      return NextResponse.json({ ok: false }, { status: 400 });
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    await supabase.from("events").insert({
+      event_name: name,
+      path: path ? String(path).slice(0, 300) : null,
+      session_id: sessionId ? String(sessionId).slice(0, 64) : null,
+      props: propsJson,
+      utm_source: utm?.utm_source ?? null,
+      utm_medium: utm?.utm_medium ?? null,
+      utm_campaign: utm?.utm_campaign ?? null,
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ ok: false }, { status: 500 });
+  }
+}

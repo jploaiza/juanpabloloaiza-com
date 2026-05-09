@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import TrackedLink from "@/components/TrackedLink";
 import { createAdminClient } from "@/lib/supabase/server";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import { Award, Calendar, CheckCircle, ExternalLink } from "lucide-react";
@@ -144,13 +145,14 @@ export default async function CertificatePage({ params }: Props) {
         )}
 
         {/* CTA */}
-        <Link
+        <TrackedLink
           href={`${siteUrl}/agenda`}
           className="w-full flex items-center justify-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-xs uppercase tracking-widest px-6 py-4 hover:bg-white transition"
+          trackingEvent={{ name: "agendar_click", props: { source: "certificate" } }}
         >
           <Calendar className="w-4 h-4" />
           Agendar sesión con Juan Pablo
-        </Link>
+        </TrackedLink>
 
         <Link
           href={`${siteUrl}/academy`}

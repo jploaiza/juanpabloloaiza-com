@@ -34,6 +34,13 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Track lesson completed (anon/authenticated can insert — fire and forget)
+  void supabase.from("events").insert({
+    event_name: "lesson_completed",
+    user_id: user.id,
+    props: { lessonId, courseId },
+  });
+
   // Check total completed lessons vs actual published lessons in course
   const [{ data: completedRows }, { count: totalPublished }] = await Promise.all([
     supabase
@@ -86,6 +93,13 @@ export async function POST(req: NextRequest) {
   } else {
     certificateToken = existing.verify_token;
   }
+
+  // Track course completed
+  void adminSb.from("events").insert({
+    event_name: "course_completed",
+    user_id: user.id,
+    props: { courseId },
+  });
 
   // 3. Fetch profile + course settings for emails
   const [{ data: profile }, { data: course }] = await Promise.all([

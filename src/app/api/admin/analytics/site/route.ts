@@ -41,10 +41,12 @@ export async function GET() {
     { data: views30d },
     { data: viewsAll },
     { data: blogPosts },
+    { data: eventsData },
   ] = await Promise.all([
-    adminSb.from("page_views").select("path, referrer, created_at").gte("created_at", thirtyDaysAgo),
+    adminSb.from("page_views").select("path, referrer, created_at, utm_source, utm_medium, utm_campaign").gte("created_at", thirtyDaysAgo),
     adminSb.from("page_views").select("path, created_at").gte("created_at", sixMonthsAgo),
     adminSb.from("blog_posts").select("id, slug, title, published_at").eq("status", "published").order("published_at", { ascending: false }),
+    adminSb.from("events").select("event_name, utm_source, utm_medium, utm_campaign, created_at").gte("created_at", thirtyDaysAgo),
   ]);
 
   const allViews30 = views30d ?? [];
@@ -107,6 +109,40 @@ export async function GET() {
   // Unique paths count
   const uniquePaths = new Set(allViews30.map((v) => v.path)).size;
 
+  // Event counts (last 30 days)
+  const events30 = eventsData ?? [];
+  const eventCounts: Record<string, number> = {};
+  for (const e of events30) {
+    eventCounts[e.event_name] = (eventCounts[e.event_name] ?? 0) + 1;
+  }
+
+  // UTM attribution from page_views
+  const utmSourceCounts: Record<string, number> = {};
+  const utmCampaignCounts: Record<string, number> = {};
+  for (const v of allViews30) {
+    if (v.utm_source) utmSourceCounts[v.utm_source] = (utmSourceCounts[v.utm_source] ?? 0) + 1;
+    if (v.utm_campaign) utmCampaignCounts[v.utm_campaign] = (utmCampaignCounts[v.utm_campaign] ?? 0) + 1;
+  }
+  const topUtmSources = Object.entries(utmSourceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([source, count]) => ({ source, count }));
+  const topUtmCampaigns = Object.entries(utmCampaignCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([campaign, count]) => ({ campaign, count }));
+
+  const agendarClicks = eventCounts["agendar_click"] ?? 0;
+  const bookings = eventCounts["booking_confirmed"] ?? 0;
+  const whatsappClicks = eventCounts["whatsapp_click"] ?? 0;
+  const funnel = {
+    visits: totalViews,
+    agendarClicks,
+    bookings,
+    whatsappClicks,
+    conversionRate: totalViews > 0 ? Math.round((bookings / totalViews) * 10000) / 100 : 0,
+  };
+
   return NextResponse.json({
     totalViews,
     uniquePaths,
@@ -115,5 +151,9 @@ export async function GET() {
     topPages,
     topReferrers,
     blogViews,
+    eventCounts,
+    topUtmSources,
+    topUtmCampaigns,
+    funnel,
   });
 }

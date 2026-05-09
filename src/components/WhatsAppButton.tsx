@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { trackEvent } from "@/lib/track";
 
 export default function WhatsAppButton() {
   return (
@@ -12,6 +13,7 @@ export default function WhatsAppButton() {
       whileTap={{ scale: 0.95 }}
       className="fixed bottom-4 right-2 sm:bottom-8 sm:right-8 z-40 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-[#25d366] hover:bg-[#1ead50] text-white rounded-lg shadow-lg transition-colors"
       aria-label="Contactar por WhatsApp"
+      onClick={() => trackEvent("whatsapp_click", { location: "floating" })}
     >
       {/* WhatsApp official icon */}
       <svg

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RefreshCw, Globe, FileText, TrendingUp, Eye, ExternalLink } from "lucide-react";
+import { RefreshCw, Globe, FileText, TrendingUp, Eye, ExternalLink, MousePointer2, Calendar, MessageCircle, Zap } from "lucide-react";
 
 interface SiteData {
   totalViews: number;
@@ -11,6 +11,10 @@ interface SiteData {
   topPages: { path: string; count: number }[];
   topReferrers: { domain: string; count: number }[];
   blogViews: { slug: string; title: string; count: number; published_at: string | null }[];
+  eventCounts: Record<string, number>;
+  topUtmSources: { source: string; count: number }[];
+  topUtmCampaigns: { campaign: string; count: number }[];
+  funnel: { visits: number; agendarClicks: number; bookings: number; whatsappClicks: number; conversionRate: number };
 }
 
 function MiniBarChart({ data, color = "#C5A059", height = 40 }: {
@@ -104,7 +108,7 @@ export default function SiteAnalyticsPanel() {
     </div>
   );
 
-  const { totalViews, uniquePaths, dailyViews, monthlyViews, topPages, topReferrers, blogViews } = data;
+  const { totalViews, uniquePaths, dailyViews, monthlyViews, topPages, topReferrers, blogViews, eventCounts, topUtmSources, topUtmCampaigns, funnel } = data;
   const maxPage = Math.max(...topPages.map((p) => p.count), 1);
   const maxRef = Math.max(...topReferrers.map((r) => r.count), 1);
   const maxBlog = Math.max(...blogViews.map((b) => b.count), 1);
@@ -248,6 +252,121 @@ export default function SiteAnalyticsPanel() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Conversions */}
+      <div className="space-y-4">
+        <div>
+          <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/70 mb-0.5">Conversiones</p>
+          <h2 className="font-cinzel text-lg text-white">Eventos de Conversión</h2>
+          <p className="font-crimson text-xs text-gray-600 mt-0.5">Últimos 30 días · tracking propio sin cookies</p>
+        </div>
+
+        {/* Funnel KPIs */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <KpiCard icon={Eye} label="Visitas (30d)" value={String(funnel.visits)} sub="páginas vistas" />
+          <KpiCard icon={MousePointer2} label="Clicks Agendar" value={String(funnel.agendarClicks)} sub="hacia /agenda" color="text-amber-400" />
+          <KpiCard icon={Calendar} label="Bookings" value={String(funnel.bookings)} sub="sesiones confirmadas" color="text-emerald-400" />
+          <KpiCard icon={MessageCircle} label="WhatsApp" value={String(funnel.whatsappClicks)} sub="clicks al botón" color="text-green-400" />
+        </div>
+
+        {/* Funnel visual */}
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
+          <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Embudo de conversión</h3>
+          <p className="font-crimson text-xs text-gray-600 mb-5">visit → agendar click → booking confirmado</p>
+          {[
+            { label: "Visitas", value: funnel.visits, color: "bg-[#C5A059]/60", pct: 100 },
+            { label: "Clicks Agendar", value: funnel.agendarClicks, color: "bg-amber-400/60", pct: funnel.visits > 0 ? Math.round((funnel.agendarClicks / funnel.visits) * 100) : 0 },
+            { label: "Bookings", value: funnel.bookings, color: "bg-emerald-400/60", pct: funnel.visits > 0 ? Math.round((funnel.bookings / funnel.visits) * 100) : 0 },
+          ].map(({ label, value, color, pct }) => (
+            <div key={label} className="mb-3">
+              <div className="flex justify-between mb-1">
+                <span className="font-cinzel text-[10px] uppercase tracking-widest text-gray-400">{label}</span>
+                <span className="font-cinzel text-[10px] text-gray-500">{value} · {pct}%</span>
+              </div>
+              <div className="h-2 bg-[#0a1628]">
+                <div className={`h-full ${color} transition-all`} style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          ))}
+          <p className="font-cinzel text-[10px] text-emerald-400 mt-3">
+            Tasa de conversión visit→booking: <span className="font-bold">{funnel.conversionRate}%</span>
+          </p>
+        </div>
+
+        {/* UTM sources + campaigns */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
+            <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Top UTM sources</h3>
+            <p className="font-crimson text-xs text-gray-600 mb-4">?utm_source en URL de aterrizaje</p>
+            {topUtmSources.length === 0 ? (
+              <p className="font-crimson text-sm text-gray-600 text-center py-4">Sin datos — agrega ?utm_source=instagram a tus links</p>
+            ) : (() => {
+              const maxUtm = Math.max(...topUtmSources.map((u) => u.count), 1);
+              return (
+                <div className="space-y-2.5">
+                  {topUtmSources.map(({ source, count }) => (
+                    <div key={source} className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="font-crimson text-sm text-gray-200">{source}</span>
+                        <span className="font-cinzel text-[10px] text-amber-400">{count}</span>
+                      </div>
+                      <div className="h-1 bg-[#0a1628]">
+                        <div className="h-full bg-amber-400/50" style={{ width: `${Math.round((count / maxUtm) * 100)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+
+          <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
+            <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1">Top campañas</h3>
+            <p className="font-crimson text-xs text-gray-600 mb-4">?utm_campaign en URL de aterrizaje</p>
+            {topUtmCampaigns.length === 0 ? (
+              <p className="font-crimson text-sm text-gray-600 text-center py-4">Sin datos — agrega ?utm_campaign=nombre a tus links</p>
+            ) : (() => {
+              const maxCmp = Math.max(...topUtmCampaigns.map((c) => c.count), 1);
+              return (
+                <div className="space-y-2.5">
+                  {topUtmCampaigns.map(({ campaign, count }) => (
+                    <div key={campaign} className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="font-crimson text-sm text-gray-200">{campaign}</span>
+                        <span className="font-cinzel text-[10px] text-[#C5A059]">{count}</span>
+                      </div>
+                      <div className="h-1 bg-[#0a1628]">
+                        <div className="h-full bg-[#C5A059]/50" style={{ width: `${Math.round((count / maxCmp) * 100)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* All events */}
+        <div className="bg-[#16213e] border border-[#C5A059]/10 p-5">
+          <h3 className="font-cinzel text-xs uppercase tracking-widest text-white mb-1 flex items-center gap-2">
+            <Zap className="w-3.5 h-3.5 text-[#C5A059]" />
+            Todos los eventos (30d)
+          </h3>
+          <p className="font-crimson text-xs text-gray-600 mb-4">Engagement + conversiones</p>
+          {Object.keys(eventCounts).length === 0 ? (
+            <p className="font-crimson text-sm text-gray-600 text-center py-4">Sin eventos registrados aún — se acumularán a medida que haya visitas</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {Object.entries(eventCounts).sort((a, b) => b[1] - a[1]).map(([name, count]) => (
+                <div key={name} className="border border-white/5 p-3">
+                  <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{name.replace(/_/g, " ")}</p>
+                  <p className="font-cinzel text-xl text-[#C5A059]">{count}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

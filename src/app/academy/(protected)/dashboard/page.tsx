@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import TrackedLink from "@/components/TrackedLink";
 import { createClient } from "@/lib/supabase/server";
 import AcademyHeader from "@/components/academy/AcademyHeader";
 import ProgressBar from "@/components/academy/ProgressBar";
@@ -182,9 +183,10 @@ export default async function DashboardPage() {
             </div>
           </a>
           {isCompleted ? (
-            <Link
+            <TrackedLink
               href="/agenda"
               className="relative flex items-center gap-4 p-5 bg-[#16213e] border border-[#C5A059]/20 hover:border-[#C5A059]/50 transition overflow-hidden"
+              trackingEvent={{ name: "agendar_click", props: { source: "academy_dashboard" } }}
             >
               <ScrollworkCorners size={40} opacity={0.65} />
               <Calendar className="w-8 h-8 text-[#C5A059] flex-shrink-0" />
@@ -192,7 +194,7 @@ export default async function DashboardPage() {
                 <p className="font-cinzel text-xs uppercase tracking-widest text-white mb-0.5">¡Estás listo!</p>
                 <p className="font-crimson text-gray-400 text-sm">Agenda tu primera sesión →</p>
               </div>
-            </Link>
+            </TrackedLink>
           ) : (
             <div className="relative flex items-center gap-4 p-5 bg-[#16213e] border border-white/5 overflow-hidden opacity-60">
               <ScrollworkCorners size={40} opacity={0.4} />

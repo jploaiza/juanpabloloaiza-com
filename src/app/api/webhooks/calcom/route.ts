@@ -400,9 +400,9 @@ export async function POST(req: NextRequest) {
     emailStatus = "failed";
   }
 
-  // Log the send — non-blocking: if schema constraints fail, the email was already sent
+  // Log the send + track booking event — non-blocking
   try {
-    const adminSb = await createAdminClient();
+    const adminSb = createAdminClient();
     await adminSb.from("comms_log").insert({
       type: triggerEventToType(triggerEvent),
       subject: email.subject,
@@ -410,6 +410,16 @@ export async function POST(req: NextRequest) {
       sent_at: new Date().toISOString(),
       body_preview: `cal:${payload.uid}:${triggerEvent}`,
     });
+    if (triggerEvent === "BOOKING_CREATED") {
+      await adminSb.from("events").insert({
+        event_name: "booking_confirmed",
+        props: {
+          calUid: payload.uid,
+          attendeeEmail: attendee.email,
+          eventTypeId: payload.eventTypeId ?? null,
+        },
+      });
+    }
   } catch (logErr) {
     console.error("[calcom-webhook] Log failed:", logErr);
   }

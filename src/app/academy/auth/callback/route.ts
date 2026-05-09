@@ -24,6 +24,11 @@ export async function GET(request: Request) {
             { user_id: user.id, course_id: course.id },
             { onConflict: "user_id,course_id", ignoreDuplicates: true }
           );
+          void supabase.from("events").insert({
+            event_name: "enrollment_started",
+            user_id: user.id,
+            props: { courseId: course.id },
+          });
         }
       }
       return NextResponse.redirect(`${origin}${next}`);
