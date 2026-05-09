@@ -31,7 +31,7 @@ export default async function AnalyticsPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/academy/login");
 
-  const adminSb = await createAdminClient();
+  const adminSb = createAdminClient();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
   const [
@@ -50,18 +50,24 @@ export default async function AnalyticsPage() {
     adminSb.from("lessons").select("id, title, course_id").eq("is_published", true),
   ]);
 
-  const totalEnrolled = enrollments?.length ?? 0;
-  const completedCount = certificates?.length ?? 0;
+  const adminIds = new Set((allProfiles ?? []).filter((p) => p.role === "admin").map((p) => p.id));
+  const studentEnrollments = (enrollments ?? []).filter((e) => !adminIds.has(e.user_id));
+  const studentCerts = (certificates ?? []).filter((c) => !adminIds.has(c.user_id));
+  const studentProgress = (progressAll ?? []).filter((p) => !adminIds.has(p.user_id));
+  const studentNewEnrollments = (newEnrollments ?? []).filter((e) => !adminIds.has(e.user_id));
+
+  const totalEnrolled = studentEnrollments.length;
+  const completedCount = studentCerts.length;
   const completionRate = totalEnrolled > 0 ? Math.round((completedCount / totalEnrolled) * 100) : 0;
-  const totalWatchSeconds = (progressAll ?? []).reduce((sum, p) => sum + (p.watch_seconds ?? 0), 0);
+  const totalWatchSeconds = studentProgress.reduce((sum, p) => sum + (p.watch_seconds ?? 0), 0);
   const avgWatchSeconds = totalEnrolled > 0 ? totalWatchSeconds / totalEnrolled : 0;
-  const newLast30d = newEnrollments?.length ?? 0;
+  const newLast30d = studentNewEnrollments.length;
   const totalLessonsCount = lessons?.length ?? 1;
 
   // Lesson stats
   const lessonMap: Record<string, { title: string; completions: number; realPlayTotal: number; durationTotal: number }> = {};
   for (const lesson of lessons ?? []) lessonMap[lesson.id] = { title: lesson.title, completions: 0, realPlayTotal: 0, durationTotal: 0 };
-  for (const p of progressAll ?? []) {
+  for (const p of studentProgress) {
     if (!p.lesson_id || !lessonMap[p.lesson_id]) continue;
     if (p.is_completed) lessonMap[p.lesson_id].completions++;
     if (p.duration_seconds && p.duration_seconds > 0) {
@@ -75,7 +81,7 @@ export default async function AnalyticsPage() {
   const enrolledUserIds = new Set((enrollments ?? []).map((e) => e.user_id));
   const certUserIds = new Set((certificates ?? []).map((c) => c.user_id));
   const progressByUser: Record<string, { completed: number; watchSeconds: number; lastActive: string | null }> = {};
-  for (const p of progressAll ?? []) {
+  for (const p of studentProgress) {
     if (!progressByUser[p.user_id]) progressByUser[p.user_id] = { completed: 0, watchSeconds: 0, lastActive: null };
     if (p.is_completed) progressByUser[p.user_id].completed++;
     progressByUser[p.user_id].watchSeconds += p.watch_seconds ?? 0;
