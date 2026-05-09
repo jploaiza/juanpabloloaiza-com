@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  const adminSb = await createAdminClient();
+  const adminSb = createAdminClient();
 
   const { data: lessons } = await adminSb
     .from("lessons")

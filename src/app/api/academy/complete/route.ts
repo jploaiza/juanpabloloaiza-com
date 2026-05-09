@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Course completed ──────────────────────────────────────
-  const adminSb = await createAdminClient();
+  const adminSb = createAdminClient();
 
   // 1. Mark enrollment completed
   await adminSb
