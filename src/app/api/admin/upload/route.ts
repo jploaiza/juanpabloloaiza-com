@@ -27,6 +27,13 @@ function hasValidMagicBytes(buf: Buffer, mimeType: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  // CSRF: verify request originates from own site
+  const origin = req.headers.get("origin");
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com").replace(/\/$/, "");
+  if (origin && origin !== siteUrl) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   // Auth guard
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

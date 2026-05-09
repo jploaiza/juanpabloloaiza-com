@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (insertError) {
-    console.error("Session insert error:", insertError);
-    return NextResponse.json({ error: insertError.message }, { status: 500 });
+    console.error("[sessions-insert]", insertError.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   // If completed, increment sessions_used on the pack
@@ -163,6 +163,16 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
+  // Verify session exists before updating
+  const { data: existing } = await adminSb
+    .from("therapy_sessions")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const { data: updated, error: updateError } = await adminSb
     .from("therapy_sessions")
     .update(updateFields)
@@ -171,8 +181,8 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (updateError) {
-    console.error("Session update error:", updateError);
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+    console.error("[sessions-patch]", updateError.code);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   // Handle status change to completed — increment sessions_used
