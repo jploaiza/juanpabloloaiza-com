@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
@@ -136,9 +136,10 @@ const charCountClass = "font-cinzel text-[9px] tracking-widest";
 
 interface Props {
   basePath?: string;
+  initialFromTrend?: { keyword: string; geo: string; ideaId: string };
 }
 
-export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
+export default function NuevoPostClient({ basePath = "/admin/blog", initialFromTrend }: Props) {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
@@ -168,6 +169,18 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importError, setImportError] = useState("");
   const mdFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Pre-populate from trend if coming from /admin/trends
+  useEffect(() => {
+    if (!initialFromTrend) return;
+    const { keyword } = initialFromTrend;
+    const initialTitle = keyword.charAt(0).toUpperCase() + keyword.slice(1);
+    setTitle(initialTitle);
+    setSlug(slugify(initialTitle));
+    const normalizedTag = keyword.toLowerCase().trim();
+    setTags([normalizedTag]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleTitleChange = useCallback(
     (val: string) => {
@@ -394,6 +407,15 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
         return;
       }
 
+      // Link the blog post to the content idea if coming from trends
+      if (initialFromTrend?.ideaId && data.post?.id) {
+        await fetch(`/api/admin/trends/ideas/${initialFromTrend.ideaId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "published", blog_post_id: data.post.id }),
+        }).catch(() => {});
+      }
+
       router.push(basePath);
     } catch {
       setServerError("Error de conexión. Inténtalo de nuevo.");
@@ -410,6 +432,19 @@ export default function NuevoPostClient({ basePath = "/admin/blog" }: Props) {
         <ArrowLeft className="w-3 h-3" />
         Volver al blog
       </Link>
+
+      {initialFromTrend && (
+        <div className="mb-6 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
+          <span className="text-emerald-400 mt-0.5">↗</span>
+          <div>
+            <p className="font-cinzel text-[9px] uppercase tracking-widest text-emerald-400 mb-0.5">Idea importada desde tendencias</p>
+            <p className="font-crimson text-sm text-emerald-200/80">
+              Keyword: <strong>«{initialFromTrend.keyword}»</strong> ({initialFromTrend.geo}).
+              Usa «Mejorar con IA» o «Generar artículo completo» para completar el contenido.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-start justify-between mb-8">
         <div>
