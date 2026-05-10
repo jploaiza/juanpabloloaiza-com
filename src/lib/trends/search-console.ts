@@ -64,7 +64,8 @@ export async function fetchTopQueries(opts: {
       ctr: r.ctr ?? 0,
       position: r.position ?? 0,
     }));
-  } catch {
+  } catch (err) {
+    console.error("[GSC] fetchTopQueries error:", err instanceof Error ? err.message : String(err));
     return [];
   }
 }
