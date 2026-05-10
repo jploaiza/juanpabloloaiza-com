@@ -97,7 +97,14 @@ export async function GET(req: NextRequest) {
   const startDate = new Date(Date.now() - 28 * 86400000).toISOString().split("T")[0];
 
   for (const country of GSC_COUNTRIES) {
-    const rows = await fetchTopQueries({ startDate, endDate, country });
+    let rows: Awaited<ReturnType<typeof fetchTopQueries>> = [];
+    try {
+      rows = await fetchTopQueries({ startDate, endDate, country });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(`gsc fetch ${country}: ${msg}`);
+      continue;
+    }
     if (rows.length > 0) {
       const { error } = await adminSb.from("gsc_queries").upsert(
         rows.map((r) => ({

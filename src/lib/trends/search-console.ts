@@ -67,8 +67,9 @@ export async function fetchTopQueries(opts: {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const code = (err as { code?: number }).code;
-    console.error(`[GSC] fetchTopQueries error code=${code} msg=${msg}`);
-    return [];
+    const detail = (err as { errors?: unknown[] }).errors;
+    console.error(`[GSC] code=${code} msg=${msg} detail=${JSON.stringify(detail)}`);
+    throw err;  // let callers surface the full error
   }
 }
 
