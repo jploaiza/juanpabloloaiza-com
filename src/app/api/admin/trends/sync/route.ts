@@ -5,6 +5,8 @@ import { fetchTopQueries } from "@/lib/trends/search-console";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { getActiveSeeds } from "@/lib/trends/get-seeds";
 
+export const maxDuration = 60;
+
 const GEOS: TrendGeo[] = ["ES", "US", "MX", "CL"];
 
 const GSC_COUNTRIES = ["esp", "usa", "mex", "chl"];

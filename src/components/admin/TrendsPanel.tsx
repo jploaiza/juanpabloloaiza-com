@@ -194,7 +194,7 @@ export default function TrendsPanel() {
     setRefreshError(null);
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 90_000);
+      const timeout = setTimeout(() => controller.abort(), 120_000);
       const res = await fetch("/api/admin/trends/sync", {
         method: "POST",
         signal: controller.signal,
@@ -211,7 +211,9 @@ export default function TrendsPanel() {
         setRefreshError("Error de conexión al sincronizar.");
       }
     }
-    await fetchData(geo, tab);
+    // Always refresh ideas regardless of current tab
+    await fetchData(geo, "ideas");
+    if (tab === "saved") fetchSaved();
     setRefreshing(false);
   };
 
