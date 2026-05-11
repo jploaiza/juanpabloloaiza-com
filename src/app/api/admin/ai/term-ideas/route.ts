@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 
+export const maxDuration = 60;
+
 function getClient() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    baseURL: "https://api.deepseek.com",
+  });
 }
 
 const VALID_GEOS = new Set(["ES", "US", "MX", "CL", "ALL"]);
@@ -102,6 +107,10 @@ Devuelve ÚNICAMENTE un JSON válido (sin markdown wrapper):
 }
 
 export async function POST(req: NextRequest) {
+  if (!process.env.DEEPSEEK_API_KEY) {
+    return NextResponse.json({ error: "DEEPSEEK_API_KEY no está configurada." }, { status: 500 });
+  }
+
   const isAdmin = await assertAdmin();
   if (!isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -115,12 +124,12 @@ export async function POST(req: NextRequest) {
   }
 
   const client = getClient();
-  const call = (prompt: string) =>
+  const call = (prompt: string, maxTok: number) =>
     client.chat.completions.create({
-      model: "gpt-4o",
+      model: "deepseek-chat",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
-      max_tokens: 4000,
+      max_tokens: maxTok,
     }).then((r) => {
       const raw = r.choices[0]?.message?.content ?? "{}";
       const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
@@ -128,10 +137,10 @@ export async function POST(req: NextRequest) {
     });
 
   const [articleIdea, reelIdea, carouselIdea, fullArticle] = await Promise.allSettled([
-    call(articleIdeaPrompt(keyword, geo)),
-    call(reelIdeaPrompt(keyword, geo)),
-    call(carouselIdeaPrompt(keyword, geo)),
-    call(fullArticlePrompt(keyword, geo)),
+    call(articleIdeaPrompt(keyword, geo), 800),
+    call(reelIdeaPrompt(keyword, geo), 600),
+    call(carouselIdeaPrompt(keyword, geo), 1000),
+    call(fullArticlePrompt(keyword, geo), 8192),
   ]);
 
   return NextResponse.json({
