@@ -1,14 +1,17 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import KeywordIdeasPanel from "@/components/admin/KeywordIdeasPanel";
+import type { Angle } from "@/app/api/admin/ai/term-ideas/route";
 
 export const metadata: Metadata = { title: "Ideas de contenido — Admin" };
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function TermPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; geo?: string }>;
+  searchParams: Promise<{ q?: string; geo?: string; savedItem?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -31,5 +34,25 @@ export default async function TermPage({
 
   if (!keyword) redirect("/academy/admin/trends");
 
-  return <KeywordIdeasPanel keyword={keyword} geo={geo} />;
+  const rawSavedItem = params.savedItem ?? "";
+  let initialAngle: Angle | null = null;
+
+  if (UUID_RE.test(rawSavedItem)) {
+    const adminSb = await createAdminClient();
+    const { data: savedItem } = await adminSb
+      .from("saved_content_items")
+      .select("type,data")
+      .eq("id", rawSavedItem)
+      .single();
+
+    if (savedItem?.type === "angle" && savedItem.data) {
+      initialAngle = savedItem.data as Angle;
+      await adminSb
+        .from("saved_content_items")
+        .update({ status: "developing" })
+        .eq("id", rawSavedItem);
+    }
+  }
+
+  return <KeywordIdeasPanel keyword={keyword} geo={geo} initialAngle={initialAngle} />;
 }

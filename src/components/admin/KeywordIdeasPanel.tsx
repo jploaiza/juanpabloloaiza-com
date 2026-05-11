@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { ArrowLeft, FileText, Video, LayoutGrid, RefreshCw, ChevronLeft, Sparkles, ChevronDown, ChevronUp, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, FileText, Video, LayoutGrid, RefreshCw, ChevronLeft, Sparkles, ChevronDown, ChevronUp, ArrowUpRight, Bookmark } from "lucide-react";
 
 interface Angle { id: string; title: string; perspective: string; hook: string; formats: string[]; targetAudience: string; }
 interface AnglesData { termContext: string; angles: Angle[]; }
+
+interface Props {
+  keyword: string;
+  geo: string;
+  initialAngle?: Angle | null;
+}
 interface DevelopData {
   articleIdea: { title: string; angle: string; keyPoints: string[]; targetQuery: string } | null;
   reelIdea: { title: string; hook: string; structure: string[]; cta: string; angle: string } | null;
@@ -37,7 +43,7 @@ function CenteredLoader({ message }: { message: string }) {
   );
 }
 
-export default function KeywordIdeasPanel({ keyword, geo }: { keyword: string; geo: string }) {
+export default function KeywordIdeasPanel({ keyword, geo, initialAngle }: Props) {
   const router = useRouter();
   const [step, setStep] = useState<"angles" | "developing" | "results">("angles");
   const [selectedAngle, setSelectedAngle] = useState<Angle | null>(null);
@@ -46,6 +52,8 @@ export default function KeywordIdeasPanel({ keyword, geo }: { keyword: string; g
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [articleExpanded, setArticleExpanded] = useState(false);
+  const [savingAngle, setSavingAngle] = useState<string | null>(null);
+  const [savedAngles, setSavedAngles] = useState<Set<string>>(new Set());
 
   const fetchAngles = async () => {
     setLoading(true); setError(null); setAnglesData(null); setStep("angles");
@@ -57,16 +65,60 @@ export default function KeywordIdeasPanel({ keyword, geo }: { keyword: string; g
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchAngles(); }, [keyword, geo]); // eslint-disable-line
+  const fetchDevelop = useCallback(async (angle: Angle) => {
+    setStep("developing");
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/ai/term-ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, geo, action: "develop", selectedAngle: angle }),
+      });
+      if (!res.ok) throw new Error("Error al desarrollar el ángulo");
+      const json = await res.json();
+      setDevelopData(json);
+      setStep("results");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error inesperado");
+      setStep("angles");
+    } finally {
+      setLoading(false);
+    }
+  }, [keyword, geo]);
+
+  useEffect(() => {
+    if (initialAngle) {
+      setSelectedAngle(initialAngle);
+      fetchDevelop(initialAngle);
+    } else {
+      fetchAngles();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDevelop = async (angle: Angle) => {
-    setSelectedAngle(angle); setStep("developing"); setLoading(true); setError(null); setDevelopData(null);
+    setSelectedAngle(angle);
+    setDevelopData(null);
+    await fetchDevelop(angle);
+  };
+
+  const handleSaveAngle = async (angle: Angle) => {
+    setSavingAngle(angle.id);
     try {
-      const res = await fetch("/api/admin/ai/term-ideas", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ keyword, geo, action: "develop", selectedAngle: angle }) });
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-      setDevelopData(await res.json()); setStep("results");
-    } catch (e) { setError(e instanceof Error ? e.message : "Error al generar contenido"); setStep("angles"); }
-    finally { setLoading(false); }
+      await fetch("/api/admin/trends/saved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "angle",
+          keyword,
+          geo,
+          title: angle.title,
+          data: angle,
+        }),
+      });
+      setSavedAngles((prev) => new Set([...prev, angle.id]));
+    } catch { /* ignore */ }
+    setSavingAngle(null);
   };
 
   const handleBackToAngles = () => { setStep("angles"); setSelectedAngle(null); setDevelopData(null); setError(null); };
@@ -130,6 +182,14 @@ export default function KeywordIdeasPanel({ keyword, geo }: { keyword: string; g
                 <p className="font-crimson text-sm text-gray-500 italic mb-5">"{angle.hook}"</p>
                 <button onClick={() => handleDevelop(angle)} className="w-full flex items-center justify-center gap-2 py-2.5 font-cinzel text-[9px] uppercase tracking-widest bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 transition">
                   <Sparkles className="w-3 h-3" /> Desarrollar esta idea →
+                </button>
+                <button
+                  onClick={() => handleSaveAngle(angle)}
+                  disabled={savingAngle === angle.id}
+                  className="flex items-center gap-1.5 w-full justify-center px-4 py-2 font-cinzel text-[9px] uppercase tracking-widest text-gray-500 border border-white/10 hover:border-[#C5A059]/30 hover:text-[#C5A059] transition disabled:opacity-40 mt-2"
+                >
+                  <Bookmark className="w-3 h-3" />
+                  {savedAngles.has(angle.id) ? "Guardada ✓" : savingAngle === angle.id ? "Guardando…" : "Guardar para después"}
                 </button>
               </div>
             ))}

@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp, ExternalLink, Bookmark } from "lucide-react";
 
-type Tab = "ideas" | "trends" | "gsc";
+type Tab = "ideas" | "trends" | "gsc" | "saved";
 type Geo = "ES" | "US" | "MX" | "CL" | "ALL";
 
 interface ContentIdea {
@@ -59,6 +59,17 @@ interface GlobalTrend {
   interest_score: number;
   geo: string;
   rising: boolean;
+}
+
+interface SavedItem {
+  id: string;
+  type: "trend" | "angle";
+  keyword: string;
+  geo: string;
+  title: string;
+  data: Record<string, unknown> | null;
+  status: string;
+  created_at: string;
 }
 
 interface ApiData {
@@ -137,8 +148,12 @@ export default function TrendsPanel() {
   const [seedLoading, setSeedLoading] = useState(false);
   const [seedsMgmtLoading, setSeedsMgmtLoading] = useState<string | null>(null);
   const [seedsExpanded, setSeedsExpanded] = useState(true);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const fetchData = useCallback(async (currentGeo: Geo, currentTab: Tab) => {
+    if (currentTab === "saved") return;
     try {
       const res = await fetch(`/api/admin/trends?geo=${currentGeo}&tab=${currentTab}`);
       if (!res.ok) return;
@@ -153,6 +168,17 @@ export default function TrendsPanel() {
     setLoading(true);
     fetchData(geo, tab).finally(() => setLoading(false));
   }, [geo, tab, fetchData]);
+
+  const fetchSaved = useCallback(() => {
+    fetch("/api/admin/trends/saved")
+      .then((r) => r.json())
+      .then((j) => setSavedItems(j.items ?? []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (tab === "saved") fetchSaved();
+  }, [tab, fetchSaved]);
 
   const fetchSeeds = useCallback(() => {
     fetch("/api/admin/trends/seeds")
@@ -251,6 +277,24 @@ export default function TrendsPanel() {
       prev ? { ...prev, contentIdeas: prev.contentIdeas.filter((i) => i.id !== idea.id) } : prev
     );
     setRejectingId(null);
+  };
+
+  const handleSaveTrend = async (keyword: string, geoVal: string) => {
+    const key = `${keyword}::${geoVal}`;
+    setSavingId(key);
+    await fetch("/api/admin/trends/saved", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "trend", keyword, geo: geoVal, title: keyword }),
+    }).catch(() => {});
+    setSavingId(null);
+  };
+
+  const handleRemoveSaved = async (id: string) => {
+    setRemovingId(id);
+    await fetch(`/api/admin/trends/saved/${id}`, { method: "DELETE" }).catch(() => {});
+    setSavedItems((prev) => prev.filter((i) => i.id !== id));
+    setRemovingId(null);
   };
 
   const formatDate = (iso: string) =>
@@ -431,17 +475,22 @@ export default function TrendsPanel() {
         </select>
 
         <div className="flex items-center gap-1">
-          {(["ideas", "trends", "gsc"] as Tab[]).map((t) => (
+          {(["ideas", "trends", "gsc", "saved"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 font-cinzel text-[9px] uppercase tracking-widest transition-colors border ${
+              className={`relative px-4 py-2 font-cinzel text-[9px] uppercase tracking-widest transition-colors border ${
                 tab === t
                   ? "bg-[#C5A059]/15 text-[#C5A059] border-[#C5A059]/30"
                   : "text-gray-500 border-white/5 hover:text-[#C5A059] hover:bg-[#C5A059]/5"
               }`}
             >
-              {t === "ideas" ? "Ideas" : t === "trends" ? "Tendencias" : "GSC"}
+              {t === "ideas" ? "Ideas" : t === "trends" ? "Tendencias" : t === "gsc" ? "GSC" : "Guardadas"}
+              {t === "saved" && savedItems.length > 0 && tab !== "saved" && (
+                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 bg-[#C5A059] text-[#020617] font-cinzel text-[7px] rounded-full">
+                  {savedItems.length > 9 ? "9+" : savedItems.length}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -509,6 +558,14 @@ export default function TrendsPanel() {
                                 Ver ideas
                               </Link>
                               <button
+                                onClick={() => handleSaveTrend(idea.seed_keyword, idea.geo || geo)}
+                                disabled={savingId === `${idea.seed_keyword}::${idea.geo || geo}`}
+                                title="Guardar para después"
+                                className="flex items-center gap-1 px-2 py-1.5 text-gray-600 hover:text-[#C5A059] font-cinzel text-[8px] uppercase tracking-widest transition-colors disabled:opacity-50"
+                              >
+                                <Bookmark className="w-3 h-3" />
+                              </button>
+                              <button
                                 onClick={() => handleReject(idea)}
                                 disabled={rejectingId === idea.id}
                                 className="flex items-center gap-1 px-2 py-1.5 text-gray-600 hover:text-red-400 font-cinzel text-[8px] uppercase tracking-widest transition-colors disabled:opacity-50"
@@ -535,15 +592,24 @@ export default function TrendsPanel() {
                   <p className="font-crimson text-sm text-gray-600 mb-6">Lo más buscado en todas las geos — independiente de tus semillas. Úsalos para hablar de temas de actualidad desde la espiritualidad.</p>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     {data?.globalTrends?.map((t, i) => (
-                      <Link
-                        key={`${t.keyword}${i}`}
-                        href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo)}`}
-                        className="group flex flex-col gap-1 bg-[#16213e] border border-white/5 hover:border-[#C5A059]/30 p-3 transition"
-                      >
-                        <span className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600"># {i + 1}</span>
-                        <span className="font-crimson text-sm text-[#C5A059] group-hover:text-[#d4b575] underline underline-offset-2 decoration-[#C5A059]/40 line-clamp-2">{t.keyword}</span>
-                        <span className="font-cinzel text-[8px] text-gray-600">{t.interest_score} pts · {t.geo}</span>
-                      </Link>
+                      <div key={`${t.keyword}${i}`} className="relative group">
+                        <Link
+                          href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo)}`}
+                          className="group flex flex-col gap-1 bg-[#16213e] border border-white/5 hover:border-[#C5A059]/30 p-3 transition"
+                        >
+                          <span className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600"># {i + 1}</span>
+                          <span className="font-crimson text-sm text-[#C5A059] group-hover:text-[#d4b575] underline underline-offset-2 decoration-[#C5A059]/40 line-clamp-2">{t.keyword}</span>
+                          <span className="font-cinzel text-[8px] text-gray-600">{t.interest_score} pts · {t.geo}</span>
+                        </Link>
+                        <button
+                          onClick={() => handleSaveTrend(t.keyword, t.geo)}
+                          disabled={savingId === `${t.keyword}::${t.geo}`}
+                          className="absolute top-2 right-2 text-gray-600 hover:text-[#C5A059] transition opacity-0 group-hover:opacity-100"
+                          title="Guardar para después"
+                        >
+                          <Bookmark className="w-3 h-3" />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </AcademyCard>
@@ -623,6 +689,61 @@ export default function TrendsPanel() {
                 </AcademyCard>
               )}
             </div>
+          )}
+
+          {/* SAVED TAB */}
+          {tab === "saved" && (
+            <AcademyCard>
+              <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-2">
+                Guardadas para después
+              </h2>
+              <p className="font-crimson text-sm text-gray-600 mb-6">
+                Términos y ángulos guardados. Haz clic en «Desarrollar →» cuando estés listo.
+              </p>
+              {savedItems.length === 0 ? (
+                <div className="py-12 text-center">
+                  <Bookmark className="w-6 h-6 text-gray-700 mx-auto mb-3" />
+                  <p className="font-crimson text-gray-600">Sin elementos guardados. Usa el ícono 🔖 en Ideas o Tendencias.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {savedItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-4 bg-[#16213e] border border-white/5 px-4 py-3 hover:border-[#C5A059]/20 transition">
+                      <div className="shrink-0">
+                        <span className={`font-cinzel text-[8px] uppercase tracking-widest px-2 py-0.5 border ${
+                          item.type === "trend"
+                            ? "text-[#C5A059] border-[#C5A059]/20 bg-[#C5A059]/5"
+                            : "text-violet-400 border-violet-400/20 bg-violet-400/5"
+                        }`}>
+                          {item.type === "trend" ? "Tendencia" : "Ángulo"}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-crimson text-sm text-white truncate">{item.title}</p>
+                        <p className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 mt-0.5">{item.keyword} · {item.geo}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Link
+                          href={`/academy/admin/trends/term?q=${encodeURIComponent(item.keyword)}&geo=${encodeURIComponent(item.geo)}${item.type === "angle" ? `&savedItem=${item.id}` : ""}`}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 font-cinzel text-[8px] uppercase tracking-widest transition-colors"
+                        >
+                          <ArrowUpRight className="w-3 h-3" />
+                          Desarrollar
+                        </Link>
+                        <button
+                          onClick={() => handleRemoveSaved(item.id)}
+                          disabled={removingId === item.id}
+                          className="p-1.5 text-gray-600 hover:text-red-400 transition disabled:opacity-50"
+                          title="Eliminar"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </AcademyCard>
           )}
 
           {/* GSC TAB */}
