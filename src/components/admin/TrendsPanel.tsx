@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
 type Tab = "ideas" | "trends" | "gsc";
 type Geo = "ES" | "US" | "MX" | "CL" | "ALL";
@@ -123,7 +123,7 @@ export default function TrendsPanel() {
   const [seeds, setSeeds] = useState<Seed[]>([]);
   const [seedInput, setSeedInput] = useState("");
   const [seedLoading, setSeedLoading] = useState(false);
-  const [seedsExpanded, setSeedsExpanded] = useState(false);
+  const [seedsExpanded, setSeedsExpanded] = useState(true);
 
   const fetchData = useCallback(async (currentGeo: Geo, currentTab: Tab) => {
     try {
@@ -405,9 +405,10 @@ export default function TrendsPanel() {
                           <td className="py-3 pr-4 max-w-[200px]">
                             <Link
                               href={`/academy/admin/trends/term?q=${encodeURIComponent(idea.seed_keyword)}&geo=${encodeURIComponent(idea.geo || geo)}`}
-                              className="font-crimson text-sm text-gray-200 hover:text-[#C5A059] transition truncate block"
+                              className="group flex items-center gap-1 font-crimson text-sm text-[#C5A059] hover:text-[#d4b575] transition truncate"
                             >
-                              {idea.seed_keyword}
+                              <span className="underline underline-offset-2 decoration-[#C5A059]/40 truncate">{idea.seed_keyword}</span>
+                              <ExternalLink className="w-3 h-3 shrink-0 opacity-50 group-hover:opacity-100 transition" />
                             </Link>
                           </td>
                           <td className="py-3 pr-4">
@@ -474,9 +475,10 @@ export default function TrendsPanel() {
                             <td className="py-3 pr-4 max-w-[200px]">
                               <Link
                                 href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo || geo)}`}
-                                className="font-crimson text-sm text-gray-200 hover:text-[#C5A059] transition truncate block"
+                                className="group flex items-center gap-1 font-crimson text-sm text-[#C5A059] hover:text-[#d4b575] transition truncate"
                               >
-                                {t.keyword}
+                                <span className="underline underline-offset-2 decoration-[#C5A059]/40 truncate">{t.keyword}</span>
+                                <ExternalLink className="w-3 h-3 shrink-0 opacity-50 group-hover:opacity-100 transition" />
                               </Link>
                             </td>
                             <td className="py-3 pr-4"><span className="font-cinzel text-[9px] text-gray-500 uppercase">{t.source.replace("_", " ")}</span></td>
