@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
@@ -124,7 +123,6 @@ function SourceBadge({ source }: { source: string }) {
 }
 
 export default function TrendsPanel() {
-  const router = useRouter();
   const [geo, setGeo] = useState<Geo>("ES");
   const [tab, setTab] = useState<Tab>("ideas");
   const [data, setData] = useState<ApiData | null>(null);
@@ -191,20 +189,6 @@ export default function TrendsPanel() {
     setRefreshing(false);
   };
 
-  const handleCreateArticle = async (idea: ContentIdea) => {
-    await fetch(`/api/admin/trends/ideas/${idea.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "drafting" }),
-    }).catch(() => {});
-    const params = new URLSearchParams({
-      from: "trend",
-      keyword: idea.seed_keyword,
-      geo: idea.geo,
-      idea: idea.id,
-    });
-    router.push(`/academy/admin/blog/nuevo?${params}`);
-  };
 
   const handleAddSeed = async () => {
     const kw = seedInput.trim().toLowerCase();
@@ -416,7 +400,17 @@ export default function TrendsPanel() {
                       <Plus className="w-3 h-3" /> Agregar
                     </button>
                   </div>
-                  <p className="font-crimson text-xs text-gray-600 mt-2">Los términos se usan en la próxima sincronización o al presionar «Refrescar».</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="font-crimson text-xs text-gray-600">Los términos se usan al presionar «Sincronizar».</p>
+                    <button
+                      onClick={handleRefresh}
+                      disabled={refreshing}
+                      className="flex items-center gap-1.5 px-3 py-1.5 font-cinzel text-[8px] uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30 hover:bg-[#C5A059]/20 transition disabled:opacity-40"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} />
+                      Sincronizar con estos términos
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -507,13 +501,13 @@ export default function TrendsPanel() {
                           </td>
                           <td className="py-3">
                             <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleCreateArticle(idea)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C5A059] hover:bg-[#d4b06a] text-[#020617] font-cinzel text-[8px] uppercase tracking-widest transition-colors"
+                              <Link
+                                href={`/academy/admin/trends/term?q=${encodeURIComponent(idea.seed_keyword)}&geo=${encodeURIComponent(idea.geo || geo)}`}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 font-cinzel text-[8px] uppercase tracking-widest transition-colors"
                               >
-                                <CheckCircle className="w-3 h-3" />
-                                Crear artículo
-                              </button>
+                                <ArrowUpRight className="w-3 h-3" />
+                                Ver ideas
+                              </Link>
                               <button
                                 onClick={() => handleReject(idea)}
                                 disabled={rejectingId === idea.id}
