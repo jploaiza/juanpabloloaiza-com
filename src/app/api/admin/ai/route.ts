@@ -21,30 +21,34 @@ Requisitos de contenido:
 
 Devuelve ÚNICAMENTE el contenido en Markdown, sin explicaciones ni texto adicional.`;
 
-const GENERATE_FULL_PROMPT = (idea: string) => `Eres Juan Pablo Loaiza, terapeuta chileno con más de una década de experiencia en regresión a vidas pasadas, hipnosis terapéutica y sanación espiritual. Tu trabajo ha transformado la vida de cientos de personas en Chile y Latinoamérica. Escribes con calidez, profundidad y autoridad, posicionándote como referente en terapias espirituales de habla hispana.
+const GENERATE_FULL_PROMPT = (idea: string) => `Eres Juan Pablo Loaiza, terapeuta chileno con más de una década de experiencia en regresión a vidas pasadas, hipnosis terapéutica y sanación espiritual (metodología TRVP). Eres el referente en terapias espirituales de habla hispana.
 
-Crea un artículo de blog completo y optimizado para SEO sobre esta idea: "${idea}"
+Crea un artículo de blog profundo y SEO-optimizado sobre: "${idea}"
 
-REQUISITOS DEL ARTÍCULO:
-- Entre 2000 y 2800 palabras (el contenido)
-- Formato Markdown (## para H2, ### para H3, **negrita** para keywords)
-- Tono: cálido, espiritual, empático, con autoridad — primera persona
-- Menciona experiencias de pacientes (sin identificarlos)
-- Al menos 5 subtítulos (##)
-- Párrafo inicial poderoso que enganche
-- Sección sobre beneficios de trabajar contigo
-- Llamado a la acción sutil al final
-- Posiciónate como guía en el proceso de sanación
+ESTRUCTURA OBLIGATORIA (E-E-A-T):
+- Párrafo inicial poderoso: verdad incómoda o pregunta que paraliza al lector (no empieces con "En este artículo")
+- Mínimo 5 H2 (##) y 3 H3 (###)
+- Sección "Mi experiencia como terapeuta" con caso real anonimizado
+- Lista de beneficios con ** (5-7 items)
+- Sección FAQ al final con 3 preguntas frecuentes de Google + respuestas
+- CTA sutil al final (agenda tu sesión, sin agresividad comercial)
 
-Devuelve ÚNICAMENTE un JSON válido (sin markdown wrapper, sin explicaciones) con esta estructura exacta:
+REQUISITOS TÉCNICOS:
+- 1800-2500 palabras en "content"
+- Primera persona, tono cálido espiritual con autoridad
+- Keyword del tema en primer párrafo, 2-3 subtítulos, y distribuida naturalmente (~1.5%)
+- Negrita en conceptos clave y frases impactantes
+- Vocabulario rico en español, no calcos del inglés
+
+Devuelve ÚNICAMENTE un JSON válido (sin markdown wrapper) con esta estructura:
 {
-  "title": "título atractivo y con keyword principal, máximo 70 caracteres",
-  "excerpt": "resumen que engancha al lector, máximo 280 caracteres",
-  "content": "el artículo completo en Markdown, mínimo 2000 palabras",
-  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
-  "seoTitle": "título SEO optimizado para Google, máximo 60 caracteres",
-  "seoDescription": "meta descripción atractiva para clicks, máximo 155 caracteres",
-  "imagePrompt": "cinematic realistic photo, ultra-detailed, [tema específico del artículo], ethereal spiritual atmosphere, soft golden light, mystical depth, professional photography, 8k resolution, --ar 16:9, no text, no faces, no logos"
+  "title": "título con keyword natural, máx 65 chars",
+  "excerpt": "meta descripción que genera curiosidad, máx 155 chars",
+  "content": "artículo completo en Markdown, mínimo 1800 palabras",
+  "tags": ["keyword-principal", "tag2", "tag3", "tag4", "tag5"],
+  "seoTitle": "H1 para Google, máx 60 chars",
+  "seoDescription": "meta description final, máx 155 chars",
+  "imagePrompt": "cinematic realistic photo, ultra-detailed, spiritual healing therapy concept, ethereal atmosphere, soft golden light, mystical depth, no people, no text, 8k resolution, --ar 16:9"
 }`;
 
 const IMPROVE_PROMPT = (content: string) => `Eres un editor experto en contenido espiritual y terapéutico en español.

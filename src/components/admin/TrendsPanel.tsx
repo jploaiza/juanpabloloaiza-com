@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle } from "lucide-react";
+import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 
 type Tab = "ideas" | "trends" | "gsc";
 type Geo = "ES" | "US" | "MX" | "CL" | "ALL";
@@ -64,6 +65,13 @@ interface ApiData {
   kpis: Kpis;
 }
 
+interface Seed {
+  id: string;
+  keyword: string;
+  active: boolean;
+  created_at: string;
+}
+
 const GEO_OPTIONS: { value: Geo; label: string }[] = [
   { value: "ES", label: "🇪🇸 España" },
   { value: "US", label: "🇺🇸 Estados Unidos (es)" },
@@ -112,6 +120,10 @@ export default function TrendsPanel() {
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectError, setRejectError] = useState<string | null>(null);
+  const [seeds, setSeeds] = useState<Seed[]>([]);
+  const [seedInput, setSeedInput] = useState("");
+  const [seedLoading, setSeedLoading] = useState(false);
+  const [seedsExpanded, setSeedsExpanded] = useState(false);
 
   const fetchData = useCallback(async (currentGeo: Geo, currentTab: Tab) => {
     try {
@@ -128,6 +140,13 @@ export default function TrendsPanel() {
     setLoading(true);
     fetchData(geo, tab).finally(() => setLoading(false));
   }, [geo, tab, fetchData]);
+
+  useEffect(() => {
+    fetch("/api/admin/trends/seeds")
+      .then((r) => r.json())
+      .then((j) => setSeeds(j.seeds ?? []))
+      .catch(() => {});
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -168,6 +187,33 @@ export default function TrendsPanel() {
       idea: idea.id,
     });
     router.push(`/academy/admin/blog/nuevo?${params}`);
+  };
+
+  const handleAddSeed = async () => {
+    const kw = seedInput.trim().toLowerCase();
+    if (!kw || kw.length < 2) return;
+    setSeedLoading(true);
+    try {
+      const res = await fetch("/api/admin/trends/seeds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword: kw }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setSeeds((prev) => {
+          const exists = prev.find((s) => s.id === json.seed.id);
+          return exists ? prev : [...prev, json.seed];
+        });
+        setSeedInput("");
+      }
+    } catch { /* ignore */ }
+    setSeedLoading(false);
+  };
+
+  const handleDeleteSeed = async (id: string) => {
+    await fetch(`/api/admin/trends/seeds/${id}`, { method: "DELETE" }).catch(() => {});
+    setSeeds((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleReject = async (idea: ContentIdea) => {
@@ -248,6 +294,53 @@ export default function TrendsPanel() {
         <KpiCard icon={ArrowUpRight} label="Clicks 28 días" value={kpis ? String(kpis.totalClicks28d) : "—"} sub="Clicks orgánicos totales" />
       </div>
 
+      {/* Seeds Management */}
+      <div className="mb-6">
+        <button
+          onClick={() => setSeedsExpanded((v) => !v)}
+          className="flex items-center gap-2 font-cinzel text-[9px] uppercase tracking-widest text-gray-500 hover:text-[#C5A059] transition mb-2"
+        >
+          {seedsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          Semillas de búsqueda ({seeds.length} términos)
+        </button>
+
+        {seedsExpanded && (
+          <div className="bg-[#0a1628] border border-white/5 p-4">
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={seedInput}
+                onChange={(e) => setSeedInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddSeed()}
+                placeholder="Agregar término de búsqueda…"
+                className="flex-1 bg-[#16213e] border border-white/10 text-sm font-crimson text-white px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-[#C5A059]/40"
+              />
+              <button
+                onClick={handleAddSeed}
+                disabled={seedLoading || seedInput.trim().length < 2}
+                className="flex items-center gap-1.5 px-4 py-2 font-cinzel text-[9px] uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30 hover:bg-[#C5A059]/20 transition disabled:opacity-40"
+              >
+                <Plus className="w-3 h-3" /> Agregar
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {seeds.map((s) => (
+                <div key={s.id} className="flex items-center gap-1 bg-white/[0.03] border border-white/5 px-2 py-1">
+                  <span className="font-crimson text-xs text-gray-400">{s.keyword}</span>
+                  <button
+                    onClick={() => handleDeleteSeed(s.id)}
+                    className="text-gray-600 hover:text-red-400 transition ml-1"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="font-crimson text-xs text-gray-600 mt-3">Los términos se usan en la próxima sincronización diaria o al presionar «Refrescar ahora».</p>
+          </div>
+        )}
+      </div>
+
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <select
@@ -309,8 +402,13 @@ export default function TrendsPanel() {
                     <tbody>
                       {data?.contentIdeas.map((idea) => (
                         <tr key={idea.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition">
-                          <td className="py-3 pr-4">
-                            <p className="font-crimson text-sm text-gray-200">{idea.seed_keyword}</p>
+                          <td className="py-3 pr-4 max-w-[200px]">
+                            <Link
+                              href={`/academy/admin/trends/term?q=${encodeURIComponent(idea.seed_keyword)}&geo=${encodeURIComponent(idea.geo || geo)}`}
+                              className="font-crimson text-sm text-gray-200 hover:text-[#C5A059] transition truncate block"
+                            >
+                              {idea.seed_keyword}
+                            </Link>
                           </td>
                           <td className="py-3 pr-4">
                             <span className="font-cinzel text-[9px] text-gray-500 uppercase">{idea.geo}</span>
@@ -373,7 +471,14 @@ export default function TrendsPanel() {
                       <tbody>
                         {data?.topTrends.map((t, i) => (
                           <tr key={`${t.keyword}${i}`} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition">
-                            <td className="py-3 pr-4"><p className="font-crimson text-sm text-gray-200">{t.keyword}</p></td>
+                            <td className="py-3 pr-4 max-w-[200px]">
+                              <Link
+                                href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo || geo)}`}
+                                className="font-crimson text-sm text-gray-200 hover:text-[#C5A059] transition truncate block"
+                              >
+                                {t.keyword}
+                              </Link>
+                            </td>
                             <td className="py-3 pr-4"><span className="font-cinzel text-[9px] text-gray-500 uppercase">{t.source.replace("_", " ")}</span></td>
                             <td className="py-3 pr-4">
                               <span className="font-cinzel text-[10px] text-[#C5A059]">{t.interest_score ?? "—"}</span>

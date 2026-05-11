@@ -136,7 +136,17 @@ const charCountClass = "font-cinzel text-[9px] tracking-widest";
 
 interface Props {
   basePath?: string;
-  initialFromTrend?: { keyword: string; geo: string; ideaId: string };
+  initialFromTrend?: {
+    keyword: string;
+    geo: string;
+    ideaId?: string;
+    prefillTitle?: string;
+    prefillExcerpt?: string;
+    prefillContent?: string;
+    prefillTags?: string;
+    prefillSeoTitle?: string;
+    prefillSeoDesc?: string;
+  };
 }
 
 export default function NuevoPostClient({ basePath = "/admin/blog", initialFromTrend }: Props) {
@@ -170,15 +180,24 @@ export default function NuevoPostClient({ basePath = "/admin/blog", initialFromT
   const [importError, setImportError] = useState("");
   const mdFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Pre-populate from trend if coming from /admin/trends
+  // Pre-populate from trend
   useEffect(() => {
     if (!initialFromTrend) return;
-    const { keyword } = initialFromTrend;
-    const initialTitle = keyword.charAt(0).toUpperCase() + keyword.slice(1);
-    setTitle(initialTitle);
-    setSlug(slugify(initialTitle));
-    const normalizedTag = keyword.toLowerCase().trim();
-    setTags([normalizedTag]);
+    const { keyword, prefillTitle, prefillExcerpt, prefillContent, prefillTags, prefillSeoTitle, prefillSeoDesc } = initialFromTrend;
+
+    const resolvedTitle = prefillTitle ?? (keyword.charAt(0).toUpperCase() + keyword.slice(1));
+    setTitle(resolvedTitle);
+    setSlug(slugify(resolvedTitle));
+
+    if (prefillExcerpt) setExcerpt(prefillExcerpt.slice(0, 300));
+    if (prefillContent) setContent(prefillContent);
+    if (prefillSeoTitle) setSeoTitle(prefillSeoTitle);
+    if (prefillSeoDesc) setSeoDescription(prefillSeoDesc);
+
+    const resolvedTags = prefillTags
+      ? prefillTags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean)
+      : [keyword.toLowerCase().trim()];
+    setTags(resolvedTags);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

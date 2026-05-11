@@ -3,19 +3,9 @@ import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import { fetchDailyTrends, fetchRelatedQueries, type TrendGeo } from "@/lib/trends/google-trends";
 import { fetchTopQueries, getStrikingDistanceQueries } from "@/lib/trends/search-console";
+import { getActiveSeeds } from "@/lib/trends/get-seeds";
 
 const GEOS: TrendGeo[] = ["ES", "US", "MX", "CL"];
-
-const SEED_KEYWORDS = [
-  "hipnosis",
-  "terapia regresiva",
-  "vidas pasadas",
-  "liberación de entidades",
-  "terapia espiritual",
-  "regresión a vidas pasadas",
-  "hipnosis clínica",
-  "sanación espiritual",
-];
 
 const GSC_COUNTRIES = ["esp", "usa", "mex", "chl"];
 
@@ -47,6 +37,8 @@ export async function GET(req: NextRequest) {
   let trendsInserted = 0;
   let gscInserted = 0;
   let ideasInserted = 0;
+
+  const SEED_KEYWORDS = await getActiveSeeds();
 
   // ── 1. Fetch daily trends per geo ──────────────────────────────────────────
   for (const geo of GEOS) {
