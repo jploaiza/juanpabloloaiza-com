@@ -55,6 +55,13 @@ interface LastRun {
   errors: string[] | null;
 }
 
+interface GlobalTrend {
+  keyword: string;
+  interest_score: number;
+  geo: string;
+  rising: boolean;
+}
+
 interface ApiData {
   topTrends: TrendItem[];
   risingQueries: TrendItem[];
@@ -63,14 +70,20 @@ interface ApiData {
   contentIdeas: ContentIdea[];
   lastRun: LastRun | null;
   kpis: Kpis;
+  globalTrends?: GlobalTrend[];
 }
+
+type SeedCategory = "spiritual" | "clinical" | "world";
 
 interface Seed {
   id: string;
   keyword: string;
   active: boolean;
+  category: SeedCategory;
   created_at: string;
 }
+
+type SeedsGrouped = Record<SeedCategory, Seed[]>;
 
 const GEO_OPTIONS: { value: Geo; label: string }[] = [
   { value: "ES", label: "🇪🇸 España" },
@@ -120,9 +133,11 @@ export default function TrendsPanel() {
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectError, setRejectError] = useState<string | null>(null);
-  const [seeds, setSeeds] = useState<Seed[]>([]);
+  const [seedsGrouped, setSeedsGrouped] = useState<SeedsGrouped>({ spiritual: [], clinical: [], world: [] });
   const [seedInput, setSeedInput] = useState("");
+  const [seedCategory, setSeedCategory] = useState<SeedCategory>("spiritual");
   const [seedLoading, setSeedLoading] = useState(false);
+  const [seedsMgmtLoading, setSeedsMgmtLoading] = useState<string | null>(null);
   const [seedsExpanded, setSeedsExpanded] = useState(true);
 
   const fetchData = useCallback(async (currentGeo: Geo, currentTab: Tab) => {
@@ -141,12 +156,14 @@ export default function TrendsPanel() {
     fetchData(geo, tab).finally(() => setLoading(false));
   }, [geo, tab, fetchData]);
 
-  useEffect(() => {
+  const fetchSeeds = useCallback(() => {
     fetch("/api/admin/trends/seeds")
       .then((r) => r.json())
-      .then((j) => setSeeds(j.seeds ?? []))
+      .then((j) => setSeedsGrouped(j.seeds ?? { spiritual: [], clinical: [], world: [] }))
       .catch(() => {});
   }, []);
+
+  useEffect(() => { fetchSeeds(); }, [fetchSeeds]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -197,23 +214,33 @@ export default function TrendsPanel() {
       const res = await fetch("/api/admin/trends/seeds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword: kw }),
+        body: JSON.stringify({ keyword: kw, category: seedCategory }),
       });
       if (res.ok) {
-        const json = await res.json();
-        setSeeds((prev) => {
-          const exists = prev.find((s) => s.id === json.seed.id);
-          return exists ? prev : [...prev, json.seed];
-        });
         setSeedInput("");
+        fetchSeeds();
       }
     } catch { /* ignore */ }
     setSeedLoading(false);
   };
 
-  const handleDeleteSeed = async (id: string) => {
+  const handleDeleteSeed = async (id: string, cat: SeedCategory) => {
     await fetch(`/api/admin/trends/seeds/${id}`, { method: "DELETE" }).catch(() => {});
-    setSeeds((prev) => prev.filter((s) => s.id !== id));
+    setSeedsGrouped((prev) => ({ ...prev, [cat]: prev[cat].filter((s) => s.id !== id) }));
+  };
+
+  const handleClearCategory = async (cat: SeedCategory | "all") => {
+    setSeedsMgmtLoading(`clear-${cat}`);
+    await fetch(`/api/admin/trends/seeds?action=clear&category=${cat}`, { method: "DELETE" }).catch(() => {});
+    await fetchSeeds();
+    setSeedsMgmtLoading(null);
+  };
+
+  const handleRestoreCategory = async (cat: SeedCategory | "all") => {
+    setSeedsMgmtLoading(`restore-${cat}`);
+    await fetch(`/api/admin/trends/seeds?action=restore&category=${cat}`, { method: "POST" }).catch(() => {});
+    await fetchSeeds();
+    setSeedsMgmtLoading(null);
   };
 
   const handleReject = async (idea: ContentIdea) => {
@@ -295,51 +322,107 @@ export default function TrendsPanel() {
       </div>
 
       {/* Seeds Management */}
-      <div className="mb-6">
-        <button
-          onClick={() => setSeedsExpanded((v) => !v)}
-          className="flex items-center gap-2 font-cinzel text-[9px] uppercase tracking-widest text-gray-500 hover:text-[#C5A059] transition mb-2"
-        >
-          {seedsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          Semillas de búsqueda ({seeds.length} términos)
-        </button>
-
-        {seedsExpanded && (
-          <div className="bg-[#0a1628] border border-white/5 p-4">
-            <div className="flex gap-2 mb-4">
-              <input
-                type="text"
-                value={seedInput}
-                onChange={(e) => setSeedInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddSeed()}
-                placeholder="Agregar término de búsqueda…"
-                className="flex-1 bg-[#16213e] border border-white/10 text-sm font-crimson text-white px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-[#C5A059]/40"
-              />
+      {(() => {
+        const totalSeeds = Object.values(seedsGrouped).reduce((s, arr) => s + arr.length, 0);
+        const CATS: { key: SeedCategory; label: string; icon: string }[] = [
+          { key: "spiritual", label: "Espiritual", icon: "🔮" },
+          { key: "clinical", label: "Clínica", icon: "🏥" },
+          { key: "world", label: "Mundo actual", icon: "🌍" },
+        ];
+        const mgmtBtn = (label: string, loadKey: string, onClick: () => void, variant: "red" | "gold" = "gold") => (
+          <button
+            onClick={onClick}
+            disabled={seedsMgmtLoading === loadKey}
+            className={`font-cinzel text-[8px] uppercase tracking-widest px-2 py-1 border transition disabled:opacity-40 ${
+              variant === "red"
+                ? "text-red-400 border-red-400/20 hover:bg-red-400/10"
+                : "text-[#C5A059] border-[#C5A059]/20 hover:bg-[#C5A059]/10"
+            }`}
+          >
+            {seedsMgmtLoading === loadKey ? "…" : label}
+          </button>
+        );
+        return (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
               <button
-                onClick={handleAddSeed}
-                disabled={seedLoading || seedInput.trim().length < 2}
-                className="flex items-center gap-1.5 px-4 py-2 font-cinzel text-[9px] uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30 hover:bg-[#C5A059]/20 transition disabled:opacity-40"
+                onClick={() => setSeedsExpanded((v) => !v)}
+                className="flex items-center gap-2 font-cinzel text-[9px] uppercase tracking-widest text-gray-500 hover:text-[#C5A059] transition"
               >
-                <Plus className="w-3 h-3" /> Agregar
+                {seedsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                Semillas de búsqueda ({totalSeeds} términos)
               </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {seeds.map((s) => (
-                <div key={s.id} className="flex items-center gap-1 bg-white/[0.03] border border-white/5 px-2 py-1">
-                  <span className="font-crimson text-xs text-gray-400">{s.keyword}</span>
-                  <button
-                    onClick={() => handleDeleteSeed(s.id)}
-                    className="text-gray-600 hover:text-red-400 transition ml-1"
-                  >
-                    <X className="w-2.5 h-2.5" />
-                  </button>
+              {seedsExpanded && (
+                <div className="flex gap-1.5">
+                  {mgmtBtn("Restaurar todo", "restore-all", () => handleRestoreCategory("all"), "gold")}
+                  {mgmtBtn("Eliminar todo", "clear-all", () => handleClearCategory("all"), "red")}
                 </div>
-              ))}
+              )}
             </div>
-            <p className="font-crimson text-xs text-gray-600 mt-3">Los términos se usan en la próxima sincronización diaria o al presionar «Refrescar ahora».</p>
+
+            {seedsExpanded && (
+              <div className="bg-[#0a1628] border border-white/5 p-4 space-y-5">
+                {CATS.map(({ key, label, icon }) => (
+                  <div key={key}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500">
+                        {icon} {label} ({seedsGrouped[key].length})
+                      </span>
+                      <div className="flex gap-1.5">
+                        {mgmtBtn("Restaurar", `restore-${key}`, () => handleRestoreCategory(key), "gold")}
+                        {mgmtBtn("Eliminar", `clear-${key}`, () => handleClearCategory(key), "red")}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {seedsGrouped[key].map((s) => (
+                        <div key={s.id} className="flex items-center gap-1 bg-white/[0.03] border border-white/5 px-2 py-1">
+                          <span className="font-crimson text-xs text-gray-400">{s.keyword}</span>
+                          <button onClick={() => handleDeleteSeed(s.id, key)} className="text-gray-600 hover:text-red-400 transition ml-1">
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                      ))}
+                      {seedsGrouped[key].length === 0 && (
+                        <span className="font-crimson text-xs text-gray-600 italic">Sin términos. Usa «Restaurar» para volver a los defaults.</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="pt-3 border-t border-white/5">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={seedInput}
+                      onChange={(e) => setSeedInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddSeed()}
+                      placeholder="Agregar término…"
+                      className="flex-1 bg-[#16213e] border border-white/10 text-sm font-crimson text-white px-3 py-2 placeholder-gray-600 focus:outline-none focus:border-[#C5A059]/40"
+                    />
+                    <select
+                      value={seedCategory}
+                      onChange={(e) => setSeedCategory(e.target.value as SeedCategory)}
+                      className="bg-[#16213e] border border-white/10 text-xs font-cinzel text-gray-400 px-2 py-2 outline-none focus:border-[#C5A059]/40"
+                    >
+                      {CATS.map(({ key, label, icon }) => (
+                        <option key={key} value={key}>{icon} {label}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleAddSeed}
+                      disabled={seedLoading || seedInput.trim().length < 2}
+                      className="flex items-center gap-1.5 px-4 py-2 font-cinzel text-[9px] uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30 hover:bg-[#C5A059]/20 transition disabled:opacity-40"
+                    >
+                      <Plus className="w-3 h-3" /> Agregar
+                    </button>
+                  </div>
+                  <p className="font-crimson text-xs text-gray-600 mt-2">Los términos se usan en la próxima sincronización o al presionar «Refrescar».</p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -452,6 +535,25 @@ export default function TrendsPanel() {
           {/* TRENDS TAB */}
           {tab === "trends" && (
             <div className="space-y-6">
+              {(data?.globalTrends?.length ?? 0) > 0 && (
+                <AcademyCard>
+                  <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-2">🌐 Top 10 Global</h2>
+                  <p className="font-crimson text-sm text-gray-600 mb-6">Lo más buscado en todas las geos — independiente de tus semillas. Úsalos para hablar de temas de actualidad desde la espiritualidad.</p>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    {data?.globalTrends?.map((t, i) => (
+                      <Link
+                        key={`${t.keyword}${i}`}
+                        href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo)}`}
+                        className="group flex flex-col gap-1 bg-[#16213e] border border-white/5 hover:border-[#C5A059]/30 p-3 transition"
+                      >
+                        <span className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600"># {i + 1}</span>
+                        <span className="font-crimson text-sm text-[#C5A059] group-hover:text-[#d4b575] underline underline-offset-2 decoration-[#C5A059]/40 line-clamp-2">{t.keyword}</span>
+                        <span className="font-cinzel text-[8px] text-gray-600">{t.interest_score} pts · {t.geo}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </AcademyCard>
+              )}
               <AcademyCard>
                 <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-2">
                   Top tendencias — {geo}

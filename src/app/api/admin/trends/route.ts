@@ -4,6 +4,13 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 const VALID_GEOS = new Set(["ES", "US", "MX", "CL", "ALL"]);
 const VALID_TABS = new Set(["trends", "gsc", "ideas", "all"]);
 
+interface GlobalTrend {
+  keyword: string;
+  interest_score: number;
+  geo: string;
+  rising: boolean;
+}
+
 async function assertAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -53,6 +60,7 @@ export async function GET(req: NextRequest) {
     { data: gscStrikingData },
     { data: contentIdeasData },
     { data: lastRunData },
+    { data: globalTrendsRaw },
   ] = await Promise.all([
     tab === "ideas" ? Promise.resolve({ data: [] }) : topTrendsQ,
     // Always fetch rising for KPI — skip display only on gsc tab
@@ -85,6 +93,14 @@ export async function GET(req: NextRequest) {
       .select("run_at,duration_ms,trends_inserted,gsc_inserted,ideas_inserted,errors")
       .order("run_at", { ascending: false })
       .limit(1),
+    // Global top 10: daily_trend entries from the last 7 days, across all geos
+    adminSb
+      .from("trends_snapshots")
+      .select("keyword,interest_score,geo,rising,captured_at")
+      .eq("source", "daily_trend")
+      .gte("captured_at", sevenDaysAgo)
+      .order("interest_score", { ascending: false })
+      .limit(200),
   ]);
 
   // Deduplicate top trends by keyword, pick max score
@@ -103,6 +119,23 @@ export async function GET(req: NextRequest) {
   const contentIdeas = contentIdeasData ?? [];
   const lastRun = lastRunData?.[0] ?? null;
 
+  // Deduplicate global trends by keyword (pick highest interest_score across all geos), top 10
+  const globalMap: Record<string, GlobalTrend> = {};
+  for (const t of globalTrendsRaw ?? []) {
+    const existing = globalMap[t.keyword];
+    if (!existing || (t.interest_score ?? 0) > (existing.interest_score ?? 0)) {
+      globalMap[t.keyword] = {
+        keyword: t.keyword,
+        interest_score: t.interest_score ?? 0,
+        geo: t.geo ?? "",
+        rising: t.rising ?? false,
+      };
+    }
+  }
+  const globalTrends: GlobalTrend[] = Object.values(globalMap)
+    .sort((a, b) => b.interest_score - a.interest_score)
+    .slice(0, 10);
+
   // Tab-filtered display data
   const gscTopQueries = (tab === "trends" || tab === "ideas") ? [] : (gscTopData ?? []);
   const gscStriking = (tab === "trends" || tab === "ideas") ? [] : (gscStrikingData ?? []);
@@ -120,6 +153,7 @@ export async function GET(req: NextRequest) {
     gscStriking,
     contentIdeas,
     lastRun,
+    globalTrends,
     kpis: {
       newIdeas: newIdeasCount,
       striking: strikingCount,

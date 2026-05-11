@@ -15,20 +15,90 @@ const VALID_GEOS = new Set(["ES", "US", "MX", "CL", "ALL"]);
 
 async function assertAdmin() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return false;
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   return profile?.role === "admin";
 }
 
 const JPL_CONTEXT = `Eres Juan Pablo Loaiza, terapeuta chileno con más de una década de experiencia en regresión a vidas pasadas, hipnosis terapéutica y sanación espiritual (metodología TRVP). Tienes autoridad como referente en terapias espirituales de habla hispana. Tu audiencia son personas que buscan sanar emociones, comprender su alma, superar traumas y crecer espiritualmente.`;
 
-function articleIdeaPrompt(keyword: string, geo: string) {
+// ---------------------------------------------------------------------------
+// Type definitions
+// ---------------------------------------------------------------------------
+
+export interface Angle {
+  id: "1" | "2" | "3";
+  title: string;
+  perspective: string;
+  hook: string;
+  formats: string[];
+  targetAudience: string;
+}
+
+// ---------------------------------------------------------------------------
+// Step 1 prompt — angles
+// ---------------------------------------------------------------------------
+
+function anglesPrompt(keyword: string, geo: string) {
+  const market = geo === "ALL" ? "Latinoamérica hispanohablante" : geo;
+  return `${JPL_CONTEXT}
+
+Keyword objetivo: "${keyword}" (mercado: ${market})
+
+Tu tarea es dos cosas:
+1. Explicar qué significa "${keyword}" en el contexto de búsquedas actuales en Google (¿es un año, una técnica, una película, una tendencia que resurgió, un nombre propio?). Sé muy específico sobre qué buscan las personas cuando escriben esto.
+2. Proponer 3 ángulos narrativos distintos para crear contenido sobre este keyword.
+
+Devuelve ÚNICAMENTE un JSON válido con esta estructura (sin markdown wrapper):
+{
+  "termContext": "100-150 palabras explicando qué es '${keyword}' en el contexto de búsquedas actuales — qué busca el usuario, si es una fecha histórica o reciente, si es un tema que resurgió, de dónde viene el interés, etc.",
+  "angles": [
+    {
+      "id": "1",
+      "title": "título atractivo para este ángulo",
+      "perspective": "250-300 palabras: qué es este ángulo, por qué resuena emocionalmente, qué problema del lector resuelve, qué insight único aporta, por qué encaja con la voz y autoridad de Juan Pablo Loaiza (terapeuta TRVP)",
+      "hook": "primera frase que detiene el scroll — pregunta, afirmación incómoda o dato sorprendente",
+      "formats": ["article", "reel", "carousel"],
+      "targetAudience": "una oración describiendo exactamente a quién habla este ángulo"
+    },
+    {
+      "id": "2",
+      "title": "...",
+      "perspective": "...",
+      "hook": "...",
+      "formats": ["article"],
+      "targetAudience": "..."
+    },
+    {
+      "id": "3",
+      "title": "...",
+      "perspective": "...",
+      "hook": "...",
+      "formats": ["reel", "carousel"],
+      "targetAudience": "..."
+    }
+  ]
+}`;
+}
+
+// ---------------------------------------------------------------------------
+// Step 2 prompts — develop
+// ---------------------------------------------------------------------------
+
+function articleIdeaPrompt(keyword: string, geo: string, angle: Angle) {
   return `${JPL_CONTEXT}
 
 Keyword objetivo: "${keyword}" (mercado: ${geo === "ALL" ? "Latinoamérica" : geo})
+El ángulo narrativo que debes usar: ${angle.perspective}. El hook de apertura: ${angle.hook}
 
-Genera una idea de artículo de blog SEO-optimizado para este keyword. Devuelve ÚNICAMENTE un JSON válido con esta estructura:
+Genera una idea de artículo de blog SEO-optimizado para este keyword usando el ángulo indicado. Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 {
   "title": "título del artículo con keyword natural, máx 70 chars",
   "angle": "el ángulo narrativo único que diferencia este artículo — 1 oración",
@@ -38,12 +108,13 @@ Genera una idea de artículo de blog SEO-optimizado para este keyword. Devuelve 
 }`;
 }
 
-function reelIdeaPrompt(keyword: string, geo: string) {
+function reelIdeaPrompt(keyword: string, geo: string, angle: Angle) {
   return `${JPL_CONTEXT}
 
 Keyword objetivo: "${keyword}" (mercado: ${geo === "ALL" ? "Latinoamérica" : geo})
+El ángulo narrativo que debes usar: ${angle.perspective}. El hook de apertura: ${angle.hook}
 
-Genera una idea de reel/short de 60-90 segundos para Instagram/TikTok/YouTube Shorts. Devuelve ÚNICAMENTE un JSON válido:
+Genera una idea de reel/short de 60-90 segundos para Instagram/TikTok/YouTube Shorts usando el ángulo y hook indicados. Devuelve ÚNICAMENTE un JSON válido:
 {
   "title": "título del reel — el hook visual/textual, máx 60 chars",
   "hook": "primera frase de impacto para los primeros 3 segundos (pregunta o afirmación que detiene el scroll)",
@@ -53,12 +124,13 @@ Genera una idea de reel/short de 60-90 segundos para Instagram/TikTok/YouTube Sh
 }`;
 }
 
-function carouselIdeaPrompt(keyword: string, geo: string) {
+function carouselIdeaPrompt(keyword: string, geo: string, angle: Angle) {
   return `${JPL_CONTEXT}
 
 Keyword objetivo: "${keyword}" (mercado: ${geo === "ALL" ? "Latinoamérica" : geo})
+El ángulo narrativo que debes usar: ${angle.perspective}. El hook de apertura: ${angle.hook}
 
-Genera una idea de carrusel para Instagram (6-10 slides). Devuelve ÚNICAMENTE un JSON válido:
+Genera una idea de carrusel para Instagram (6-10 slides) usando el ángulo y hook indicados. Devuelve ÚNICAMENTE un JSON válido:
 {
   "title": "título de la primera slide (portada) — el hook, máx 60 chars",
   "slides": [
@@ -73,19 +145,30 @@ Genera una idea de carrusel para Instagram (6-10 slides). Devuelve ÚNICAMENTE u
 }`;
 }
 
-function fullArticlePrompt(keyword: string, geo: string) {
-  const market = geo === "ALL" ? "Latinoamérica hispanohablante" : geo === "ES" ? "España" : geo === "MX" ? "México" : geo === "CL" ? "Chile" : "Estados Unidos hispanohablante";
+function fullArticlePrompt(keyword: string, geo: string, angle: Angle) {
+  const market =
+    geo === "ALL"
+      ? "Latinoamérica hispanohablante"
+      : geo === "ES"
+        ? "España"
+        : geo === "MX"
+          ? "México"
+          : geo === "CL"
+            ? "Chile"
+            : "Estados Unidos hispanohablante";
   return `${JPL_CONTEXT}
 
 Crea un artículo de blog completo y profundamente optimizado para SEO sobre: "${keyword}"
 Mercado objetivo: ${market}
+El ángulo narrativo que debes usar: ${angle.perspective}. El hook de apertura: ${angle.hook}
 
 REQUISITOS OBLIGATORIOS:
 - Entre 1800 y 2500 palabras en el campo "content"
+- Comienza el artículo con el hook de apertura indicado arriba
+- Desarrolla todo el contenido desde el ángulo narrativo indicado
 - Estructura E-E-A-T: demuestra Experiencia, Expertise, Autoridad y Confianza desde la primera oración
 - H1 implícito en el title, mínimo 5 H2 (##) y 3 H3 (###) en el contenido
 - Keyword "${keyword}" en: primer párrafo, 2-3 H2, distribuida naturalmente (densidad ~1.5%)
-- Párrafo inicial poderoso: empieza con una verdad incómoda o pregunta que resuena
 - Sección "Mi experiencia como terapeuta" con caso real (anonimizado)
 - Sección de beneficios concretos (lista de 5-7 items con **)
 - Sección FAQ al final (mínimo 3 preguntas frecuentes que la gente busca en Google)
@@ -106,49 +189,133 @@ Devuelve ÚNICAMENTE un JSON válido (sin markdown wrapper):
 }`;
 }
 
+// ---------------------------------------------------------------------------
+// Shared helper
+// ---------------------------------------------------------------------------
+
+function parseAIResponse(raw: string): unknown {
+  const cleaned = raw
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+  return JSON.parse(cleaned);
+}
+
+// ---------------------------------------------------------------------------
+// Route handler
+// ---------------------------------------------------------------------------
+
 export async function POST(req: NextRequest) {
   if (!process.env.DEEPSEEK_API_KEY) {
-    return NextResponse.json({ error: "DEEPSEEK_API_KEY no está configurada." }, { status: 500 });
+    return NextResponse.json(
+      { error: "DEEPSEEK_API_KEY no está configurada." },
+      { status: 500 },
+    );
   }
 
   const isAdmin = await assertAdmin();
-  if (!isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isAdmin)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  const keyword = typeof body.keyword === "string" ? body.keyword.trim() : "";
-  const rawGeo = typeof body.geo === "string" ? body.geo.toUpperCase() : "ES";
+  const keyword =
+    typeof body.keyword === "string" ? body.keyword.trim() : "";
+  const rawGeo =
+    typeof body.geo === "string" ? body.geo.toUpperCase() : "ES";
   const geo = VALID_GEOS.has(rawGeo) ? rawGeo : "ES";
+  const action =
+    typeof body.action === "string" ? body.action : "angles";
 
   if (!keyword || keyword.length < 2 || keyword.length > 100) {
-    return NextResponse.json({ error: "keyword must be 2–100 chars" }, { status: 400 });
+    return NextResponse.json(
+      { error: "keyword must be 2–100 chars" },
+      { status: 400 },
+    );
   }
 
   const client = getClient();
-  const call = (prompt: string, maxTok: number) =>
-    client.chat.completions.create({
-      model: "deepseek-chat",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.8,
-      max_tokens: maxTok,
-    }).then((r) => {
-      const raw = r.choices[0]?.message?.content ?? "{}";
-      const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
-      return JSON.parse(cleaned);
+
+  // -------------------------------------------------------------------------
+  // Step 1: generate angles
+  // -------------------------------------------------------------------------
+  if (action === "angles") {
+    const raw = await client.chat.completions
+      .create({
+        model: "deepseek-chat",
+        messages: [{ role: "user", content: anglesPrompt(keyword, geo) }],
+        temperature: 0.85,
+        max_tokens: 2500,
+      })
+      .then((r) => r.choices[0]?.message?.content ?? "{}");
+
+    let parsed: { termContext?: string; angles?: Angle[] };
+    try {
+      parsed = parseAIResponse(raw) as typeof parsed;
+    } catch {
+      return NextResponse.json(
+        { error: "Failed to parse AI response", raw },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json({
+      keyword,
+      geo,
+      termContext: parsed.termContext ?? "",
+      angles: parsed.angles ?? [],
     });
+  }
 
-  const [articleIdea, reelIdea, carouselIdea, fullArticle] = await Promise.allSettled([
-    call(articleIdeaPrompt(keyword, geo), 800),
-    call(reelIdeaPrompt(keyword, geo), 600),
-    call(carouselIdeaPrompt(keyword, geo), 1000),
-    call(fullArticlePrompt(keyword, geo), 8192),
-  ]);
+  // -------------------------------------------------------------------------
+  // Step 2: develop selected angle into all content formats
+  // -------------------------------------------------------------------------
+  if (action === "develop") {
+    const selectedAngle = body.selectedAngle as Angle | undefined;
+    if (
+      !selectedAngle ||
+      typeof selectedAngle.perspective !== "string" ||
+      typeof selectedAngle.hook !== "string"
+    ) {
+      return NextResponse.json(
+        { error: "selectedAngle is required for action 'develop'" },
+        { status: 400 },
+      );
+    }
 
-  return NextResponse.json({
-    keyword,
-    geo,
-    articleIdea: articleIdea.status === "fulfilled" ? articleIdea.value : null,
-    reelIdea: reelIdea.status === "fulfilled" ? reelIdea.value : null,
-    carouselIdea: carouselIdea.status === "fulfilled" ? carouselIdea.value : null,
-    fullArticle: fullArticle.status === "fulfilled" ? fullArticle.value : null,
-  });
+    const call = (prompt: string, maxTok: number) =>
+      client.chat.completions
+        .create({
+          model: "deepseek-chat",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.8,
+          max_tokens: maxTok,
+        })
+        .then((r) => parseAIResponse(r.choices[0]?.message?.content ?? "{}"));
+
+    const [articleIdea, reelIdea, carouselIdea, fullArticle] =
+      await Promise.allSettled([
+        call(articleIdeaPrompt(keyword, geo, selectedAngle), 800),
+        call(reelIdeaPrompt(keyword, geo, selectedAngle), 600),
+        call(carouselIdeaPrompt(keyword, geo, selectedAngle), 1000),
+        call(fullArticlePrompt(keyword, geo, selectedAngle), 8192),
+      ]);
+
+    return NextResponse.json({
+      keyword,
+      geo,
+      articleIdea:
+        articleIdea.status === "fulfilled" ? articleIdea.value : null,
+      reelIdea: reelIdea.status === "fulfilled" ? reelIdea.value : null,
+      carouselIdea:
+        carouselIdea.status === "fulfilled" ? carouselIdea.value : null,
+      fullArticle:
+        fullArticle.status === "fulfilled" ? fullArticle.value : null,
+    });
+  }
+
+  return NextResponse.json(
+    { error: "Invalid action. Use 'angles' or 'develop'." },
+    { status: 400 },
+  );
 }
