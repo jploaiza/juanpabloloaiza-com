@@ -433,7 +433,7 @@ export default function TrendsPanel() {
                   Queries con posición 8–30 e impresiones ≥ 30. Mayor oportunidad de mejora con contenido enfocado.
                 </p>
                 {data?.gscStriking.length === 0 ? (
-                  <p className="font-crimson text-gray-600 text-sm py-8 text-center">Sin datos de GSC. Configura el Service Account para activar Search Console.</p>
+                  <p className="font-crimson text-gray-600 text-sm py-8 text-center">Sin queries en striking distance aún. El sitio necesita más impresiones orgánicas (≥ 30) en posición 8–30 para que aparezcan datos aquí.</p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
@@ -469,7 +469,7 @@ export default function TrendsPanel() {
                 </h2>
                 <p className="font-crimson text-sm text-gray-600 mb-6">Últimos 30 días.</p>
                 {data?.gscTopQueries.length === 0 ? (
-                  <p className="font-crimson text-gray-600 text-sm py-8 text-center">Sin datos de GSC.</p>
+                  <p className="font-crimson text-gray-600 text-sm py-8 text-center">Sin datos de clics aún. Los datos de Search Console aparecerán a medida que el sitio reciba tráfico orgánico.</p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
