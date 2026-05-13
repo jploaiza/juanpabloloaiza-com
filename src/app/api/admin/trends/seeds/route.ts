@@ -39,7 +39,7 @@ const DEFAULT_SEEDS: Record<Category, string[]> = {
     "reencarnación",
     "alma gemela",
     "misión de vida",
-    "propósito de vida",
+    // "propósito de vida" belongs to 'world' category — removed from spiritual to avoid UNIQUE conflict
     "bienestar integral",
     "salud holística",
     "cuerpo y mente",
@@ -58,6 +58,7 @@ const DEFAULT_SEEDS: Record<Category, string[]> = {
     "crecimiento personal",
     "medicina alternativa",
     "terapias complementarias",
+    // Note: "propósito de vida" belongs to 'world' — not duplicated here
   ],
   clinical: [
     "depresión",

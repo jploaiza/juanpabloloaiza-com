@@ -15,7 +15,7 @@ export interface TrendKeyword {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function fetchDailyTrends(geo: TrendGeo): Promise<TrendKeyword[]> {
-  await sleep(1500);
+  await sleep(500);
   try {
     const raw = await googleTrends.dailyTrends({ geo, hl: "es" });
     const parsed = JSON.parse(raw);
@@ -46,7 +46,7 @@ export async function fetchRelatedQueries(
   seed: string,
   geo: TrendGeo
 ): Promise<TrendKeyword[]> {
-  await sleep(1500);
+  await sleep(500);
   try {
     const raw = await googleTrends.relatedQueries({ keyword: seed, geo, hl: "es" });
     const parsed = JSON.parse(raw);
@@ -82,7 +82,7 @@ export async function fetchInterestOverTime(
   keyword: string,
   geo: TrendGeo
 ): Promise<number | null> {
-  await sleep(1500);
+  await sleep(500);
   try {
     const raw = await googleTrends.interestOverTime({
       keyword,

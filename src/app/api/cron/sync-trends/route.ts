@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
-import { fetchDailyTrends, fetchRelatedQueries, type TrendGeo } from "@/lib/trends/google-trends";
-import { fetchTopQueries, getStrikingDistanceQueries } from "@/lib/trends/search-console";
+import { fetchDailyTrends, fetchRelatedQueries, fetchInterestOverTime, type TrendGeo } from "@/lib/trends/google-trends";
+import { fetchTopQueries } from "@/lib/trends/search-console";
 import { getActiveSeeds } from "@/lib/trends/get-seeds";
+import { buildTrendIdeas, buildGscIdeas } from "@/lib/trends/scoring";
+
+// Runs once a week via cron-job.org — fetches ALL data from external APIs.
+// 300s max covers: 4 geos × daily + N seeds × 4 geos × related + top seeds × interest_over_time.
+export const maxDuration = 300;
 
 const GEOS: TrendGeo[] = ["ES", "US", "MX", "CL"];
 
@@ -32,7 +37,7 @@ export async function GET(req: NextRequest) {
   }
 
   const start = Date.now();
-  const adminSb = await createAdminClient();
+  const adminSb = createAdminClient();
   const errors: string[] = [];
   let trendsInserted = 0;
   let gscInserted = 0;
@@ -40,7 +45,7 @@ export async function GET(req: NextRequest) {
 
   const SEED_KEYWORDS = await getActiveSeeds();
 
-  // ── 1. Fetch daily trends per geo ──────────────────────────────────────────
+  // ── 1. Daily trends per geo ────────────────────────────────────────────────
   for (const geo of GEOS) {
     const daily = await fetchDailyTrends(geo);
     if (daily.length > 0) {
@@ -49,7 +54,7 @@ export async function GET(req: NextRequest) {
           geo: t.geo,
           keyword: t.keyword,
           source: t.source,
-          seed_keyword: "",  // '' not null so UNIQUE constraint deduplicates correctly
+          seed_keyword: "",
           interest_score: t.interest_score,
           rising: t.rising,
           raw: t.raw,
@@ -61,7 +66,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 2. Fetch related queries per seed × geo ────────────────────────────────
+  // ── 2. Related queries per seed × geo ─────────────────────────────────────
   for (const geo of GEOS) {
     for (const seed of SEED_KEYWORDS) {
       const related = await fetchRelatedQueries(seed, geo);
@@ -84,7 +89,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 3. Fetch GSC queries per country ──────────────────────────────────────
+  // ── 3. GSC queries per country ────────────────────────────────────────────
   const endDate = new Date().toISOString().split("T")[0];
   const startDate = new Date(Date.now() - 28 * 86400000).toISOString().split("T")[0];
 
@@ -108,10 +113,28 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 4. Recompute content ideas (replace 'new' ones) ───────────────────────
-  await adminSb.from("content_ideas").delete().eq("status", "new");
+  // ── 4. Interest over time — top 20 seeds × all geos → trends_interest_timeline ──
+  const todayDate = endDate; // reuse endDate (today's date string)
+  const topSeeds = SEED_KEYWORDS.slice(0, 20);
+  let timelineInserted = 0;
 
-  // Fetch recent trends for scoring
+  for (const geo of GEOS) {
+    for (const seed of topSeeds) {
+      const score = await fetchInterestOverTime(seed, geo);
+      if (score !== null) {
+        const { error } = await adminSb
+          .from("trends_interest_timeline")
+          .upsert(
+            { keyword: seed, geo, interest_score: score, recorded_date: todayDate },
+            { onConflict: "keyword,geo,recorded_date", ignoreDuplicates: true }
+          );
+        if (error) errors.push(`interest_timeline ${geo}/${seed}: ${error.message}`);
+        else timelineInserted++;
+      }
+    }
+  }
+
+  // ── 5. Recompute content ideas ─────────────────────────────────────────────
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
   const [{ data: recentTrends }, { data: strikingGsc }] = await Promise.all([
     adminSb
@@ -131,57 +154,22 @@ export async function GET(req: NextRequest) {
       .limit(100),
   ]);
 
-  // Deduplicate and score trend ideas
-  const trendIdeas: Record<string, { keyword: string; geo: string; score: number; ref_id: string; rising: boolean }> = {};
-  for (const t of recentTrends ?? []) {
-    const k = `${t.keyword}::${t.geo}::trends`;
-    const score = (t.rising ? 50 : 0) + (t.interest_score ?? 0);
-    if (!trendIdeas[k] || score > trendIdeas[k].score) {
-      trendIdeas[k] = { keyword: t.keyword, geo: t.geo, score, ref_id: t.id, rising: t.rising };
-    }
-  }
+  await adminSb.from("content_ideas").delete().eq("status", "new");
 
-  // Build ideas list from trends
-  const ideasToInsert = Object.entries(trendIdeas)
-    .sort((a, b) => b[1].score - a[1].score)
-    .slice(0, 20)
-    .map(([, v]) => ({
-      seed_keyword: v.keyword,
-      geo: v.geo,
-      source: "trends",
-      source_ref: { trends_snapshot_id: v.ref_id, rising: v.rising },
-      opportunity_score: v.score,
-      status: "new",
-    }));
-
-  // Add striking distance GSC ideas (skip rows with unmapped country codes)
-  const gscIdeas = (strikingGsc ?? [])
-    .flatMap((r) => {
-      const geoEntry = Object.entries(GEO_TO_COUNTRY).find(([, c]) => c === r.country);
-      if (!geoEntry) return [];
-      const score = r.impressions / 10 + (32 - r.position) * 5;
-      return [{
-        seed_keyword: r.query,
-        geo: geoEntry[0],
-        source: "gsc",
-        source_ref: { gsc_query_id: r.id, position: r.position, impressions: r.impressions },
-        opportunity_score: score,
-        status: "new",
-      }];
-    })
-    .slice(0, 20);
-
-  const allIdeas = [...ideasToInsert, ...gscIdeas];
+  const allIdeas = [
+    ...buildTrendIdeas(recentTrends ?? []),
+    ...buildGscIdeas(strikingGsc ?? []),
+  ];
 
   if (allIdeas.length > 0) {
     const { error } = await adminSb
       .from("content_ideas")
-      .upsert(allIdeas, { onConflict: "seed_keyword,geo,source", ignoreDuplicates: false });
+      .upsert(allIdeas, { onConflict: "seed_keyword,geo,source", ignoreDuplicates: true });
     if (error) errors.push(`ideas: ${error.message}`);
     else ideasInserted = allIdeas.length;
   }
 
-  // ── 5. Log run ─────────────────────────────────────────────────────────────
+  // ── 6. Log run ─────────────────────────────────────────────────────────────
   await adminSb.from("trends_run_logs").insert({
     duration_ms: Date.now() - start,
     trends_inserted: trendsInserted,
@@ -195,6 +183,7 @@ export async function GET(req: NextRequest) {
     trends_inserted: trendsInserted,
     gsc_inserted: gscInserted,
     ideas_inserted: ideasInserted,
+    timeline_inserted: timelineInserted,
     duration_ms: Date.now() - start,
     errors: errors.length > 0 ? errors : undefined,
   });

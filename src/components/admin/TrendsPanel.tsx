@@ -193,25 +193,14 @@ export default function TrendsPanel() {
     setRefreshing(true);
     setRefreshError(null);
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 120_000);
-      const res = await fetch("/api/admin/trends/sync", {
-        method: "POST",
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
+      const res = await fetch("/api/admin/trends/sync", { method: "POST" });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
-        setRefreshError(json.error ?? "Error en sincronización");
+        setRefreshError(json.error ?? "Error al recalcular ideas");
       }
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
-        setRefreshError("La sincronización tardó demasiado. Revisa los logs.");
-      } else {
-        setRefreshError("Error de conexión al sincronizar.");
-      }
+    } catch {
+      setRefreshError("Error de conexión al recalcular ideas.");
     }
-    // Always refresh ideas regardless of current tab
     await fetchData(geo, "ideas");
     if (tab === "saved") fetchSaved();
     setRefreshing(false);
@@ -324,10 +313,11 @@ export default function TrendsPanel() {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
+          title="Recalcula las ideas desde los datos ya guardados. Los datos de Google Trends se actualizan automáticamente cada semana."
           className="flex items-center gap-2 px-4 py-2.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors disabled:opacity-50"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-          Refrescar
+          Recalcular ideas
         </button>
       </div>
 
@@ -447,14 +437,17 @@ export default function TrendsPanel() {
                     </button>
                   </div>
                   <div className="flex items-center justify-between mt-2">
-                    <p className="font-crimson text-xs text-gray-600">Los términos se usan al presionar «Sincronizar».</p>
+                    <p className="font-crimson text-xs text-gray-600">
+                    Los términos se usan en la sincronización semanal automática de Google Trends.
+                  </p>
                     <button
                       onClick={handleRefresh}
                       disabled={refreshing}
+                      title="Recalcula las ideas desde los datos ya guardados en la base de datos"
                       className="flex items-center gap-1.5 px-3 py-1.5 font-cinzel text-[8px] uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30 hover:bg-[#C5A059]/20 transition disabled:opacity-40"
                     >
                       <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} />
-                      Sincronizar con estos términos
+                      Ver ideas actualizadas
                     </button>
                   </div>
                 </div>
