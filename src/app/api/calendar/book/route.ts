@@ -55,8 +55,9 @@ function buildConfirmationHtml(params: {
   timeStr: string;
   duration: number;
   notes?: string;
+  bookingCode?: string;
 }): string {
-  const { name, type, dateLabel, timeStr, duration, notes } = params;
+  const { name, type, dateLabel, timeStr, duration, notes, bookingCode } = params;
   const typeLabel = type === "session" ? "Sesión TRVP" : "Entrevista de Admisión";
   const firstName = name.split(" ")[0];
 
@@ -87,6 +88,7 @@ function buildConfirmationHtml(params: {
                 <p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Duración</p>
                 <p style="color:#ffffff;font-size:16px;margin:0;">${duration} minutos</p>
                 ${notes ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 4px;">Notas</p><p style="color:#d1d5db;font-size:14px;margin:0;">${notes}</p>` : ""}
+                ${bookingCode ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 4px;">Código de Reserva</p><p style="color:#C5A059;font-size:18px;font-weight:bold;letter-spacing:0.15em;margin:0;">${bookingCode}</p>` : ""}
               </td></tr>
             </table>
             <p style="color:#d1d5db;font-size:15px;line-height:1.7;margin:0 0 16px;">La sesión se realizará <strong style="color:#ffffff;">vía Zoom</strong>. Recibirás el enlace de la reunión poco antes de tu cita.</p>
@@ -224,34 +226,66 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `No se pudo crear la cita: ${msg}` }, { status: 502 });
   }
 
-  // Send confirmation email to client
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  const emailResult = await resend.emails.send({
-    from: FROM_EMAIL,
-    to: email.trim().toLowerCase(),
-    subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
-    html: buildConfirmationHtml({
-      name: safeName,
+  // Generate booking code and persist to bookings table
+  const { data: bookingRow } = await adminSb
+    .from("bookings")
+    .insert({
       type: bookingType,
-      dateLabel,
-      timeStr: time,
-      duration: durationMin,
-      notes: safeNotes || undefined,
-    }),
-  });
+      date,
+      time_slot: time,
+      patient_name: safeName,
+      patient_email: email.trim().toLowerCase(),
+      patient_phone: phone.trim(),
+      notes: safeNotes,
+      status: "confirmed",
+      google_event_id: "",
+      google_event_link: eventLink,
+    })
+    .select("booking_code")
+    .single();
 
-  // Log to DB (non-blocking)
-  void adminSb.from("comms_log").insert({
-    type: "booking_confirmation",
-    subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
-    status: emailResult.error ? "error" : "sent",
-    sent_at: new Date().toISOString(),
-    body_preview: `gcal:${date}:${time}:${bookingType}:${email}`,
-  });
+  const bookingCode = bookingRow?.booking_code ?? "";
+
+  // Send confirmation email (non-blocking — calendar event already created)
+  let emailSent = false;
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const emailResult = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email.trim().toLowerCase(),
+      subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
+      html: buildConfirmationHtml({
+        name: safeName,
+        type: bookingType,
+        dateLabel,
+        timeStr: time,
+        duration: durationMin,
+        notes: safeNotes || undefined,
+        bookingCode,
+      }),
+    });
+    emailSent = !emailResult.error;
+    void adminSb.from("comms_log").insert({
+      type: "booking_confirmation",
+      subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
+      status: emailResult.error ? "error" : "sent",
+      sent_at: new Date().toISOString(),
+      body_preview: `gcal:${date}:${time}:${bookingType}:${email}`,
+    });
+  } catch {
+    void adminSb.from("comms_log").insert({
+      type: "booking_confirmation",
+      subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
+      status: "error",
+      sent_at: new Date().toISOString(),
+      body_preview: `gcal:${date}:${time}:${bookingType}:${email}`,
+    });
+  }
 
   return NextResponse.json({
     ok: true,
     event_link: eventLink,
-    email_sent: !emailResult.error,
+    booking_code: bookingCode,
+    email_sent: emailSent,
   });
 }
