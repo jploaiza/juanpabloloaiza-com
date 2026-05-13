@@ -9,7 +9,7 @@ export default function AgendaContent() {
   return (
     <>
       <Header />
-      <main className="min-h-screen w-full bg-[#0a1628] pt-24">
+      <main className="min-h-screen w-full bg-[#0a1628] pt-24" style={{ fontFamily: "var(--font-libre-baskerville), Georgia, serif" }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

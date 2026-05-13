@@ -33,30 +33,19 @@ function slotsOverlap(start: Date, end: Date, busy: BusySlot[]): boolean {
 }
 
 function slotToDate(dateStr: string, timeStr: string): Date {
-  // Parse "HH:MM" in Santiago time → UTC Date
   const [h, m] = timeStr.split(":").map(Number);
-  // Build a date string that Intl can resolve
-  const probe = new Date(`${dateStr}T12:00:00`);
-  const offsetMs = new Date(`${dateStr}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`).getTime()
-    - new Date(probe.toLocaleString("en-US", { timeZone: BOOKING_TZ })).getTime()
-    + probe.getTime();
-  // Simpler: use the offset from Intl
-  const fmt = new Intl.DateTimeFormat("en-CA", {
+  const probe = new Date(`${dateStr}T12:00:00Z`);
+  const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: BOOKING_TZ,
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour: "numeric",
     hour12: false,
-  });
-  // Compute UTC offset for the date
-  const parts = fmt.formatToParts(probe);
-  const pMap = Object.fromEntries(parts.map((p) => [p.type, p.value]));
-  const localStr = `${pMap.year}-${pMap.month}-${pMap.day}T12:00:00`;
-  const utcFromLocal = new Date(localStr + "Z").getTime() + (probe.getTime() - new Date(localStr + "Z").getTime());
-  const tzOffsetMs = probe.getTime() - new Date(probe.toLocaleString("en-CA") + "Z").getTime();
-  // UTC = local - tzOffset
-  const localMidnightUtc = new Date(`${dateStr}T00:00:00Z`).getTime() - tzOffsetMs;
-  return new Date(localMidnightUtc + (h * 60 + m) * 60000);
-  void offsetMs; void utcFromLocal;
+    timeZoneName: "shortOffset",
+  }).formatToParts(probe);
+  const offsetStr = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT-4";
+  const offsetMatch = offsetStr.match(/GMT([+-]\d+)/);
+  const offsetH = offsetMatch ? parseInt(offsetMatch[1]) : -4;
+  const midnightUtcMs = new Date(`${dateStr}T${String(-offsetH).padStart(2, "0")}:00:00Z`).getTime();
+  return new Date(midnightUtcMs + (h * 60 + m) * 60000);
 }
 
 function buildConfirmationHtml(params: {

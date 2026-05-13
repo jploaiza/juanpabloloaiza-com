@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Clock, Check, Loader2, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Check, Loader2, AlertCircle, UserCheck } from "lucide-react";
 
 type BookingType = "session" | "entrevista";
 
@@ -39,15 +39,25 @@ function getWeekDates(offsetWeeks: number): Date[] {
   });
 }
 
+type Step = "email" | "date" | "time" | "form" | "success";
+
 export default function BookingWidget({ type }: Props) {
+  const [step, setStep] = useState<Step>("email");
+
+  // Email step
+  const [emailInput, setEmailInput] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [lookingUp, setLookingUp] = useState(false);
+  const [patientFound, setPatientFound] = useState(false);
+
+  // Calendar
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [slots, setSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [step, setStep] = useState<"date" | "time" | "form" | "success">("date");
 
-  // Form state
+  // Form fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -77,9 +87,36 @@ export default function BookingWidget({ type }: Props) {
     if (selectedDate) fetchSlots(selectedDate);
   }, [selectedDate, fetchSlots]);
 
+  const handleEmailContinue = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = emailInput.trim().toLowerCase();
+    if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      setEmailError("Ingresa un correo válido");
+      return;
+    }
+    setEmailError(null);
+    setEmail(val);
+    setLookingUp(true);
+    try {
+      const res = await fetch(`/api/calendar/patient-lookup?email=${encodeURIComponent(val)}`);
+      const json = await res.json();
+      if (json.found) {
+        setName(json.name ?? "");
+        setPhone(json.phone ?? "");
+        setPatientFound(true);
+      } else {
+        setPatientFound(false);
+      }
+    } catch {
+      setPatientFound(false);
+    } finally {
+      setLookingUp(false);
+      setStep("date");
+    }
+  };
+
   const handleDateSelect = (date: Date) => {
-    const iso = isoDate(date);
-    setSelectedDate(iso);
+    setSelectedDate(isoDate(date));
     setSelectedTime(null);
     setStep("time");
     setError(null);
@@ -115,7 +152,15 @@ export default function BookingWidget({ type }: Props) {
     }
   };
 
-  // Success screen
+  const resetAll = () => {
+    setStep("email");
+    setEmailInput(""); setEmail(""); setEmailError(null); setPatientFound(false);
+    setSelectedDate(null); setSelectedTime(null);
+    setName(""); setPhone(""); setNotes(""); setError(null);
+    setWeekOffset(0);
+  };
+
+  // ── Success ────────────────────────────────────────────────────────────────
   if (step === "success") {
     return (
       <div className="text-center py-16 px-4">
@@ -130,7 +175,7 @@ export default function BookingWidget({ type }: Props) {
         </p>
         <p className="font-crimson text-gray-500 mb-8">Revisa tu correo — te enviamos la confirmación.</p>
         <button
-          onClick={() => { setStep("date"); setSelectedDate(null); setSelectedTime(null); setName(""); setEmail(""); setPhone(""); setNotes(""); }}
+          onClick={resetAll}
           className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 px-6 py-2.5 hover:bg-[#C5A059]/10 transition"
         >
           Agendar otra cita
@@ -139,31 +184,76 @@ export default function BookingWidget({ type }: Props) {
     );
   }
 
+  const STEP_ORDER: Step[] = ["email", "date", "time", "form"];
+  const currentStepIdx = STEP_ORDER.indexOf(step);
+
   return (
     <div className="w-full">
-      {/* Steps indicator */}
+      {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
-        {(["date", "time", "form"] as const).map((s, i) => (
-          <div key={s} className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center font-cinzel text-[9px] border transition
-              ${step === s || (step === "form" && s === "date") || (step === "form" && s === "time")
-                ? "bg-[#C5A059] border-[#C5A059] text-[#020617]"
-                : "border-white/10 text-gray-600"}`}
-            >
-              {i + 1}
+        {(["email", "date", "time", "form"] as const).map((s, i) => {
+          const done = currentStepIdx > i;
+          const active = step === s;
+          return (
+            <div key={s} className="flex items-center gap-2">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-cinzel text-[9px] border transition
+                ${done || active ? "bg-[#C5A059] border-[#C5A059] text-[#020617]" : "border-white/10 text-gray-600"}`}
+              >
+                {done ? <Check className="w-3 h-3" /> : i + 1}
+              </div>
+              <span className={`font-cinzel text-[8px] uppercase tracking-widest hidden sm:block
+                ${active ? "text-[#C5A059]" : "text-gray-600"}`}>
+                {s === "email" ? "Email" : s === "date" ? "Fecha" : s === "time" ? "Hora" : "Datos"}
+              </span>
+              {i < 3 && <div className="w-6 h-px bg-white/10" />}
             </div>
-            <span className={`font-cinzel text-[8px] uppercase tracking-widest hidden sm:block
-              ${step === s ? "text-[#C5A059]" : "text-gray-600"}`}>
-              {s === "date" ? "Fecha" : s === "time" ? "Hora" : "Datos"}
-            </span>
-            {i < 2 && <div className="w-8 h-px bg-white/10" />}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* DATE STEP */}
+      {/* ── EMAIL STEP ─────────────────────────────────────────────────────── */}
+      {step === "email" && (
+        <form onSubmit={handleEmailContinue} className="max-w-sm">
+          <p className="font-crimson text-gray-400 mb-6 text-base leading-relaxed">
+            Ingresa tu correo para comenzar. Si ya eres paciente, tus datos se cargarán automáticamente.
+          </p>
+          <div className="mb-4">
+            <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">
+              Correo electrónico *
+            </label>
+            <input
+              type="email"
+              value={emailInput}
+              onChange={(e) => { setEmailInput(e.target.value); setEmailError(null); }}
+              required
+              autoFocus
+              placeholder="tu@correo.com"
+              className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600"
+            />
+            {emailError && <p className="font-crimson text-xs text-red-400 mt-1">{emailError}</p>}
+          </div>
+          <button
+            type="submit"
+            disabled={lookingUp}
+            className="flex items-center justify-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-8 py-3 hover:bg-[#C5A059]/90 disabled:opacity-60 transition"
+          >
+            {lookingUp && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            {lookingUp ? "Buscando…" : "Continuar"}
+          </button>
+        </form>
+      )}
+
+      {/* ── DATE STEP ──────────────────────────────────────────────────────── */}
       {step === "date" && (
         <div>
+          {patientFound && (
+            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 mb-6">
+              <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <p className="font-crimson text-sm text-emerald-300">
+                Hola <strong>{name.split(" ")[0]}</strong>, encontramos tu cuenta. Tus datos se cargaron automáticamente.
+              </p>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}
@@ -182,7 +272,6 @@ export default function BookingWidget({ type }: Props) {
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-
           <div className="grid grid-cols-7 gap-1">
             {weekDates.map((date, i) => {
               const iso = isoDate(date);
@@ -208,7 +297,7 @@ export default function BookingWidget({ type }: Props) {
         </div>
       )}
 
-      {/* TIME STEP */}
+      {/* ── TIME STEP ──────────────────────────────────────────────────────── */}
       {step === "time" && selectedDate && (
         <div>
           <button onClick={() => { setStep("date"); setSelectedDate(null); }} className="flex items-center gap-1 font-cinzel text-[8px] uppercase tracking-widest text-gray-500 hover:text-[#C5A059] transition mb-6">
@@ -217,7 +306,6 @@ export default function BookingWidget({ type }: Props) {
           <p className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059] mb-6">
             {formatDateLabel(new Date(`${selectedDate}T12:00:00`))}
           </p>
-
           {slotsLoading ? (
             <div className="flex items-center gap-2 py-12 justify-center">
               <Loader2 className="w-4 h-4 text-[#C5A059] animate-spin" />
@@ -250,7 +338,7 @@ export default function BookingWidget({ type }: Props) {
         </div>
       )}
 
-      {/* FORM STEP */}
+      {/* ── FORM STEP ──────────────────────────────────────────────────────── */}
       {step === "form" && selectedDate && selectedTime && (
         <div>
           <button onClick={() => { setStep("time"); setSelectedTime(null); }} className="flex items-center gap-1 font-cinzel text-[8px] uppercase tracking-widest text-gray-500 hover:text-[#C5A059] transition mb-6">
@@ -264,6 +352,13 @@ export default function BookingWidget({ type }: Props) {
             </p>
           </div>
 
+          {patientFound && (
+            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 mb-6">
+              <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <p className="font-crimson text-sm text-emerald-300">Datos cargados desde tu perfil. Puedes editarlos si es necesario.</p>
+            </div>
+          )}
+
           {error && (
             <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 mb-6">
               <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
@@ -272,6 +367,15 @@ export default function BookingWidget({ type }: Props) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">Correo electrónico</label>
+              <input
+                type="email"
+                value={email}
+                readOnly
+                className="w-full bg-[#0a1628]/60 border border-white/5 text-gray-400 px-4 py-3 font-crimson text-base cursor-default"
+              />
+            </div>
             <div>
               <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">Nombre completo *</label>
               <input
@@ -283,17 +387,6 @@ export default function BookingWidget({ type }: Props) {
                 maxLength={100}
                 className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600"
                 placeholder="Tu nombre"
-              />
-            </div>
-            <div>
-              <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">Correo electrónico *</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600"
-                placeholder="tu@correo.com"
               />
             </div>
             <div>
