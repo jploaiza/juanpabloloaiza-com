@@ -49,12 +49,22 @@ export interface ZoomMeetingResult {
   password: string;
 }
 
+export interface ZoomMeetingSettings {
+  host_video?: boolean;
+  participant_video?: boolean;
+  join_before_host?: boolean;
+  mute_upon_entry?: boolean;
+  waiting_room?: boolean;
+  auto_recording?: string;
+}
+
 export interface CreateZoomMeetingOptions {
   topic: string;
   startIso: string;
   durationMin: number;
   timeZone: string;
   agenda?: string;
+  settings?: ZoomMeetingSettings;
 }
 
 /**
@@ -88,6 +98,7 @@ export async function createZoomMeeting(
         mute_upon_entry: true,
         waiting_room: true,
         auto_recording: "none",
+        ...opts.settings,
       },
     }),
     signal: AbortSignal.timeout(10000),

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FileText, BarChart2, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Users, FileText, BarChart2, TrendingUp, Calendar } from "lucide-react";
 
 const LINKS = [
   { href: "/academy/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/academy/admin/crm", label: "CRM", icon: Users },
+  { href: "/academy/admin/calendar", label: "Calendario", icon: Calendar },
   { href: "/academy/admin/blog", label: "Blog", icon: FileText },
   { href: "/academy/admin/analytics", label: "Analíticas", icon: BarChart2 },
   { href: "/academy/admin/trends", label: "Tendencias", icon: TrendingUp },

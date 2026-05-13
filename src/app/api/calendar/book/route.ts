@@ -1,10 +1,10 @@
 /**
  * POST /api/calendar/book
  *
- * Creates a Google Calendar event and sends a confirmation email.
+ * Creates a Google Calendar event and sends a confirmation email + WhatsApp.
  * Public endpoint — uses the admin's stored credentials.
  *
- * Body: { name, email, phone, date, time, type, notes? }
+ * Body: { name, email, phone, date, time, type, notes?, reschedule_code? }
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -20,11 +20,9 @@ import {
 } from "@/lib/google-calendar";
 import { createZoomMeeting, deleteZoomMeeting } from "@/lib/zoom";
 import { rateLimit, getIp } from "@/lib/rate-limit";
-import { BOOKING_TZ, EVENT_CONFIGS, type BookingType } from "@/lib/booking-config";
-
-const FROM_EMAIL = "Juan Pablo Loaiza <academy@juanpabloloaiza.com>";
-const LOGO_URL = "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png";
-const SITE_URL = "https://www.juanpabloloaiza.com";
+import { BOOKING_TZ, getCalendarConfig, getEventTypes } from "@/lib/booking-config";
+import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
+import { sendWhatsApp } from "@/lib/whatsapp";
 
 function slotsOverlap(start: Date, end: Date, busy: BusySlot[]): boolean {
   return busy.some((b) => {
@@ -50,93 +48,6 @@ function slotToDate(dateStr: string, timeStr: string): Date {
   return new Date(midnightUtcMs + (h * 60 + m) * 60000);
 }
 
-function buildConfirmationHtml(params: {
-  name: string;
-  type: BookingType;
-  dateLabel: string;
-  timeStr: string;
-  duration: number;
-  notes?: string;
-  bookingCode?: string;
-  zoomJoinUrl?: string;
-}): string {
-  const { name, type, dateLabel, timeStr, duration, notes, bookingCode, zoomJoinUrl } = params;
-  const typeLabel = type === "session" ? "Sesión TRVP" : "Entrevista de Admisión";
-  const firstName = name.split(" ")[0];
-  const manageUrl = bookingCode
-    ? `${SITE_URL}/agenda/gestionar?code=${bookingCode}`
-    : `${SITE_URL}/agenda`;
-
-  return `<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#020617;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#020617;padding:40px 0;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-        <!-- Header -->
-        <tr>
-          <td style="background:#0a1628;border-top:3px solid #C5A059;padding:32px 40px;text-align:center;">
-            <img src="${LOGO_URL}" alt="Juan Pablo Loaiza" height="48" style="height:48px;max-width:200px;">
-          </td>
-        </tr>
-        <!-- Body -->
-        <tr>
-          <td style="background:#0f1e35;padding:40px;">
-            <p style="color:#C5A059;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;margin:0 0 16px;">Confirmación de ${typeLabel}</p>
-            <h1 style="color:#ffffff;font-size:24px;margin:0 0 24px;line-height:1.3;">Hola ${firstName}, tu cita está confirmada</h1>
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#16213e;border:1px solid rgba(197,160,89,0.2);margin-bottom:24px;">
-              <tr><td style="padding:20px 24px;">
-                <p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Tipo</p>
-                <p style="color:#ffffff;font-size:16px;margin:0 0 16px;">${typeLabel}</p>
-                <p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Fecha y hora</p>
-                <p style="color:#C5A059;font-size:18px;font-weight:bold;margin:0 0 16px;">${dateLabel} — ${timeStr}</p>
-                <p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Duración</p>
-                <p style="color:#ffffff;font-size:16px;margin:0 0 ${notes ? 16 : 0}px;">${duration} minutos</p>
-                ${notes ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Notas</p><p style="color:#d1d5db;font-size:14px;margin:0 0 0px;">${notes}</p>` : ""}
-                ${bookingCode ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 4px;">Código de Reserva</p><p style="color:#C5A059;font-size:20px;font-weight:bold;letter-spacing:0.2em;margin:0;">${bookingCode}</p>` : ""}
-              </td></tr>
-            </table>
-
-            ${zoomJoinUrl ? `
-            <!-- Zoom link -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a1628;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
-              <tr><td style="padding:20px 24px;text-align:center;">
-                <p style="color:#9ca3af;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin:0 0 12px;">Enlace de tu sesión Zoom</p>
-                <a href="${zoomJoinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;padding:12px 28px;text-decoration:none;font-weight:bold;border-radius:2px;">Unirse a Zoom</a>
-                <p style="color:#6b7280;font-size:11px;margin:10px 0 0;">Guarda este enlace — es tu acceso a la sesión.</p>
-              </td></tr>
-            </table>` : `
-            <p style="color:#d1d5db;font-size:15px;line-height:1.7;margin:0 0 24px;">La sesión se realizará <strong style="color:#ffffff;">vía Zoom</strong>. Recibirás el enlace poco antes de tu cita.</p>`}
-
-            <!-- CTA buttons -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-              <tr>
-                <td style="padding-right:8px;">
-                  <a href="${manageUrl}&action=reschedule" style="display:block;text-align:center;background:#C5A059;color:#020617;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;padding:12px 16px;text-decoration:none;font-weight:bold;">Reprogramar</a>
-                </td>
-                <td style="padding-left:8px;">
-                  <a href="${manageUrl}&action=cancel" style="display:block;text-align:center;background:transparent;color:#9ca3af;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;padding:11px 16px;text-decoration:none;border:1px solid rgba(156,163,175,0.3);">Cancelar</a>
-                </td>
-              </tr>
-            </table>
-
-            <p style="color:#6b7280;font-size:13px;line-height:1.6;margin:0;">Guarda tu código <strong style="color:#C5A059;">${bookingCode ?? ""}</strong> — lo necesitarás para reprogramar o cancelar sin iniciar sesión.</p>
-          </td>
-        </tr>
-        <!-- Footer -->
-        <tr>
-          <td style="background:#0a1628;padding:24px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.05);">
-            <p style="color:#4b5563;font-size:12px;margin:0;">Juan Pablo Loaiza · Terapeuta TRVP · <a href="${SITE_URL}" style="color:#C5A059;text-decoration:none;">${SITE_URL.replace("https://", "")}</a></p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
-}
-
 export async function POST(req: NextRequest) {
   const ip = getIp(req.headers);
   if (!rateLimit(`cal-book:${ip}`, 5, 10 * 60 * 1000)) {
@@ -152,31 +63,29 @@ export async function POST(req: NextRequest) {
 
   const { name, email, phone, date, time, type, notes, reschedule_code } = body;
 
-  // Validate required fields
   if (!name?.trim() || name.trim().length < 2) return NextResponse.json({ error: "Nombre requerido" }, { status: 400 });
   if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "Email inválido" }, { status: 400 });
   if (!phone?.trim() || phone.replace(/\D/g, "").length < 8) return NextResponse.json({ error: "Teléfono inválido" }, { status: 400 });
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return NextResponse.json({ error: "Fecha inválida" }, { status: 400 });
   if (!time || !/^\d{2}:\d{2}$/.test(time)) return NextResponse.json({ error: "Hora inválida" }, { status: 400 });
-  if (!type || !(type in EVENT_CONFIGS)) return NextResponse.json({ error: "Tipo inválido" }, { status: 400 });
+  if (!type) return NextResponse.json({ error: "Tipo inválido" }, { status: 400 });
 
-  const bookingType = type as BookingType;
-  const { durationMin, label } = EVENT_CONFIGS[bookingType];
+  // Load config + event types from DB
+  const [config, eventTypes] = await Promise.all([getCalendarConfig(), getEventTypes(true)]);
+  const eventType = eventTypes.find((e) => e.slug === type);
+  if (!eventType) return NextResponse.json({ error: "Tipo de evento inválido" }, { status: 400 });
 
-  // Sanitize name and notes
   const safeName = name.trim().slice(0, 100);
   const safeNotes = notes?.trim().slice(0, 500) ?? "";
+  const { duration_min: durationMin, label } = eventType;
 
-  // Convert slot to UTC dates
   const startDate = slotToDate(date, time);
   const endDate = new Date(startDate.getTime() + durationMin * 60000);
 
-  // Reject past bookings
-  if (startDate.getTime() < Date.now() + 30 * 60000) {
-    return NextResponse.json({ error: "Selecciona una cita con al menos 30 minutos de anticipación" }, { status: 400 });
+  if (startDate.getTime() < Date.now() + config.lead_time_min * 60000) {
+    return NextResponse.json({ error: `Selecciona una cita con al menos ${config.lead_time_min} minutos de anticipación` }, { status: 400 });
   }
 
-  // Get admin's calendar credentials
   const adminSb = createAdminClient();
   const { data: stored } = await adminSb
     .from("google_calendar_tokens")
@@ -203,7 +112,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "El calendario no está disponible. Inténtalo más tarde." }, { status: 503 });
   }
 
-  // Double-check availability (prevent race conditions)
   let busy: BusySlot[] = [];
   try {
     busy = await getFreeBusy(
@@ -228,7 +136,7 @@ export async function POST(req: NextRequest) {
     year: "numeric",
   });
 
-  // Create Zoom meeting (graceful — non-blocking if credentials missing)
+  // Create Zoom meeting using config settings
   let zoomMeetingId: number | null = null;
   let zoomJoinUrl = "";
   let zoomStartUrl = "";
@@ -239,17 +147,15 @@ export async function POST(req: NextRequest) {
       durationMin,
       timeZone: BOOKING_TZ,
       agenda: safeNotes || undefined,
+      settings: config.zoom,
     });
     if (zoom) {
       zoomMeetingId = zoom.id;
       zoomJoinUrl = zoom.join_url;
       zoomStartUrl = zoom.start_url;
     }
-  } catch {
-    // Non-critical — proceed without Zoom
-  }
+  } catch { /* non-critical */ }
 
-  // Build calendar event description
   const description = [
     `Paciente: ${safeName}`,
     `Email: ${email.trim().toLowerCase()}`,
@@ -258,7 +164,6 @@ export async function POST(req: NextRequest) {
     safeNotes ? `Notas: ${safeNotes}` : "",
   ].filter(Boolean).join("\n");
 
-  // Create Google Calendar event
   let eventLink = "";
   let googleEventId = "";
   try {
@@ -275,9 +180,9 @@ export async function POST(req: NextRequest) {
     googleEventId = created.id;
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
-    // Clean up Zoom meeting if calendar event fails
+    console.error("[book] GCal event creation failed:", msg);
     if (zoomMeetingId) void deleteZoomMeeting(zoomMeetingId);
-    return NextResponse.json({ error: `No se pudo crear la cita: ${msg}` }, { status: 502 });
+    return NextResponse.json({ error: "No se pudo crear el evento en el calendario. Intenta de nuevo." }, { status: 502 });
   }
 
   // If rescheduling: cancel the old booking
@@ -290,17 +195,14 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (oldBooking && oldBooking.status === "confirmed") {
-      // Delete old calendar event
       try {
         if (oldBooking.google_event_id) {
           await deleteCalendarEvent(accessToken, stored.calendar_id ?? "primary", oldBooking.google_event_id);
         }
       } catch { /* non-critical */ }
-      // Delete old Zoom meeting
       if (oldBooking.zoom_meeting_id) {
         void deleteZoomMeeting(Number(oldBooking.zoom_meeting_id));
       }
-      // Mark old booking as rescheduled
       await adminSb.from("bookings").update({ status: "rescheduled" }).eq("id", oldBooking.id);
     }
   }
@@ -309,7 +211,7 @@ export async function POST(req: NextRequest) {
   const { data: bookingRow } = await adminSb
     .from("bookings")
     .insert({
-      type: bookingType,
+      type,
       date,
       time_slot: time,
       patient_name: safeName,
@@ -327,42 +229,73 @@ export async function POST(req: NextRequest) {
     .single();
 
   const bookingCode = bookingRow?.booking_code ?? "";
+  const manageUrl = `${config.site_url}/agenda/gestionar?code=${bookingCode}`;
 
-  // Send confirmation email (non-blocking)
+  // Build template vars
+  const firstName = safeName.split(" ")[0];
+  const templateVars: Record<string, string> = {
+    name: safeName,
+    first_name: firstName,
+    email: email.trim().toLowerCase(),
+    phone: phone.trim(),
+    type_label: label,
+    duration: String(durationMin),
+    date,
+    date_long: dateLabel,
+    time,
+    booking_code: bookingCode,
+    event_link: eventLink,
+    zoom_join_url: zoomJoinUrl,
+    manage_url: manageUrl,
+    cancel_url: `${manageUrl}&action=cancel`,
+    reschedule_url: `${manageUrl}&action=reschedule`,
+    site_url: config.site_url,
+    logo_url: config.logo_url,
+    therapist_name: "Juan Pablo Loaiza",
+  };
+
+  // Load confirmation templates from DB
+  const { data: templates } = await adminSb
+    .from("booking_alert_templates")
+    .select("channel, subject, body")
+    .eq("event_type_slug", type)
+    .eq("trigger", "confirmation")
+    .eq("is_active", true);
+
+  // Send email confirmation
   let emailSent = false;
+  const emailTpl = templates?.find((t) => t.channel === "email");
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const emailResult = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: email.trim().toLowerCase(),
-      subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
-      html: buildConfirmationHtml({
-        name: safeName,
-        type: bookingType,
-        dateLabel,
-        timeStr: time,
-        duration: durationMin,
-        notes: safeNotes || undefined,
-        bookingCode,
-        zoomJoinUrl: zoomJoinUrl || undefined,
-      }),
-    });
-    emailSent = !emailResult.error;
+    const subject = emailTpl?.subject
+      ? renderTemplate(emailTpl.subject as string, templateVars)
+      : `Confirmación de ${label} — ${dateLabel} ${time}`;
+    const html = emailTpl?.body
+      ? renderTemplateHtml(emailTpl.body as string, templateVars)
+      : `<p>Tu ${label} está confirmada para el ${dateLabel} a las ${time}. Código: ${bookingCode}</p>`;
+    const result = await resend.emails.send({ from: config.from_email, to: email.trim().toLowerCase(), subject, html });
+    emailSent = !result.error;
     void adminSb.from("comms_log").insert({
       type: "booking_confirmation",
-      subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
-      status: emailResult.error ? "error" : "sent",
+      subject,
+      status: result.error ? "error" : "sent",
       sent_at: new Date().toISOString(),
-      body_preview: `gcal:${date}:${time}:${bookingType}:${email}`,
+      body_preview: `gcal:${date}:${time}:${type}:${email}`,
     });
   } catch {
     void adminSb.from("comms_log").insert({
       type: "booking_confirmation",
-      subject: `Confirmación de ${label} — ${dateLabel} ${time}`,
+      subject: `Confirmación de ${label}`,
       status: "error",
       sent_at: new Date().toISOString(),
-      body_preview: `gcal:${date}:${time}:${bookingType}:${email}`,
+      body_preview: `gcal:${date}:${time}:${type}:${email}`,
     });
+  }
+
+  // Send WhatsApp confirmation (non-blocking)
+  const waTpl = templates?.find((t) => t.channel === "whatsapp");
+  if (waTpl && phone.trim()) {
+    void sendWhatsApp({ to: phone.trim(), body: renderTemplate(waTpl.body as string, templateVars) });
   }
 
   return NextResponse.json({
