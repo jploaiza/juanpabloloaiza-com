@@ -1,21 +1,10 @@
 "use client";
 import ScrollDivider from "@/components/ScrollDivider";
-import Cal, { getCalApi } from "@calcom/embed-react";
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
+import BookingWidget from "@/components/booking/BookingWidget";
 
 export default function AgendaContent() {
-  useEffect(() => {
-    (async function () {
-      const cal = await getCalApi({ namespace: "trvp" });
-      cal("ui", {
-        theme: "light",
-        hideEventTypeDetails: false,
-        layout: "month_view",
-      });
-    })();
-  }, []);
 
   return (
     <>
@@ -50,14 +39,7 @@ export default function AgendaContent() {
             <div className="absolute -bottom-6 -right-6 w-12 h-12 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
 
             <div className="bg-[#16213e] border border-[#C5A059]/30 p-8 sm:p-12 relative z-0">
-              <div className="bg-white rounded-sm overflow-hidden">
-                <Cal
-                  namespace="trvp"
-                  calLink="jploaizao/trvp"
-                  style={{ width: "100%", height: "auto", minHeight: "700px" }}
-                  config={{ layout: "month_view", theme: "light" }}
-                />
-              </div>
+              <BookingWidget type="session" />
             </div>
           </motion.div>
 

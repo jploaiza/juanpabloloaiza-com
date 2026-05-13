@@ -34,7 +34,10 @@ export function buildGoogleAuthUrl(redirectUri: string, state: string): string {
     client_id: process.env.GOOGLE_CLIENT_ID!,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: "https://www.googleapis.com/auth/calendar.readonly",
+    scope: [
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "https://www.googleapis.com/auth/calendar.events",
+    ].join(" "),
     access_type: "offline",
     prompt: "consent",
     state,
@@ -216,4 +219,85 @@ export function matchPatientsWithEvents(
 
     return { patient_id: patient.id, scheduled: false };
   });
+}
+
+// ── FreeBusy ──────────────────────────────────────────────────────
+
+export interface BusySlot {
+  start: string;
+  end: string;
+}
+
+export async function getFreeBusy(
+  accessToken: string,
+  calendarId: string,
+  timeMin: string,
+  timeMax: string,
+): Promise<BusySlot[]> {
+  const res = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      timeMin,
+      timeMax,
+      items: [{ id: calendarId }],
+    }),
+    signal: AbortSignal.timeout(7000),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message ?? "FreeBusy query failed");
+  return (data.calendars?.[calendarId]?.busy ?? []) as BusySlot[];
+}
+
+// ── Create Event ──────────────────────────────────────────────────
+
+export interface NewCalendarEvent {
+  summary: string;
+  description: string;
+  startIso: string;
+  endIso: string;
+  timeZone: string;
+  attendeeEmail: string;
+  attendeeName: string;
+}
+
+export async function createCalendarEvent(
+  accessToken: string,
+  calendarId: string,
+  event: NewCalendarEvent,
+): Promise<{ id: string; htmlLink: string }> {
+  const body = {
+    summary: event.summary,
+    description: event.description,
+    start: { dateTime: event.startIso, timeZone: event.timeZone },
+    end: { dateTime: event.endIso, timeZone: event.timeZone },
+    attendees: [{ email: event.attendeeEmail, displayName: event.attendeeName }],
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: "email", minutes: 24 * 60 },
+        { method: "popup", minutes: 60 },
+      ],
+    },
+    conferenceData: undefined,
+  };
+
+  const res = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=none`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000),
+    },
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message ?? "Event creation failed");
+  return { id: data.id, htmlLink: data.htmlLink };
 }
