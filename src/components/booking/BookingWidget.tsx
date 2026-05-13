@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ChevronLeft, ChevronRight, Clock, Check, Loader2,
-  AlertCircle, UserCheck, Globe, Copy, Video, Calendar,
+  AlertCircle, UserCheck, Globe, Copy, Video, Calendar, Link,
 } from "lucide-react";
 import {
   getBrowserTz, detectCountryCode, slotTimeInUserTz, getMonthDays,
@@ -13,7 +13,11 @@ import {
 
 type BookingType = "session" | "entrevista";
 
-interface Props { type: BookingType }
+interface Props {
+  type: BookingType;
+  /** Booking code of the appointment being replaced — triggers cancel-old logic */
+  rescheduleCode?: string;
+}
 
 const TYPE_LABELS: Record<BookingType, string> = {
   session: "Sesión TRVP",
@@ -26,7 +30,7 @@ const DAYS_HDR = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
 
 type Step = "calendar" | "form" | "confirm";
 
-export default function BookingWidget({ type }: Props) {
+export default function BookingWidget({ type, rescheduleCode }: Props) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -158,6 +162,7 @@ export default function BookingWidget({ type }: Props) {
           name, email: emailInput.trim().toLowerCase(),
           phone: fullPhone, notes, date: selectedDate,
           time: selectedTime, type,
+          ...(rescheduleCode ? { reschedule_code: rescheduleCode } : {}),
         }),
       });
       const json = await res.json();
@@ -174,6 +179,7 @@ export default function BookingWidget({ type }: Props) {
           durationMin: DURATION[type],
           eventLink: json.event_link ?? "",
           userTz,
+          zoomJoinUrl: json.zoom_join_url ?? undefined,
         });
         setStep("confirm");
       }
@@ -270,7 +276,18 @@ export default function BookingWidget({ type }: Props) {
           Guarda tu código de reserva para reprogramar o cancelar sin iniciar sesión.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 mb-3">
+          {confirmation.zoomJoinUrl && (
+            <a
+              href={confirmation.zoomJoinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600/90 text-white font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-blue-600 transition"
+            >
+              <Video className="w-3.5 h-3.5" />
+              Unirse a Zoom
+            </a>
+          )}
           {confirmation.eventLink && (
             <a
               href={confirmation.eventLink}
@@ -279,14 +296,25 @@ export default function BookingWidget({ type }: Props) {
               className="flex-1 flex items-center justify-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-[#C5A059]/10 transition"
             >
               <Calendar className="w-3.5 h-3.5" />
-              Ver en Google Calendar
+              Google Calendar
+            </a>
+          )}
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          {confirmation.bookingCode && (
+            <a
+              href={`/agenda/gestionar?code=${confirmation.bookingCode}`}
+              className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-gray-400 font-cinzel text-[9px] uppercase tracking-widest py-3 hover:border-white/20 transition"
+            >
+              <Link className="w-3 h-3" />
+              Gestionar reserva
             </a>
           )}
           <button
             onClick={resetAll}
-            className="flex-1 font-cinzel text-[9px] uppercase tracking-widest text-gray-500 border border-white/10 py-3 hover:border-white/20 transition"
+            className="flex-1 font-cinzel text-[9px] uppercase tracking-widest text-gray-600 border border-white/5 py-3 hover:border-white/10 transition"
           >
-            Agendar otra cita
+            Agendar otra
           </button>
         </div>
       </div>

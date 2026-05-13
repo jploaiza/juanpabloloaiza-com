@@ -24,6 +24,7 @@ export interface ConfirmationData {
   durationMin: number;
   eventLink: string;
   userTz: string;
+  zoomJoinUrl?: string;
 }
 
 // ── Timezone helpers ──────────────────────────────────────────────────────────

@@ -14,9 +14,11 @@ import {
   getValidToken,
   getFreeBusy,
   createCalendarEvent,
+  deleteCalendarEvent,
   type GCalTokenData,
   type BusySlot,
 } from "@/lib/google-calendar";
+import { createZoomMeeting, deleteZoomMeeting } from "@/lib/zoom";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { BOOKING_TZ, EVENT_CONFIGS, type BookingType } from "@/lib/booking-config";
 
@@ -56,10 +58,14 @@ function buildConfirmationHtml(params: {
   duration: number;
   notes?: string;
   bookingCode?: string;
+  zoomJoinUrl?: string;
 }): string {
-  const { name, type, dateLabel, timeStr, duration, notes, bookingCode } = params;
+  const { name, type, dateLabel, timeStr, duration, notes, bookingCode, zoomJoinUrl } = params;
   const typeLabel = type === "session" ? "Sesión TRVP" : "Entrevista de Admisión";
   const firstName = name.split(" ")[0];
+  const manageUrl = bookingCode
+    ? `${SITE_URL}/agenda/gestionar?code=${bookingCode}`
+    : `${SITE_URL}/agenda`;
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -86,16 +92,36 @@ function buildConfirmationHtml(params: {
                 <p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Fecha y hora</p>
                 <p style="color:#C5A059;font-size:18px;font-weight:bold;margin:0 0 16px;">${dateLabel} — ${timeStr}</p>
                 <p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Duración</p>
-                <p style="color:#ffffff;font-size:16px;margin:0;">${duration} minutos</p>
-                ${notes ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 4px;">Notas</p><p style="color:#d1d5db;font-size:14px;margin:0;">${notes}</p>` : ""}
-                ${bookingCode ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 4px;">Código de Reserva</p><p style="color:#C5A059;font-size:18px;font-weight:bold;letter-spacing:0.15em;margin:0;">${bookingCode}</p>` : ""}
+                <p style="color:#ffffff;font-size:16px;margin:0 0 ${notes ? 16 : 0}px;">${duration} minutos</p>
+                ${notes ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px;">Notas</p><p style="color:#d1d5db;font-size:14px;margin:0 0 0px;">${notes}</p>` : ""}
+                ${bookingCode ? `<p style="color:#9ca3af;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 4px;">Código de Reserva</p><p style="color:#C5A059;font-size:20px;font-weight:bold;letter-spacing:0.2em;margin:0;">${bookingCode}</p>` : ""}
               </td></tr>
             </table>
-            <p style="color:#d1d5db;font-size:15px;line-height:1.7;margin:0 0 16px;">La sesión se realizará <strong style="color:#ffffff;">vía Zoom</strong>. Recibirás el enlace de la reunión poco antes de tu cita.</p>
-            <p style="color:#d1d5db;font-size:15px;line-height:1.7;margin:0 0 32px;">Si necesitas reagendar o cancelar, responde este correo o escríbeme directamente.</p>
-            <div style="text-align:center;">
-              <a href="${SITE_URL}" style="display:inline-block;background:#C5A059;color:#020617;font-size:13px;letter-spacing:0.15em;text-transform:uppercase;padding:12px 32px;text-decoration:none;font-weight:bold;">Visitar sitio web</a>
-            </div>
+
+            ${zoomJoinUrl ? `
+            <!-- Zoom link -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a1628;border:1px solid rgba(197,160,89,0.3);margin-bottom:24px;">
+              <tr><td style="padding:20px 24px;text-align:center;">
+                <p style="color:#9ca3af;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin:0 0 12px;">Enlace de tu sesión Zoom</p>
+                <a href="${zoomJoinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;padding:12px 28px;text-decoration:none;font-weight:bold;border-radius:2px;">Unirse a Zoom</a>
+                <p style="color:#6b7280;font-size:11px;margin:10px 0 0;">Guarda este enlace — es tu acceso a la sesión.</p>
+              </td></tr>
+            </table>` : `
+            <p style="color:#d1d5db;font-size:15px;line-height:1.7;margin:0 0 24px;">La sesión se realizará <strong style="color:#ffffff;">vía Zoom</strong>. Recibirás el enlace poco antes de tu cita.</p>`}
+
+            <!-- CTA buttons -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr>
+                <td style="padding-right:8px;">
+                  <a href="${manageUrl}&action=reschedule" style="display:block;text-align:center;background:#C5A059;color:#020617;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;padding:12px 16px;text-decoration:none;font-weight:bold;">Reprogramar</a>
+                </td>
+                <td style="padding-left:8px;">
+                  <a href="${manageUrl}&action=cancel" style="display:block;text-align:center;background:transparent;color:#9ca3af;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;padding:11px 16px;text-decoration:none;border:1px solid rgba(156,163,175,0.3);">Cancelar</a>
+                </td>
+              </tr>
+            </table>
+
+            <p style="color:#6b7280;font-size:13px;line-height:1.6;margin:0;">Guarda tu código <strong style="color:#C5A059;">${bookingCode ?? ""}</strong> — lo necesitarás para reprogramar o cancelar sin iniciar sesión.</p>
           </td>
         </tr>
         <!-- Footer -->
@@ -117,14 +143,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Demasiadas solicitudes. Intenta en unos minutos." }, { status: 429 });
   }
 
-  let body: { name?: string; email?: string; phone?: string; date?: string; time?: string; type?: string; notes?: string };
+  let body: { name?: string; email?: string; phone?: string; date?: string; time?: string; type?: string; notes?: string; reschedule_code?: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  const { name, email, phone, date, time, type, notes } = body;
+  const { name, email, phone, date, time, type, notes, reschedule_code } = body;
 
   // Validate required fields
   if (!name?.trim() || name.trim().length < 2) return NextResponse.json({ error: "Nombre requerido" }, { status: 400 });
@@ -194,7 +220,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Este horario ya no está disponible. Elige otro." }, { status: 409 });
   }
 
-  // Create the calendar event
   const dateLabel = startDate.toLocaleDateString("es-CL", {
     timeZone: BOOKING_TZ,
     weekday: "long",
@@ -202,14 +227,40 @@ export async function POST(req: NextRequest) {
     month: "long",
     year: "numeric",
   });
+
+  // Create Zoom meeting (graceful — non-blocking if credentials missing)
+  let zoomMeetingId: number | null = null;
+  let zoomJoinUrl = "";
+  let zoomStartUrl = "";
+  try {
+    const zoom = await createZoomMeeting({
+      topic: `${label} — ${safeName}`,
+      startIso: startDate.toISOString().replace(".000Z", "Z"),
+      durationMin,
+      timeZone: BOOKING_TZ,
+      agenda: safeNotes || undefined,
+    });
+    if (zoom) {
+      zoomMeetingId = zoom.id;
+      zoomJoinUrl = zoom.join_url;
+      zoomStartUrl = zoom.start_url;
+    }
+  } catch {
+    // Non-critical — proceed without Zoom
+  }
+
+  // Build calendar event description
   const description = [
     `Paciente: ${safeName}`,
     `Email: ${email.trim().toLowerCase()}`,
     `Teléfono: ${phone.trim()}`,
+    zoomJoinUrl ? `Zoom: ${zoomJoinUrl}` : "",
     safeNotes ? `Notas: ${safeNotes}` : "",
   ].filter(Boolean).join("\n");
 
+  // Create Google Calendar event
   let eventLink = "";
+  let googleEventId = "";
   try {
     const created = await createCalendarEvent(accessToken, stored.calendar_id ?? "primary", {
       summary: `${label} — ${safeName}`,
@@ -221,12 +272,40 @@ export async function POST(req: NextRequest) {
       attendeeName: safeName,
     });
     eventLink = created.htmlLink;
+    googleEventId = created.id;
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
+    // Clean up Zoom meeting if calendar event fails
+    if (zoomMeetingId) void deleteZoomMeeting(zoomMeetingId);
     return NextResponse.json({ error: `No se pudo crear la cita: ${msg}` }, { status: 502 });
   }
 
-  // Generate booking code and persist to bookings table
+  // If rescheduling: cancel the old booking
+  if (reschedule_code?.trim()) {
+    const oldCode = reschedule_code.trim().toUpperCase();
+    const { data: oldBooking } = await adminSb
+      .from("bookings")
+      .select("id, google_event_id, zoom_meeting_id, status")
+      .eq("booking_code", oldCode)
+      .single();
+
+    if (oldBooking && oldBooking.status === "confirmed") {
+      // Delete old calendar event
+      try {
+        if (oldBooking.google_event_id) {
+          await deleteCalendarEvent(accessToken, stored.calendar_id ?? "primary", oldBooking.google_event_id);
+        }
+      } catch { /* non-critical */ }
+      // Delete old Zoom meeting
+      if (oldBooking.zoom_meeting_id) {
+        void deleteZoomMeeting(Number(oldBooking.zoom_meeting_id));
+      }
+      // Mark old booking as rescheduled
+      await adminSb.from("bookings").update({ status: "rescheduled" }).eq("id", oldBooking.id);
+    }
+  }
+
+  // Persist new booking
   const { data: bookingRow } = await adminSb
     .from("bookings")
     .insert({
@@ -238,15 +317,18 @@ export async function POST(req: NextRequest) {
       patient_phone: phone.trim(),
       notes: safeNotes,
       status: "confirmed",
-      google_event_id: "",
+      google_event_id: googleEventId,
       google_event_link: eventLink,
+      zoom_meeting_id: zoomMeetingId,
+      zoom_join_url: zoomJoinUrl,
+      zoom_start_url: zoomStartUrl,
     })
     .select("booking_code")
     .single();
 
   const bookingCode = bookingRow?.booking_code ?? "";
 
-  // Send confirmation email (non-blocking — calendar event already created)
+  // Send confirmation email (non-blocking)
   let emailSent = false;
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -262,6 +344,7 @@ export async function POST(req: NextRequest) {
         duration: durationMin,
         notes: safeNotes || undefined,
         bookingCode,
+        zoomJoinUrl: zoomJoinUrl || undefined,
       }),
     });
     emailSent = !emailResult.error;
@@ -286,6 +369,7 @@ export async function POST(req: NextRequest) {
     ok: true,
     event_link: eventLink,
     booking_code: bookingCode,
+    zoom_join_url: zoomJoinUrl || null,
     email_sent: emailSent,
   });
 }

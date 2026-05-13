@@ -252,6 +252,29 @@ export async function getFreeBusy(
   return (data.calendars?.[calendarId]?.busy ?? []) as BusySlot[];
 }
 
+// ── Delete Event ──────────────────────────────────────────────────
+
+export async function deleteCalendarEvent(
+  accessToken: string,
+  calendarId: string,
+  eventId: string,
+): Promise<void> {
+  if (!eventId) return;
+  const res = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}?sendUpdates=none`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(8000),
+    },
+  );
+  // 404 = already gone, treat as success
+  if (!res.ok && res.status !== 404) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error?.message ?? `Event delete failed: ${res.status}`);
+  }
+}
+
 // ── Create Event ──────────────────────────────────────────────────
 
 export interface NewCalendarEvent {
