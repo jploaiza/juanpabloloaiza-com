@@ -53,6 +53,8 @@ export async function GET(req: NextRequest) {
     .limit(20);
   if (geo !== "ALL") risingQ = risingQ.eq("geo", geo);
 
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0];
+
   const [
     { data: topTrendsData },
     { data: risingData },
@@ -61,18 +63,16 @@ export async function GET(req: NextRequest) {
     { data: contentIdeasData },
     { data: lastRunData },
     { data: globalTrendsRaw },
+    { data: timelineRaw },
   ] = await Promise.all([
     tab === "ideas" ? Promise.resolve({ data: [] }) : topTrendsQ,
-    // Always fetch rising for KPI — skip display only on gsc tab
     tab === "gsc" ? Promise.resolve({ data: [] }) : risingQ,
-    // Always fetch GSC for KPI
     adminSb
       .from("gsc_queries")
       .select("query,country,clicks,impressions,ctr,position,date")
       .gte("date", thirtyDaysAgo)
       .order("clicks", { ascending: false })
       .limit(50),
-    // Always fetch striking for KPI
     adminSb
       .from("gsc_queries")
       .select("query,country,clicks,impressions,ctr,position,date")
@@ -93,7 +93,6 @@ export async function GET(req: NextRequest) {
       .select("run_at,duration_ms,trends_inserted,gsc_inserted,ideas_inserted,errors")
       .order("run_at", { ascending: false })
       .limit(1),
-    // Global top 10: daily_trend entries from the last 7 days, across all geos
     adminSb
       .from("trends_snapshots")
       .select("keyword,interest_score,geo,rising,captured_at")
@@ -101,6 +100,16 @@ export async function GET(req: NextRequest) {
       .gte("captured_at", sevenDaysAgo)
       .order("interest_score", { ascending: false })
       .limit(200),
+    // Interest timeline: last 12 weeks for seeds, filtered by geo
+    (() => {
+      let q = adminSb
+        .from("trends_interest_timeline")
+        .select("keyword,geo,interest_score,recorded_date")
+        .gte("recorded_date", ninetyDaysAgo)
+        .order("recorded_date", { ascending: true });
+      if (geo !== "ALL") q = q.eq("geo", geo);
+      return q.limit(500);
+    })(),
   ]);
 
   // Deduplicate top trends by keyword, pick max score
@@ -146,6 +155,18 @@ export async function GET(req: NextRequest) {
   const risingCount = (risingData ?? []).length;
   const totalClicks = (gscTopData ?? []).reduce((sum, r) => sum + (r.clicks ?? 0), 0);
 
+  // Group timeline by keyword → sorted date points
+  type TimelinePoint = { date: string; score: number };
+  const timelineMap: Record<string, TimelinePoint[]> = {};
+  for (const row of timelineRaw ?? []) {
+    if (!timelineMap[row.keyword]) timelineMap[row.keyword] = [];
+    timelineMap[row.keyword].push({ date: row.recorded_date, score: row.interest_score });
+  }
+  // Keep only keywords with ≥2 points (enough to draw a line)
+  const interestTimeline = Object.entries(timelineMap)
+    .filter(([, pts]) => pts.length >= 2)
+    .map(([keyword, points]) => ({ keyword, points }));
+
   return NextResponse.json({
     topTrends,
     risingQueries,
@@ -154,6 +175,7 @@ export async function GET(req: NextRequest) {
     contentIdeas,
     lastRun,
     globalTrends,
+    interestTimeline,
     kpis: {
       newIdeas: newIdeasCount,
       striking: strikingCount,

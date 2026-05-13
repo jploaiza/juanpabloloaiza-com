@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={LOGO_DATA_URL} alt="Juan Pablo Loaiza" width={300} height={72} style={{ height: "62px", width: "260px", objectFit: "contain" }} />
-            <span style={{ fontSize: "22px", color: "#6b7280", letterSpacing: "0.08em" }}>www.juanpabloloaiza.com</span>
+            <span style={{ fontSize: "22px", color: "#6b7280", letterSpacing: "0.08em" }}>{siteUrl}</span>
           </div>
         </div>
       </div>

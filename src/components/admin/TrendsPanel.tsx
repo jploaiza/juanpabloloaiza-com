@@ -72,6 +72,16 @@ interface SavedItem {
   created_at: string;
 }
 
+interface TimelinePoint {
+  date: string;
+  score: number;
+}
+
+interface KeywordTimeline {
+  keyword: string;
+  points: TimelinePoint[];
+}
+
 interface ApiData {
   topTrends: TrendItem[];
   risingQueries: TrendItem[];
@@ -81,6 +91,7 @@ interface ApiData {
   lastRun: LastRun | null;
   kpis: Kpis;
   globalTrends?: GlobalTrend[];
+  interestTimeline?: KeywordTimeline[];
 }
 
 type SeedCategory = "spiritual" | "clinical" | "world";
@@ -102,6 +113,28 @@ const GEO_OPTIONS: { value: Geo; label: string }[] = [
   { value: "CL", label: "🇨🇱 Chile" },
   { value: "ALL", label: "🌎 Todos LATAM" },
 ];
+
+function Sparkline({ points, width = 80, height = 28 }: { points: TimelinePoint[]; width?: number; height?: number }) {
+  if (points.length < 2) return null;
+  const scores = points.map((p) => p.score);
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const range = max - min || 1;
+  const step = width / (points.length - 1);
+  const toY = (s: number) => height - ((s - min) / range) * height;
+  const d = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${(i * step).toFixed(1)} ${toY(p.score).toFixed(1)}`)
+    .join(" ");
+  const last = points[points.length - 1];
+  const prev = points[points.length - 2];
+  const trending = last.score >= prev.score;
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+      <path d={d} fill="none" stroke={trending ? "#34d399" : "#f87171"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={(points.length - 1) * step} cy={toY(last.score)} r="2.5" fill={trending ? "#34d399" : "#f87171"} />
+    </svg>
+  );
+}
 
 function KpiCard({ icon: Icon, label, value, sub }: { icon: React.ElementType; label: string; value: string; sub: string }) {
   return (
@@ -656,6 +689,36 @@ export default function TrendsPanel() {
                   </div>
                 )}
               </AcademyCard>
+
+              {(data?.interestTimeline?.length ?? 0) > 0 && (
+                <AcademyCard>
+                  <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-2">Interés histórico por seed</h2>
+                  <p className="font-crimson text-sm text-gray-600 mb-6">Evolución semanal del interés (0–100) por keyword. Verde = subiendo, rojo = bajando.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {data?.interestTimeline?.map((kw) => {
+                      const last = kw.points[kw.points.length - 1];
+                      const prev = kw.points[kw.points.length - 2];
+                      const delta = last.score - prev.score;
+                      return (
+                        <div key={kw.keyword} className="flex items-center gap-3 bg-[#0a1628] border border-white/5 px-4 py-3">
+                          <Sparkline points={kw.points} width={80} height={28} />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-crimson text-sm text-gray-200 truncate">{kw.keyword}</p>
+                            <p className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 mt-0.5">
+                              Score actual: <span className="text-[#C5A059]">{last.score}</span>
+                              {delta !== 0 && (
+                                <span className={delta > 0 ? " text-emerald-400" : " text-red-400"}>
+                                  {" "}{delta > 0 ? "+" : ""}{delta}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </AcademyCard>
+              )}
 
               {(data?.risingQueries.length ?? 0) > 0 && (
                 <AcademyCard>

@@ -80,11 +80,11 @@ describe("GET /api/og/story", () => {
     expect(siteUrlMatch?.[1] ?? "").not.toContain("blog/");
   });
 
-  it("includes logo URL from origin", async () => {
+  it("includes logo as embedded data URL", async () => {
     const req = makeRequest({ title: "Test", slug: "test" });
     await GET(req as never);
     const element = MockImageResponse.lastElement;
-    expect(element).toContain("/assets/logo.webp");
+    expect(element).toContain("data:image/png;base64,");
   });
 
   it("includes background imageUrl in element when provided", async () => {
