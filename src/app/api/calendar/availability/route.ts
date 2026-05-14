@@ -31,18 +31,20 @@ function toSantiagoMidnight(dateStr: string): Date {
 
 function generateSlots(
   dateStr: string,
-  durationMin: number,
+  sessionMin: number,   // session duration only — determines last valid slot start
+  busyMin: number,      // session + buffer — used for busy overlap check
   slotStepMin: number,
   workStart: number,
-  workEnd: number,
+  workEnd: number,      // 0 is treated as 24 (midnight)
   busy: BusySlot[],
 ): string[] {
+  const effectiveEnd = workEnd === 0 ? 24 : workEnd;
   const midnight = toSantiagoMidnight(dateStr);
   const slots: string[] = [];
-  const totalMinutes = (workEnd - workStart) * 60;
-  for (let offset = workStart * 60; offset + durationMin <= workStart * 60 + totalMinutes; offset += slotStepMin) {
+  const totalMinutes = (effectiveEnd - workStart) * 60;
+  for (let offset = workStart * 60; offset + sessionMin <= workStart * 60 + totalMinutes; offset += slotStepMin) {
     const slotStart = new Date(midnight.getTime() + offset * 60000);
-    const slotEnd = new Date(slotStart.getTime() + durationMin * 60000);
+    const slotEnd = new Date(slotStart.getTime() + busyMin * 60000);
     const overlaps = busy.some((b) => {
       const bStart = new Date(b.start).getTime();
       const bEnd = new Date(b.end).getTime();
@@ -155,8 +157,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Error al consultar disponibilidad" }, { status: 502 });
   }
 
-  const durationMin = eventType.duration_min + eventType.buffer_after_min;
-  let slots = generateSlots(dateStr, durationMin, config.slot_step_min, workStart, workEnd, busy);
+  const sessionMin = eventType.duration_min;
+  const busyMin = eventType.duration_min + eventType.buffer_after_min;
+  let slots = generateSlots(dateStr, sessionMin, busyMin, config.slot_step_min, workStart, workEnd, busy);
 
   // Filter out slots within lead_time from now
   const nowMs = Date.now();
