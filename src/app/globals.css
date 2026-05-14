@@ -130,6 +130,14 @@ body {
    ───────────────────────────────────────────────────────────── */
 @layer base {
 
+  /* Libre Baskerville — agenda/booking pages */
+  .font-baskerville {
+    font-family: var(--font-libre-baskerville), Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   /* Cinzel — títulos, labels, nav, UI chrome */
   .font-cinzel {
     -webkit-font-smoothing: antialiased;

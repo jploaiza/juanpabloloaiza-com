@@ -1,59 +1,59 @@
 "use client";
-import ScrollDivider from "@/components/ScrollDivider";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import BookingWidget from "@/components/booking/BookingWidget";
 
 export default function AgendaContent() {
-
   return (
     <>
       <Header />
-      <main className="min-h-screen w-full bg-[#0a1628] pt-24" style={{ fontFamily: "var(--font-libre-baskerville), Georgia, serif" }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+      <main className="min-h-screen w-full bg-[#0a1628] pt-24 font-baskerville">
+        {/* Hero text */}
+        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            transition={{ duration: 0.7 }}
           >
-            <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Reserva tu Espacio</span>
-            <h1 className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel">
+            <span className="font-baskerville text-[#C5A059] uppercase tracking-[0.25em] text-xs font-semibold">
+              Reserva tu Espacio
+            </span>
+            <h1 className="font-baskerville text-4xl md:text-5xl text-white mt-4 mb-5 font-bold leading-tight">
               Agenda tu Sesión
             </h1>
-            <p className="font-crimson text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Selecciona la fecha y hora que mejor te convenga para tu sesión. Las sesiones se realizan vía Zoom en privacidad total.
-            </p>
-            <ScrollDivider className="mt-6" />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
-          >
-            <div className="absolute -top-6 -left-6 w-12 h-12 border-t-2 border-l-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -top-6 -right-6 w-12 h-12 border-t-2 border-r-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -bottom-6 -left-6 w-12 h-12 border-b-2 border-l-2 border-[#C5A059]/50 z-10"></div>
-            <div className="absolute -bottom-6 -right-6 w-12 h-12 border-b-2 border-r-2 border-[#C5A059]/50 z-10"></div>
-
-            <div className="bg-[#16213e] border border-[#C5A059]/30 p-8 sm:p-12 relative z-0">
-              <BookingWidget type="session" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-12 p-6 bg-[#16213e] border border-[#C5A059]/20 rounded-sm"
-          >
-            <p className="font-crimson text-base text-gray-300 leading-relaxed">
-              <span className="text-[#C5A059] font-semibold">Privacidad:</span> Este calendario es privado y solo para clientes admitidos. Cada sesión es personalizada y confidencial. Si necesitas ayuda, contacta vía WhatsApp.
+            <p className="font-baskerville text-lg text-gray-300 max-w-xl mx-auto leading-relaxed">
+              Selecciona la fecha y hora que mejor te convenga. Las sesiones se realizan vía Zoom en privacidad total.
             </p>
           </motion.div>
         </div>
+
+        {/* White booking card */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="max-w-4xl mx-auto px-4 sm:px-6 pb-24"
+        >
+          {/* Gold corner accents */}
+          <div className="relative">
+            <div className="absolute -top-3 -left-3 w-8 h-8 border-t-2 border-l-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+            <div className="absolute -top-3 -right-3 w-8 h-8 border-t-2 border-r-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+            <div className="absolute -bottom-3 -left-3 w-8 h-8 border-b-2 border-l-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+            <div className="absolute -bottom-3 -right-3 w-8 h-8 border-b-2 border-r-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+
+            <div className="bg-white shadow-2xl shadow-black/40 p-8 sm:p-10">
+              <BookingWidget type="session" />
+            </div>
+          </div>
+
+          {/* Privacy note */}
+          <div className="mt-8 px-1">
+            <p className="font-baskerville text-sm text-gray-400 leading-relaxed text-center">
+              <span className="text-[#C5A059] font-semibold">Privacidad:</span>{" "}
+              Este calendario es privado y solo para clientes admitidos. Cada sesión es personalizada y confidencial.
+            </p>
+          </div>
+        </motion.div>
       </main>
     </>
   );

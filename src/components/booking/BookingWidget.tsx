@@ -15,7 +15,6 @@ type BookingType = "session" | "entrevista";
 
 interface Props {
   type: BookingType;
-  /** Booking code of the appointment being replaced — triggers cancel-old logic */
   rescheduleCode?: string;
 }
 
@@ -46,16 +45,19 @@ const DAYS_HDR = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
 
 type Step = "calendar" | "form" | "confirm";
 
+const B = "font-baskerville";
+
+const inputCls = `w-full bg-white border border-gray-200 text-gray-900 px-4 py-3 ${B} text-base focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]/20 transition placeholder-gray-400 rounded-sm`;
+const labelCls = `block ${B} text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2`;
+
 export default function BookingWidget({ type, rescheduleCode }: Props) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // ── Event type config ─────────────────────────────────────────────────────
   const [eventTypeConfig, setEventTypeConfig] = useState<EventTypeConfig | null>(null);
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | boolean>>({});
   const [isPending, setIsPending] = useState(false);
 
-  // ── Timezone / time format ────────────────────────────────────────────────
   const [userTz, setUserTz] = useState("America/Bogota");
   const [use24h, setUse24h] = useState(true);
   const [tzOpen, setTzOpen] = useState(false);
@@ -83,12 +85,10 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── Calendar nav ──────────────────────────────────────────────────────────
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // ── Slots ─────────────────────────────────────────────────────────────────
   const [slots, setSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -108,7 +108,6 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     if (selectedDate) fetchSlots(selectedDate);
   }, [selectedDate, fetchSlots]);
 
-  // ── Form fields ───────────────────────────────────────────────────────────
   const [step, setStep] = useState<Step>("calendar");
   const [emailInput, setEmailInput] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -122,7 +121,6 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<ConfirmationData | null>(null);
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   const calDays = getMonthDays(viewYear, viewMonth);
 
   function prevMonth() {
@@ -140,10 +138,6 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     if (!dateStr || dateStr < today.toISOString().slice(0, 10)) return;
     setSelectedDate(dateStr);
     setSelectedTime(null);
-  }
-
-  function handleTimeSelect(time: string) {
-    setSelectedTime(time);
   }
 
   async function handleEmailLookup(e: React.FormEvent) {
@@ -243,7 +237,7 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
 
   const tzLabel = TZ_OPTIONS.find(t => t.value === userTz)?.label ?? userTz;
 
-  // ── Confirmation screen ───────────────────────────────────────────────────
+  // ── Confirmation ──────────────────────────────────────────────────────────
   if (step === "confirm" && confirmation) {
     const utcMs = (() => {
       const [h, m] = confirmation.time.split(":").map(Number);
@@ -267,110 +261,85 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     });
 
     return (
-      <div className="max-w-lg mx-auto">
+      <div className={`max-w-md mx-auto ${B}`}>
         <div className="text-center mb-8">
           {isPending ? (
             <>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 mb-4">
-                <Timer className="w-7 h-7 text-amber-400" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 border-2 border-amber-200 mb-5">
+                <Timer className="w-7 h-7 text-amber-500" />
               </div>
-              <h2 className="font-cinzel text-2xl text-white mb-2">¡Solicitud recibida!</h2>
-              <p className="font-crimson text-gray-400">Tu solicitud está pendiente de aprobación. Te notificaremos por correo y WhatsApp.</p>
+              <h2 className={`${B} text-2xl font-bold text-gray-900 mb-2`}>¡Solicitud recibida!</h2>
+              <p className={`${B} text-base text-gray-500`}>Tu solicitud está pendiente de aprobación. Te notificaremos por correo y WhatsApp.</p>
             </>
           ) : (
             <>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-4">
-                <Check className="w-7 h-7 text-emerald-400" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-200 mb-5">
+                <Check className="w-7 h-7 text-emerald-500" />
               </div>
-              <h2 className="font-cinzel text-2xl text-white mb-2">¡Cita confirmada!</h2>
-              <p className="font-crimson text-gray-400">Revisa tu correo — te enviamos la confirmación.</p>
+              <h2 className={`${B} text-2xl font-bold text-gray-900 mb-2`}>¡Cita confirmada!</h2>
+              <p className={`${B} text-base text-gray-500`}>Revisa tu correo — te enviamos todos los detalles.</p>
             </>
           )}
         </div>
 
-        <div className="bg-[#0a1628] border border-[#C5A059]/30 p-6 mb-4">
-          <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-4">Detalles de tu reserva</p>
-          <div className="space-y-3">
-            <div className="flex justify-between items-baseline">
-              <span className="font-crimson text-gray-400 text-sm">Tipo</span>
-              <span className="font-crimson text-white">{confirmation.type}</span>
+        <div className="border border-gray-200 divide-y divide-gray-100 mb-5">
+          {[
+            { label: "Tipo", value: confirmation.type },
+            { label: "Fecha", value: <span className="capitalize">{dateLabel}</span> },
+            { label: "Hora", value: <span className="text-[#C5A059] font-bold text-lg">{timeLabel}</span> },
+            { label: "Duración", value: `${confirmation.durationMin} min` },
+            { label: "Zona horaria", value: <span className="text-sm">{confirmation.userTz}</span> },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex justify-between items-center px-5 py-3">
+              <span className={`${B} text-sm text-gray-500`}>{label}</span>
+              <span className={`${B} text-base text-gray-900`}>{value}</span>
             </div>
-            <div className="flex justify-between items-baseline">
-              <span className="font-crimson text-gray-400 text-sm">Fecha</span>
-              <span className="font-crimson text-white capitalize">{dateLabel}</span>
-            </div>
-            <div className="flex justify-between items-baseline">
-              <span className="font-crimson text-gray-400 text-sm">Hora</span>
-              <span className="font-crimson text-[#C5A059] font-bold text-lg">{timeLabel}</span>
-            </div>
-            <div className="flex justify-between items-baseline">
-              <span className="font-crimson text-gray-400 text-sm">Duración</span>
-              <span className="font-crimson text-white">{confirmation.durationMin} min</span>
-            </div>
-            <div className="flex justify-between items-baseline">
-              <span className="font-crimson text-gray-400 text-sm">Zona horaria</span>
-              <span className="font-crimson text-white text-xs">{confirmation.userTz}</span>
-            </div>
-            <div className="border-t border-white/10 pt-3 flex justify-between items-center">
-              <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500">Código de reserva</span>
-              <div className="flex items-center gap-2">
-                <span className="font-cinzel text-[#C5A059] text-lg tracking-widest">{confirmation.bookingCode}</span>
-                <button
-                  onClick={() => navigator.clipboard.writeText(confirmation.bookingCode)}
-                  className="text-gray-500 hover:text-[#C5A059] transition"
-                  title="Copiar código"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                </button>
-              </div>
+          ))}
+          <div className="flex justify-between items-center px-5 py-3 bg-gray-50">
+            <span className={`${B} text-xs font-semibold uppercase tracking-widest text-gray-500`}>Código de reserva</span>
+            <div className="flex items-center gap-2">
+              <span className={`${B} text-[#C5A059] font-bold text-lg tracking-widest`}>{confirmation.bookingCode}</span>
+              <button
+                onClick={() => navigator.clipboard.writeText(confirmation.bookingCode)}
+                className="text-gray-400 hover:text-[#C5A059] transition"
+                title="Copiar código"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
 
-        <p className="font-crimson text-xs text-gray-600 text-center mb-6">
-          Guarda tu código de reserva para reprogramar o cancelar sin iniciar sesión.
+        <p className={`${B} text-sm text-gray-400 text-center mb-6`}>
+          Guarda tu código para reprogramar o cancelar sin iniciar sesión.
         </p>
 
         {!isPending && (
           <div className="flex flex-col sm:flex-row gap-3 mb-3">
             {confirmation.zoomJoinUrl && (
-              <a
-                href={confirmation.zoomJoinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600/90 text-white font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-blue-600 transition"
-              >
-                <Video className="w-3.5 h-3.5" />
-                Unirse a Zoom
+              <a href={confirmation.zoomJoinUrl} target="_blank" rel="noopener noreferrer"
+                className={`flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white ${B} text-sm font-semibold py-3 hover:bg-blue-700 transition rounded-sm`}>
+                <Video className="w-4 h-4" /> Unirse a Zoom
               </a>
             )}
             {confirmation.eventLink && (
-              <a
-                href={confirmation.eventLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-[#C5A059]/10 transition"
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                Google Calendar
+              <a href={confirmation.eventLink} target="_blank" rel="noopener noreferrer"
+                className={`flex-1 flex items-center justify-center gap-2 border-2 border-[#C5A059] text-[#C5A059] ${B} text-sm font-semibold py-3 hover:bg-[#C5A059]/5 transition rounded-sm`}>
+                <Calendar className="w-4 h-4" /> Google Calendar
               </a>
             )}
           </div>
         )}
+
         <div className="flex flex-col sm:flex-row gap-3">
           {confirmation.bookingCode && (
-            <a
-              href={`/agenda/gestionar?code=${confirmation.bookingCode}`}
-              className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-gray-400 font-cinzel text-[9px] uppercase tracking-widest py-3 hover:border-white/20 transition"
-            >
-              <Link className="w-3 h-3" />
-              Gestionar reserva
+            <a href={`/agenda/gestionar?code=${confirmation.bookingCode}`}
+              className={`flex-1 flex items-center justify-center gap-2 border border-gray-200 text-gray-600 ${B} text-sm py-3 hover:border-gray-300 hover:text-gray-800 transition rounded-sm`}>
+              <Link className="w-3.5 h-3.5" /> Gestionar reserva
             </a>
           )}
-          <button
-            onClick={resetAll}
-            className="flex-1 font-cinzel text-[9px] uppercase tracking-widest text-gray-600 border border-white/5 py-3 hover:border-white/10 transition"
-          >
+          <button onClick={resetAll}
+            className={`flex-1 ${B} text-sm text-gray-400 border border-gray-100 py-3 hover:border-gray-200 transition rounded-sm`}>
             Agendar otra
           </button>
         </div>
@@ -386,48 +355,47 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     });
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0 lg:gap-8">
+      <div className={`grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-0 lg:gap-10 ${B}`}>
         {/* Sidebar */}
-        <div className="lg:border-r lg:border-white/10 lg:pr-8 pb-8 lg:pb-0">
-          <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Juan Pablo Loaiza</p>
-          <h3 className="font-cinzel text-white text-lg mb-4">{eventTypeConfig?.label ?? TYPE_LABELS[type]}</h3>
-          <div className="space-y-2 text-sm font-crimson text-gray-400">
-            <div className="flex items-center gap-2">
+        <div className="bg-gray-50 border border-gray-100 p-6 mb-6 lg:mb-0 rounded-sm">
+          <p className={`${B} text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1`}>Juan Pablo Loaiza</p>
+          <h3 className={`${B} text-xl font-bold text-gray-900 mb-5`}>{eventTypeConfig?.label ?? TYPE_LABELS[type]}</h3>
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
               <Clock className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span>{eventTypeConfig?.duration_min ?? DURATION[type]} minutos</span>
+              <span className={`${B} text-base text-gray-600`}>{eventTypeConfig?.duration_min ?? DURATION[type]} minutos</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Video className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span>Zoom (enlace tras confirmar)</span>
+              <span className={`${B} text-base text-gray-600`}>Zoom (enlace tras confirmar)</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Globe className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span className="text-xs">{tzLabel}</span>
+              <span className={`${B} text-sm text-gray-500`}>{tzLabel}</span>
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Fecha seleccionada</p>
-            <p className="font-crimson text-white capitalize">{dateLabel}</p>
-            <p className="font-crimson text-[#C5A059] font-bold text-xl mt-1">{displayTime}</p>
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className={`${B} text-xs font-semibold uppercase tracking-widest text-[#C5A059] mb-2`}>Fecha seleccionada</p>
+            <p className={`${B} text-base text-gray-700 capitalize`}>{dateLabel}</p>
+            <p className={`${B} text-[#C5A059] font-bold text-2xl mt-1`}>{displayTime}</p>
             <button
               onClick={() => setStep("calendar")}
-              className="mt-3 font-cinzel text-[8px] uppercase tracking-widest text-gray-500 hover:text-[#C5A059] transition"
+              className={`mt-4 ${B} text-sm text-gray-400 hover:text-[#C5A059] transition flex items-center gap-1`}
             >
-              ← Cambiar
+              <ChevronLeft className="w-3.5 h-3.5" /> Cambiar fecha
             </button>
           </div>
         </div>
 
         {/* Form */}
         <div>
-          <h3 className="font-cinzel text-white text-base mb-6 hidden lg:block">Tus datos</h3>
+          <h3 className={`${B} text-2xl font-bold text-gray-900 mb-7 hidden lg:block`}>Tus datos</h3>
 
           {/* Email lookup */}
           <form onSubmit={handleEmailLookup} className="mb-6">
-            <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">
-              Correo electrónico *
-            </label>
+            <label className={labelCls}>Correo electrónico *</label>
             <div className="flex gap-2">
               <input
                 type="email"
@@ -436,101 +404,80 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
                 required
                 autoFocus
                 placeholder="tu@correo.com"
-                className="flex-1 bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600"
+                className={`flex-1 ${inputCls}`}
               />
               <button
                 type="submit"
                 disabled={lookingUp}
-                className="px-4 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] font-cinzel text-[9px] uppercase tracking-widest hover:bg-[#C5A059]/20 transition disabled:opacity-50 whitespace-nowrap"
+                className={`px-5 bg-[#C5A059]/10 border border-[#C5A059]/40 text-[#C5A059] ${B} text-sm font-semibold hover:bg-[#C5A059]/20 transition disabled:opacity-50 whitespace-nowrap rounded-sm`}
               >
-                {lookingUp ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Buscar"}
+                {lookingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Buscar"}
               </button>
             </div>
-            {emailError && <p className="font-crimson text-xs text-red-400 mt-1">{emailError}</p>}
+            {emailError && <p className={`${B} text-sm text-red-500 mt-1`}>{emailError}</p>}
           </form>
 
           {patientFound && (
-            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 mb-5">
-              <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <p className="font-crimson text-sm text-emerald-300">
+            <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 px-4 py-3 mb-5 rounded-sm">
+              <UserCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <p className={`${B} text-sm text-emerald-700`}>
                 Hola <strong>{name.split(" ")[0]}</strong>, encontramos tu perfil. Datos cargados automáticamente.
               </p>
             </div>
           )}
 
           {formError && (
-            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 mb-5">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-              <p className="font-crimson text-sm text-red-300">{formError}</p>
+            <div className="flex items-center gap-3 bg-red-50 border border-red-200 px-4 py-3 mb-5 rounded-sm">
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+              <p className={`${B} text-sm text-red-600`}>{formError}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">Nombre completo *</label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-                minLength={2}
-                maxLength={100}
-                placeholder="Tu nombre"
-                className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600"
-              />
+              <label className={labelCls}>Nombre completo *</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)}
+                required minLength={2} maxLength={100} placeholder="Tu nombre completo"
+                className={inputCls} />
             </div>
 
             <div>
-              <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">Teléfono / WhatsApp *</label>
+              <label className={labelCls}>Teléfono / WhatsApp *</label>
               <div className="flex gap-0">
                 <select
-                  value={countryCode}
-                  onChange={e => setCountryCode(e.target.value)}
-                  className="bg-[#0a1628] border border-r-0 border-white/10 text-white px-3 py-3 font-crimson text-sm focus:outline-none focus:border-[#C5A059]/50 transition shrink-0 max-w-[130px]"
+                  value={countryCode} onChange={e => setCountryCode(e.target.value)}
+                  className={`bg-white border border-r-0 border-gray-200 text-gray-900 px-3 py-3 ${B} text-sm focus:outline-none focus:border-[#C5A059] transition shrink-0 max-w-[130px] rounded-sm rounded-r-none`}
                 >
                   {COUNTRY_CODES.map(c => (
-                    <option key={c.code + c.country} value={c.code}>
-                      {c.flag} {c.code}
-                    </option>
+                    <option key={c.code + c.country} value={c.code}>{c.flag} {c.code}</option>
                   ))}
                 </select>
                 <input
-                  type="tel"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  required
-                  placeholder="300 000 0000"
-                  className="flex-1 bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600 min-w-0"
+                  type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                  required placeholder="300 000 0000"
+                  className={`flex-1 bg-white border border-gray-200 text-gray-900 px-4 py-3 ${B} text-base focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]/20 transition placeholder-gray-400 min-w-0 rounded-sm rounded-l-none`}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">
-                ¿Algo que quieras compartir? <span className="text-gray-600">(opcional)</span>
-              </label>
-              <textarea
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                maxLength={500}
-                rows={3}
-                placeholder="Contexto, preguntas, motivación…"
-                className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition resize-none placeholder-gray-600"
-              />
+              <label className={labelCls}>¿Algo que quieras compartir? <span className="text-gray-400 normal-case">(opcional)</span></label>
+              <textarea value={notes} onChange={e => setNotes(e.target.value)}
+                maxLength={500} rows={3} placeholder="Contexto, preguntas, motivación…"
+                className={`${inputCls} resize-none`} />
             </div>
 
             {eventTypeConfig?.booking_questions?.map((q) => (
               <div key={q.id}>
-                <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">
+                <label className={labelCls}>
                   {q.label}{q.required && <span className="text-red-400 ml-1">*</span>}
                 </label>
                 {q.type === 'textarea' && (
                   <textarea
                     value={(questionAnswers[q.id] as string) ?? ""}
                     onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.value }))}
-                    required={q.required}
-                    rows={3}
-                    className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition resize-none placeholder-gray-600"
+                    required={q.required} rows={3}
+                    className={`${inputCls} resize-none`}
                   />
                 )}
                 {q.type === 'select' && (
@@ -538,7 +485,7 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
                     value={(questionAnswers[q.id] as string) ?? ""}
                     onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.value }))}
                     required={q.required}
-                    className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition"
+                    className={inputCls}
                   >
                     <option value="">Selecciona una opción</option>
                     {q.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -552,7 +499,7 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
                       onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.checked }))}
                       className="accent-[#C5A059] w-4 h-4"
                     />
-                    <span className="font-crimson text-gray-300 text-sm">{q.label}</span>
+                    <span className={`${B} text-base text-gray-700`}>{q.label}</span>
                   </label>
                 )}
                 {(q.type === 'text' || q.type === 'phone') && (
@@ -561,7 +508,7 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
                     value={(questionAnswers[q.id] as string) ?? ""}
                     onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.value }))}
                     required={q.required}
-                    className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600"
+                    className={inputCls}
                   />
                 )}
               </div>
@@ -570,12 +517,12 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
             <button
               type="submit"
               disabled={submitting || !emailInput.trim()}
-              className="w-full flex items-center justify-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest py-4 hover:bg-[#C5A059]/90 disabled:opacity-60 transition"
+              className={`w-full flex items-center justify-center gap-2 bg-[#C5A059] text-white ${B} text-base font-semibold py-4 hover:bg-[#b8924d] disabled:opacity-60 transition rounded-sm shadow-sm`}
             >
-              {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {submitting ? "Confirmando…" : "Confirmar cita"}
             </button>
-            <p className="font-crimson text-xs text-gray-600 text-center">
+            <p className={`${B} text-sm text-gray-400 text-center`}>
               Tus datos se usan únicamente para gestionar esta cita.
             </p>
           </form>
@@ -584,48 +531,46 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     );
   }
 
-  // ── Calendar step (default) ───────────────────────────────────────────────
+  // ── Calendar step ─────────────────────────────────────────────────────────
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0 lg:gap-8">
-      {/* ── Left sidebar ────────────────────────────────────────────────────── */}
-      <div className="lg:border-r lg:border-white/10 lg:pr-8 pb-8 lg:pb-0">
-        <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Juan Pablo Loaiza</p>
-        <h3 className="font-cinzel text-white text-lg mb-4">{eventTypeConfig?.label ?? TYPE_LABELS[type]}</h3>
+    <div className={`grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-0 lg:gap-10 ${B}`}>
 
-        <div className="space-y-2 text-sm font-crimson text-gray-400">
-          <div className="flex items-center gap-2">
+      {/* Sidebar */}
+      <div className="bg-gray-50 border border-gray-100 p-6 mb-6 lg:mb-0 rounded-sm">
+        <p className={`${B} text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1`}>Juan Pablo Loaiza</p>
+        <h3 className={`${B} text-xl font-bold text-gray-900 mb-5`}>{eventTypeConfig?.label ?? TYPE_LABELS[type]}</h3>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
             <Clock className="w-4 h-4 text-[#C5A059] shrink-0" />
-            <span>{eventTypeConfig?.duration_min ?? DURATION[type]} minutos</span>
+            <span className={`${B} text-base text-gray-600`}>{eventTypeConfig?.duration_min ?? DURATION[type]} minutos</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Video className="w-4 h-4 text-[#C5A059] shrink-0" />
-            <span>Zoom (enlace tras confirmar)</span>
+            <span className={`${B} text-base text-gray-600`}>Zoom</span>
           </div>
         </div>
 
         {/* Timezone selector */}
-        <div className="mt-6 pt-6 border-t border-white/10">
-          <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">Zona horaria</p>
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <p className={`${B} text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2`}>Zona horaria</p>
           <div className="relative" ref={tzRef}>
             <button
               onClick={() => setTzOpen(o => !o)}
-              className="w-full flex items-center justify-between gap-2 bg-[#0a1628] border border-white/10 px-3 py-2 text-left text-white hover:border-[#C5A059]/40 transition"
+              className={`w-full flex items-center justify-between gap-2 bg-white border border-gray-200 px-3 py-2.5 text-left hover:border-[#C5A059]/50 transition rounded-sm`}
             >
               <div className="flex items-center gap-2 min-w-0">
                 <Globe className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
-                <span className="font-crimson text-sm truncate">{tzLabel}</span>
+                <span className={`${B} text-sm text-gray-700 truncate`}>{tzLabel}</span>
               </div>
-              <ChevronRight className={`w-3.5 h-3.5 text-gray-500 shrink-0 transition-transform ${tzOpen ? "rotate-90" : ""}`} />
+              <ChevronRight className={`w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform ${tzOpen ? "rotate-90" : ""}`} />
             </button>
             {tzOpen && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#0a1628] border border-white/10 max-h-48 overflow-y-auto shadow-xl">
+              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 max-h-48 overflow-y-auto shadow-lg rounded-sm">
                 {TZ_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => { setUserTz(opt.value); setTzOpen(false); }}
-                    className={`w-full text-left px-3 py-2 font-crimson text-sm hover:bg-[#C5A059]/10 transition
-                      ${userTz === opt.value ? "text-[#C5A059]" : "text-gray-300"}`}
-                  >
+                  <button key={opt.value} onClick={() => { setUserTz(opt.value); setTzOpen(false); }}
+                    className={`w-full text-left px-3 py-2.5 ${B} text-sm hover:bg-[#C5A059]/5 transition
+                      ${userTz === opt.value ? "text-[#C5A059] font-semibold bg-[#C5A059]/5" : "text-gray-700"}`}>
                     {opt.label}
                   </button>
                 ))}
@@ -636,17 +581,14 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
 
         {/* 12/24h toggle */}
         <div className="mt-4">
-          <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">Formato de hora</p>
+          <p className={`${B} text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2`}>Formato de hora</p>
           <div className="flex gap-1">
             {([true, false] as const).map(is24 => (
-              <button
-                key={String(is24)}
-                onClick={() => setUse24h(is24)}
-                className={`flex-1 py-1.5 font-cinzel text-[9px] uppercase tracking-widest border transition
+              <button key={String(is24)} onClick={() => setUse24h(is24)}
+                className={`flex-1 py-2 ${B} text-sm font-medium border transition rounded-sm
                   ${use24h === is24
-                    ? "bg-[#C5A059]/10 border-[#C5A059]/50 text-[#C5A059]"
-                    : "border-white/10 text-gray-500 hover:border-white/20"}`}
-              >
+                    ? "bg-[#C5A059] border-[#C5A059] text-white"
+                    : "border-gray-200 text-gray-500 hover:border-gray-300 bg-white"}`}>
                 {is24 ? "24h" : "12h"}
               </button>
             ))}
@@ -654,43 +596,35 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
         </div>
       </div>
 
-      {/* ── Right panel: calendar + slots ───────────────────────────────────── */}
+      {/* Calendar + slots */}
       <div>
-        {/* Month header */}
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={prevMonth}
-            disabled={isPrevDisabled}
-            className="p-2 text-gray-500 hover:text-[#C5A059] disabled:opacity-20 transition"
-          >
-            <ChevronLeft className="w-4 h-4" />
+        {/* Month nav */}
+        <div className="flex items-center justify-between mb-5">
+          <button onClick={prevMonth} disabled={isPrevDisabled}
+            className="p-2 text-gray-400 hover:text-[#C5A059] disabled:opacity-20 transition">
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <p className="font-cinzel text-sm text-white capitalize">
+          <p className={`${B} text-lg font-bold text-gray-900 capitalize`}>
             {MONTHS_ES[viewMonth]} {viewYear}
           </p>
-          <button
-            onClick={nextMonth}
-            className="p-2 text-gray-500 hover:text-[#C5A059] transition"
-          >
-            <ChevronRight className="w-4 h-4" />
+          <button onClick={nextMonth} className="p-2 text-gray-400 hover:text-[#C5A059] transition">
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
         {/* Day headers */}
-        <div className="grid grid-cols-7 mb-2">
+        <div className="grid grid-cols-7 mb-1">
           {DAYS_HDR.map(d => (
-            <div key={d} className="text-center font-cinzel text-[8px] uppercase tracking-widest text-gray-600 py-1">
+            <div key={d} className={`text-center ${B} text-xs font-semibold uppercase tracking-widest text-gray-400 py-2`}>
               {d}
             </div>
           ))}
         </div>
 
         {/* Day cells */}
-        <div className="grid grid-cols-7 gap-1 mb-6">
+        <div className="grid grid-cols-7 gap-1 mb-8">
           {calDays.map((day, idx) => {
-            if (!day.dateStr) {
-              return <div key={`pad-${idx}`} />;
-            }
+            if (!day.dateStr) return <div key={`pad-${idx}`} />;
             const todayStr = today.toISOString().slice(0, 10);
             const disabled = day.dateStr < todayStr;
             const isSelected = day.dateStr === selectedDate;
@@ -700,10 +634,10 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
                 key={day.dateStr}
                 onClick={() => !disabled && handleDateClick(day.dateStr)}
                 disabled={disabled}
-                className={`aspect-square flex items-center justify-center font-cinzel text-sm rounded-sm transition
-                  ${disabled ? "text-gray-700 cursor-not-allowed" : "hover:bg-[#C5A059]/10 hover:text-[#C5A059] cursor-pointer text-gray-300"}
-                  ${isSelected ? "bg-[#C5A059] text-[#020617] hover:bg-[#C5A059] hover:text-[#020617] font-bold" : ""}
-                  ${isToday && !isSelected ? "border border-[#C5A059]/40 text-[#C5A059]" : ""}`}
+                className={`aspect-square flex items-center justify-center ${B} text-base font-medium transition rounded-sm
+                  ${disabled ? "text-gray-300 cursor-not-allowed" : "hover:bg-[#C5A059]/10 hover:text-[#C5A059] cursor-pointer text-gray-800"}
+                  ${isSelected ? "bg-[#C5A059] !text-white font-bold shadow-sm" : ""}
+                  ${isToday && !isSelected ? "border-2 border-[#C5A059] text-[#C5A059] font-bold" : ""}`}
               >
                 {day.dayNum}
               </button>
@@ -714,33 +648,35 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
         {/* Time slots */}
         {selectedDate && (
           <div>
-            <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-3">
-              Horarios disponibles
-            </p>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-px flex-1 bg-gray-200" />
+              <p className={`${B} text-xs font-semibold uppercase tracking-widest text-gray-400`}>
+                Horarios disponibles
+              </p>
+              <div className="h-px flex-1 bg-gray-200" />
+            </div>
             {slotsLoading ? (
-              <div className="flex items-center gap-2 py-8 justify-center">
-                <Loader2 className="w-4 h-4 text-[#C5A059] animate-spin" />
-                <span className="font-crimson text-gray-500">Consultando…</span>
+              <div className="flex items-center gap-3 py-10 justify-center">
+                <Loader2 className="w-5 h-5 text-[#C5A059] animate-spin" />
+                <span className={`${B} text-base text-gray-400`}>Consultando disponibilidad…</span>
               </div>
             ) : slots.length === 0 ? (
-              <div className="py-8 text-center">
-                <Clock className="w-5 h-5 text-gray-600 mx-auto mb-2" />
-                <p className="font-crimson text-gray-500 text-sm">Sin horarios disponibles este día.</p>
+              <div className="py-10 text-center">
+                <Clock className="w-6 h-6 text-gray-300 mx-auto mb-3" />
+                <p className={`${B} text-base text-gray-400`}>Sin horarios disponibles este día.</p>
+                <p className={`${B} text-sm text-gray-300 mt-1`}>Elige otro día en el calendario.</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 {slots.map(slot => {
                   const displayTime = slotTimeInUserTz(selectedDate, slot, userTz, use24h);
-                  const isSelected = slot === selectedTime;
+                  const isSlotSelected = slot === selectedTime;
                   return (
-                    <button
-                      key={slot}
-                      onClick={() => handleTimeSelect(slot)}
-                      className={`py-2.5 font-cinzel text-xs border transition
-                        ${isSelected
-                          ? "bg-[#C5A059] border-[#C5A059] text-[#020617] font-bold"
-                          : "bg-[#0a1628] border-white/10 text-gray-300 hover:border-[#C5A059]/40 hover:text-[#C5A059]"}`}
-                    >
+                    <button key={slot} onClick={() => setSelectedTime(slot)}
+                      className={`py-3 ${B} text-sm font-medium border transition rounded-sm
+                        ${isSlotSelected
+                          ? "bg-[#C5A059] border-[#C5A059] text-white font-bold shadow-sm"
+                          : "bg-white border-gray-200 text-gray-700 hover:border-[#C5A059]/60 hover:text-[#C5A059] hover:bg-[#C5A059]/5"}`}>
                       {displayTime}
                     </button>
                   );
@@ -749,13 +685,13 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
             )}
 
             {selectedTime && (
-              <div className="mt-6">
+              <div className="mt-8">
                 <button
                   onClick={() => setStep("form")}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-10 py-3.5 hover:bg-[#C5A059]/90 transition"
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 bg-[#C5A059] text-white ${B} text-base font-semibold px-10 py-4 hover:bg-[#b8924d] transition rounded-sm shadow-sm`}
                 >
                   Continuar
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             )}
@@ -763,9 +699,12 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
         )}
 
         {!selectedDate && (
-          <p className="font-crimson text-sm text-gray-600 text-center py-4">
-            Selecciona una fecha para ver los horarios disponibles
-          </p>
+          <div className="py-10 text-center border-t border-gray-100 mt-2">
+            <Calendar className="w-7 h-7 text-gray-200 mx-auto mb-3" />
+            <p className={`${B} text-base text-gray-400`}>
+              Selecciona una fecha para ver los horarios disponibles
+            </p>
+          </div>
         )}
       </div>
     </div>
