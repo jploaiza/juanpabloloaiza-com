@@ -13,6 +13,7 @@ interface BookingData {
   time_slot: string;
   patient_name: string;
   patient_email: string;
+  patient_phone?: string;
   status: string;
   zoom_join_url?: string;
   google_event_link?: string;
@@ -127,16 +128,32 @@ export default function GestionarContent() {
   if (view === "reschedule") {
     return (
       <div>
-        <button onClick={() => setView("details")} className="flex items-center gap-1 font-cinzel text-[8px] uppercase tracking-widest text-gray-500 hover:text-[#C5A059] transition mb-8">
-          <ChevronLeft className="w-3 h-3" /> Volver
+        <button onClick={() => setView("details")} className="flex items-center gap-1 font-baskerville text-sm text-gray-500 hover:text-[#C5A059] transition mb-6">
+          <ChevronLeft className="w-4 h-4" /> Volver
         </button>
-        <div className="mb-8">
-          <span className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]">Reprogramando</span>
-          <p className="font-crimson text-gray-400 text-sm mt-1">
+        <div className="mb-8 text-center">
+          <span className="font-baskerville text-xs font-semibold uppercase tracking-widest text-[#C5A059]">Reprogramando</span>
+          <p className="font-baskerville text-gray-300 text-sm mt-2">
             Elige una nueva fecha y hora. Tu cita actual ({formatDate(booking.date)} — {booking.time_slot}) será cancelada automáticamente.
           </p>
         </div>
-        <BookingWidget type={booking.type} rescheduleCode={code} />
+
+        {/* White card — same style as /agenda */}
+        <div className="relative">
+          <div className="absolute -top-3 -left-3 w-8 h-8 border-t-2 border-l-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+          <div className="absolute -top-3 -right-3 w-8 h-8 border-t-2 border-r-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+          <div className="absolute -bottom-3 -left-3 w-8 h-8 border-b-2 border-l-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+          <div className="absolute -bottom-3 -right-3 w-8 h-8 border-b-2 border-r-2 border-[#C5A059]/60 z-10 pointer-events-none" />
+          <div className="bg-white shadow-2xl shadow-black/40 p-8 sm:p-10">
+            <BookingWidget
+              type={booking.type}
+              rescheduleCode={code}
+              prefillEmail={booking.patient_email}
+              prefillName={booking.patient_name}
+              prefillPhone={booking.patient_phone}
+            />
+          </div>
+        </div>
       </div>
     );
   }

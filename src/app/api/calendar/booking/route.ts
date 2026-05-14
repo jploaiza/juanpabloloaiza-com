@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const sb = createAdminClient();
   const { data } = await sb
     .from("bookings")
-    .select("id, booking_code, type, date, time_slot, patient_name, patient_email, status, zoom_join_url, google_event_link")
+    .select("id, booking_code, type, date, time_slot, patient_name, patient_email, patient_phone, status, zoom_join_url, google_event_link")
     .eq("booking_code", code)
     .single();
 

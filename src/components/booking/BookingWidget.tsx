@@ -16,6 +16,9 @@ type BookingType = "session" | "entrevista";
 interface Props {
   type: BookingType;
   rescheduleCode?: string;
+  prefillEmail?: string;
+  prefillName?: string;
+  prefillPhone?: string;
 }
 
 interface EventTypeConfig {
@@ -50,7 +53,7 @@ const B = "font-baskerville";
 const inputCls = `w-full bg-white border border-gray-200 text-gray-900 px-4 py-3 ${B} text-base focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]/20 transition placeholder-gray-400 rounded-sm`;
 const labelCls = `block ${B} text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2`;
 
-export default function BookingWidget({ type, rescheduleCode }: Props) {
+export default function BookingWidget({ type, rescheduleCode, prefillEmail, prefillName, prefillPhone }: Props) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -84,6 +87,23 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Pre-fill form when rescheduling — skip email lookup entirely
+  useEffect(() => {
+    if (!prefillEmail) return;
+    setEmailInput(prefillEmail);
+    if (prefillName) setName(prefillName);
+    if (prefillPhone) {
+      const matched = COUNTRY_CODES.find(c => prefillPhone.startsWith(c.code));
+      if (matched) {
+        setCountryCode(matched.code);
+        setPhone(prefillPhone.slice(matched.code.length).trim());
+      } else {
+        setPhone(prefillPhone);
+      }
+    }
+    setPatientFound(true);
+  }, [prefillEmail, prefillName, prefillPhone]);
 
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -140,17 +160,15 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     setSelectedTime(null);
   }
 
-  async function handleEmailLookup(e: React.FormEvent) {
-    e.preventDefault();
-    const val = emailInput.trim().toLowerCase();
-    if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+  async function runEmailLookup(email: string) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailError("Ingresa un correo válido");
       return;
     }
     setEmailError(null);
     setLookingUp(true);
     try {
-      const res = await fetch(`/api/calendar/patient-lookup?email=${encodeURIComponent(val)}`);
+      const res = await fetch(`/api/calendar/patient-lookup?email=${encodeURIComponent(email)}`);
       const json = await res.json();
       if (json.found) {
         setName(json.name ?? "");
@@ -168,6 +186,11 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
       }
     } catch { setPatientFound(false); }
     finally { setLookingUp(false); }
+  }
+
+  function handleEmailBlur() {
+    const val = emailInput.trim().toLowerCase();
+    if (val && !patientFound && !lookingUp) runEmailLookup(val);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -393,29 +416,28 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
         <div>
           <h3 className={`${B} text-2xl font-bold text-gray-900 mb-7 hidden lg:block`}>Tus datos</h3>
 
-          {/* Email lookup */}
-          <form onSubmit={handleEmailLookup} className="mb-6">
+          {/* Email lookup — auto-triggers on blur */}
+          <div className="mb-6">
             <label className={labelCls}>Correo electrónico *</label>
-            <div className="flex gap-2">
+            <div className="relative">
               <input
                 type="email"
                 value={emailInput}
                 onChange={e => { setEmailInput(e.target.value); setEmailError(null); setPatientFound(false); setName(""); setPhone(""); }}
+                onBlur={handleEmailBlur}
                 required
-                autoFocus
+                autoFocus={!prefillEmail}
                 placeholder="tu@correo.com"
-                className={`flex-1 ${inputCls}`}
+                className={inputCls}
               />
-              <button
-                type="submit"
-                disabled={lookingUp}
-                className={`px-5 bg-[#C5A059]/10 border border-[#C5A059]/40 text-[#C5A059] ${B} text-sm font-semibold hover:bg-[#C5A059]/20 transition disabled:opacity-50 whitespace-nowrap rounded-sm`}
-              >
-                {lookingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Buscar"}
-              </button>
+              {lookingUp && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#C5A059]" />
+                </div>
+              )}
             </div>
             {emailError && <p className={`${B} text-sm text-red-500 mt-1`}>{emailError}</p>}
-          </form>
+          </div>
 
           {patientFound && (
             <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 px-4 py-3 mb-5 rounded-sm">
