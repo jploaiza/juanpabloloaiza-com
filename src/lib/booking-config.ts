@@ -37,6 +37,19 @@ export interface EventType {
   description: string | null;
   sort_order: number;
   is_active: boolean;
+  booking_questions?: Array<{
+    id: string;
+    label: string;
+    type: 'text' | 'textarea' | 'select' | 'phone' | 'checkbox';
+    required: boolean;
+    options?: string[];
+  }>;
+  requires_confirmation?: boolean;
+  redirect_url?: string | null;
+  max_active_per_email?: number;
+  allow_cancellation?: boolean;
+  allow_reschedule?: boolean;
+  cancellation_cutoff_hours?: number;
 }
 
 const DEFAULT_CONFIG: CalendarConfig = {

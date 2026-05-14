@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
   if (!date_start || !/^\d{4}-\d{2}-\d{2}$/.test(date_start)) {
     return NextResponse.json({ error: "date_start requerida (YYYY-MM-DD)" }, { status: 400 });
   }
+  if (date_end !== undefined && date_end !== null && !/^\d{4}-\d{2}-\d{2}$/.test(date_end)) {
+    return NextResponse.json({ error: "date_end debe ser YYYY-MM-DD" }, { status: 400 });
+  }
+  if (date_end && date_end < date_start) {
+    return NextResponse.json({ error: "date_end no puede ser anterior a date_start" }, { status: 400 });
+  }
 
   const { data, error } = await sb
     .from("calendar_blackouts")

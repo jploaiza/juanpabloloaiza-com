@@ -8,7 +8,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { getValidToken, deleteCalendarEvent, type GCalTokenData } from "@/lib/google-calendar";
 import { deleteZoomMeeting } from "@/lib/zoom";
-import { getCalendarConfig } from "@/lib/booking-config";
+import { getCalendarConfig, getEventTypes } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
 
@@ -18,17 +18,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Demasiadas solicitudes" }, { status: 429 });
   }
 
-  let body: { code?: string; action?: string };
+  let body: { code?: string; action?: string; cancel_reason?: string };
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: "JSON inválido" }, { status: 400 }); }
 
-  const { code, action } = body;
+  const { code, action, cancel_reason } = body;
   if (!code?.trim() || action !== "cancel") {
     return NextResponse.json({ error: "Parámetros inválidos" }, { status: 400 });
   }
 
+  // Validate booking_code format: alphanumeric, 6-20 chars (prevents enumeration padding attacks)
+  if (!/^[A-Z0-9]{6,20}$/i.test(code.trim())) {
+    return NextResponse.json({ error: "Código de reserva inválido" }, { status: 400 });
+  }
+
   const sb = createAdminClient();
-  const config = await getCalendarConfig();
+  const [config, eventTypes] = await Promise.all([getCalendarConfig(), getEventTypes(false)]);
 
   const { data: booking } = await sb
     .from("bookings")
@@ -38,6 +43,24 @@ export async function POST(req: NextRequest) {
 
   if (!booking) return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
   if (booking.status === "cancelled") return NextResponse.json({ error: "Esta reserva ya fue cancelada" }, { status: 409 });
+  if (booking.status === "pending") return NextResponse.json({ error: "Esta reserva está pendiente de aprobación y no puede cancelarse desde aquí" }, { status: 409 });
+
+  // Check cancellation policy for this event type
+  const eventType = eventTypes.find((e) => e.slug === booking.type);
+  if (eventType) {
+    if (eventType.allow_cancellation === false) {
+      return NextResponse.json({ error: "Este tipo de cita no permite cancelaciones" }, { status: 403 });
+    }
+    if ((eventType.cancellation_cutoff_hours ?? 0) > 0) {
+      const slotMs = new Date(`${booking.date}T${booking.time_slot}:00`).getTime();
+      const hoursUntil = (slotMs - Date.now()) / 3_600_000;
+      if (hoursUntil < (eventType.cancellation_cutoff_hours ?? 0)) {
+        return NextResponse.json({
+          error: `No se puede cancelar con menos de ${eventType.cancellation_cutoff_hours}h de anticipación`,
+        }, { status: 403 });
+      }
+    }
+  }
 
   // Delete Google Calendar event
   try {
@@ -64,10 +87,11 @@ export async function POST(req: NextRequest) {
     await deleteZoomMeeting(Number(booking.zoom_meeting_id), config.zoom_credentials);
   }
 
-  // Mark as cancelled
+  // Mark as cancelled (with optional reason)
   await sb.from("bookings").update({
     status: "cancelled",
     cancelled_at: new Date().toISOString(),
+    cancel_reason: cancel_reason?.trim().slice(0, 500) ?? null,
   }).eq("id", booking.id);
 
   // Fire cancellation alerts (non-blocking)
@@ -99,6 +123,7 @@ export async function POST(req: NextRequest) {
         site_url: config.site_url,
         logo_url: config.logo_url,
         zoom_join_url: (booking.zoom_join_url as string) ?? "",
+        cancel_reason: cancel_reason?.trim() ?? "",
       };
 
       for (const tpl of templates ?? []) {

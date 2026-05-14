@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Copy, Check, Filter } from "lucide-react";
+import { Loader2, Copy, Check, Filter, X } from "lucide-react";
 
 interface Booking {
   id: string;
@@ -22,13 +22,22 @@ const STATUS_LABELS: Record<string, string> = {
   confirmed: "Confirmada",
   cancelled: "Cancelada",
   rescheduled: "Reprogramada",
+  pending: "Pendiente aprobación",
+  rejected: "Rechazada",
 };
 
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "text-green-400 border-green-500/30 bg-green-500/10",
   cancelled: "text-red-400 border-red-500/30 bg-red-500/10",
   rescheduled: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+  pending: "text-amber-300 border-amber-400/40 bg-amber-400/10",
+  rejected: "text-red-400 border-red-500/20 bg-red-500/5",
 };
+
+interface RejectModal {
+  bookingId: string;
+  reason: string;
+}
 
 export default function BookingsPanel() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -39,6 +48,9 @@ export default function BookingsPanel() {
   const [fromFilter, setFromFilter] = useState("");
   const [toFilter, setToFilter] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [approving, setApproving] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<string | null>(null);
+  const [rejectModal, setRejectModal] = useState<RejectModal | null>(null);
 
   async function load(p = page) {
     setLoading(true);
@@ -62,6 +74,26 @@ export default function BookingsPanel() {
     setTimeout(() => setCopied(null), 2000);
   }
 
+  async function handleApprove(id: string) {
+    setApproving(id);
+    try {
+      const res = await fetch(`/api/admin/calendar/bookings/${id}/approve`, { method: "POST" });
+      if (res.ok) await load(page);
+    } finally { setApproving(null); }
+  }
+
+  async function handleReject(id: string, reason: string) {
+    setRejecting(id);
+    try {
+      const res = await fetch(`/api/admin/calendar/bookings/${id}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
+      if (res.ok) await load(page);
+    } finally { setRejecting(null); }
+  }
+
   const totalPages = Math.ceil(total / 20);
 
   return (
@@ -83,6 +115,8 @@ export default function BookingsPanel() {
           <option value="confirmed">Confirmada</option>
           <option value="cancelled">Cancelada</option>
           <option value="rescheduled">Reprogramada</option>
+          <option value="pending">Pendiente</option>
+          <option value="rejected">Rechazada</option>
         </select>
         <input type="date" value={fromFilter} onChange={(e) => setFromFilter(e.target.value)}
           className="bg-[#020617] border border-white/10 text-white text-xs px-3 py-1.5 font-crimson" />
@@ -144,6 +178,26 @@ export default function BookingsPanel() {
                     </a>
                   )}
                 </div>
+                {b.status === "pending" && (
+                  <div className="flex gap-2 mt-2 pt-2 border-t border-white/5">
+                    <button
+                      onClick={() => handleApprove(b.id)}
+                      disabled={approving === b.id}
+                      className="flex items-center gap-1.5 font-cinzel text-[8px] uppercase tracking-widest text-green-400 border border-green-500/30 px-3 py-1 hover:bg-green-500/10 disabled:opacity-50 transition"
+                    >
+                      {approving === b.id ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Check className="w-2.5 h-2.5" />}
+                      Aprobar
+                    </button>
+                    <button
+                      onClick={() => setRejectModal({ bookingId: b.id, reason: "" })}
+                      disabled={rejecting === b.id}
+                      className="flex items-center gap-1.5 font-cinzel text-[8px] uppercase tracking-widest text-red-400 border border-red-500/20 px-3 py-1 hover:bg-red-500/10 disabled:opacity-50 transition"
+                    >
+                      {rejecting === b.id ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <X className="w-2.5 h-2.5" />}
+                      Rechazar
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -163,6 +217,42 @@ export default function BookingsPanel() {
             </div>
           )}
         </>
+      )}
+      {/* Reject modal */}
+      {rejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#0a1628] border border-white/10 p-6 w-full max-w-sm mx-4">
+            <h3 className="font-cinzel text-white text-xs uppercase tracking-widest mb-4">Rechazar reserva</h3>
+            <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">
+              Motivo del rechazo <span className="text-gray-600">(opcional)</span>
+            </label>
+            <textarea
+              value={rejectModal.reason}
+              onChange={e => setRejectModal(m => m ? { ...m, reason: e.target.value } : null)}
+              rows={3}
+              placeholder="Ej: No hay disponibilidad en esa fecha…"
+              className="w-full bg-[#020617] border border-white/10 text-white px-3 py-2 font-crimson text-sm focus:outline-none focus:border-red-500/40 transition resize-none placeholder-gray-600 mb-4"
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setRejectModal(null)}
+                className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 border border-white/10 px-4 py-2 hover:border-white/20 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  const { bookingId, reason } = rejectModal;
+                  setRejectModal(null);
+                  await handleReject(bookingId, reason);
+                }}
+                className="font-cinzel text-[9px] uppercase tracking-widest text-red-400 border border-red-500/30 px-4 py-2 hover:bg-red-500/10 transition"
+              >
+                Confirmar rechazo
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -12,8 +12,14 @@ import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
 
 export async function POST(req: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET ?? "";
+  // Require a minimum-length secret so timingSafeEqual is not trivially brute-forced.
+  if (cronSecret.length < 32) {
+    console.error("[cron] CRON_SECRET is not set or is too short (< 32 chars). Refusing to run.");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const auth = req.headers.get("authorization") ?? "";
-  const expected = Buffer.from(`Bearer ${process.env.CRON_SECRET ?? ""}`);
+  const expected = Buffer.from(`Bearer ${cronSecret}`);
   const incoming = Buffer.from(auth);
   if (incoming.length === 0 || incoming.length !== expected.length || !timingSafeEqual(incoming, expected)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -114,10 +120,81 @@ export async function POST(req: NextRequest) {
     return sent;
   }
 
+  async function sendFollowups(trigger: "followup_24h" | "followup_72h", windowMinPast: number) {
+    const sentCol = trigger === "followup_24h" ? "followup_24h_sent_at" : "followup_72h_sent_at";
+    const windowStart = new Date(now.getTime() - (windowMinPast + 120) * 60_000);
+    const windowEnd = new Date(now.getTime() - (windowMinPast - 120) * 60_000);
+
+    const { data: bookings } = await sb
+      .from("bookings")
+      .select("id, type, date, time_slot, patient_name, patient_email, patient_phone, zoom_join_url")
+      .eq("status", "confirmed")
+      .is(sentCol, null)
+      .gte("date", windowStart.toISOString().slice(0, 10))
+      .lte("date", windowEnd.toISOString().slice(0, 10));
+
+    if (!bookings?.length) return 0;
+    let sent = 0;
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    for (const booking of bookings) {
+      const slotMs = slotToUtcMs(booking.date, booking.time_slot);
+      if (slotMs < windowStart.getTime() || slotMs > windowEnd.getTime()) continue;
+
+      const { data: templates } = await sb
+        .from("booking_alert_templates")
+        .select("channel, subject, body")
+        .eq("event_type_slug", booking.type)
+        .eq("trigger", trigger)
+        .eq("is_active", true);
+
+      if (!templates?.length) continue;
+
+      const dateLabel = new Date(`${booking.date}T12:00:00`).toLocaleDateString("es-CL", {
+        timeZone: BOOKING_TZ, weekday: "long", day: "numeric", month: "long", year: "numeric",
+      });
+      const firstName = (booking.patient_name as string).split(" ")[0];
+      const vars: Record<string, string> = {
+        name: booking.patient_name as string,
+        first_name: firstName,
+        email: booking.patient_email as string,
+        type_label: booking.type === "session" ? "Sesión TRVP" : "Entrevista de Admisión",
+        date: booking.date as string,
+        date_long: dateLabel,
+        time: booking.time_slot as string,
+        zoom_join_url: (booking.zoom_join_url as string) ?? "",
+        site_url: config.site_url,
+        logo_url: config.logo_url,
+        therapist_name: "Juan Pablo Loaiza",
+      };
+
+      for (const tpl of templates) {
+        if (tpl.channel === "email") {
+          try {
+            const rendered = renderTemplateHtml(tpl.body as string, vars);
+            const subject = tpl.subject ? renderTemplate(tpl.subject as string, vars) : `Seguimiento: ${vars.type_label}`;
+            await resend.emails.send({ from: config.from_email, to: booking.patient_email as string, subject, html: rendered });
+          } catch { /* continue */ }
+        } else if (tpl.channel === "whatsapp" && booking.patient_phone) {
+          await sendWhatsApp({ to: booking.patient_phone as string, body: renderTemplate(tpl.body as string, vars) });
+        }
+      }
+
+      await sb.from("bookings").update({ [sentCol]: now.toISOString() }).eq("id", booking.id);
+      sent++;
+    }
+    return sent;
+  }
+
   const [sent24h, sent1h] = await Promise.all([
     sendReminders("reminder_24h", 23 * 60, 25 * 60),
     sendReminders("reminder_1h", 50, 70),
   ]);
 
-  return NextResponse.json({ ok: true, sent_24h: sent24h, sent_1h: sent1h });
+  const [sentFollowup24h, sentFollowup72h] = await Promise.all([
+    sendFollowups("followup_24h", 24 * 60),
+    sendFollowups("followup_72h", 72 * 60),
+  ]);
+
+  return NextResponse.json({ ok: true, sent_24h: sent24h, sent_1h: sent1h, followup_24h: sentFollowup24h, followup_72h: sentFollowup72h });
 }

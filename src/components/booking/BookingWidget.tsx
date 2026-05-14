@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ChevronLeft, ChevronRight, Clock, Check, Loader2,
-  AlertCircle, UserCheck, Globe, Copy, Video, Calendar, Link,
+  AlertCircle, UserCheck, Globe, Copy, Video, Calendar, Link, Timer,
 } from "lucide-react";
 import {
   getBrowserTz, detectCountryCode, slotTimeInUserTz, getMonthDays,
@@ -17,6 +17,22 @@ interface Props {
   type: BookingType;
   /** Booking code of the appointment being replaced — triggers cancel-old logic */
   rescheduleCode?: string;
+}
+
+interface EventTypeConfig {
+  booking_questions: Array<{
+    id: string;
+    label: string;
+    type: 'text' | 'textarea' | 'select' | 'phone' | 'checkbox';
+    required: boolean;
+    options?: string[];
+  }>;
+  requires_confirmation: boolean;
+  redirect_url?: string | null;
+  max_active_per_email?: number;
+  label: string;
+  duration_min: number;
+  slug: string;
 }
 
 const TYPE_LABELS: Record<BookingType, string> = {
@@ -34,6 +50,11 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // ── Event type config ─────────────────────────────────────────────────────
+  const [eventTypeConfig, setEventTypeConfig] = useState<EventTypeConfig | null>(null);
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | boolean>>({});
+  const [isPending, setIsPending] = useState(false);
+
   // ── Timezone / time format ────────────────────────────────────────────────
   const [userTz, setUserTz] = useState("America/Bogota");
   const [use24h, setUse24h] = useState(true);
@@ -45,7 +66,14 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     setUserTz(tz);
     const def = detectCountryCode(tz);
     setCountryCode(def);
-  }, []);
+    fetch("/api/event-types")
+      .then(r => r.json())
+      .then(d => {
+        const found = (d.types ?? []).find((t: EventTypeConfig) => t.slug === type);
+        if (found) setEventTypeConfig(found);
+      })
+      .catch(() => {});
+  }, [type]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -162,6 +190,7 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
           name, email: emailInput.trim().toLowerCase(),
           phone: fullPhone, notes, date: selectedDate,
           time: selectedTime, type,
+          answers: questionAnswers,
           ...(rescheduleCode ? { reschedule_code: rescheduleCode } : {}),
         }),
       });
@@ -169,19 +198,31 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
       if (!res.ok) {
         setFormError(json.error ?? "Error al reservar. Intenta de nuevo.");
       } else {
-        setConfirmation({
+        const resolvedLabel = eventTypeConfig?.label ?? TYPE_LABELS[type];
+        const resolvedDuration = eventTypeConfig?.duration_min ?? DURATION[type];
+        const confirmData: ConfirmationData = {
           bookingCode: json.booking_code ?? "",
           name,
           email: emailInput.trim().toLowerCase(),
-          type: TYPE_LABELS[type],
+          type: resolvedLabel,
           date: selectedDate,
           time: selectedTime,
-          durationMin: DURATION[type],
+          durationMin: resolvedDuration,
           eventLink: json.event_link ?? "",
           userTz,
           zoomJoinUrl: json.zoom_join_url ?? undefined,
-        });
+        };
+        setConfirmation(confirmData);
+        setIsPending(json.status === "pending");
         setStep("confirm");
+
+        if (json.redirect_url) {
+          const url = new URL(json.redirect_url);
+          url.searchParams.set("booking", json.booking_code ?? "");
+          url.searchParams.set("email", emailInput.trim().toLowerCase());
+          url.searchParams.set("name", name);
+          setTimeout(() => { window.location.href = url.toString(); }, 2000);
+        }
       }
     } catch {
       setFormError("Error de conexión. Intenta de nuevo.");
@@ -196,6 +237,8 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     setEmailInput(""); setEmailError(null); setPatientFound(false);
     setName(""); setPhone(""); setNotes(""); setFormError(null);
     setConfirmation(null);
+    setQuestionAnswers({});
+    setIsPending(false);
   }
 
   const tzLabel = TZ_OPTIONS.find(t => t.value === userTz)?.label ?? userTz;
@@ -226,11 +269,23 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
     return (
       <div className="max-w-lg mx-auto">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-4">
-            <Check className="w-7 h-7 text-emerald-400" />
-          </div>
-          <h2 className="font-cinzel text-2xl text-white mb-2">¡Cita confirmada!</h2>
-          <p className="font-crimson text-gray-400">Revisa tu correo — te enviamos la confirmación.</p>
+          {isPending ? (
+            <>
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 mb-4">
+                <Timer className="w-7 h-7 text-amber-400" />
+              </div>
+              <h2 className="font-cinzel text-2xl text-white mb-2">¡Solicitud recibida!</h2>
+              <p className="font-crimson text-gray-400">Tu solicitud está pendiente de aprobación. Te notificaremos por correo y WhatsApp.</p>
+            </>
+          ) : (
+            <>
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-4">
+                <Check className="w-7 h-7 text-emerald-400" />
+              </div>
+              <h2 className="font-cinzel text-2xl text-white mb-2">¡Cita confirmada!</h2>
+              <p className="font-crimson text-gray-400">Revisa tu correo — te enviamos la confirmación.</p>
+            </>
+          )}
         </div>
 
         <div className="bg-[#0a1628] border border-[#C5A059]/30 p-6 mb-4">
@@ -276,30 +331,32 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
           Guarda tu código de reserva para reprogramar o cancelar sin iniciar sesión.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 mb-3">
-          {confirmation.zoomJoinUrl && (
-            <a
-              href={confirmation.zoomJoinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600/90 text-white font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-blue-600 transition"
-            >
-              <Video className="w-3.5 h-3.5" />
-              Unirse a Zoom
-            </a>
-          )}
-          {confirmation.eventLink && (
-            <a
-              href={confirmation.eventLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-[#C5A059]/10 transition"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              Google Calendar
-            </a>
-          )}
-        </div>
+        {!isPending && (
+          <div className="flex flex-col sm:flex-row gap-3 mb-3">
+            {confirmation.zoomJoinUrl && (
+              <a
+                href={confirmation.zoomJoinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600/90 text-white font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-blue-600 transition"
+              >
+                <Video className="w-3.5 h-3.5" />
+                Unirse a Zoom
+              </a>
+            )}
+            {confirmation.eventLink && (
+              <a
+                href={confirmation.eventLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-[#C5A059]/10 transition"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Google Calendar
+              </a>
+            )}
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row gap-3">
           {confirmation.bookingCode && (
             <a
@@ -333,11 +390,11 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
         {/* Sidebar */}
         <div className="lg:border-r lg:border-white/10 lg:pr-8 pb-8 lg:pb-0">
           <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Juan Pablo Loaiza</p>
-          <h3 className="font-cinzel text-white text-lg mb-4">{TYPE_LABELS[type]}</h3>
+          <h3 className="font-cinzel text-white text-lg mb-4">{eventTypeConfig?.label ?? TYPE_LABELS[type]}</h3>
           <div className="space-y-2 text-sm font-crimson text-gray-400">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-[#C5A059] shrink-0" />
-              <span>{DURATION[type]} minutos</span>
+              <span>{eventTypeConfig?.duration_min ?? DURATION[type]} minutos</span>
             </div>
             <div className="flex items-center gap-2">
               <Video className="w-4 h-4 text-[#C5A059] shrink-0" />
@@ -462,6 +519,54 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
               />
             </div>
 
+            {eventTypeConfig?.booking_questions?.map((q) => (
+              <div key={q.id}>
+                <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">
+                  {q.label}{q.required && <span className="text-red-400 ml-1">*</span>}
+                </label>
+                {q.type === 'textarea' && (
+                  <textarea
+                    value={(questionAnswers[q.id] as string) ?? ""}
+                    onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+                    required={q.required}
+                    rows={3}
+                    className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition resize-none placeholder-gray-600"
+                  />
+                )}
+                {q.type === 'select' && (
+                  <select
+                    value={(questionAnswers[q.id] as string) ?? ""}
+                    onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+                    required={q.required}
+                    className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition"
+                  >
+                    <option value="">Selecciona una opción</option>
+                    {q.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                )}
+                {q.type === 'checkbox' && (
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(questionAnswers[q.id] as boolean) ?? false}
+                      onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.checked }))}
+                      className="accent-[#C5A059] w-4 h-4"
+                    />
+                    <span className="font-crimson text-gray-300 text-sm">{q.label}</span>
+                  </label>
+                )}
+                {(q.type === 'text' || q.type === 'phone') && (
+                  <input
+                    type={q.type === 'phone' ? 'tel' : 'text'}
+                    value={(questionAnswers[q.id] as string) ?? ""}
+                    onChange={e => setQuestionAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+                    required={q.required}
+                    className="w-full bg-[#0a1628] border border-white/10 text-white px-4 py-3 font-crimson text-base focus:outline-none focus:border-[#C5A059]/50 transition placeholder-gray-600"
+                  />
+                )}
+              </div>
+            ))}
+
             <button
               type="submit"
               disabled={submitting || !emailInput.trim()}
@@ -485,12 +590,12 @@ export default function BookingWidget({ type, rescheduleCode }: Props) {
       {/* ── Left sidebar ────────────────────────────────────────────────────── */}
       <div className="lg:border-r lg:border-white/10 lg:pr-8 pb-8 lg:pb-0">
         <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Juan Pablo Loaiza</p>
-        <h3 className="font-cinzel text-white text-lg mb-4">{TYPE_LABELS[type]}</h3>
+        <h3 className="font-cinzel text-white text-lg mb-4">{eventTypeConfig?.label ?? TYPE_LABELS[type]}</h3>
 
         <div className="space-y-2 text-sm font-crimson text-gray-400">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#C5A059] shrink-0" />
-            <span>{DURATION[type]} minutos</span>
+            <span>{eventTypeConfig?.duration_min ?? DURATION[type]} minutos</span>
           </div>
           <div className="flex items-center gap-2">
             <Video className="w-4 h-4 text-[#C5A059] shrink-0" />
