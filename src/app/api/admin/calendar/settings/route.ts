@@ -6,13 +6,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { assertAdmin } from "@/lib/auth";
 import { invalidateConfigCache } from "@/lib/booking-config";
 
+function parseSettingsValue(value: unknown): Record<string, unknown> {
+  if (!value) return {};
+  if (typeof value === "string") {
+    try { return JSON.parse(value) as Record<string, unknown>; } catch { return {}; }
+  }
+  if (typeof value === "object") return value as Record<string, unknown>;
+  return {};
+}
+
 export async function GET() {
   const sb = await assertAdmin();
   if (!sb) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data } = await sb.from("crm_settings").select("value").eq("key", "calendar_config").single();
 
-  const raw = (data?.value ?? {}) as Record<string, unknown>;
+  const raw = parseSettingsValue(data?.value);
   const dbCreds = raw.zoom_credentials as { account_id?: string; client_id?: string; client_secret?: string } | undefined;
 
   const zoomReady = !!(
@@ -43,11 +52,12 @@ export async function POST(req: NextRequest) {
   catch { return NextResponse.json({ error: "JSON inválido" }, { status: 400 }); }
 
   const { data: current } = await sb.from("crm_settings").select("value").eq("key", "calendar_config").single();
-  const merged = { ...(current?.value ?? {}), ...patch };
+  const currentValue = parseSettingsValue(current?.value);
+  const merged = { ...currentValue, ...patch };
 
-  await sb.from("crm_settings").upsert({ key: "calendar_config", value: merged }, { onConflict: "key" });
+  await sb.from("crm_settings").upsert({ key: "calendar_config", value: JSON.stringify(merged) }, { onConflict: "key" });
   invalidateConfigCache();
 
-  const { zoom_credentials: _hidden2, ...safeMerged } = merged as Record<string, unknown>;
+  const { zoom_credentials: _hidden2, ...safeMerged } = merged;
   return NextResponse.json({ ok: true, config: safeMerged });
 }

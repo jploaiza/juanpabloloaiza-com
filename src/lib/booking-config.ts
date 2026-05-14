@@ -75,6 +75,15 @@ const DEFAULT_EVENT_TYPES: EventType[] = [
 let configCache: { data: CalendarConfig; exp: number } | null = null;
 let eventTypesCache: { data: EventType[]; exp: number } | null = null;
 
+function parseConfigValue(value: unknown): Partial<CalendarConfig> {
+  if (!value) return {};
+  if (typeof value === "string") {
+    try { return JSON.parse(value) as Partial<CalendarConfig>; } catch { return {}; }
+  }
+  if (typeof value === "object") return value as Partial<CalendarConfig>;
+  return {};
+}
+
 export async function getCalendarConfig(): Promise<CalendarConfig> {
   const now = Date.now();
   if (configCache && now < configCache.exp) return configCache.data;
@@ -84,7 +93,8 @@ export async function getCalendarConfig(): Promise<CalendarConfig> {
       .select("value")
       .eq("key", "calendar_config")
       .single();
-    const config: CalendarConfig = data?.value ? { ...DEFAULT_CONFIG, ...(data.value as Partial<CalendarConfig>) } : DEFAULT_CONFIG;
+    const parsed = parseConfigValue(data?.value);
+    const config: CalendarConfig = data?.value ? { ...DEFAULT_CONFIG, ...parsed } : DEFAULT_CONFIG;
     configCache = { data: config, exp: now + 60_000 };
     return config;
   } catch {
