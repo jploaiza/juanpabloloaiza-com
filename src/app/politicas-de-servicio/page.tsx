@@ -5,7 +5,7 @@ import WhatsAppCta from "@/components/WhatsAppCta";
 
 export const metadata: Metadata = {
   title: "Políticas de Servicio | Juan Pablo Loaiza",
-  description: "Políticas de servicio, cancelación, reembolsos y privacidad de Juan Pablo Loaiza — Hipnosis Terapéutica de Regresión a Vidas Pasadas.",
+  description: "Políticas de servicio, cancelación, reembolsos, política de privacidad y eliminación de datos de Juan Pablo Loaiza — Hipnosis Terapéutica de Regresión a Vidas Pasadas.",
   alternates: { canonical: "https://juanpabloloaiza.com/politicas-de-servicio" },
 };
 
@@ -130,7 +130,7 @@ export default function PoliticasPage() {
           </p>
           <div className="w-16 h-[1px] bg-[#C5A059] mt-6" />
           <p className="text-gray-500 font-crimson text-sm mt-4">
-            Última actualización: abril 2026
+            Última actualización: mayo 2026
           </p>
         </div>
 
@@ -183,6 +183,109 @@ export default function PoliticasPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Política de privacidad */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-20 mb-10">
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">
+            Datos y privacidad
+          </span>
+          <h2 className="text-3xl md:text-4xl text-white mt-4 mb-6 font-cinzel font-bold leading-tight">
+            Política de Privacidad
+          </h2>
+          <div className="w-16 h-[1px] bg-[#C5A059] mt-6" />
+        </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-10">
+          {[
+            {
+              title: "¿Qué datos recopilamos?",
+              content: `Al utilizar los servicios de Juan Pablo Loaiza, podemos recopilar los siguientes datos personales:
+— Nombre completo.
+— Dirección de correo electrónico.
+— Número de teléfono / WhatsApp.
+— Fecha y hora de las sesiones agendadas.
+— Información compartida voluntariamente durante el proceso terapéutico.
+— Datos técnicos de navegación (dirección IP, tipo de navegador, páginas visitadas) cuando accedes a este sitio web.`,
+            },
+            {
+              title: "¿Con qué finalidad tratamos tus datos?",
+              content: `Los datos personales recopilados se utilizan exclusivamente para:
+— Gestionar la agenda y el proceso terapéutico.
+— Enviar confirmaciones, recordatorios y comunicaciones relacionadas con tus sesiones.
+— Emitir documentos de pago cuando corresponda.
+— Mejorar la calidad del servicio ofrecido.
+— Cumplir con obligaciones legales vigentes.
+
+Tus datos nunca serán vendidos, cedidos ni compartidos con terceros con fines comerciales.`,
+            },
+            {
+              title: "¿Cuánto tiempo conservamos tus datos?",
+              content: `Los datos personales se conservan durante el tiempo que dure la relación terapéutica activa y por un período adicional de hasta 2 años tras la última sesión, con el fin de mantener el historial terapéutico y cumplir con posibles obligaciones legales. Transcurrido ese período, los datos son eliminados de forma permanente, salvo que exista una obligación legal que exija su conservación por un plazo mayor.`,
+            },
+            {
+              title: "¿Cómo protegemos tus datos?",
+              content: `Adoptamos medidas técnicas y organizativas razonables para proteger tus datos personales frente a accesos no autorizados, pérdida, alteración o divulgación indebida. El acceso a los datos está restringido únicamente al terapeuta y a las plataformas tecnológicas utilizadas para la prestación del servicio (como Zoom, servicios de correo electrónico y plataformas de pago).`,
+            },
+            {
+              title: "Tus derechos",
+              content: `De conformidad con la Ley N°19.628 sobre Protección de la Vida Privada (Chile) y la normativa equivalente aplicable en tu país de residencia, tienes derecho a:
+— Acceder a los datos personales que tenemos sobre ti.
+— Rectificar datos inexactos o incompletos.
+— Solicitar la eliminación de tus datos (ver sección siguiente).
+— Oponerte al tratamiento de tus datos en determinadas circunstancias.
+
+Para ejercer cualquiera de estos derechos, puedes escribirnos a contacto@juanpabloloaiza.com.`,
+            },
+          ].map((section, i) => (
+            <div key={i} className="relative bg-[#16213e] border border-[#C5A059]/20 p-8">
+              <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/50" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/50" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#C5A059]/50" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#C5A059]/50" />
+              <h2 className="text-xl font-cinzel text-[#C5A059] mb-4 font-semibold">{section.title}</h2>
+              <div className="font-crimson text-gray-300 text-lg leading-relaxed whitespace-pre-line">{section.content}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Eliminación de datos */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-20 mb-10">
+          <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">
+            Tu derecho al olvido
+          </span>
+          <h2 className="text-3xl md:text-4xl text-white mt-4 mb-6 font-cinzel font-bold leading-tight">
+            Eliminación de Datos de Usuario
+          </h2>
+          <div className="w-16 h-[1px] bg-[#C5A059] mt-6" />
+        </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-10">
+          <div className="relative bg-[#16213e] border border-[#C5A059]/20 p-8">
+            <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#C5A059]/50" />
+            <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#C5A059]/50" />
+            <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-[#C5A059]/50" />
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#C5A059]/50" />
+            <h2 className="text-xl font-cinzel text-[#C5A059] mb-4 font-semibold">Cómo solicitar la eliminación de tus datos</h2>
+            <div className="font-crimson text-gray-300 text-lg leading-relaxed space-y-5">
+              <p>
+                Tienes derecho a solicitar la eliminación de todos tus datos personales de nuestros registros en cualquier momento. Para hacerlo, envía un correo electrónico a la siguiente dirección indicando tu nombre completo, el correo electrónico con el que te registraste y la solicitud de eliminación:
+              </p>
+              <div className="bg-[#0a1628] border border-[#C5A059]/30 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <span className="text-[#C5A059] font-cinzel text-xs uppercase tracking-widest shrink-0">Correo de contacto</span>
+                <a
+                  href="mailto:contacto@juanpabloloaiza.com?subject=Solicitud%20de%20eliminaci%C3%B3n%20de%20datos%20personales"
+                  className="font-crimson text-white text-xl hover:text-[#C5A059] transition underline underline-offset-4 decoration-[#C5A059]/40"
+                >
+                  contacto@juanpabloloaiza.com
+                </a>
+              </div>
+              <p>
+                Una vez recibida tu solicitud, procederemos a eliminar tus datos personales en un plazo máximo de <strong className="text-white">30 días hábiles</strong>. Recibirás una confirmación por correo electrónico cuando la eliminación haya sido completada.
+              </p>
+              <p className="text-gray-400 text-base">
+                Ten en cuenta que la solicitud de eliminación de datos implica la finalización del proceso terapéutico activo, si lo hubiera, y no genera derecho a reembolso por sesiones no realizadas, de conformidad con las Políticas de Servicio vigentes. Algunos datos podrían ser retenidos por el período mínimo exigido por ley para el cumplimiento de obligaciones fiscales o legales.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* CTA */}
