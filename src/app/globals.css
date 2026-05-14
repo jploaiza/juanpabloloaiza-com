@@ -138,9 +138,8 @@ body {
     text-rendering: optimizeLegibility;
   }
 
-  /* Cinzel — títulos, labels, nav, UI chrome (→ Libre Baskerville) */
+  /* Cinzel — títulos, labels, nav, UI chrome (→ Libre Baskerville vía --font-cinzel) */
   .font-cinzel {
-    font-family: var(--font-libre-baskerville), Georgia, serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;

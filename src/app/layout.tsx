@@ -18,6 +18,13 @@ const dmSans = DM_Sans({
   style: ["normal"],
 });
 
+const libreBaskervilleCinzel = Libre_Baskerville({
+  variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+});
+
 const libreBaskerville = Libre_Baskerville({
   variable: "--font-libre-baskerville",
   subsets: ["latin"],
@@ -93,7 +100,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${sourceSerif4.variable} ${dmSans.variable} ${libreBaskerville.variable} h-full antialiased scroll-smooth`}
+      className={`${libreBaskervilleCinzel.variable} ${sourceSerif4.variable} ${dmSans.variable} ${libreBaskerville.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         {/* Preconnect to external asset hosts */}
