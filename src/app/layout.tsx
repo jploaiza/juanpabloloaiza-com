@@ -1,15 +1,8 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Serif_4, DM_Sans, Libre_Baskerville } from "next/font/google";
+import { Source_Serif_4, DM_Sans, Libre_Baskerville } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import PageTracker from "@/components/PageTracker";
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "900"],
-  style: ["normal", "italic"],
-});
 
 const sourceSerif4 = Source_Serif_4({
   variable: "--font-crimson",
@@ -100,7 +93,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${playfairDisplay.variable} ${sourceSerif4.variable} ${dmSans.variable} ${libreBaskerville.variable} h-full antialiased scroll-smooth`}
+      className={`${sourceSerif4.variable} ${dmSans.variable} ${libreBaskerville.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         {/* Preconnect to external asset hosts */}
