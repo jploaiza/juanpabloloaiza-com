@@ -12,13 +12,26 @@ export async function GET() {
 
   const { data } = await sb.from("crm_settings").select("value").eq("key", "calendar_config").single();
 
+  const raw = (data?.value ?? {}) as Record<string, unknown>;
+  const dbCreds = raw.zoom_credentials as { account_id?: string; client_id?: string; client_secret?: string } | undefined;
+
   const zoomReady = !!(
-    process.env.ZOOM_ACCOUNT_ID &&
-    process.env.ZOOM_CLIENT_ID &&
-    process.env.ZOOM_CLIENT_SECRET
+    (dbCreds?.account_id && dbCreds?.client_id && dbCreds?.client_secret) ||
+    (process.env.ZOOM_ACCOUNT_ID && process.env.ZOOM_CLIENT_ID && process.env.ZOOM_CLIENT_SECRET)
   );
 
-  return NextResponse.json({ config: data?.value ?? {}, zoom_ready: zoomReady });
+  // Strip credentials from the config before returning — never expose them to the frontend
+  const { zoom_credentials: _hidden, ...safeConfig } = raw;
+
+  return NextResponse.json({
+    config: safeConfig,
+    zoom_ready: zoomReady,
+    zoom_credentials_set: {
+      account_id: !!(dbCreds?.account_id || process.env.ZOOM_ACCOUNT_ID),
+      client_id: !!(dbCreds?.client_id || process.env.ZOOM_CLIENT_ID),
+      client_secret: !!(dbCreds?.client_secret || process.env.ZOOM_CLIENT_SECRET),
+    },
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -35,5 +48,6 @@ export async function POST(req: NextRequest) {
   await sb.from("crm_settings").upsert({ key: "calendar_config", value: merged }, { onConflict: "key" });
   invalidateConfigCache();
 
-  return NextResponse.json({ ok: true, config: merged });
+  const { zoom_credentials: _hidden2, ...safeMerged } = merged as Record<string, unknown>;
+  return NextResponse.json({ ok: true, config: safeMerged });
 }

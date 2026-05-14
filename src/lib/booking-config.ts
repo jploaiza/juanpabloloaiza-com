@@ -23,6 +23,7 @@ export interface CalendarConfig {
     auto_recording: string;
   };
   rate_limits: { availability: [number, number]; book: [number, number] };
+  zoom_credentials?: { account_id: string; client_id: string; client_secret: string };
 }
 
 export interface EventType {

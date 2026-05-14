@@ -148,6 +148,7 @@ export async function POST(req: NextRequest) {
       timeZone: BOOKING_TZ,
       agenda: safeNotes || undefined,
       settings: config.zoom,
+      credentials: config.zoom_credentials,
     });
     if (zoom) {
       zoomMeetingId = zoom.id;
@@ -181,7 +182,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
     console.error("[book] GCal event creation failed:", msg);
-    if (zoomMeetingId) void deleteZoomMeeting(zoomMeetingId);
+    if (zoomMeetingId) void deleteZoomMeeting(zoomMeetingId, config.zoom_credentials);
     return NextResponse.json({ error: "No se pudo crear el evento en el calendario. Intenta de nuevo." }, { status: 502 });
   }
 
@@ -201,7 +202,7 @@ export async function POST(req: NextRequest) {
         }
       } catch { /* non-critical */ }
       if (oldBooking.zoom_meeting_id) {
-        void deleteZoomMeeting(Number(oldBooking.zoom_meeting_id));
+        void deleteZoomMeeting(Number(oldBooking.zoom_meeting_id), config.zoom_credentials);
       }
       await adminSb.from("bookings").update({ status: "rescheduled" }).eq("id", oldBooking.id);
     }

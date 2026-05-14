@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Save, Check, AlertCircle, Video } from "lucide-react";
+import { Loader2, Save, Check, AlertCircle, Video, Eye, EyeOff } from "lucide-react";
 
 interface ZoomConfig {
   waiting_room: boolean;
@@ -10,6 +10,12 @@ interface ZoomConfig {
   mute_upon_entry: boolean;
   join_before_host: boolean;
   auto_recording: string;
+}
+
+interface CredentialsSet {
+  account_id: boolean;
+  client_id: boolean;
+  client_secret: boolean;
 }
 
 const DEFAULTS: ZoomConfig = {
@@ -27,7 +33,12 @@ const TOGGLES: { key: keyof ZoomConfig; label: string }[] = [
 
 export default function ZoomPanel() {
   const [zoomReady, setZoomReady] = useState(false);
+  const [credsSet, setCredsSet] = useState<CredentialsSet>({ account_id: false, client_id: false, client_secret: false });
   const [zoom, setZoom] = useState<ZoomConfig>(DEFAULTS);
+  const [accountId, setAccountId] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
+  const [showSecret, setShowSecret] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -41,6 +52,7 @@ export default function ZoomPanel() {
       .then((d) => {
         if (d.config?.zoom) setZoom({ ...DEFAULTS, ...d.config.zoom });
         setZoomReady(!!d.zoom_ready);
+        if (d.zoom_credentials_set) setCredsSet(d.zoom_credentials_set);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -49,13 +61,31 @@ export default function ZoomPanel() {
   async function handleSave() {
     setSaving(true); setError(null); setSaved(false);
     try {
+      const payload: Record<string, unknown> = { zoom };
+      // Only include credentials if at least one field is filled in
+      if (accountId.trim() || clientId.trim() || clientSecret.trim()) {
+        payload.zoom_credentials = {
+          account_id: accountId.trim(),
+          client_id: clientId.trim(),
+          client_secret: clientSecret.trim(),
+        };
+      }
       const res = await fetch("/api/admin/calendar/settings", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ zoom }),
+        body: JSON.stringify(payload),
       });
       const d = await res.json();
       if (!res.ok) setError(d.error ?? "Error");
-      else { setSaved(true); setTimeout(() => setSaved(false), 3000); }
+      else {
+        setSaved(true);
+        // Reload zoom_ready after saving credentials
+        fetch("/api/admin/calendar/settings").then((r) => r.json()).then((d2) => {
+          setZoomReady(!!d2.zoom_ready);
+          if (d2.zoom_credentials_set) setCredsSet(d2.zoom_credentials_set);
+        });
+        setAccountId(""); setClientId(""); setClientSecret("");
+        setTimeout(() => setSaved(false), 3000);
+      }
     } catch { setError("Error de conexión"); }
     finally { setSaving(false); }
   }
@@ -79,15 +109,56 @@ export default function ZoomPanel() {
       {/* Status */}
       <div className={`flex items-center gap-3 px-4 py-3 border ${zoomReady ? "bg-green-500/10 border-green-500/20" : "bg-amber-500/10 border-amber-500/20"}`}>
         <Video className={`w-4 h-4 shrink-0 ${zoomReady ? "text-green-400" : "text-amber-400"}`} />
+        <p className={`font-cinzel text-xs ${zoomReady ? "text-green-400" : "text-amber-400"}`}>
+          {zoomReady ? "Credenciales configuradas" : "Credenciales no configuradas"}
+        </p>
+      </div>
+
+      {/* Credentials */}
+      <div className="space-y-3">
+        <h3 className="font-cinzel text-gray-400 text-[9px] uppercase tracking-widest">Credenciales Server-to-Server OAuth</h3>
+        <p className="font-crimson text-gray-500 text-xs">
+          Obtén estos valores en{" "}
+          <span className="text-gray-400">marketplace.zoom.us → Develop → Build App → Server-to-Server OAuth</span>.
+          Deja en blanco los campos que no quieras cambiar.
+        </p>
+        {[
+          { label: "Account ID", value: accountId, set: credsSet.account_id, onChange: setAccountId, type: "text" as const },
+          { label: "Client ID", value: clientId, set: credsSet.client_id, onChange: setClientId, type: "text" as const },
+        ].map(({ label, value, set, onChange, type }) => (
+          <div key={label}>
+            <label className="font-cinzel text-[9px] uppercase tracking-widest text-gray-400 block mb-1">
+              {label}{set && <span className="ml-2 text-green-500">✓ guardado</span>}
+            </label>
+            <input
+              type={type}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={set ? "••••••••••••••• (guardado)" : "Pega aquí tu " + label}
+              className="w-full bg-[#020617] border border-white/10 text-white text-sm px-3 py-2 font-crimson placeholder:text-gray-700"
+            />
+          </div>
+        ))}
         <div>
-          <p className={`font-cinzel text-xs ${zoomReady ? "text-green-400" : "text-amber-400"}`}>
-            {zoomReady ? "Credenciales configuradas" : "Credenciales no configuradas"}
-          </p>
-          {!zoomReady && (
-            <p className="font-crimson text-gray-400 text-xs mt-0.5">
-              Configura ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID y ZOOM_CLIENT_SECRET en las variables de entorno de Vercel.
-            </p>
-          )}
+          <label className="font-cinzel text-[9px] uppercase tracking-widest text-gray-400 block mb-1">
+            Client Secret{credsSet.client_secret && <span className="ml-2 text-green-500">✓ guardado</span>}
+          </label>
+          <div className="relative">
+            <input
+              type={showSecret ? "text" : "password"}
+              value={clientSecret}
+              onChange={(e) => setClientSecret(e.target.value)}
+              placeholder={credsSet.client_secret ? "••••••••••••••• (guardado)" : "Pega aquí tu Client Secret"}
+              className="w-full bg-[#020617] border border-white/10 text-white text-sm px-3 py-2 pr-10 font-crimson placeholder:text-gray-700"
+            />
+            <button
+              type="button"
+              onClick={() => setShowSecret((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+            >
+              {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
       </div>
 

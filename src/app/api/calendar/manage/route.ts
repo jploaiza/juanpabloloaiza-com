@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
   }
 
   const sb = createAdminClient();
+  const config = await getCalendarConfig();
 
   const { data: booking } = await sb
     .from("bookings")
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   // Delete Zoom meeting
   if (booking.zoom_meeting_id) {
-    await deleteZoomMeeting(Number(booking.zoom_meeting_id));
+    await deleteZoomMeeting(Number(booking.zoom_meeting_id), config.zoom_credentials);
   }
 
   // Mark as cancelled
@@ -72,14 +73,11 @@ export async function POST(req: NextRequest) {
   // Fire cancellation alerts (non-blocking)
   void (async () => {
     try {
-      const [config, { data: templates }] = await Promise.all([
-        getCalendarConfig(),
-        sb.from("booking_alert_templates")
-          .select("channel, subject, body")
-          .eq("event_type_slug", booking.type)
-          .eq("trigger", "cancellation")
-          .eq("is_active", true),
-      ]);
+      const { data: templates } = await sb.from("booking_alert_templates")
+        .select("channel, subject, body")
+        .eq("event_type_slug", booking.type)
+        .eq("trigger", "cancellation")
+        .eq("is_active", true);
 
       const dateLabel = new Date(`${booking.date}T12:00:00`).toLocaleDateString("es-CL", {
         timeZone: "America/Santiago",

@@ -1,28 +1,42 @@
 /**
  * Zoom Server-to-Server OAuth integration.
- * Requires env vars: ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET
+ * Credentials can come from DB (zoom_credentials in calendar_config) or env vars as fallback.
  */
 
 const ZOOM_TOKEN_URL = "https://zoom.us/oauth/token";
 const ZOOM_API_BASE = "https://api.zoom.us/v2";
 
-function hasZoomCredentials(): boolean {
-  return !!(
-    process.env.ZOOM_ACCOUNT_ID &&
-    process.env.ZOOM_CLIENT_ID &&
-    process.env.ZOOM_CLIENT_SECRET
-  );
+export interface ZoomCredentials {
+  account_id: string;
+  client_id: string;
+  client_secret: string;
 }
 
-async function getZoomToken(): Promise<string> {
-  const accountId = process.env.ZOOM_ACCOUNT_ID!;
-  const clientId = process.env.ZOOM_CLIENT_ID!;
-  const clientSecret = process.env.ZOOM_CLIENT_SECRET!;
+function resolveCredentials(creds?: ZoomCredentials | null): ZoomCredentials | null {
+  if (creds?.account_id && creds?.client_id && creds?.client_secret) return creds;
+  if (process.env.ZOOM_ACCOUNT_ID && process.env.ZOOM_CLIENT_ID && process.env.ZOOM_CLIENT_SECRET) {
+    return {
+      account_id: process.env.ZOOM_ACCOUNT_ID,
+      client_id: process.env.ZOOM_CLIENT_ID,
+      client_secret: process.env.ZOOM_CLIENT_SECRET,
+    };
+  }
+  return null;
+}
+
+function hasZoomCredentials(creds?: ZoomCredentials | null): boolean {
+  return resolveCredentials(creds) !== null;
+}
+
+async function getZoomToken(creds?: ZoomCredentials | null): Promise<string> {
+  const resolved = resolveCredentials(creds);
+  if (!resolved) throw new Error("Zoom credentials not configured");
+  const { account_id: accountId, client_id: clientId, client_secret: clientSecret } = resolved;
 
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   const res = await fetch(
-    `${ZOOM_TOKEN_URL}?grant_type=account_credentials&account_id=${encodeURIComponent(accountId)}`,
+    `${ZOOM_TOKEN_URL}?grant_type=account_credentials&account_id=${encodeURIComponent(accountId!)}`,
     {
       method: "POST",
       headers: {
@@ -65,18 +79,19 @@ export interface CreateZoomMeetingOptions {
   timeZone: string;
   agenda?: string;
   settings?: ZoomMeetingSettings;
+  credentials?: ZoomCredentials | null;
 }
 
 /**
  * Creates a scheduled Zoom meeting.
- * Returns null (does not throw) if ZOOM env vars are not set.
+ * Returns null (does not throw) if no credentials are available.
  */
 export async function createZoomMeeting(
   opts: CreateZoomMeetingOptions
 ): Promise<ZoomMeetingResult | null> {
-  if (!hasZoomCredentials()) return null;
+  if (!hasZoomCredentials(opts.credentials)) return null;
 
-  const token = await getZoomToken();
+  const token = await getZoomToken(opts.credentials);
 
   const res = await fetch(`${ZOOM_API_BASE}/users/me/meetings`, {
     method: "POST",
@@ -115,11 +130,11 @@ export async function createZoomMeeting(
 /**
  * Deletes a Zoom meeting. Silent if not found or no credentials.
  */
-export async function deleteZoomMeeting(meetingId: number): Promise<void> {
-  if (!hasZoomCredentials() || !meetingId) return;
+export async function deleteZoomMeeting(meetingId: number, credentials?: ZoomCredentials | null): Promise<void> {
+  if (!hasZoomCredentials(credentials) || !meetingId) return;
 
   try {
-    const token = await getZoomToken();
+    const token = await getZoomToken(credentials);
     await fetch(`${ZOOM_API_BASE}/meetings/${meetingId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
