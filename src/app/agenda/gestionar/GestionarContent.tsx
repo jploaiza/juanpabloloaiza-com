@@ -16,6 +16,8 @@ interface BookingData {
   status: string;
   zoom_join_url?: string;
   google_event_link?: string;
+  allow_cancellation?: boolean;
+  allow_reschedule?: boolean;
 }
 
 const TYPE_LABELS = { session: "Sesión TRVP", entrevista: "Entrevista de Admisión" };
@@ -41,6 +43,7 @@ export default function GestionarContent() {
   const [view, setView] = useState<"details" | "cancel-confirm" | "cancelled" | "reschedule">("details");
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
 
   const fetchBooking = useCallback(async () => {
     if (!code) { setError("Código de reserva no encontrado en la URL."); setLoading(false); return; }
@@ -69,7 +72,7 @@ export default function GestionarContent() {
       const res = await fetch("/api/calendar/manage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, action: "cancel" }),
+        body: JSON.stringify({ code, action: "cancel", cancel_reason: cancelReason.trim() || undefined }),
       });
       const json = await res.json();
       if (!res.ok) { setCancelError(json.error ?? "Error al cancelar."); }
@@ -151,6 +154,17 @@ export default function GestionarContent() {
           <p className="font-crimson text-white">{TYPE_LABELS[booking.type]}</p>
           <p className="font-crimson text-[#C5A059] font-bold capitalize">{formatDate(booking.date)} — {booking.time_slot}</p>
         </div>
+        <div className="mb-6">
+          <label className="font-cinzel text-[9px] uppercase tracking-widest text-gray-400 block mb-1">¿Cuál es el motivo? (opcional)</label>
+          <textarea
+            rows={3}
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            placeholder="Cuéntanos por qué cancelas…"
+            className="w-full bg-[#020617] border border-white/10 text-white text-sm px-3 py-2 font-crimson resize-none placeholder:text-gray-700"
+            maxLength={500}
+          />
+        </div>
         {cancelError && (
           <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 mb-4">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
@@ -218,20 +232,24 @@ export default function GestionarContent() {
       )}
 
       <div className="flex flex-col sm:flex-row gap-3">
-        <button
-          onClick={() => setView("reschedule")}
-          disabled={booking.status !== "confirmed"}
-          className="flex-1 bg-[#C5A059] text-[#020617] font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-[#C5A059]/90 disabled:opacity-40 transition"
-        >
-          Reprogramar
-        </button>
-        <button
-          onClick={() => setView("cancel-confirm")}
-          disabled={booking.status !== "confirmed"}
-          className="flex-1 border border-white/20 text-gray-400 font-cinzel text-[9px] uppercase tracking-widest py-3 hover:border-red-500/40 hover:text-red-400 disabled:opacity-40 transition"
-        >
-          Cancelar reserva
-        </button>
+        {booking.allow_reschedule !== false && (
+          <button
+            onClick={() => setView("reschedule")}
+            disabled={booking.status !== "confirmed"}
+            className="flex-1 bg-[#C5A059] text-[#020617] font-cinzel text-[9px] uppercase tracking-widest py-3 hover:bg-[#C5A059]/90 disabled:opacity-40 transition"
+          >
+            Reprogramar
+          </button>
+        )}
+        {booking.allow_cancellation !== false && (
+          <button
+            onClick={() => setView("cancel-confirm")}
+            disabled={booking.status !== "confirmed"}
+            className="flex-1 border border-white/20 text-gray-400 font-cinzel text-[9px] uppercase tracking-widest py-3 hover:border-red-500/40 hover:text-red-400 disabled:opacity-40 transition"
+          >
+            Cancelar reserva
+          </button>
+        )}
       </div>
     </div>
   );

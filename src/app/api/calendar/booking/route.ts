@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { rateLimit, getIp } from "@/lib/rate-limit";
+import { getEventTypes } from "@/lib/booking-config";
 
 export async function GET(req: NextRequest) {
   const ip = getIp(req.headers);
@@ -26,5 +27,15 @@ export async function GET(req: NextRequest) {
 
   if (!data) return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
 
-  return NextResponse.json({ booking: data });
+  // Attach cancellation/reschedule policy from event type (defaults to allow both)
+  const eventTypes = await getEventTypes(false);
+  const eventType = eventTypes.find((e) => e.slug === data.type);
+
+  return NextResponse.json({
+    booking: {
+      ...data,
+      allow_cancellation: eventType?.allow_cancellation ?? true,
+      allow_reschedule: eventType?.allow_reschedule ?? true,
+    },
+  });
 }

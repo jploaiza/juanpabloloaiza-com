@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     color = "#C5A059", description, sort_order = 99,
     booking_questions = [], requires_confirmation = false,
     redirect_url, max_active_per_email = 0,
+    allow_cancellation = true, allow_reschedule = true, cancellation_cutoff_hours = 0,
   } = body;
 
   if (!slug || !label || !duration_min) {
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
       color, description, sort_order,
       booking_questions, requires_confirmation,
       redirect_url, max_active_per_email,
+      allow_cancellation, allow_reschedule, cancellation_cutoff_hours,
     })
     .select()
     .single();

@@ -22,6 +22,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     "label", "duration_min", "buffer_before_min", "buffer_after_min",
     "color", "description", "sort_order", "is_active",
     "booking_questions", "requires_confirmation", "redirect_url", "max_active_per_email",
+    "allow_cancellation", "allow_reschedule", "cancellation_cutoff_hours",
   ];
   const patch: Record<string, unknown> = {};
   for (const key of allowed) {

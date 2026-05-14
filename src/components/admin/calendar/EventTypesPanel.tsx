@@ -26,12 +26,16 @@ interface EventType {
   requires_confirmation: boolean;
   redirect_url: string;
   max_active_per_email: number;
+  allow_cancellation: boolean;
+  allow_reschedule: boolean;
+  cancellation_cutoff_hours: number;
 }
 
 const EMPTY: Omit<EventType, "id"> = {
   slug: "", label: "", duration_min: 60, buffer_before_min: 0, buffer_after_min: 0,
   color: "#C5A059", description: "", sort_order: 99, is_active: true,
   booking_questions: [], requires_confirmation: false, redirect_url: "", max_active_per_email: 0,
+  allow_cancellation: true, allow_reschedule: true, cancellation_cutoff_hours: 0,
 };
 
 const INPUT_CLS = "w-full bg-[#020617] border border-white/10 text-white text-sm px-3 py-2 font-crimson";
@@ -147,6 +151,9 @@ export default function EventTypesPanel() {
                     is_active: t.is_active, booking_questions: t.booking_questions ?? [],
                     requires_confirmation: t.requires_confirmation ?? false,
                     redirect_url: t.redirect_url ?? "", max_active_per_email: t.max_active_per_email ?? 0,
+                    allow_cancellation: t.allow_cancellation ?? true,
+                    allow_reschedule: t.allow_reschedule ?? true,
+                    cancellation_cutoff_hours: t.cancellation_cutoff_hours ?? 0,
                   });
                 }}
                 className="p-1.5 text-gray-500 hover:text-[#C5A059] transition"
@@ -261,6 +268,49 @@ export default function EventTypesPanel() {
                 className={INPUT_CLS}
               />
               <p className="text-gray-500 text-xs font-crimson mt-1">0 = sin límite. Recomendado: 1 para entrevistas gratuitas.</p>
+            </div>
+
+            {/* allow_cancellation */}
+            <div className="col-span-2">
+              <label className={LABEL_CLS}>Cancelación</label>
+              <div className="flex items-center gap-3 mb-2">
+                <input
+                  type="checkbox"
+                  id="allow_cancellation"
+                  checked={draft.allow_cancellation}
+                  onChange={(e) => setDraft((d) => ({ ...d, allow_cancellation: e.target.checked }))}
+                  className="w-4 h-4 accent-[#C5A059] cursor-pointer"
+                />
+                <label htmlFor="allow_cancellation" className="font-crimson text-white text-sm cursor-pointer">Permitir cancelación por el paciente</label>
+              </div>
+              {draft.allow_cancellation && (
+                <div>
+                  <label className={LABEL_CLS}>Horas mínimas de anticipación para cancelar</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={draft.cancellation_cutoff_hours}
+                    onChange={(e) => setDraft((d) => ({ ...d, cancellation_cutoff_hours: parseInt(e.target.value) || 0 }))}
+                    className={INPUT_CLS}
+                  />
+                  <p className="text-gray-500 text-xs font-crimson mt-1">0 = sin restricción de tiempo. Ej: 24 = no cancelar con menos de 24h de anticipación.</p>
+                </div>
+              )}
+            </div>
+
+            {/* allow_reschedule */}
+            <div className="col-span-2">
+              <label className={LABEL_CLS}>Reprogramación</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="allow_reschedule"
+                  checked={draft.allow_reschedule}
+                  onChange={(e) => setDraft((d) => ({ ...d, allow_reschedule: e.target.checked }))}
+                  className="w-4 h-4 accent-[#C5A059] cursor-pointer"
+                />
+                <label htmlFor="allow_reschedule" className="font-crimson text-white text-sm cursor-pointer">Permitir reprogramación por el paciente</label>
+              </div>
             </div>
           </div>
 
