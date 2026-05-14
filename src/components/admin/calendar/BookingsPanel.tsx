@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Copy, Check, Filter, X } from "lucide-react";
+import { Loader2, Copy, Check, Filter, X, Ban, CalendarClock } from "lucide-react";
 
 interface Booking {
   id: string;
@@ -39,6 +39,12 @@ interface RejectModal {
   reason: string;
 }
 
+interface CancelModal {
+  bookingId: string;
+  patientName: string;
+  reason: string;
+}
+
 export default function BookingsPanel() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [total, setTotal] = useState(0);
@@ -50,7 +56,9 @@ export default function BookingsPanel() {
   const [copied, setCopied] = useState<string | null>(null);
   const [approving, setApproving] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
   const [rejectModal, setRejectModal] = useState<RejectModal | null>(null);
+  const [cancelModal, setCancelModal] = useState<CancelModal | null>(null);
 
   async function load(p = page) {
     setLoading(true);
@@ -92,6 +100,18 @@ export default function BookingsPanel() {
       });
       if (res.ok) await load(page);
     } finally { setRejecting(null); }
+  }
+
+  async function handleCancel(id: string, reason: string) {
+    setCancelling(id);
+    try {
+      const res = await fetch(`/api/admin/calendar/bookings/${id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cancel_reason: reason }),
+      });
+      if (res.ok) await load(page);
+    } finally { setCancelling(null); }
   }
 
   const totalPages = Math.ceil(total / 20);
@@ -198,6 +218,29 @@ export default function BookingsPanel() {
                     </button>
                   </div>
                 )}
+                {(b.status === "confirmed" || b.status === "pending") && (
+                  <div className="flex gap-2 mt-2 pt-2 border-t border-white/5">
+                    {b.status === "confirmed" && (
+                      <a
+                        href={`/agenda/gestionar?code=${b.booking_code}&action=reschedule`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 font-cinzel text-[8px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 px-3 py-1 hover:bg-[#C5A059]/10 transition"
+                      >
+                        <CalendarClock className="w-2.5 h-2.5" />
+                        Reprogramar
+                      </a>
+                    )}
+                    <button
+                      onClick={() => setCancelModal({ bookingId: b.id, patientName: b.patient_name, reason: "" })}
+                      disabled={cancelling === b.id}
+                      className="flex items-center gap-1.5 font-cinzel text-[8px] uppercase tracking-widest text-red-400 border border-red-500/20 px-3 py-1 hover:bg-red-500/10 disabled:opacity-50 transition"
+                    >
+                      {cancelling === b.id ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Ban className="w-2.5 h-2.5" />}
+                      Cancelar
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -218,6 +261,45 @@ export default function BookingsPanel() {
           )}
         </>
       )}
+      {/* Cancel modal */}
+      {cancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#0a1628] border border-white/10 p-6 w-full max-w-sm mx-4">
+            <h3 className="font-cinzel text-white text-xs uppercase tracking-widest mb-1">Cancelar reserva</h3>
+            <p className="font-crimson text-gray-400 text-sm mb-4">{cancelModal.patientName}</p>
+            <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-2">
+              Motivo <span className="text-gray-600">(opcional)</span>
+            </label>
+            <textarea
+              value={cancelModal.reason}
+              onChange={e => setCancelModal(m => m ? { ...m, reason: e.target.value } : null)}
+              rows={3}
+              placeholder="Ej: Conflicto de agenda, reagendaremos…"
+              className="w-full bg-[#020617] border border-white/10 text-white px-3 py-2 font-crimson text-sm focus:outline-none focus:border-red-500/40 transition resize-none placeholder-gray-600 mb-4"
+              maxLength={500}
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setCancelModal(null)}
+                className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 border border-white/10 px-4 py-2 hover:border-white/20 transition"
+              >
+                Volver
+              </button>
+              <button
+                onClick={async () => {
+                  const { bookingId, reason } = cancelModal;
+                  setCancelModal(null);
+                  await handleCancel(bookingId, reason);
+                }}
+                className="font-cinzel text-[9px] uppercase tracking-widest text-red-400 border border-red-500/30 px-4 py-2 hover:bg-red-500/10 transition"
+              >
+                Confirmar cancelación
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reject modal */}
       {rejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
