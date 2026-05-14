@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Save, AlertCircle, Check } from "lucide-react";
+import { Loader2, Save, AlertCircle, Check, Copy } from "lucide-react";
 
 interface WorkingHours {
   mon: [number, number] | null;
@@ -17,6 +17,8 @@ interface CalendarConfig {
   working_hours: WorkingHours;
   slot_step_min: number;
   lead_time_min: number;
+  buffer_before_min: number;
+  buffer_after_min: number;
   lookahead_days: number;
   max_bookings_per_day: number;
   from_email: string;
@@ -38,6 +40,8 @@ const DEFAULT_CFG: CalendarConfig = {
   working_hours: { mon: [9, 19], tue: [9, 19], wed: [9, 19], thu: [9, 19], fri: [9, 19], sat: null, sun: null },
   slot_step_min: 30,
   lead_time_min: 30,
+  buffer_before_min: 0,
+  buffer_after_min: 0,
   lookahead_days: 60,
   max_bookings_per_day: 8,
   from_email: "",
@@ -88,6 +92,18 @@ export default function GeneralSettings() {
     });
   }
 
+  function copyToAll(dow: keyof WorkingHours) {
+    setConfig((c) => {
+      const hours = c.working_hours[dow];
+      if (!hours) return c;
+      const next = { ...c.working_hours };
+      for (const key of Object.keys(next) as (keyof WorkingHours)[]) {
+        next[key] = [hours[0], hours[1]];
+      }
+      return { ...c, working_hours: next };
+    });
+  }
+
   if (loading) return <div className="flex items-center gap-2 text-gray-500"><Loader2 className="w-4 h-4 animate-spin" /> Cargando…</div>;
 
   return (
@@ -113,7 +129,7 @@ export default function GeneralSettings() {
                   <span className="font-crimson text-sm text-gray-300">{label}</span>
                 </div>
                 {hours ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1">
                     <input
                       type="number" min={0} max={23} value={hours[0]}
                       onChange={(e) => setHours(dow, 0, parseInt(e.target.value))}
@@ -126,6 +142,14 @@ export default function GeneralSettings() {
                       className="w-16 bg-[#020617] border border-white/10 text-white text-sm px-2 py-1 font-crimson"
                     />
                     <span className="text-gray-500 text-xs">hrs</span>
+                    <button
+                      type="button"
+                      onClick={() => copyToAll(dow)}
+                      title="Copiar a todos los días"
+                      className="ml-2 flex items-center gap-1 font-cinzel text-[8px] uppercase tracking-widest text-gray-500 border border-white/10 px-2 py-1 hover:text-[#C5A059] hover:border-[#C5A059]/30 transition"
+                    >
+                      <Copy className="w-2.5 h-2.5" /> Copiar a todos
+                    </button>
                   </div>
                 ) : (
                   <span className="font-crimson text-gray-600 text-sm">Cerrado</span>
@@ -143,6 +167,8 @@ export default function GeneralSettings() {
           {[
             { label: "Paso de slot (min)", key: "slot_step_min", min: 5, max: 120 },
             { label: "Lead time (min)", key: "lead_time_min", min: 0, max: 1440 },
+            { label: "Tiempo previo a la sesión (min)", key: "buffer_before_min", min: 0, max: 120 },
+            { label: "Tiempo posterior a la sesión (min)", key: "buffer_after_min", min: 0, max: 120 },
             { label: "Días adelante", key: "lookahead_days", min: 1, max: 365 },
             { label: "Máx. citas/día", key: "max_bookings_per_day", min: 1, max: 50 },
           ].map(({ label, key, min, max }) => (
