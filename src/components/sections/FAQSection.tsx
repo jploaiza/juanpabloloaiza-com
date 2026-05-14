@@ -95,8 +95,8 @@ function useVideoAutoplay(active: boolean) {
 }
 
 // Desktop: single video panel (shared, swaps content)
-function DesktopVideoPanel({ faq, index }: { faq: typeof faqs[0]; index: number }) {
-  const videoRef = useVideoAutoplay(true);
+function DesktopVideoPanel({ faq, index, autoplay }: { faq: typeof faqs[0]; index: number; autoplay: boolean }) {
+  const videoRef = useVideoAutoplay(autoplay);
   return (
     <div className="flex flex-col items-center w-full">
       <HeraldFrame size={64} className="w-full max-w-[280px] sm:max-w-[320px]">
@@ -230,6 +230,7 @@ function MobileAccordionItem({
 
 export default function FAQSection() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const handleSelect = (index: number) => {
     if (typeof document !== "undefined") {
@@ -238,6 +239,7 @@ export default function FAQSection() {
         v.currentTime = 0;
       });
     }
+    setHasInteracted(true);
     setActiveIndex(index);
   };
 
@@ -292,7 +294,7 @@ export default function FAQSection() {
             viewport={{ once: true }}
             className="lg:sticky lg:top-32 flex justify-center"
           >
-            <DesktopVideoPanel faq={faqs[activeIndex]} index={activeIndex} />
+            <DesktopVideoPanel faq={faqs[activeIndex]} index={activeIndex} autoplay={hasInteracted} />
           </motion.div>
 
           <motion.div
