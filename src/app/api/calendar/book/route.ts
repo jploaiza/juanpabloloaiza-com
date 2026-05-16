@@ -329,8 +329,6 @@ export async function POST(req: NextRequest) {
       startIso: startDate.toISOString(),
       endIso: endDate.toISOString(),
       timeZone: BOOKING_TZ,
-      attendeeEmail: email.trim().toLowerCase(),
-      attendeeName: safeName,
     });
     eventLink = created.htmlLink;
     googleEventId = created.id;

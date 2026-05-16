@@ -283,8 +283,6 @@ export interface NewCalendarEvent {
   startIso: string;
   endIso: string;
   timeZone: string;
-  attendeeEmail: string;
-  attendeeName: string;
 }
 
 export async function createCalendarEvent(
@@ -297,7 +295,6 @@ export async function createCalendarEvent(
     description: event.description,
     start: { dateTime: event.startIso, timeZone: event.timeZone },
     end: { dateTime: event.endIso, timeZone: event.timeZone },
-    attendees: [{ email: event.attendeeEmail, displayName: event.attendeeName }],
     reminders: {
       useDefault: false,
       overrides: [

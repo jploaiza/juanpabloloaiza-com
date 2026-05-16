@@ -140,8 +140,6 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       startIso: startDate.toISOString(),
       endIso: endDate.toISOString(),
       timeZone: BOOKING_TZ,
-      attendeeEmail: (booking.patient_email as string).toLowerCase(),
-      attendeeName: safeName,
     });
     eventLink = created.htmlLink;
     googleEventId = created.id;
