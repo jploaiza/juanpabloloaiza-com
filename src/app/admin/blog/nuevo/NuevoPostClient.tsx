@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import ContentEditor from "@/components/admin/ContentEditor";
-import { ArrowLeft, X, Plus, Upload, Sparkles, ImagePlus, FileDown, FileUp } from "lucide-react";
+import { ArrowLeft, X, Plus, Upload, Sparkles, ImagePlus, FileDown, FileUp, Wand2, Copy } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Frontmatter parser (no external deps)
@@ -167,6 +167,9 @@ export default function NuevoPostClient({ basePath = "/admin/blog", initialFromT
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [generatingPrompt, setGeneratingPrompt] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
   const [seoImproving, setSeoImproving] = useState(false);
   const [seoError, setSeoError] = useState("");
   const [showAiModal, setShowAiModal] = useState(false);
@@ -294,6 +297,36 @@ export default function NuevoPostClient({ basePath = "/admin/blog", initialFromT
     } finally {
       setSeoImproving(false);
     }
+  };
+
+  const handleGenerateImagePrompt = async () => {
+    if (!title.trim()) { setUploadError("Agrega un título antes de generar el prompt."); return; }
+    setUploadError("");
+    setImagePrompt("");
+    setGeneratingPrompt(true);
+    try {
+      const res = await fetch("/api/admin/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "image-prompt",
+          input: JSON.stringify({ title, excerpt, content }),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setUploadError(data.error ?? "Error al generar prompt."); }
+      else { setImagePrompt(data.prompt ?? ""); }
+    } catch {
+      setUploadError("Error de conexión al generar prompt.");
+    } finally {
+      setGeneratingPrompt(false);
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(imagePrompt);
+    setPromptCopied(true);
+    setTimeout(() => setPromptCopied(false), 2000);
   };
 
   const handleGenerateImage = async () => {
@@ -766,6 +799,15 @@ Párrafos, listas, citas...`}</pre>
                 />
                 <button
                   type="button"
+                  onClick={handleGenerateImagePrompt}
+                  disabled={generatingPrompt || uploading || generatingImage}
+                  className="px-3 py-3 bg-emerald-900/30 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/50 disabled:opacity-50 transition-colors"
+                  title="Generar prompt para Midjourney / DALL-E / Stable Diffusion"
+                >
+                  <Wand2 className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
                   onClick={handleGenerateImage}
                   disabled={generatingImage || uploading}
                   className="px-3 py-3 bg-purple-900/30 border border-purple-500/30 text-purple-300 hover:bg-purple-900/50 disabled:opacity-50 transition-colors"
@@ -790,10 +832,33 @@ Párrafos, listas, citas...`}</pre>
                   onChange={handleImageUpload}
                 />
               </div>
-              {(uploading || generatingImage) && (
+              {(uploading || generatingImage || generatingPrompt) && (
                 <p className="font-cinzel text-[9px] tracking-widest text-[#C5A059]/60 mt-1">
-                  {generatingImage ? "Generando imagen con IA (~20s)..." : "Subiendo..."}
+                  {generatingPrompt ? "Generando prompt..." : generatingImage ? "Generando imagen con IA (~20s)..." : "Subiendo..."}
                 </p>
+              )}
+              {imagePrompt && !generatingPrompt && (
+                <div className="mt-3">
+                  <p className="font-cinzel text-[8px] uppercase tracking-widest text-emerald-400/80 mb-1.5">
+                    Prompt generado — copia y usa en Midjourney / DALL-E / Stable Diffusion
+                  </p>
+                  <div className="flex gap-2">
+                    <textarea
+                      value={imagePrompt}
+                      onChange={(e) => setImagePrompt(e.target.value)}
+                      rows={4}
+                      className="flex-1 bg-black/40 border border-emerald-500/20 text-gray-300 font-mono text-[11px] px-3 py-2 resize-none focus:outline-none focus:border-emerald-500/40 leading-relaxed"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyPrompt}
+                      className="self-start px-3 py-2 bg-emerald-900/20 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-900/40 transition-colors"
+                      title="Copiar al portapapeles"
+                    >
+                      {promptCopied ? <span className="font-cinzel text-[8px] uppercase tracking-widest">✓</span> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
               )}
               {uploadError && <p className="text-red-400 text-xs font-crimson mt-1">{uploadError}</p>}
               {featuredImageUrl && !uploading && !generatingImage && (

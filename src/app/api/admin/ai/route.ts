@@ -79,6 +79,28 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, s
   "excerpt": "extracto del artículo para listados, máximo 300 caracteres, engancha al lector"
 }`;
 
+const IMAGE_PROMPT_PROMPT = (title: string, excerpt: string, content: string) => `You are a professional image prompt engineer for AI image generators (Midjourney, Stable Diffusion, DALL-E 3).
+
+Based on this blog post:
+Title: ${title}
+Excerpt: ${excerpt}
+Content preview: ${content.slice(0, 800)}
+
+Generate a single, detailed image generation prompt in English that:
+- Captures the emotional and thematic essence of the article
+- Cinematic photography style, hyperrealistic
+- Real photograph look — NOT illustration, NOT digital art, NOT painting
+- 16:9 aspect ratio, ultra-wide composition
+- Ultra-high quality, 8K resolution, extreme detail
+- Specific natural lighting: golden hour, soft diffuse light, or dramatic shadows depending on topic mood
+- Specific composition and depth: rule of thirds, shallow depth of field, bokeh background
+- No people, no faces, no hands, no text overlays, no watermarks
+- Atmospheric, evocative, spiritually meaningful
+- Use photography/cinema terminology: f/1.4 aperture, 85mm lens, RAW, HDR, etc.
+- End with: --ar 16:9 --q 2 --style raw
+
+Return ONLY the prompt string. No explanation, no quotes, no labels.`;
+
 const IMPROVE_FIELDS_PROMPT = (
   fields: string[],
   data: { title: string; excerpt: string; content: string; tags: string[]; seoTitle: string; seoDescription: string }
@@ -137,7 +159,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { action, input } = body as { action: string; input: string };
 
-  const VALID_ACTIONS = new Set(["generate", "generate-full", "improve", "seo", "improve-fields"]);
+  const VALID_ACTIONS = new Set(["generate", "generate-full", "improve", "seo", "improve-fields", "image-prompt"]);
   if (!action || !VALID_ACTIONS.has(action)) {
     return NextResponse.json({ error: "Acción inválida." }, { status: 400 });
   }
@@ -168,6 +190,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Selecciona al menos un campo." }, { status: 400 });
     }
     prompt = IMPROVE_FIELDS_PROMPT(parsed.fields, parsed);
+  } else if (action === "image-prompt") {
+    let parsed: { title: string; excerpt: string; content: string };
+    try {
+      parsed = JSON.parse(input);
+    } catch {
+      return NextResponse.json({ error: "Input inválido para image-prompt." }, { status: 400 });
+    }
+    prompt = IMAGE_PROMPT_PROMPT(parsed.title ?? "", parsed.excerpt ?? "", parsed.content ?? "");
   } else if (action === "generate-full") {
     prompt = GENERATE_FULL_PROMPT(input);
   } else {
@@ -241,6 +271,10 @@ export async function POST(req: NextRequest) {
     } catch {
       return NextResponse.json({ error: "IA no devolvió JSON válido.", raw }, { status: 500 });
     }
+  }
+
+  if (action === "image-prompt") {
+    return NextResponse.json({ prompt: raw.trim() });
   }
 
   return NextResponse.json({ content: raw });
