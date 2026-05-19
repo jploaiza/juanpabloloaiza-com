@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp, ExternalLink, Bookmark, FileText, Copy, Check } from "lucide-react";
+import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp, ExternalLink, Bookmark, FileText, Copy, Check, Download } from "lucide-react";
 
 type Tab = "ideas" | "trends" | "gsc" | "saved";
 type Geo = "ES" | "US" | "MX" | "CL" | "ALL";
@@ -371,6 +371,64 @@ export default function TrendsPanel() {
     } finally {
       setReportGenerating(false);
     }
+  };
+
+  const downloadReportMd = (report: TrendReport, keyword: string, geoVal: string) => {
+    const slug = keyword.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const md = `---
+keyword: "${keyword}"
+geo: "${geoVal}"
+generated_at: "${new Date().toISOString().slice(0, 10)}"
+titulo_sugerido: "${report.titulo_sugerido}"
+meta_description: "${report.meta_description}"
+tags: [${report.tags.map((t) => `"${t}"`).join(", ")}]
+oportunidad_seo: "${report.oportunidad_seo}"
+intencion_busqueda: "${report.intencion_busqueda}"
+---
+
+# Informe de tendencia: ${keyword}
+
+## Resumen estratégico
+
+${report.resumen_estrategico}
+
+## Keywords principales
+
+${report.keywords_principales.map((k) => `- ${k}`).join("\n")}
+
+## Keywords LSI / semánticas
+
+${report.keywords_lsi.map((k) => `- ${k}`).join("\n")}
+
+## Foco TRVP
+
+${report.foco_trvp}
+
+## Ángulo principal
+
+**${report.angulo_principal}**
+
+## Ángulos alternativos
+
+${report.angulos_secundarios.map((a, i) => `${i + 1}. ${a}`).join("\n")}
+
+## SEO
+
+**Título sugerido:** ${report.titulo_sugerido}
+
+**Meta description:** ${report.meta_description}
+
+## Tags recomendados
+
+${report.tags.map((t) => `\`${t}\``).join(" · ")}
+`;
+    const blob = new Blob([md], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `informe-tendencia-${slug}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const copyField = (text: string, key: string) => {
@@ -1080,7 +1138,7 @@ export default function TrendsPanel() {
                   </div>
 
                   {/* CTA */}
-                  <div className="pt-2 border-t border-white/5 flex gap-3">
+                  <div className="pt-2 border-t border-white/5 flex flex-wrap gap-3">
                     <Link
                       href={`/academy/admin/blog/nuevo?prefillTitle=${encodeURIComponent(reportData.titulo_sugerido)}&prefillSeoTitle=${encodeURIComponent(reportData.titulo_sugerido)}&prefillSeoDesc=${encodeURIComponent(reportData.meta_description)}&prefillTags=${encodeURIComponent(reportData.tags.join(","))}&from=trend&keyword=${encodeURIComponent(reportKeyword)}&geo=${encodeURIComponent(reportGeo)}`}
                       className="flex items-center gap-2 px-4 py-2.5 bg-[#C5A059] hover:bg-[#d4b06a] text-[#020617] font-cinzel text-[9px] uppercase tracking-widest transition-colors"
@@ -1088,6 +1146,13 @@ export default function TrendsPanel() {
                       <FileText className="w-3.5 h-3.5" />
                       Crear artículo
                     </Link>
+                    <button
+                      onClick={() => downloadReportMd(reportData, reportKeyword, reportGeo)}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Descargar .MD
+                    </button>
                     <button
                       onClick={() => setReportModalOpen(false)}
                       className="px-4 py-2.5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
