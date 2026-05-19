@@ -79,6 +79,33 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, s
   "excerpt": "extracto del artículo para listados, máximo 300 caracteres, engancha al lector"
 }`;
 
+const TREND_REPORT_PROMPT = (keyword: string, geo: string, source: string, score: number) => {
+  const geoLabel: Record<string, string> = { ES: "España", US: "Estados Unidos (hispanos)", MX: "México", CL: "Chile", ALL: "Latinoamérica" };
+  return `Eres un experto en estrategia de contenido digital para espiritualidad, psicología transpersonal y terapias alternativas en español. Trabajas para Juan Pablo Loaiza, terapeuta chileno especializado en TRVP (Terapia de Regresión a Vidas Pasadas), hipnosis terapéutica y sanación espiritual.
+
+Analiza esta tendencia de búsqueda y genera un informe estratégico completo:
+
+TENDENCIA: "${keyword}"
+MERCADO: ${geoLabel[geo] ?? geo}
+FUENTE: ${source === "trends" ? "Google Trends" : source === "gsc" ? "Google Search Console" : "Manual"}
+SCORE DE OPORTUNIDAD: ${score}/100
+
+Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, sin bloques de código):
+{
+  "keywords_principales": ["keyword exacta", "variante 1", "variante 2", "variante 3", "variante 4"],
+  "keywords_lsi": ["término relacionado 1", "término relacionado 2", "término relacionado 3", "término relacionado 4", "término relacionado 5", "término relacionado 6", "término relacionado 7", "término relacionado 8"],
+  "intencion_busqueda": "Informacional | Transaccional | Navegacional — explicación de 1 línea sobre qué busca realmente el usuario",
+  "foco_trvp": "Párrafo de 3-4 líneas explicando cómo conectar ESPECÍFICAMENTE esta tendencia con TRVP, regresiones a vidas pasadas, hipnosis terapéutica o sanación espiritual. Debe ser el ángulo único de Juan Pablo Loaiza.",
+  "angulo_principal": "Título del ángulo principal recomendado en español — máx 80 chars. Debe incluir la keyword y conectar con TRVP o espiritualidad.",
+  "angulos_secundarios": ["Ángulo 2 — máx 80 chars", "Ángulo 3 — máx 80 chars", "Ángulo 4 — máx 80 chars"],
+  "oportunidad_seo": "Alta | Media | Baja — justificación de 1 línea: volumen estimado, competencia y relevancia para el nicho TRVP",
+  "titulo_sugerido": "Título SEO óptimo con keyword natural en español, máx 60 chars",
+  "meta_description": "Meta description persuasiva para Google, máx 155 chars, con CTA implícito",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6"],
+  "resumen_estrategico": "Párrafo de 2-3 líneas resumiendo por qué esta tendencia es relevante AHORA para el nicho TRVP y cuál es la prioridad de acción inmediata."
+}`;
+};
+
 const IMAGE_PROMPT_PROMPT = (title: string, excerpt: string, content: string) => `You are a professional image prompt engineer for AI image generators (Midjourney, Stable Diffusion, DALL-E 3).
 
 Based on this blog post:
@@ -159,7 +186,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { action, input } = body as { action: string; input: string };
 
-  const VALID_ACTIONS = new Set(["generate", "generate-full", "improve", "seo", "improve-fields", "image-prompt"]);
+  const VALID_ACTIONS = new Set(["generate", "generate-full", "improve", "seo", "improve-fields", "image-prompt", "trend-report"]);
   if (!action || !VALID_ACTIONS.has(action)) {
     return NextResponse.json({ error: "Acción inválida." }, { status: 400 });
   }
@@ -190,6 +217,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Selecciona al menos un campo." }, { status: 400 });
     }
     prompt = IMPROVE_FIELDS_PROMPT(parsed.fields, parsed);
+  } else if (action === "trend-report") {
+    let parsed: { keyword: string; geo: string; source: string; opportunity_score: number };
+    try {
+      parsed = JSON.parse(input);
+    } catch {
+      return NextResponse.json({ error: "Input inválido para trend-report." }, { status: 400 });
+    }
+    prompt = TREND_REPORT_PROMPT(parsed.keyword ?? "", parsed.geo ?? "ES", parsed.source ?? "trends", parsed.opportunity_score ?? 0);
   } else if (action === "image-prompt") {
     let parsed: { title: string; excerpt: string; content: string };
     try {
@@ -275,6 +310,16 @@ export async function POST(req: NextRequest) {
 
   if (action === "image-prompt") {
     return NextResponse.json({ prompt: raw.trim() });
+  }
+
+  if (action === "trend-report") {
+    try {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+      return NextResponse.json(parsed);
+    } catch {
+      return NextResponse.json({ error: "IA no devolvió JSON válido.", raw }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ content: raw });

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp, ExternalLink, Bookmark } from "lucide-react";
+import { TrendingUp, Search, Lightbulb, RefreshCw, ArrowUpRight, CheckCircle, XCircle, Plus, X, ChevronDown, ChevronUp, ExternalLink, Bookmark, FileText, Copy, Check } from "lucide-react";
 
 type Tab = "ideas" | "trends" | "gsc" | "saved";
 type Geo = "ES" | "US" | "MX" | "CL" | "ALL";
@@ -59,6 +59,20 @@ interface GlobalTrend {
   interest_score: number;
   geo: string;
   rising: boolean;
+}
+
+interface TrendReport {
+  keywords_principales: string[];
+  keywords_lsi: string[];
+  intencion_busqueda: string;
+  foco_trvp: string;
+  angulo_principal: string;
+  angulos_secundarios: string[];
+  oportunidad_seo: string;
+  titulo_sugerido: string;
+  meta_description: string;
+  tags: string[];
+  resumen_estrategico: string;
 }
 
 interface SavedItem {
@@ -184,6 +198,13 @@ export default function TrendsPanel() {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportGenerating, setReportGenerating] = useState(false);
+  const [reportData, setReportData] = useState<TrendReport | null>(null);
+  const [reportKeyword, setReportKeyword] = useState("");
+  const [reportGeo, setReportGeo] = useState("");
+  const [reportError, setReportError] = useState("");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const fetchData = useCallback(async (currentGeo: Geo, currentTab: Tab) => {
     if (currentTab === "saved") return;
@@ -319,6 +340,43 @@ export default function TrendsPanel() {
     await fetch(`/api/admin/trends/saved/${id}`, { method: "DELETE" }).catch(() => {});
     setSavedItems((prev) => prev.filter((i) => i.id !== id));
     setRemovingId(null);
+  };
+
+  const handleGenerateReport = async (idea: ContentIdea) => {
+    setReportKeyword(idea.seed_keyword);
+    setReportGeo(idea.geo || geo);
+    setReportError("");
+    setReportData(null);
+    setReportModalOpen(true);
+    setReportGenerating(true);
+    try {
+      const res = await fetch("/api/admin/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "trend-report",
+          input: JSON.stringify({
+            keyword: idea.seed_keyword,
+            geo: idea.geo || geo,
+            source: idea.source,
+            opportunity_score: idea.opportunity_score,
+          }),
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) setReportError(d.error ?? "Error al generar informe.");
+      else setReportData(d as TrendReport);
+    } catch {
+      setReportError("Error de conexión.");
+    } finally {
+      setReportGenerating(false);
+    }
+  };
+
+  const copyField = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(key);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const formatDate = (iso: string) =>
@@ -578,13 +636,13 @@ export default function TrendsPanel() {
                           </td>
                           <td className="py-3">
                             <div className="flex items-center gap-2">
-                              <Link
-                                href={`/academy/admin/trends/term?q=${encodeURIComponent(idea.seed_keyword)}&geo=${encodeURIComponent(idea.geo || geo)}`}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 font-cinzel text-[8px] uppercase tracking-widest transition-colors"
+                              <button
+                                onClick={() => handleGenerateReport(idea)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500/10 border border-violet-500/30 text-violet-300 hover:bg-violet-500/20 font-cinzel text-[8px] uppercase tracking-widest transition-colors"
                               >
-                                <ArrowUpRight className="w-3 h-3" />
-                                Ver ideas
-                              </Link>
+                                <FileText className="w-3 h-3" />
+                                Informe IA
+                              </button>
                               <button
                                 onClick={() => handleSaveTrend(idea.seed_keyword, idea.geo || geo)}
                                 disabled={savingId === `${idea.seed_keyword}::${idea.geo || geo}`}
@@ -880,6 +938,168 @@ export default function TrendsPanel() {
             </div>
           )}
         </>
+      )}
+
+      {/* Trend Report Modal */}
+      {reportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/60 backdrop-blur-sm">
+          <div className="relative bg-[#0a1628] border-l border-white/10 w-full max-w-2xl h-full overflow-y-auto flex flex-col">
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-[#0a1628] border-b border-white/10 px-6 py-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="font-cinzel text-[8px] uppercase tracking-widest text-violet-400 mb-0.5">Informe de tendencia</p>
+                <h2 className="font-cinzel text-base text-white leading-tight">{reportKeyword}</h2>
+                <p className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 mt-0.5">{reportGeo}</p>
+              </div>
+              <button
+                onClick={() => setReportModalOpen(false)}
+                className="shrink-0 p-2 text-gray-600 hover:text-white transition mt-0.5"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 px-6 py-6 space-y-6">
+              {reportGenerating && (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <RefreshCw className="w-6 h-6 text-violet-400 animate-spin" />
+                  <p className="font-cinzel text-[10px] uppercase tracking-widest text-gray-500">Analizando tendencia...</p>
+                </div>
+              )}
+              {reportError && (
+                <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 font-crimson text-sm text-red-300">
+                  {reportError}
+                </div>
+              )}
+              {reportData && (
+                <>
+                  {/* Resumen estratégico */}
+                  <div className="bg-violet-500/5 border border-violet-500/20 px-5 py-4">
+                    <p className="font-cinzel text-[9px] uppercase tracking-widest text-violet-400 mb-2">Resumen estratégico</p>
+                    <p className="font-crimson text-sm text-gray-200 leading-relaxed">{reportData.resumen_estrategico}</p>
+                  </div>
+
+                  {/* Keywords */}
+                  <div>
+                    <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/80 mb-3">Keywords principales</p>
+                    <div className="flex flex-wrap gap-2">
+                      {reportData.keywords_principales.map((kw) => (
+                        <span key={kw} className="px-3 py-1 bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] font-cinzel text-[9px] uppercase tracking-widest">
+                          {kw}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600 mb-3">Keywords LSI / semánticas</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {reportData.keywords_lsi.map((kw) => (
+                        <span key={kw} className="px-2.5 py-1 bg-white/[0.03] border border-white/10 text-gray-400 font-cinzel text-[8px] uppercase tracking-widest">
+                          {kw}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Intención + Oportunidad */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-[#16213e] border border-white/5 px-4 py-3">
+                      <p className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 mb-1.5">Intención de búsqueda</p>
+                      <p className="font-crimson text-sm text-gray-200">{reportData.intencion_busqueda}</p>
+                    </div>
+                    <div className="bg-[#16213e] border border-white/5 px-4 py-3">
+                      <p className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 mb-1.5">Oportunidad SEO</p>
+                      <p className="font-crimson text-sm text-gray-200">{reportData.oportunidad_seo}</p>
+                    </div>
+                  </div>
+
+                  {/* Foco TRVP */}
+                  <div className="bg-[#C5A059]/5 border border-[#C5A059]/15 px-5 py-4">
+                    <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/80 mb-2">Foco TRVP</p>
+                    <p className="font-crimson text-sm text-gray-200 leading-relaxed">{reportData.foco_trvp}</p>
+                  </div>
+
+                  {/* Ángulos */}
+                  <div>
+                    <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-3">Ángulo principal</p>
+                    <div className="bg-emerald-500/5 border border-emerald-500/20 px-4 py-3 mb-2">
+                      <p className="font-crimson text-sm text-emerald-200">{reportData.angulo_principal}</p>
+                    </div>
+                    <p className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 mt-3 mb-2">Ángulos alternativos</p>
+                    <div className="space-y-1.5">
+                      {reportData.angulos_secundarios.map((a, i) => (
+                        <div key={i} className="bg-[#16213e] border border-white/5 px-4 py-2">
+                          <p className="font-crimson text-sm text-gray-300">{a}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SEO Title + Meta */}
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500">Título SEO sugerido</p>
+                        <button onClick={() => copyField(reportData.titulo_sugerido, "titulo")} className="flex items-center gap-1 text-gray-600 hover:text-[#C5A059] transition">
+                          {copiedField === "titulo" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          <span className="font-cinzel text-[7px] uppercase tracking-widest">{copiedField === "titulo" ? "Copiado" : "Copiar"}</span>
+                        </button>
+                      </div>
+                      <div className="bg-[#16213e] border border-white/10 px-4 py-2.5">
+                        <p className="font-crimson text-sm text-white">{reportData.titulo_sugerido}</p>
+                        <p className="font-cinzel text-[8px] text-gray-600 mt-1">{reportData.titulo_sugerido.length}/60 chars</p>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500">Meta description</p>
+                        <button onClick={() => copyField(reportData.meta_description, "meta")} className="flex items-center gap-1 text-gray-600 hover:text-[#C5A059] transition">
+                          {copiedField === "meta" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          <span className="font-cinzel text-[7px] uppercase tracking-widest">{copiedField === "meta" ? "Copiado" : "Copiar"}</span>
+                        </button>
+                      </div>
+                      <div className="bg-[#16213e] border border-white/10 px-4 py-2.5">
+                        <p className="font-crimson text-sm text-gray-200">{reportData.meta_description}</p>
+                        <p className="font-cinzel text-[8px] text-gray-600 mt-1">{reportData.meta_description.length}/155 chars</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div>
+                    <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600 mb-2">Tags recomendados</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {reportData.tags.map((tag) => (
+                        <span key={tag} className="px-2.5 py-1 bg-white/[0.03] border border-white/10 text-gray-400 font-cinzel text-[8px] uppercase tracking-widest">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CTA */}
+                  <div className="pt-2 border-t border-white/5 flex gap-3">
+                    <Link
+                      href={`/academy/admin/blog/nuevo?prefillTitle=${encodeURIComponent(reportData.titulo_sugerido)}&prefillSeoTitle=${encodeURIComponent(reportData.titulo_sugerido)}&prefillSeoDesc=${encodeURIComponent(reportData.meta_description)}&prefillTags=${encodeURIComponent(reportData.tags.join(","))}&from=trend&keyword=${encodeURIComponent(reportKeyword)}&geo=${encodeURIComponent(reportGeo)}`}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-[#C5A059] hover:bg-[#d4b06a] text-[#020617] font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Crear artículo
+                    </Link>
+                    <button
+                      onClick={() => setReportModalOpen(false)}
+                      className="px-4 py-2.5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Last run errors */}
