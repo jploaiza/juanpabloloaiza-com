@@ -66,12 +66,17 @@ export async function GET(req: NextRequest) {
 
   const adminSb = await createAdminClient();
 
-  // Current Chile time (UTC-4)
-  const nowChile = new Date(Date.now() - 4 * 60 * 60 * 1000);
-  const chileDay = nowChile.getUTCDay();
-  const chileHour = nowChile.getUTCHours();
-  const chileMinute = nowChile.getUTCMinutes();
-  const todayStr = nowChile.toISOString().split("T")[0];
+  // Current Chile time — read directly from America/Santiago, no offset arithmetic
+  const _fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Santiago",
+    weekday: "short", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  });
+  const _p = Object.fromEntries(_fmt.formatToParts(new Date()).map(({ type, value }) => [type, value]));
+  const chileDay = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(_p.weekday);
+  const chileHour = parseInt(_p.hour);
+  const chileMinute = parseInt(_p.minute);
+  const todayStr = `${_p.year}-${_p.month}-${_p.day}`;
 
   // Load saved templates from Supabase
   const { data: settingsRows } = await adminSb.from("crm_settings").select("key, value");

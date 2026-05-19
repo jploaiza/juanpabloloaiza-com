@@ -12,16 +12,9 @@ import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
 
 export async function POST(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET ?? "";
-  // Require a minimum-length secret so timingSafeEqual is not trivially brute-forced.
-  if (cronSecret.length < 32) {
-    console.error("[cron] CRON_SECRET is not set or is too short (< 32 chars). Refusing to run.");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const auth = req.headers.get("authorization") ?? "";
-  const expected = Buffer.from(`Bearer ${cronSecret}`);
-  const incoming = Buffer.from(auth);
-  if (incoming.length === 0 || incoming.length !== expected.length || !timingSafeEqual(incoming, expected)) {
+  const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");
+  const expected = Buffer.from(process.env.CRON_SECRET ?? "");
+  if (secret.length === 0 || secret.length !== expected.length || !timingSafeEqual(secret, expected)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
