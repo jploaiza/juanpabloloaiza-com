@@ -64,6 +64,7 @@ export async function GET(req: NextRequest) {
     { data: lastRunData },
     { data: globalTrendsRaw },
     { data: timelineRaw },
+    { data: topByGeoRaw },
   ] = await Promise.all([
     tab === "ideas" ? Promise.resolve({ data: [] }) : topTrendsQ,
     tab === "gsc" ? Promise.resolve({ data: [] }) : risingQ,
@@ -113,6 +114,19 @@ export async function GET(req: NextRequest) {
         .order("recorded_date", { ascending: true });
       if (geo !== "ALL") q = q.eq("geo", geo);
       return q.limit(500);
+    })(),
+    // Top keywords by interest score for the selected geo (best proxy for "trending now")
+    (() => {
+      let q = adminSb
+        .from("trends_snapshots")
+        .select("keyword,geo,interest_score,seed_keyword,rising")
+        .eq("source", "related_query")
+        .gte("captured_at", sevenDaysAgo)
+        .not("interest_score", "is", null)
+        .order("interest_score", { ascending: false })
+        .limit(50);
+      if (geo !== "ALL") q = q.eq("geo", geo);
+      return q;
     })(),
   ]);
 
@@ -171,6 +185,25 @@ export async function GET(req: NextRequest) {
     .filter(([, pts]) => pts.length >= 2)
     .map(([keyword, points]) => ({ keyword, points }));
 
+  // Top searched terms for the selected geo — deduplicated, top 10 by interest score
+  type TopByGeoItem = { keyword: string; geo: string; interest_score: number; seed_keyword: string | null; rising: boolean };
+  const topByGeoMap: Record<string, TopByGeoItem> = {};
+  for (const t of topByGeoRaw ?? []) {
+    const existing = topByGeoMap[t.keyword];
+    if (!existing || (t.interest_score ?? 0) > (existing.interest_score ?? 0)) {
+      topByGeoMap[t.keyword] = {
+        keyword: t.keyword,
+        geo: t.geo ?? "",
+        interest_score: t.interest_score ?? 0,
+        seed_keyword: t.seed_keyword ?? null,
+        rising: t.rising ?? false,
+      };
+    }
+  }
+  const topByGeo: TopByGeoItem[] = Object.values(topByGeoMap)
+    .sort((a, b) => b.interest_score - a.interest_score)
+    .slice(0, 10);
+
   return NextResponse.json({
     topTrends,
     risingQueries,
@@ -180,6 +213,7 @@ export async function GET(req: NextRequest) {
     lastRun,
     globalTrends,
     interestTimeline,
+    topByGeo,
     kpis: {
       newIdeas: newIdeasCount,
       striking: strikingCount,

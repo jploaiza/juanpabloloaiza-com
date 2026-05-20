@@ -96,6 +96,14 @@ interface KeywordTimeline {
   points: TimelinePoint[];
 }
 
+interface TopByGeoItem {
+  keyword: string;
+  geo: string;
+  interest_score: number;
+  seed_keyword: string | null;
+  rising: boolean;
+}
+
 interface ApiData {
   topTrends: TrendItem[];
   risingQueries: TrendItem[];
@@ -106,6 +114,7 @@ interface ApiData {
   kpis: Kpis;
   globalTrends?: GlobalTrend[];
   interestTimeline?: KeywordTimeline[];
+  topByGeo?: TopByGeoItem[];
 }
 
 type SeedCategory = "spiritual" | "clinical" | "world";
@@ -181,12 +190,13 @@ function SourceBadge({ source }: { source: string }) {
 }
 
 export default function TrendsPanel() {
-  const [geo, setGeo] = useState<Geo>("ES");
+  const [geo, setGeo] = useState<Geo>("ALL");
   const [tab, setTab] = useState<Tab>("ideas");
   const [data, setData] = useState<ApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [syncResult, setSyncResult] = useState<{ ideas: number; seeds: number } | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectError, setRejectError] = useState<string | null>(null);
   const [seedsGrouped, setSeedsGrouped] = useState<SeedsGrouped>({ spiritual: [], clinical: [], world: [] });
@@ -246,16 +256,23 @@ export default function TrendsPanel() {
   const handleRefresh = async () => {
     setRefreshing(true);
     setRefreshError(null);
+    setSyncResult(null);
     try {
-      const res = await fetch("/api/admin/trends/sync", { method: "POST" });
+      const res = await fetch("/api/admin/trends/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ geo }),
+      });
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
         setRefreshError(json.error ?? "Error al recalcular ideas");
+      } else {
+        setSyncResult({ ideas: json.ideas_inserted ?? 0, seeds: json.seeds_fetched ?? 0 });
       }
     } catch {
       setRefreshError("Error de conexión al recalcular ideas.");
     }
-    await fetchData(geo, "ideas");
+    await fetchData(geo, tab === "saved" ? "ideas" : tab);
     if (tab === "saved") fetchSaved();
     setRefreshing(false);
   };
@@ -470,10 +487,24 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
         </button>
       </div>
 
-      {/* Inline error banners */}
+      {/* Inline banners */}
       {refreshError && (
         <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 font-crimson text-sm text-red-300">
           {refreshError}
+        </div>
+      )}
+      {syncResult && !refreshing && (
+        <div className="mb-4 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 font-crimson text-sm text-emerald-300 flex items-center justify-between">
+          <span>
+            {syncResult.seeds > 0
+              ? `${syncResult.seeds} semilla${syncResult.seeds > 1 ? "s" : ""} consultada${syncResult.seeds > 1 ? "s" : ""} en Google Trends · `
+              : ""}
+            {syncResult.ideas} ideas recalculadas.
+            {syncResult.seeds === 0 && " (Sin semillas nuevas — los datos ya estaban actualizados.)"}
+          </span>
+          <button onClick={() => setSyncResult(null)} className="ml-4 text-emerald-500 hover:text-emerald-300 transition">
+            <X className="w-3 h-3" />
+          </button>
         </div>
       )}
       {rejectError && (
@@ -588,16 +619,8 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
                   <div className="flex items-center justify-between mt-2">
                     <p className="font-crimson text-xs text-gray-600">
                     Los términos se usan en la sincronización semanal automática de Google Trends.
+                    Al agregar un término nuevo, usa el botón <strong className="text-[#C5A059]">Recalcular ideas</strong> arriba para consultarlo en Google Trends ahora.
                   </p>
-                    <button
-                      onClick={handleRefresh}
-                      disabled={refreshing}
-                      title="Recalcula las ideas desde los datos ya guardados en la base de datos"
-                      className="flex items-center gap-1.5 px-3 py-1.5 font-cinzel text-[8px] uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30 hover:bg-[#C5A059]/20 transition disabled:opacity-40"
-                    >
-                      <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} />
-                      Ver ideas actualizadas
-                    </button>
                   </div>
                 </div>
               </div>
@@ -648,12 +671,40 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
         <>
           {/* IDEAS TAB */}
           {tab === "ideas" && (
+            <>
+            {/* Top searched terms for the selected geo */}
+            {(data?.topByGeo?.length ?? 0) > 0 && (
+              <AcademyCard>
+                <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-1">
+                  Lo más buscado {geo === "ALL" ? "— todas las regiones" : `— ${geo}`}
+                </h2>
+                <p className="font-crimson text-sm text-gray-600 mb-5">
+                  Términos con mayor volumen de búsqueda en Google Trends relacionados a tus semillas. Crea contenido sobre ellos para captar tráfico real.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {data?.topByGeo?.map((t, i) => (
+                    <Link
+                      key={`${t.keyword}${i}`}
+                      href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo || geo)}`}
+                      className="group flex items-center gap-1.5 px-3 py-1.5 bg-[#16213e] border border-[#C5A059]/15 hover:border-[#C5A059]/50 transition"
+                    >
+                      {t.rising && <TrendingUp className="w-2.5 h-2.5 text-emerald-400 shrink-0" />}
+                      <span className="font-crimson text-sm text-[#C5A059] group-hover:text-[#d4b575]">{t.keyword}</span>
+                      <span className="font-cinzel text-[7px] text-gray-600 ml-1">{t.interest_score}</span>
+                    </Link>
+                  ))}
+                </div>
+              </AcademyCard>
+            )}
             <AcademyCard>
               <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-2">
                 Ideas de contenido
               </h2>
-              <p className="font-crimson text-sm text-gray-600 mb-6">
+              <p className="font-crimson text-sm text-gray-600 mb-1">
                 Ordenadas por oportunidad. Basadas en tendencias subiendo y queries con striking distance en GSC.
+              </p>
+              <p className="font-crimson text-xs text-gray-700 mb-6">
+                <span className="text-[#C5A059]">Score</span> = volumen relativo en Google Trends (0–100) + 50 si la tendencia está subiendo. Máximo 150.
               </p>
               {data?.contentIdeas.length === 0 ? (
                 <div className="py-12 text-center">
@@ -725,6 +776,7 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
                 </div>
               )}
             </AcademyCard>
+            </>
           )}
 
           {/* TRENDS TAB */}
