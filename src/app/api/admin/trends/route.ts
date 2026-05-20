@@ -82,12 +82,16 @@ export async function GET(req: NextRequest) {
       .lte("position", 30)
       .order("impressions", { ascending: false })
       .limit(30),
-    adminSb
-      .from("content_ideas")
-      .select("*")
-      .eq("status", "new")
-      .order("opportunity_score", { ascending: false })
-      .limit(30),
+    (() => {
+      let q = adminSb
+        .from("content_ideas")
+        .select("*")
+        .eq("status", "new")
+        .order("opportunity_score", { ascending: false })
+        .limit(30);
+      if (geo !== "ALL") q = q.eq("geo", geo);
+      return q;
+    })(),
     adminSb
       .from("trends_run_logs")
       .select("run_at,duration_ms,trends_inserted,gsc_inserted,ideas_inserted,errors")

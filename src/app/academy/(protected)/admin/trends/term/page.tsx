@@ -54,5 +54,5 @@ export default async function TermPage({
     }
   }
 
-  return <KeywordIdeasPanel keyword={keyword} geo={geo} initialAngle={initialAngle} />;
+  return <KeywordIdeasPanel key={`${keyword}:${geo}`} keyword={keyword} geo={geo} initialAngle={initialAngle} />;
 }
