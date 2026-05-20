@@ -683,15 +683,24 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {data?.topByGeo?.map((t, i) => (
-                    <Link
-                      key={`${t.keyword}${i}`}
-                      href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo || geo)}`}
-                      className="group flex items-center gap-1.5 px-3 py-1.5 bg-[#16213e] border border-[#C5A059]/15 hover:border-[#C5A059]/50 transition"
-                    >
-                      {t.rising && <TrendingUp className="w-2.5 h-2.5 text-emerald-400 shrink-0" />}
-                      <span className="font-crimson text-sm text-[#C5A059] group-hover:text-[#d4b575]">{t.keyword}</span>
-                      <span className="font-cinzel text-[7px] text-gray-600 ml-1">{t.interest_score}</span>
-                    </Link>
+                    <div key={`${t.keyword}${i}`} className="flex items-center gap-0 bg-[#16213e] border border-[#C5A059]/15 hover:border-[#C5A059]/30 transition">
+                      <Link
+                        href={`/academy/admin/trends/term?q=${encodeURIComponent(t.keyword)}&geo=${encodeURIComponent(t.geo || geo)}`}
+                        className="group flex items-center gap-1.5 px-3 py-1.5"
+                        title="Ver ángulos de contenido"
+                      >
+                        {t.rising && <TrendingUp className="w-2.5 h-2.5 text-emerald-400 shrink-0" />}
+                        <span className="font-crimson text-sm text-[#C5A059] group-hover:text-[#d4b575]">{t.keyword}</span>
+                        <span className="font-cinzel text-[7px] text-gray-600 ml-1">{t.interest_score}</span>
+                      </Link>
+                      <button
+                        onClick={() => handleGenerateReport({ id: `${t.keyword}::${t.geo}`, seed_keyword: t.keyword, geo: t.geo || geo, source: "trends", opportunity_score: t.interest_score ?? 0, status: "new", source_ref: {} })}
+                        title="Informe IA"
+                        className="flex items-center px-2 py-1.5 border-l border-[#C5A059]/10 text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 transition-colors"
+                      >
+                        <FileText className="w-3 h-3" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               </AcademyCard>
