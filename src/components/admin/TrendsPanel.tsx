@@ -822,8 +822,8 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-white/5">
-                          {["Keyword", "Fuente", "Score", "Rising"].map((h) => (
-                            <th key={h} className="text-left font-cinzel text-[9px] uppercase tracking-widest text-gray-600 pb-3 pr-4">{h}</th>
+                          {["Keyword", "Fuente", "Score", "Rising", "Acciones"].map((h) => (
+                            <th key={h} className="text-left font-cinzel text-[9px] uppercase tracking-widest text-gray-600 pb-3 pr-4 last:pr-0">{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -843,12 +843,31 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
                             <td className="py-3 pr-4">
                               <span className="font-cinzel text-[10px] text-[#C5A059]">{t.interest_score ?? "—"}</span>
                             </td>
-                            <td className="py-3">
+                            <td className="py-3 pr-4">
                               {t.rising ? (
                                 <span className="inline-flex items-center gap-1 font-cinzel text-[8px] uppercase tracking-widest text-emerald-400">
                                   <TrendingUp className="w-3 h-3" /> Rising
                                 </span>
                               ) : <span className="font-cinzel text-[9px] text-gray-600">—</span>}
+                            </td>
+                            <td className="py-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleGenerateReport({ id: `${t.keyword}::${t.geo}`, seed_keyword: t.keyword, geo: t.geo || geo, source: "trends", opportunity_score: t.interest_score ?? 0, status: "new", source_ref: {} })}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500/10 border border-violet-500/30 text-violet-300 hover:bg-violet-500/20 font-cinzel text-[8px] uppercase tracking-widest transition-colors"
+                                >
+                                  <FileText className="w-3 h-3" />
+                                  Informe IA
+                                </button>
+                                <button
+                                  onClick={() => handleSaveTrend(t.keyword, t.geo || geo)}
+                                  disabled={savingId === `${t.keyword}::${t.geo || geo}`}
+                                  title="Guardar para después"
+                                  className="flex items-center gap-1 px-2 py-1.5 text-gray-600 hover:text-[#C5A059] font-cinzel text-[8px] uppercase tracking-widest transition-colors disabled:opacity-50"
+                                >
+                                  <Bookmark className="w-3 h-3" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -896,8 +915,8 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-white/5">
-                          {["Keyword", "Seed", "Score"].map((h) => (
-                            <th key={h} className="text-left font-cinzel text-[9px] uppercase tracking-widest text-gray-600 pb-3 pr-4">{h}</th>
+                          {["Keyword", "Seed", "Score", "Acciones"].map((h) => (
+                            <th key={h} className="text-left font-cinzel text-[9px] uppercase tracking-widest text-gray-600 pb-3 pr-4 last:pr-0">{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -906,7 +925,26 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
                           <tr key={`${t.keyword}${i}`} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition">
                             <td className="py-3 pr-4"><p className="font-crimson text-sm text-gray-200">{t.keyword}</p></td>
                             <td className="py-3 pr-4"><span className="font-cinzel text-[9px] text-gray-500">{t.seed_keyword ?? "—"}</span></td>
-                            <td className="py-3"><span className="font-cinzel text-[10px] text-[#C5A059]">{t.interest_score ?? "—"}</span></td>
+                            <td className="py-3 pr-4"><span className="font-cinzel text-[10px] text-[#C5A059]">{t.interest_score ?? "—"}</span></td>
+                            <td className="py-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleGenerateReport({ id: `${t.keyword}::${t.geo}`, seed_keyword: t.keyword, geo: t.geo || geo, source: "trends", opportunity_score: t.interest_score ?? 0, status: "new", source_ref: {} })}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500/10 border border-violet-500/30 text-violet-300 hover:bg-violet-500/20 font-cinzel text-[8px] uppercase tracking-widest transition-colors"
+                                >
+                                  <FileText className="w-3 h-3" />
+                                  Informe IA
+                                </button>
+                                <button
+                                  onClick={() => handleSaveTrend(t.keyword, t.geo || geo)}
+                                  disabled={savingId === `${t.keyword}::${t.geo || geo}`}
+                                  title="Guardar para después"
+                                  className="flex items-center gap-1 px-2 py-1.5 text-gray-600 hover:text-[#C5A059] font-cinzel text-[8px] uppercase tracking-widest transition-colors disabled:opacity-50"
+                                >
+                                  <Bookmark className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
