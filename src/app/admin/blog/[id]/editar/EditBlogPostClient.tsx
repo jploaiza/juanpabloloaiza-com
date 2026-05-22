@@ -6,6 +6,7 @@ import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import ContentEditor from "@/components/admin/ContentEditor";
 import { ArrowLeft, X, Plus, Trash2, Upload, Sparkles, ImagePlus } from "lucide-react";
+import PexelsSearch from "@/components/admin/PexelsSearch";
 
 type BlogPost = {
   id: string;
@@ -599,6 +600,10 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
                   />
                 </div>
               )}
+              <PexelsSearch
+                onSelect={(url) => setFeaturedImageUrl(url)}
+                defaultQuery={post.title ? post.title.split(" ").slice(0, 3).join(" ") : ""}
+              />
             </div>
 
             <div>

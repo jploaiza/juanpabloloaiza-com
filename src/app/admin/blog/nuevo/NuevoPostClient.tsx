@@ -6,6 +6,7 @@ import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import ContentEditor from "@/components/admin/ContentEditor";
 import { ArrowLeft, X, Plus, Upload, Sparkles, ImagePlus, FileDown, FileUp, Wand2, Copy } from "lucide-react";
+import PexelsSearch from "@/components/admin/PexelsSearch";
 
 // ---------------------------------------------------------------------------
 // Frontmatter parser (no external deps)
@@ -884,6 +885,10 @@ Párrafos, listas, citas...`}</pre>
                   />
                 </div>
               )}
+              <PexelsSearch
+                onSelect={(url) => setFeaturedImageUrl(url)}
+                defaultQuery={title ? title.split(" ").slice(0, 3).join(" ") : ""}
+              />
             </div>
             <div>
               <label className={labelClass}>Tags</label>
