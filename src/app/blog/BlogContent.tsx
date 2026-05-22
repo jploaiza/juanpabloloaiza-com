@@ -47,7 +47,7 @@ export default function BlogContent({ posts }: Props) {
               Sabiduría Compartida
             </span>
             <h1 className="text-5xl md:text-6xl text-white mt-3 mb-5 font-cinzel font-bold leading-tight">
-              Blog
+              Blog de Regresión a Vidas Pasadas
             </h1>
             <p className="font-crimson text-lg text-gray-400 mb-8 leading-relaxed max-w-md">
               Artículos sobre Regresión a Vidas Pasadas, Sanación Espiritual y Transformación Personal
