@@ -27,8 +27,10 @@ export default function AdmissionSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileError, setTurnstileError] = useState<string | null>(null);
   const turnstileRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetId = useRef<string>("");
+  const renderAttempted = useRef(false);
 
   const countryCodes = [
     { code: "+54", label: "🇦🇷 Argentina (+54)" },
@@ -81,27 +83,41 @@ export default function AdmissionSection() {
   };
 
   const renderTurnstile = () => {
-    if (turnstileRef.current && window.turnstile && !turnstileWidgetId.current) {
+    if (!turnstileRef.current || !window.turnstile || turnstileWidgetId.current || renderAttempted.current) return;
+    renderAttempted.current = true;
+    try {
       turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
         sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY ?? "",
         theme: "dark",
         callback: (token: string) => setTurnstileToken(token),
         "expired-callback": () => setTurnstileToken(""),
+        "error-callback": (code: string) => {
+          console.error("[Turnstile] Error:", code);
+          setTurnstileError(`No se pudo cargar la verificación de seguridad (código: ${code}). Recarga la página.`);
+        },
       });
+    } catch (err) {
+      console.error("[Turnstile] render() lanzó una excepción:", err);
+      setTurnstileError("Error al inicializar la verificación de seguridad. Recarga la página.");
     }
   };
 
   useEffect(() => {
-    // Render immediately if turnstile already loaded (e.g. navigating back)
     renderTurnstile();
 
-    // Poll as fallback for when the script hasn't loaded yet
     const interval = setInterval(() => {
-      if (turnstileWidgetId.current) { clearInterval(interval); return; }
+      if (turnstileWidgetId.current || renderAttempted.current) { clearInterval(interval); return; }
       renderTurnstile();
     }, 300);
 
-    return () => clearInterval(interval);
+    // Safety timeout: if widget never loaded after 10s, show a visible message
+    const timeout = setTimeout(() => {
+      if (!turnstileWidgetId.current && !renderAttempted.current) {
+        setTurnstileError("No se pudo cargar la verificación de seguridad. Recarga la página o escríbeme directamente.");
+      }
+    }, 10000);
+
+    return () => { clearInterval(interval); clearTimeout(timeout); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -318,6 +334,12 @@ export default function AdmissionSection() {
 
               <div ref={turnstileRef} className="flex justify-center" />
 
+              {turnstileError && (
+                <p className="text-amber-400/90 text-xs text-center font-crimson leading-snug">
+                  {turnstileError}
+                </p>
+              )}
+
               <button
                 type="submit"
                 disabled={loading || !turnstileToken}
@@ -384,6 +406,8 @@ export default function AdmissionSection() {
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="afterInteractive"
         onLoad={renderTurnstile}
+        onError={() => setTurnstileError("No se pudo cargar el script de verificación. Revisa tu conexión y recarga la página.")}
+        data-cfasync="false"
       />
     </section>
   );

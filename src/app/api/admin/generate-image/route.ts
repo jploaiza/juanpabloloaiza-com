@@ -93,6 +93,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Error subiendo a R2: ${msg}` }, { status: 500 });
   }
 
-  const url = `${process.env.R2_PUBLIC_URL!.replace(/\/$/, "")}/${key}`;
+  const url = `${process.env.R2_PUBLIC_URL!.replace(/\/$/, "").replace(/^(?:https?:\/\/)?/, "https://")}/${key}`;
   return NextResponse.json({ url });
 }

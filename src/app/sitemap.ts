@@ -1,12 +1,21 @@
 import { MetadataRoute } from "next";
 import { getAllBlogPosts } from "@/lib/blog-data";
+import { getAllPublishedPosts } from "@/lib/supabase/blog";
+
+export const revalidate = 3600;
 
 const BASE = "https://juanpabloloaiza.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getAllBlogPosts();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const staticPosts = getAllBlogPosts();
+  const supabasePosts = await getAllPublishedPosts().catch(() => []);
 
-  const blogUrls: MetadataRoute.Sitemap = posts.map((post) => ({
+  // Merge: Supabase posts take precedence; static posts fill the rest
+  const staticSlugs = new Set(supabasePosts.map((p) => p.slug));
+  const filteredStatic = staticPosts.filter((p) => !staticSlugs.has(p.slug));
+  const allPosts = [...supabasePosts, ...filteredStatic];
+
+  const blogUrls: MetadataRoute.Sitemap = allPosts.map((post) => ({
     url: `${BASE}/blog/${post.slug}`,
     lastModified: new Date(post.date),
     changeFrequency: "monthly",

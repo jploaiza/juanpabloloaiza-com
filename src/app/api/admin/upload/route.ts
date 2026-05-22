@@ -104,6 +104,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const url = `${process.env.R2_PUBLIC_URL!.replace(/\/$/, "")}/${key}`;
+  const url = `${process.env.R2_PUBLIC_URL!.replace(/\/$/, "").replace(/^(?:https?:\/\/)?/, "https://")}/${key}`;
   return NextResponse.json({ url });
 }

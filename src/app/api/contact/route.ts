@@ -260,19 +260,27 @@ export async function POST(request: NextRequest) {
   if (!turnstileToken) {
     return NextResponse.json({ error: "Verificación de seguridad requerida." }, { status: 400 });
   }
-  if (process.env.TURNSTILE_SECRET_KEY) {
-    const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        secret: process.env.TURNSTILE_SECRET_KEY,
-        response: turnstileToken,
-        remoteip: getIp(request.headers),
-      }),
-    });
-    const verifyData = await verifyRes.json() as { success: boolean };
-    if (!verifyData.success) {
-      return NextResponse.json({ error: "Verificación de seguridad fallida. Intenta de nuevo." }, { status: 400 });
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    console.warn("[Turnstile] TURNSTILE_SECRET_KEY no configurada — verificación server-side omitida.");
+  } else {
+    try {
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: process.env.TURNSTILE_SECRET_KEY,
+          response: turnstileToken,
+          remoteip: getIp(request.headers),
+        }),
+      });
+      const verifyData = await verifyRes.json() as { success: boolean; "error-codes"?: string[] };
+      if (!verifyData.success) {
+        console.error("[Turnstile] siteverify falló. Códigos de error:", verifyData["error-codes"]);
+        return NextResponse.json({ error: "Verificación de seguridad fallida. Intenta de nuevo." }, { status: 400 });
+      }
+    } catch (err) {
+      console.error("[Turnstile] Error al contactar siteverify:", err);
+      return NextResponse.json({ error: "Error al verificar la seguridad. Intenta de nuevo." }, { status: 500 });
     }
   }
 
