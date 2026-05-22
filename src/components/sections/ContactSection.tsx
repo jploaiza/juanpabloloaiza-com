@@ -58,7 +58,7 @@ export default function ContactSection() {
             variants={itemVariants}
             className="text-4xl md:text-5xl text-white mt-4 mb-4 font-cinzel"
           >
-            Conectemos
+            Agenda tu Sesión de Hipnoterapia Online
           </motion.h2>
           <motion.p
             variants={itemVariants}

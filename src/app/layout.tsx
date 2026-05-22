@@ -34,9 +34,9 @@ const libreBaskerville = Libre_Baskerville({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.juanpabloloaiza.com"),
-  title: "Hipnosis de Regresión a Vidas Pasadas | Juan Pablo Loaiza",
-  description: "Hipnosis Terapéutica de regresión a vidas pasadas y liberación de entidades espirituales. Descubre el origen de tus conflictos y transforma tu vida. Sesiones vía Zoom en todo el mundo.",
-  keywords: "regresión a vidas pasadas, hipnosis terapéutica, liberación espiritual, traumas, sanación, hipnosis terapéutica online, hipnoterapeuta, vidas pasadas zoom",
+  title: "Regresión a Vidas Pasadas Online | Juan Pablo Loaiza",
+  description: "Hipnoterapeuta de regresión a vidas pasadas. Sana traumas, libera patrones kármicos y transforma tu vida. Sesiones online: Chile, Colombia, México, Argentina.",
+  keywords: "hipnoterapeuta online, regresión a vidas pasadas, hipnosis terapéutica, hipnoterapeuta Chile, hipnoterapeuta Colombia, hipnoterapeuta México, hipnoterapeuta Argentina, sesión de regresión online",
   alternates: { canonical: "https://www.juanpabloloaiza.com" },
   openGraph: {
     title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
@@ -90,7 +90,13 @@ export default function RootLayout({
         addressLocality: "Medellín",
         addressCountry: "CO",
       },
-      areaServed: "Worldwide",
+      areaServed: [
+        { "@type": "Country", name: "Chile" },
+        { "@type": "Country", name: "Colombia" },
+        { "@type": "Country", name: "México" },
+        { "@type": "Country", name: "Argentina" },
+        "Worldwide",
+      ],
       availableLanguage: { "@type": "Language", name: "Spanish" },
       hasOfferCatalog: {
         "@type": "OfferCatalog",
@@ -140,6 +146,15 @@ export default function RootLayout({
         "https://www.youtube.com/@JuanPabloLoaizaO",
       ],
       worksFor: { "@id": "https://www.juanpabloloaiza.com/#service" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://www.juanpabloloaiza.com/#website",
+      name: "Juan Pablo Loaiza",
+      url: "https://www.juanpabloloaiza.com",
+      inLanguage: "es",
+      publisher: { "@id": "https://www.juanpabloloaiza.com/#person" },
     },
   ];
 

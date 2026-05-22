@@ -20,6 +20,67 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
+  async redirects() {
+    return [
+      // WordPress date-based post URLs → /blog/:slug
+      {
+        source: "/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug*",
+        destination: "/blog/:slug",
+        permanent: true,
+      },
+      // WordPress tag pages
+      {
+        source: "/tag/:slug*",
+        destination: "/blog",
+        permanent: true,
+      },
+      // WordPress category pages
+      {
+        source: "/category/:slug*",
+        destination: "/blog",
+        permanent: true,
+      },
+      // WordPress RSS feeds (any path ending in /feed or /feed/)
+      {
+        source: "/:slug*/feed",
+        destination: "/blog",
+        permanent: true,
+      },
+      // WordPress pagination (/slug/page/N)
+      {
+        source: "/:slug*/page/:page(\\d+)",
+        destination: "/blog",
+        permanent: true,
+      },
+      // WordPress template pages
+      {
+        source: "/template/:slug*",
+        destination: "/blog",
+        permanent: true,
+      },
+      // Old WordPress slugs at root (no date prefix) discovered in GSC
+      {
+        source: "/sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud",
+        destination: "/blog/sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud",
+        permanent: true,
+      },
+      {
+        source: "/la-ciencia-detras-de-la-regresion-a-vidas-pasadas-explorando-evidencias-y-estudios",
+        destination: "/blog/la-ciencia-detras-de-la-regresion-a-vidas-pasadas-explorando-evidencias-y-estudios",
+        permanent: true,
+      },
+      {
+        source: "/rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas",
+        destination: "/blog/rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas",
+        permanent: true,
+      },
+      {
+        source: "/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores",
+        destination: "/blog/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

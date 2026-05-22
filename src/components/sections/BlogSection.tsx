@@ -76,7 +76,7 @@ export default function BlogSection({ initialPosts = [] }: { initialPosts?: Disp
           className="text-center mb-14"
         >
           <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">Sabiduría Compartida</span>
-          <h2 className="text-2xl sm:text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-5xl text-white mt-4 mb-4 font-cinzel">Blog de Regresión a Vidas Pasadas</h2>
           <p className="text-gray-300 font-crimson text-lg max-w-2xl mx-auto">
             Artículos sobre Regresión a Vidas Pasadas y Sanación
           </p>

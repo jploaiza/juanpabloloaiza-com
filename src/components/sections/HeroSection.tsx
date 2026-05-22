@@ -31,22 +31,39 @@ export default function HeroSection() {
           transition={{ duration: 1.5, ease: "easeOut" }}
         >
           <span className="inline-flex flex-wrap justify-center gap-x-1 text-[#C5A059] font-cinzel font-semibold uppercase tracking-[0.15em] text-[9px] sm:text-[11px] md:text-[13px] border border-[#C5A059]/30 py-2 px-4 sm:px-6 rounded-sm leading-relaxed">
-            <span>Hipnosis Terapéutica</span>
+            <span>Sesiones Online</span>
             <span className="opacity-60">·</span>
-            <span>Regresión a Vidas Pasadas</span>
+            <span>Chile</span>
+            <span className="opacity-60">·</span>
+            <span>Colombia</span>
+            <span className="opacity-60">·</span>
+            <span>México</span>
+            <span className="opacity-60">·</span>
+            <span>Argentina</span>
           </span>
         </motion.div>
 
-        {/* Main heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-          className="text-[2rem] sm:text-4xl md:text-5xl lg:text-6xl text-white leading-tight font-cinzel font-bold"
-        >
-          <span className="block whitespace-nowrap">Devuelve la Felicidad</span>
-          <span className="block text-[#C5A059]">a tu Vida</span>
-        </motion.h1>
+        {/* Main heading + emotional subtitle grouped */}
+        <div className="flex flex-col items-center gap-3">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
+            className="text-[2rem] sm:text-4xl md:text-5xl lg:text-6xl text-white leading-tight font-cinzel font-bold text-center"
+          >
+            <span className="block">Hipnoterapia de Regresión</span>
+            <span className="block text-[#C5A059]">a Vidas Pasadas</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.9 }}
+            className="text-xl sm:text-2xl text-[#C5A059]/80 font-cinzel font-light tracking-wide"
+          >
+            Devuelve la Felicidad a tu Vida
+          </motion.p>
+        </div>
 
         {/* Subtitle */}
         <motion.p
