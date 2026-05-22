@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/.next/',
           '/api/',
+          '/admin/',
           '/panelcliente/',
           '/formulario-de-admision/',
           '/agenda/',

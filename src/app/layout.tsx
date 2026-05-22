@@ -33,15 +33,15 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://juanpabloloaiza.com"),
+  metadataBase: new URL("https://www.juanpabloloaiza.com"),
   title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
   description: "Hipnosis Terapéutica de regresión a vidas pasadas y liberación de entidades espirituales. Descubre el origen de tus conflictos y transforma tu vida. Sesiones vía Zoom en todo el mundo.",
   keywords: "regresión a vidas pasadas, hipnosis terapéutica, liberación espiritual, traumas, sanación, hipnosis terapéutica online, hipnoterapeuta, vidas pasadas zoom",
-  alternates: { canonical: "https://juanpabloloaiza.com" },
+  alternates: { canonical: "https://www.juanpabloloaiza.com" },
   openGraph: {
     title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
     description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones vía Zoom en todo el mundo.",
-    url: "https://juanpabloloaiza.com",
+    url: "https://www.juanpabloloaiza.com",
     siteName: "Juan Pablo Loaiza",
     locale: "es_ES",
     type: "website",
@@ -80,7 +80,7 @@ export default function RootLayout({
     "@type": "ProfessionalService",
     name: "Juan Pablo Loaiza - Hipnosis Terapéutica de Regresión a Vidas Pasadas",
     description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales",
-    url: "https://juanpabloloaiza.com",
+    url: "https://www.juanpabloloaiza.com",
     telephone: "+56962081884",
     email: "contacto@juanpabloloaiza.com",
     address: {
