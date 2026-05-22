@@ -23,7 +23,10 @@ type Step = "email" | "otp";
 
 function LoginForm() {
   const params = useSearchParams();
-  const redirectTo = params.get("redirect") ?? "/academy/dashboard";
+  const rawRedirect = params.get("redirect") ?? "/academy/dashboard";
+  const redirectTo = /^\/[a-zA-Z0-9/_\-?=&#%.@!+]*$/.test(rawRedirect)
+    ? rawRedirect
+    : "/academy/dashboard";
 
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");

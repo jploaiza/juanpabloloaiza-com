@@ -34,7 +34,7 @@ const libreBaskerville = Libre_Baskerville({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.juanpabloloaiza.com"),
-  title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
+  title: "Hipnosis de Regresión a Vidas Pasadas | Juan Pablo Loaiza",
   description: "Hipnosis Terapéutica de regresión a vidas pasadas y liberación de entidades espirituales. Descubre el origen de tus conflictos y transforma tu vida. Sesiones vía Zoom en todo el mundo.",
   keywords: "regresión a vidas pasadas, hipnosis terapéutica, liberación espiritual, traumas, sanación, hipnosis terapéutica online, hipnoterapeuta, vidas pasadas zoom",
   alternates: { canonical: "https://www.juanpabloloaiza.com" },
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
+    title: "Hipnosis de Regresión a Vidas Pasadas | Juan Pablo Loaiza",
     description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales.",
     images: ["https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"],
   },
@@ -75,27 +75,73 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    name: "Juan Pablo Loaiza - Hipnosis Terapéutica de Regresión a Vidas Pasadas",
-    description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales",
-    url: "https://www.juanpabloloaiza.com",
-    telephone: "+56962081884",
-    email: "contacto@juanpabloloaiza.com",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Medellín",
-      addressCountry: "CO",
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "@id": "https://www.juanpabloloaiza.com/#service",
+      name: "Juan Pablo Loaiza — Hipnosis Terapéutica de Regresión a Vidas Pasadas",
+      description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones individuales vía Zoom.",
+      url: "https://www.juanpabloloaiza.com",
+      telephone: "+56962081884",
+      email: "contacto@juanpabloloaiza.com",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Medellín",
+        addressCountry: "CO",
+      },
+      areaServed: "Worldwide",
+      availableLanguage: { "@type": "Language", name: "Spanish" },
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Servicios Terapéuticos",
+        itemListElement: [
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Regresión a Vidas Pasadas",
+              description: "Sesión de hipnosis terapéutica para explorar vidas pasadas, sanar traumas y liberar patrones kármicos.",
+            },
+            priceCurrency: "USD",
+            availability: "https://schema.org/InStock",
+          },
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Liberación de Entidades Espirituales",
+              description: "Proceso terapéutico de identificación y liberación de entidades espirituales que afectan el bienestar.",
+            },
+            priceCurrency: "USD",
+            availability: "https://schema.org/InStock",
+          },
+        ],
+      },
+      image: "https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu",
     },
-    areaServed: "Worldwide",
-    offers: {
-      "@type": "Offer",
-      name: "Regresión a Vidas Pasadas",
-      description: "Terapia de hipnosis para explorar vidas pasadas y sanar traumas",
-      priceCurrency: "USD",
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": "https://www.juanpabloloaiza.com/#person",
+      name: "Juan Pablo Loaiza",
+      url: "https://www.juanpabloloaiza.com",
+      jobTitle: "Hipnoterapeuta y Terapeuta de Regresión a Vidas Pasadas",
+      description: "Terapeuta especializado en hipnosis clínica y regresión a vidas pasadas. Sesiones individuales en línea para sanar traumas, superar miedos y liberar patrones kármicos.",
+      knowsAbout: [
+        "Hipnosis Terapéutica",
+        "Regresión a Vidas Pasadas",
+        "Liberación de Entidades Espirituales",
+        "Sanación Kármica",
+        "Hipnosis Clínica",
+      ],
+      sameAs: [
+        "https://www.instagram.com/juanpabloloaizao/",
+        "https://www.youtube.com/@JuanPabloLoaizaO",
+      ],
+      worksFor: { "@id": "https://www.juanpabloloaiza.com/#service" },
     },
-  };
+  ];
 
   return (
     <html
@@ -106,10 +152,13 @@ export default function RootLayout({
         {/* Preconnect to external asset hosts */}
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://media.juanpabloloaiza.com" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        {structuredData.map((block, i) => (
+          <script
+            key={i}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(block) }}
+          />
+        ))}
         <meta name="robots" content="index, follow, max-image-preview:large" />
         {/* Auto-retry failed JS chunks (slow mobile connections) */}
         <script

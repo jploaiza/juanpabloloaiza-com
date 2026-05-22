@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import Header from "@/components/Header";
 import HeroSection from "@/components/sections/HeroSection";
 import ProcessSection from "@/components/sections/ProcessSection";

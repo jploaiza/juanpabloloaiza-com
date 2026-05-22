@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   transpilePackages: ["@uiw/react-md-editor", "@uiw/react-codemirror"],
   images: {
     remotePatterns: [
@@ -47,6 +48,12 @@ const nextConfig: NextConfig = {
               "form-action 'self'",
             ].join("; "),
           },
+        ],
+      },
+      {
+        source: "/(entrevista|agenda)(.*)",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "https://www.juanpabloloaiza.com" },
         ],
       },
       {
