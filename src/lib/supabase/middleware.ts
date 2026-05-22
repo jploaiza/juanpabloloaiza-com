@@ -51,6 +51,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Redirect legacy /admin/* to /academy/admin (always, auth checked there)
+  if (path.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/academy/admin", request.url));
+  }
+
   // Admin guard
   if (path.startsWith("/academy/admin") && user) {
     const { data: profile } = await supabase
