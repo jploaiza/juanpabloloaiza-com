@@ -34,10 +34,10 @@ const libreBaskerville = Libre_Baskerville({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.juanpabloloaiza.com"),
-  title: "Regresión a Vidas Pasadas Online | Juan Pablo Loaiza",
-  description: "Hipnoterapeuta de regresión a vidas pasadas. Sana traumas, libera patrones kármicos y transforma tu vida. Sesiones online: Chile, Colombia, México, Argentina.",
-  keywords: "hipnoterapeuta online, regresión a vidas pasadas, hipnosis terapéutica, hipnoterapeuta Chile, hipnoterapeuta Colombia, hipnoterapeuta México, hipnoterapeuta Argentina, sesión de regresión online",
-  alternates: { canonical: "https://www.juanpabloloaiza.com" },
+  title: "Hipnosis Terapéutica y Regresión a Vidas Pasadas Online | Juan Pablo Loaiza",
+  description: "Sesiones online de hipnosis terapéutica y regresión a vidas pasadas para España, Chile y México. Descubre el origen de tus patrones emocionales y sánalos desde la raíz. Agenda una exploración gratuita.",
+  keywords: "hipnoterapeuta online, hipnoterapeuta España, hipnosis terapéutica online, regresión a vidas pasadas, hipnosis terapéutica, hipnoterapeuta Chile, hipnoterapeuta México, sesión de regresión online",
+  alternates: { canonical: "https://www.juanpabloloaiza.com/" },
   openGraph: {
     title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
     description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones vía Zoom en todo el mundo.",
@@ -80,22 +80,19 @@ export default function RootLayout({
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
       "@id": "https://www.juanpabloloaiza.com/#service",
-      name: "Juan Pablo Loaiza — Hipnosis Terapéutica de Regresión a Vidas Pasadas",
-      description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones individuales vía Zoom.",
+      name: "Juan Pablo Loaiza — Hipnosis Terapéutica y Regresión a Vidas Pasadas Online",
+      description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas. Sesiones individuales online vía Zoom para España, Chile y México.",
       url: "https://www.juanpabloloaiza.com",
-      telephone: "+56962081884",
       email: "contacto@juanpabloloaiza.com",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "Medellín",
-        addressCountry: "CO",
+      availableChannel: {
+        "@type": "ServiceChannel",
+        serviceType: "Online via Zoom",
+        availableLanguage: { "@type": "Language", name: "Spanish" },
       },
       areaServed: [
+        { "@type": "Country", name: "Spain" },
         { "@type": "Country", name: "Chile" },
-        { "@type": "Country", name: "Colombia" },
-        { "@type": "Country", name: "México" },
-        { "@type": "Country", name: "Argentina" },
-        "Worldwide",
+        { "@type": "Country", name: "Mexico" },
       ],
       availableLanguage: { "@type": "Language", name: "Spanish" },
       hasOfferCatalog: {
@@ -106,8 +103,8 @@ export default function RootLayout({
             "@type": "Offer",
             itemOffered: {
               "@type": "Service",
-              name: "Regresión a Vidas Pasadas",
-              description: "Sesión de hipnosis terapéutica para explorar vidas pasadas, sanar traumas y liberar patrones kármicos.",
+              name: "Regresión a Vidas Pasadas Online",
+              description: "Sesión de hipnosis terapéutica online para explorar vidas pasadas, sanar traumas y liberar patrones kármicos. Disponible vía Zoom.",
             },
             priceCurrency: "USD",
             availability: "https://schema.org/InStock",
@@ -116,8 +113,8 @@ export default function RootLayout({
             "@type": "Offer",
             itemOffered: {
               "@type": "Service",
-              name: "Liberación de Entidades Espirituales",
-              description: "Proceso terapéutico de identificación y liberación de entidades espirituales que afectan el bienestar.",
+              name: "Liberación de Entidades Espirituales Online",
+              description: "Proceso terapéutico online de identificación y liberación de entidades espirituales que afectan el bienestar.",
             },
             priceCurrency: "USD",
             availability: "https://schema.org/InStock",
@@ -133,7 +130,7 @@ export default function RootLayout({
       name: "Juan Pablo Loaiza",
       url: "https://www.juanpabloloaiza.com",
       jobTitle: "Hipnoterapeuta y Terapeuta de Regresión a Vidas Pasadas",
-      description: "Terapeuta especializado en hipnosis clínica y regresión a vidas pasadas. Sesiones individuales en línea para sanar traumas, superar miedos y liberar patrones kármicos.",
+      description: "Terapeuta especializado en hipnosis clínica y regresión a vidas pasadas. Sesiones individuales en línea para España, Chile y México.",
       knowsAbout: [
         "Hipnosis Terapéutica",
         "Regresión a Vidas Pasadas",

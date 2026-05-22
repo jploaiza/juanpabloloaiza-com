@@ -33,13 +33,11 @@ export default function HeroSection() {
           <span className="inline-flex flex-wrap justify-center gap-x-1 text-[#C5A059] font-cinzel font-semibold uppercase tracking-[0.15em] text-[9px] sm:text-[11px] md:text-[13px] border border-[#C5A059]/30 py-2 px-4 sm:px-6 rounded-sm leading-relaxed">
             <span>Sesiones Online</span>
             <span className="opacity-60">·</span>
+            <span>España</span>
+            <span className="opacity-60">·</span>
             <span>Chile</span>
             <span className="opacity-60">·</span>
-            <span>Colombia</span>
-            <span className="opacity-60">·</span>
             <span>México</span>
-            <span className="opacity-60">·</span>
-            <span>Argentina</span>
           </span>
         </motion.div>
 
