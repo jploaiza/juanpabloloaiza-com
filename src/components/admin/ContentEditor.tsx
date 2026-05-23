@@ -3,7 +3,6 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "tiptap-markdown";
 import { useState, useCallback, useEffect, useRef } from "react";
@@ -61,7 +60,6 @@ export default function ContentEditor({ value, onChange, onFullGenerate }: Props
       StarterKit,
       Markdown.configure({ html: false, tightLists: true }),
       Image.configure({ inline: false, allowBase64: false }),
-      Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: "Escribe el contenido del artículo..." }),
     ],
     content: value,

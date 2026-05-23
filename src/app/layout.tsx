@@ -34,9 +34,10 @@ const libreBaskerville = Libre_Baskerville({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.juanpabloloaiza.com"),
-  title: "Hipnosis Terapéutica y Regresión a Vidas Pasadas Online | Juan Pablo Loaiza",
-  description: "Sesiones online de hipnosis terapéutica y regresión a vidas pasadas para España, Chile y México. Descubre el origen de tus patrones emocionales y sánalos desde la raíz. Agenda una exploración gratuita.",
-  keywords: "hipnoterapeuta online, hipnoterapeuta España, hipnosis terapéutica online, regresión a vidas pasadas, hipnosis terapéutica, hipnoterapeuta Chile, hipnoterapeuta México, sesión de regresión online",
+  title: "Regresión a Vidas Pasadas Online | Juan Pablo Loaiza",
+  description: "Hipnoterapeuta online especializado en regresión a vidas pasadas. Sesiones por Zoom para España, Chile y México. Sana el origen de tus patrones. Consulta gratuita.",
+  keywords: "hipnoterapeuta online, hipnoterapeuta España, regresión a vidas pasadas online, hipnosis terapéutica, hipnoterapeuta Chile, hipnoterapeuta México, sesión de regresión online, terapia de regresión",
+  robots: "index, follow, max-image-preview:large",
   alternates: { canonical: "https://www.juanpabloloaiza.com/" },
   openGraph: {
     title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
@@ -171,7 +172,6 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{ __html: JSON.stringify(block) }}
           />
         ))}
-        <meta name="robots" content="index, follow, max-image-preview:large" />
         {/* Auto-retry failed JS chunks (slow mobile connections) */}
         <script
           dangerouslySetInnerHTML={{

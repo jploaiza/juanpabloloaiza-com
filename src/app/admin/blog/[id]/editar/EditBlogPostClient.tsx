@@ -4,7 +4,8 @@ import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
-import ContentEditor from "@/components/admin/ContentEditor";
+import dynamic from "next/dynamic";
+const ContentEditor = dynamic(() => import("@/components/admin/ContentEditor"), { ssr: false });
 import { ArrowLeft, X, Plus, Trash2, Upload, Sparkles, ImagePlus } from "lucide-react";
 import PexelsSearch from "@/components/admin/PexelsSearch";
 

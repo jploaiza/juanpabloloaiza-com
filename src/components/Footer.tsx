@@ -116,6 +116,14 @@ export default function Footer() {
             </a>
           ))}
         </div>
+        <div className="flex justify-center mb-4">
+          <a
+            href="/llms.txt"
+            className="font-cinzel text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition"
+          >
+            llms.txt
+          </a>
+        </div>
         <p className="font-cinzel text-xs text-gray-400 uppercase tracking-widest">
           © 2026 Juan Pablo Loaiza · Todos los derechos reservados
         </p>
