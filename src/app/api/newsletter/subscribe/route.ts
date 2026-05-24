@@ -55,7 +55,7 @@ function buildConfirmEmail(name: string, confirmUrl: string): string {
         </td>
       </tr>
     </table>`;
-  return emailShell(body);
+  return emailShell(`<tr><td style="padding:0;">${body}</td></tr>`);
 }
 
 function buildResubscribeEmail(name: string, confirmUrl: string): string {
@@ -85,7 +85,7 @@ function buildResubscribeEmail(name: string, confirmUrl: string): string {
         </td>
       </tr>
     </table>`;
-  return emailShell(body);
+  return emailShell(`<tr><td style="padding:0;">${body}</td></tr>`);
 }
 
 export async function POST(req: NextRequest) {

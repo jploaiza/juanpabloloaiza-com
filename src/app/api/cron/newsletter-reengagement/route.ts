@@ -49,7 +49,7 @@ function buildReengagementEmail(name: string, days: number, unsubToken: string):
       &nbsp;·&nbsp;
       <a href="mailto:newsletter@juanpabloloaiza.com" style="color:#4a6a8a;text-decoration:none;">newsletter@juanpabloloaiza.com</a>
     </p>`;
-  return emailShell(body, footer);
+  return emailShell(`<tr><td style="padding:0;">${body}</td></tr>`, footer);
 }
 
 export async function GET(req: NextRequest) {
