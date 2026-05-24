@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function GET(
   _req: NextRequest,
@@ -9,11 +12,10 @@ export async function GET(
 ) {
   const { token } = await params;
 
-  if (!token || token.length < 10) {
+  if (!token || !UUID_RE.test(token)) {
     return NextResponse.redirect(`${SITE_URL}/newsletter/baja?error=1`);
   }
 
-  // Redirect to the baja page so user can choose (less/total)
   return NextResponse.redirect(`${SITE_URL}/newsletter/baja/${token}`);
 }
 
@@ -24,7 +26,7 @@ export async function POST(
   const { token } = await params;
   const { action } = await req.json().catch(() => ({ action: "total" }));
 
-  if (!token || token.length < 10) {
+  if (!token || !UUID_RE.test(token)) {
     return NextResponse.json({ error: "Token inválido." }, { status: 400 });
   }
 
@@ -32,7 +34,6 @@ export async function POST(
     const supabase = await createAdminClient();
 
     if (action === "pause") {
-      // Add a "paused" tag instead of full unsubscribe
       const { data: sub } = await supabase
         .from("newsletter_subscribers")
         .select("id, tags")
@@ -51,7 +52,6 @@ export async function POST(
       return NextResponse.json({ success: true, action: "paused" });
     }
 
-    // Full unsubscribe
     const { data: updated } = await supabase
       .from("newsletter_subscribers")
       .update({ status: "unsubscribed", unsubscribed_at: new Date().toISOString() })

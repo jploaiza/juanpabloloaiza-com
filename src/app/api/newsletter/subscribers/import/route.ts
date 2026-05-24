@@ -59,10 +59,19 @@ export async function POST(req: NextRequest) {
 
   if (!rows.length) return NextResponse.json({ error: "No se encontraron filas válidas." }, { status: 400 });
 
+  const MAX_ROWS = 10_000;
+  if (rows.length > MAX_ROWS) {
+    return NextResponse.json({ error: `Límite de ${MAX_ROWS} filas por importación.` }, { status: 400 });
+  }
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   let inserted = 0;
   let skipped = 0;
   const errors: Array<{ row: number; email: string; reason: string }> = [];
+  const BATCH_SIZE = 500;
+
+  const confirmedAt = new Date().toISOString();
+  const validRows: Array<{ rowNum: number; record: Record<string, unknown> }> = [];
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -70,27 +79,32 @@ export async function POST(req: NextRequest) {
       errors.push({ row: i + 2, email: row.email ?? "", reason: "Email inválido" });
       continue;
     }
-
     const tags = row.tags ? row.tags.split(/[;|,]/).map((t) => t.trim()).filter(Boolean) : [];
-
-    const { error } = await auth.adminSb.from("newsletter_subscribers").upsert(
-      {
+    validRows.push({
+      rowNum: i + 2,
+      record: {
         email: row.email,
         name: row.name ?? row.email.split("@")[0],
         apellido: row.apellido ?? "",
         status: "confirmed",
         source: "import",
         tags,
-        confirmed_at: new Date().toISOString(),
+        confirmed_at: confirmedAt,
       },
-      { onConflict: "email", ignoreDuplicates: false }
-    );
+    });
+  }
+
+  // Batch upserts (500 rows at a time)
+  for (let i = 0; i < validRows.length; i += BATCH_SIZE) {
+    const batch = validRows.slice(i, i + BATCH_SIZE);
+    const { error } = await auth.adminSb
+      .from("newsletter_subscribers")
+      .upsert(batch.map((r) => r.record), { onConflict: "email", ignoreDuplicates: false });
 
     if (error) {
-      if (error.code === "23505") { skipped++; continue; }
-      errors.push({ row: i + 2, email: row.email, reason: error.message });
+      batch.forEach((r) => errors.push({ row: r.rowNum, email: String(r.record.email), reason: "Error al insertar" }));
     } else {
-      inserted++;
+      inserted += batch.length;
     }
   }
 

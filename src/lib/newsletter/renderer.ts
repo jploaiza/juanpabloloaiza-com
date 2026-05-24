@@ -61,14 +61,14 @@ function renderEditorial(data: Record<string, unknown>, sub: Subscriber): string
   const introHtml = intro ? `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding:28px 32px 0;">
-        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0;font-family:Georgia,serif;">${intro.replace(/\n/g, "<br/>")}</p>
+        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0;font-family:Georgia,serif;">${esc(intro).replace(/\n/g, "<br/>")}</p>
       </td></tr>
     </table>` : "";
 
   const ctaHtml = cta?.url ? `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding:32px 32px 28px;text-align:center;">
-        <a href="${esc(cta.url)}" style="display:inline-block;padding:14px 36px;background:#C5A059;color:#020617;font-family:Georgia,serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">${esc(cta.text ?? "Leer más")}</a>
+        <a href="${esc(safeUrl(cta.url, SITE_URL + "/blog"))}" style="display:inline-block;padding:14px 36px;background:#C5A059;color:#020617;font-family:Georgia,serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">${esc(cta.text ?? "Leer más")}</a>
       </td></tr>
     </table>` : "";
 
@@ -76,12 +76,17 @@ function renderEditorial(data: Record<string, unknown>, sub: Subscriber): string
   return emailShell(content, unsubFooter(sub.unsubscribe_token));
 }
 
+function safeUrl(raw: unknown, fallback: string): string {
+  const s = String(raw ?? "");
+  return /^https?:\/\//i.test(s) ? s : fallback;
+}
+
 function renderAnnouncement(data: Record<string, unknown>, sub: Subscriber): string {
   const title = String(data.title ?? "");
   const body = String(data.body ?? data.body_md ?? "");
   const heroImage = String(data.hero_image ?? "");
   const ctaText = String(data.cta_text ?? "Ver más");
-  const ctaUrl = String(data.cta_url ?? SITE_URL);
+  const ctaUrl = safeUrl(data.cta_url, SITE_URL);
 
   const content = `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -89,7 +94,7 @@ function renderAnnouncement(data: Record<string, unknown>, sub: Subscriber): str
         ${heroImage ? `<img src="${esc(heroImage)}" width="100%" style="display:block;width:100%;max-height:260px;object-fit:cover;border:0;margin-bottom:24px;" alt="${esc(title)}"/>` : ""}
         <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 12px;">Anuncio</p>
         <h1 style="color:#ffffff;font-size:26px;margin:0 0 16px;font-family:Georgia,serif;font-weight:normal;line-height:1.3;">${esc(title)}</h1>
-        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0 0 28px;font-family:Georgia,serif;">${body.replace(/\n/g, "<br/>")}</p>
+        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0 0 28px;font-family:Georgia,serif;">${esc(body).replace(/\n/g, "<br/>")}</p>
         <table cellpadding="0" cellspacing="0" border="0">
           <tr><td style="background-color:#C5A059;">
             <a href="${esc(ctaUrl)}" style="display:inline-block;padding:15px 40px;color:#020617;font-family:Georgia,serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">${esc(ctaText)}</a>

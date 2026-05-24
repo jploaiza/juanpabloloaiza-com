@@ -43,7 +43,10 @@ export async function PUT(req: NextRequest, { params }: P) {
     .select("id")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[newsletter/subscribers PUT]", error);
+    return NextResponse.json({ error: "Error interno." }, { status: 500 });
+  }
   return NextResponse.json({ id: data.id });
 }
 
@@ -52,7 +55,18 @@ export async function DELETE(_req: NextRequest, { params }: P) {
   const auth = await requireNewsletterAdmin();
   if ("error" in auth) return auth.error;
 
-  const { error } = await auth.adminSb.from("newsletter_subscribers").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  // Soft-delete: preserve audit trail (GDPR accountability)
+  const { error } = await auth.adminSb
+    .from("newsletter_subscribers")
+    .update({
+      status: "deleted",
+      unsubscribed_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[newsletter/subscribers DELETE]", error);
+    return NextResponse.json({ error: "Error interno." }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

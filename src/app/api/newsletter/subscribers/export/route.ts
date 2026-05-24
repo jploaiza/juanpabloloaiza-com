@@ -3,6 +3,13 @@ import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
 
 export const dynamic = "force-dynamic";
 
+function csvField(value: string): string {
+  const s = String(value ?? "");
+  // Prevent CSV formula injection (= + - @ tab CR)
+  const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
 export async function GET(req: NextRequest) {
   const auth = await requireNewsletterAdmin();
   if ("error" in auth) return auth.error;
@@ -18,7 +25,10 @@ export async function GET(req: NextRequest) {
   if (status !== "all") query = query.eq("status", status);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[newsletter/subscribers/export]", error);
+    return NextResponse.json({ error: "Error interno." }, { status: 500 });
+  }
 
   const subscribers = data ?? [];
   const headers = ["name", "apellido", "email", "status", "tags", "source", "confirmed_at", "created_at"];
@@ -26,11 +36,11 @@ export async function GET(req: NextRequest) {
     headers.join(","),
     ...subscribers.map((s) =>
       [
-        `"${s.name ?? ""}"`,
-        `"${s.apellido ?? ""}"`,
-        `"${s.email}"`,
+        csvField(s.name ?? ""),
+        csvField(s.apellido ?? ""),
+        csvField(s.email),
         s.status,
-        `"${(s.tags ?? []).join("|")}"`,
+        csvField((s.tags ?? []).join("|")),
         s.source ?? "web",
         s.confirmed_at ? new Date(s.confirmed_at).toISOString().split("T")[0] : "",
         new Date(s.created_at).toISOString().split("T")[0],

@@ -4,9 +4,19 @@ import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
 
 export const dynamic = "force-dynamic";
 
+function sanitizePromptField(value: unknown, maxLen: number): string {
+  return String(value ?? "").replace(/[\r\n<>]/g, " ").substring(0, maxLen).trim();
+}
+
 const NEWSLETTER_AI_PROMPT = (articles: Array<{ title: string; excerpt: string; tags: string[] }>, templateKind: string) => {
   if (templateKind === "editorial") {
-    const articleList = articles.map((a, i) => `${i === 0 ? "PRINCIPAL" : `SECUNDARIO ${i}`}: "${a.title}" — ${a.excerpt} [tags: ${a.tags.join(", ")}]`).join("\n");
+    const articleList = articles.map((a, i) => {
+      const label = i === 0 ? "PRINCIPAL" : `SECUNDARIO ${i}`;
+      const title = sanitizePromptField(a.title, 200);
+      const excerpt = sanitizePromptField(a.excerpt, 500);
+      const tags = (Array.isArray(a.tags) ? a.tags : []).map((t) => sanitizePromptField(t, 50)).join(", ");
+      return `${label}: <title>${title}</title><excerpt>${excerpt}</excerpt><tags>${tags}</tags>`;
+    }).join("\n");
     return `Eres Juan Pablo Loaiza, terapeuta TRVP chileno (regresión a vidas pasadas, hipnosis terapéutica, sanación espiritual). Escribes con calidez, profundidad y autoridad espiritual. Hablas en primera persona, tono cercano, sin emojis.
 
 Genera el contenido para una newsletter editorial con estos artículos:

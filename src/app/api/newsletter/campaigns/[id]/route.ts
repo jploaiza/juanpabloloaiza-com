@@ -5,6 +5,18 @@ export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
+const ALLOWED_SENDER_DOMAIN = "juanpabloloaiza.com";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateSender(senderEmail?: unknown, senderName?: unknown): string | null {
+  if (senderEmail) {
+    const e = String(senderEmail);
+    if (!EMAIL_RE.test(e) || !e.endsWith(`@${ALLOWED_SENDER_DOMAIN}`)) return "Email de remitente inválido.";
+  }
+  if (senderName && /[\r\n]/.test(String(senderName))) return "Nombre de remitente inválido.";
+  return null;
+}
+
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   const auth = await requireNewsletterAdmin();
@@ -39,6 +51,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "No se puede editar una campaña que ya se envió." }, { status: 409 });
   }
 
+  const senderErr = validateSender(body.sender_email, body.sender_name);
+  if (senderErr) return NextResponse.json({ error: senderErr }, { status: 400 });
+
   const allowed = ["name", "subject", "preheader", "template_kind", "template_data", "sender_name", "sender_email", "segment"];
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   for (const key of allowed) {
@@ -52,7 +67,10 @@ export async function PUT(req: NextRequest, { params }: Params) {
     .select("id")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[newsletter/campaigns PUT]", error);
+    return NextResponse.json({ error: "Error interno." }, { status: 500 });
+  }
   return NextResponse.json({ id: data.id });
 }
 
@@ -73,6 +91,9 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   }
 
   const { error } = await auth.adminSb.from("newsletter_campaigns").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[newsletter/campaigns DELETE]", error);
+    return NextResponse.json({ error: "Error interno." }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

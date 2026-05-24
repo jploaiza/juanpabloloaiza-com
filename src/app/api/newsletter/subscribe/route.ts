@@ -5,6 +5,22 @@ import { emailShell, esc } from "@/lib/email/shell";
 
 export const dynamic = "force-dynamic";
 
+// Simple in-process rate limiter: 5 requests per IP per minute
+const rateMap = new Map<string, { count: number; reset: number }>();
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateMap.get(ip);
+  if (!entry || now > entry.reset) {
+    rateMap.set(ip, { count: 1, reset: now + 60_000 });
+    return false;
+  }
+  if (entry.count >= 5) return true;
+  entry.count++;
+  return false;
+}
+
+const GENERIC_RESPONSE = { success: true, message: "Si tu correo es nuevo, recibirás un enlace de confirmación." };
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
 
 function buildConfirmEmail(name: string, confirmUrl: string): string {
@@ -73,6 +89,11 @@ function buildResubscribeEmail(name: string, confirmUrl: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (isRateLimited(ip)) {
+    return NextResponse.json({ error: "Demasiados intentos. Espera un minuto." }, { status: 429 });
+  }
+
   const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const { name, apellido, email } = await req.json();
@@ -81,9 +102,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Todos los campos son obligatorios." }, { status: 400 });
     }
 
+    if (name.trim().length > 100 || apellido.trim().length > 100) {
+      return NextResponse.json({ error: "Nombre demasiado largo." }, { status: 400 });
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const normalEmail = email.trim().toLowerCase();
-    if (!emailRegex.test(normalEmail)) {
+    if (!emailRegex.test(normalEmail) || normalEmail.length > 254) {
       return NextResponse.json({ error: "Email no válido." }, { status: 400 });
     }
 
@@ -98,29 +123,22 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       if (existing.status === "confirmed") {
-        return NextResponse.json({
-          message: "Ya estás suscrito. ¡Gracias por tu interés!",
-          already: true,
-        });
+        // Return generic response — don't reveal that this email is subscribed
+        return NextResponse.json(GENERIC_RESPONSE);
       }
 
       if (existing.status === "pending") {
-        // Re-send confirmation
         const confirmUrl = `${SITE_URL}/newsletter/confirmar/${existing.confirm_token}`;
         await resend.emails.send({
           from: "Juan Pablo Loaiza <newsletter@juanpabloloaiza.com>",
           to: normalEmail,
           subject: "Confirma tu suscripción — Juan Pablo Loaiza",
           html: buildConfirmEmail(existing.name, confirmUrl),
-        });
-        return NextResponse.json({
-          message: "Te reenviamos el correo de confirmación. Revisa tu bandeja.",
-          pending: true,
-        });
+        }).catch((e) => console.error("[subscribe] resend error", e));
+        return NextResponse.json(GENERIC_RESPONSE);
       }
 
       if (existing.status === "unsubscribed") {
-        // Offer reactivation: generate new tokens and send resubscribe email
         const { data: updated } = await supabase
           .from("newsletter_subscribers")
           .update({
@@ -143,16 +161,13 @@ export async function POST(req: NextRequest) {
             to: normalEmail,
             subject: "Reactivar tu suscripción — Juan Pablo Loaiza",
             html: buildResubscribeEmail(name.trim(), confirmUrl),
-          });
+          }).catch((e) => console.error("[subscribe] resend error", e));
         }
-        return NextResponse.json({
-          message: "Te enviamos un correo para reactivar tu suscripción.",
-          resubscribe: true,
-        });
+        return NextResponse.json(GENERIC_RESPONSE);
       }
 
-      // bounced/complained — block silently
-      return NextResponse.json({ success: true });
+      // bounced/complained — block silently, return generic
+      return NextResponse.json(GENERIC_RESPONSE);
     }
 
     // New subscriber
@@ -176,9 +191,9 @@ export async function POST(req: NextRequest) {
       to: normalEmail,
       subject: "Confirma tu suscripción — Juan Pablo Loaiza",
       html: buildConfirmEmail(name.trim(), confirmUrl),
-    });
+    }).catch((e) => console.error("[subscribe] resend error", e));
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(GENERIC_RESPONSE);
   } catch (err) {
     console.error("[newsletter/subscribe]", err);
     return NextResponse.json({ error: "Error interno. Intenta de nuevo." }, { status: 500 });

@@ -6,6 +6,7 @@ import { emailShell, esc } from "@/lib/email/shell";
 export const dynamic = "force-dynamic";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function buildWelcomeEmail(name: string): string {
   const body = `
@@ -53,7 +54,7 @@ export async function GET(
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { token } = await params;
 
-  if (!token || token.length < 10) {
+  if (!token || !UUID_RE.test(token)) {
     return NextResponse.redirect(`${SITE_URL}/newsletter/confirmar/invalido`);
   }
 
@@ -65,7 +66,7 @@ export async function GET(
       .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
       .eq("confirm_token", token)
       .in("status", ["pending"])
-      .select("id, name, email")
+      .select("id, name, email, unsubscribe_token")
       .maybeSingle();
 
     if (error) throw error;
@@ -92,7 +93,8 @@ export async function GET(
           subject: "Bienvenido — Juan Pablo Loaiza",
           html: buildWelcomeEmail(subscriber.name),
           headers: {
-            "List-Unsubscribe": `<${SITE_URL}/api/newsletter/unsubscribe/${subscriber.id}>`,
+            "List-Unsubscribe": `<${SITE_URL}/newsletter/baja/${subscriber.unsubscribe_token}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
           },
         });
       }

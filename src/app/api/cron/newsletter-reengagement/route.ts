@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/server";
 import { emailShell, esc } from "@/lib/email/shell";
@@ -47,8 +48,9 @@ function buildReengagementEmail(name: string, days: number, unsubToken: string):
 }
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const expected = Buffer.from(`Bearer ${process.env.CRON_SECRET ?? ""}`);
+  const provided = Buffer.from(req.headers.get("authorization") ?? "");
+  if (expected.length === 0 || expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

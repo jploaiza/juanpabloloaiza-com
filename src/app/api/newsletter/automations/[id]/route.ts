@@ -8,8 +8,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const auth = await requireNewsletterAdmin();
   if ("error" in auth) return auth.error;
 
-  const { enabled } = await req.json();
-  const { error } = await auth.adminSb.from("newsletter_automations").update({ enabled }).eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const body = await req.json();
+  if (typeof body.enabled !== "boolean") {
+    return NextResponse.json({ error: "Valor inválido." }, { status: 400 });
+  }
+
+  const { error } = await auth.adminSb
+    .from("newsletter_automations")
+    .update({ enabled: body.enabled })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[newsletter/automations PUT]", error);
+    return NextResponse.json({ error: "Error interno." }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }
