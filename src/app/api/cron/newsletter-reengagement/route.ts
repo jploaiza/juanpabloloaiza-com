@@ -37,14 +37,19 @@ function buildReengagementEmail(name: string, days: number, unsubToken: string):
               </td>
             </tr>
           </table>
-          <p style="color:#4a6a8a;font-size:12px;margin:28px 0 0;font-family:Georgia,serif;line-height:1.6;">
-            Si prefieres no seguir recibiendo correos,
-            <a href="${SITE_URL}/newsletter/baja/${unsubToken}" style="color:#4a6a8a;">puedes darte de baja aquí</a>.
-          </p>
         </td>
       </tr>
     </table>`;
-  return emailShell(body);
+  const footer = `
+    <p style="color:#2d4a6e;font-size:11px;margin:0 0 6px;font-family:Georgia,serif;">
+      Recibes este correo porque te suscribiste en juanpabloloaiza.com
+    </p>
+    <p style="color:#2d4a6e;font-size:11px;margin:0;font-family:Georgia,serif;">
+      <a href="${SITE_URL}/newsletter/baja/${unsubToken}" style="color:#4a6a8a;text-decoration:underline;">Darse de baja</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:newsletter@juanpabloloaiza.com" style="color:#4a6a8a;text-decoration:none;">newsletter@juanpabloloaiza.com</a>
+    </p>`;
+  return emailShell(body, footer);
 }
 
 export async function GET(req: NextRequest) {

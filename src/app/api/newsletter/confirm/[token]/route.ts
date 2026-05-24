@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function buildWelcomeEmail(name: string): string {
+function buildWelcomeEmail(name: string, unsubToken: string): string {
   const body = `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
@@ -37,14 +37,19 @@ function buildWelcomeEmail(name: string): string {
               </td>
             </tr>
           </table>
-          <p style="color:#4a6a8a;font-size:12px;margin:28px 0 0;font-family:Georgia,serif;line-height:1.6;">
-            Juan Pablo Loaiza<br/>
-            Psicoterapeuta · Terapia de Regresión y Vida entre Vidas (TRVP)
-          </p>
         </td>
       </tr>
     </table>`;
-  return emailShell(body);
+  const footer = `
+    <p style="color:#2d4a6e;font-size:11px;margin:0 0 6px;font-family:Georgia,serif;">
+      Recibes este correo porque te suscribiste en juanpabloloaiza.com
+    </p>
+    <p style="color:#2d4a6e;font-size:11px;margin:0;font-family:Georgia,serif;">
+      <a href="${SITE_URL}/newsletter/baja/${unsubToken}" style="color:#4a6a8a;text-decoration:underline;">Darse de baja</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:newsletter@juanpabloloaiza.com" style="color:#4a6a8a;text-decoration:none;">newsletter@juanpabloloaiza.com</a>
+    </p>`;
+  return emailShell(body, footer);
 }
 
 export async function GET(
@@ -90,7 +95,7 @@ export async function GET(
           from: "Juan Pablo Loaiza <newsletter@juanpabloloaiza.com>",
           to: subscriber.email,
           subject: "Bienvenido — Juan Pablo Loaiza",
-          html: buildWelcomeEmail(subscriber.name),
+          html: buildWelcomeEmail(subscriber.name, subscriber.unsubscribe_token),
           headers: {
             "List-Unsubscribe": `<${SITE_URL}/newsletter/baja/${subscriber.unsubscribe_token}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
