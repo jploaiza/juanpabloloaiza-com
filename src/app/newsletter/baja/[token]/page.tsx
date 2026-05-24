@@ -8,10 +8,13 @@ export default function BajaPage({ params }: { params: Promise<{ token: string }
   const { token } = use(params);
   const [status, setStatus] = useState<"idle" | "loading" | "paused" | "done" | "error">("idle");
 
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
   async function handleAction(action: "pause" | "total") {
+    if (!UUID_RE.test(token)) { setStatus("error"); return; }
     setStatus("loading");
     try {
-      const res = await fetch(`/api/newsletter/unsubscribe/${token}`, {
+      const res = await fetch(`/api/newsletter/unsubscribe/${encodeURIComponent(token)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),

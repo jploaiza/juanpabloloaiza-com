@@ -94,7 +94,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Batch upserts (500 rows at a time)
+  // Batch upserts (500 rows at a time) — counts rows written (insert OR update)
+  let upserted = 0;
   for (let i = 0; i < validRows.length; i += BATCH_SIZE) {
     const batch = validRows.slice(i, i + BATCH_SIZE);
     const { error } = await auth.adminSb
@@ -102,9 +103,9 @@ export async function POST(req: NextRequest) {
       .upsert(batch.map((r) => r.record), { onConflict: "email", ignoreDuplicates: false });
 
     if (error) {
-      batch.forEach((r) => errors.push({ row: r.rowNum, email: String(r.record.email), reason: "Error al insertar" }));
+      batch.forEach((r) => errors.push({ row: r.rowNum, email: String(r.record.email), reason: "Error al procesar" }));
     } else {
-      inserted += batch.length;
+      upserted += batch.length;
     }
   }
 
@@ -112,11 +113,11 @@ export async function POST(req: NextRequest) {
   await auth.adminSb.from("newsletter_imports").insert({
     filename: `import-${Date.now()}.csv`,
     total_rows: rows.length,
-    inserted,
-    skipped_duplicates: skipped,
+    inserted: upserted,
+    skipped_duplicates: 0,
     errors,
     created_by: auth.userId,
   });
 
-  return NextResponse.json({ ok: true, inserted, skipped, errors: errors.slice(0, 20) });
+  return NextResponse.json({ ok: true, upserted, errors: errors.slice(0, 20) });
 }

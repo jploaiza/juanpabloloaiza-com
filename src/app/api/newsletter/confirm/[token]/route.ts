@@ -83,10 +83,9 @@ export async function GET(
       .eq("kind", "welcome")
       .maybeSingle();
 
-    if (automation?.enabled) {
+    if (automation?.enabled && subscriber.unsubscribe_token) {
       const delayMs = (automation.config?.delay_minutes ?? 0) * 60 * 1000;
       if (delayMs === 0) {
-        // Send immediately
         await resend.emails.send({
           from: "Juan Pablo Loaiza <newsletter@juanpabloloaiza.com>",
           to: subscriber.email,
@@ -96,7 +95,7 @@ export async function GET(
             "List-Unsubscribe": `<${SITE_URL}/newsletter/baja/${subscriber.unsubscribe_token}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
           },
-        });
+        }).catch((e) => console.error("[newsletter/confirm] welcome email failed", e));
       }
       // For delayed welcome, a future cron could handle queued sends
     }

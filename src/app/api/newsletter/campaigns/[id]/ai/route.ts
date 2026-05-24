@@ -62,6 +62,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { articles, template_kind } = await req.json();
 
+  if (!Array.isArray(articles)) {
+    return NextResponse.json({ error: "articles debe ser un arreglo." }, { status: 400 });
+  }
+
   const { data: campaign } = await auth.adminSb
     .from("newsletter_campaigns")
     .select("template_kind")
