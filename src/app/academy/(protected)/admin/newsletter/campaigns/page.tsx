@@ -4,35 +4,11 @@ import type { Metadata } from "next";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import AcademyCard from "@/components/academy/AcademyCard";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
-import { Plus, Send, Clock, FileText, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import CampaignsList from "@/components/newsletter/CampaignsList";
+import { Plus, Send } from "lucide-react";
 
 export const metadata: Metadata = { title: "Campañas — Newsletter" };
 export const dynamic = "force-dynamic";
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; cls: string }> = {
-    draft:     { label: "Borrador",   cls: "bg-white/5 text-gray-500 border-white/10" },
-    scheduled: { label: "Programada", cls: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-    sending:   { label: "Enviando",   cls: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-    sent:      { label: "Enviada",    cls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-    canceled:  { label: "Cancelada",  cls: "bg-red-500/10 text-red-400 border-red-500/20" },
-    failed:    { label: "Fallida",    cls: "bg-red-500/10 text-red-400 border-red-500/20" },
-  };
-  const s = map[status] ?? map.draft;
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 font-cinzel text-[8px] uppercase tracking-widest border ${s.cls}`}>
-      {s.label}
-    </span>
-  );
-}
-
-function StatIcon({ status }: { status: string }) {
-  if (status === "sent") return <CheckCircle className="w-3 h-3 text-emerald-400" />;
-  if (status === "scheduled") return <Clock className="w-3 h-3 text-amber-400" />;
-  if (status === "sending") return <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />;
-  if (status === "canceled" || status === "failed") return <XCircle className="w-3 h-3 text-red-400" />;
-  return <FileText className="w-3 h-3 text-gray-600" />;
-}
 
 type Campaign = {
   id: string; name: string; subject: string; template_kind: string;
@@ -100,57 +76,7 @@ export default async function CampaignsPage() {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5">
-                  {["", "Nombre", "Asunto", "Template", "Estado", "Fecha", "Enviados / Opens"].map((h) => (
-                    <th key={h} className="text-left font-cinzel text-[9px] uppercase tracking-widest text-gray-600 pb-3 pr-4 last:pr-0">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {campaigns.map((c) => (
-                  <tr key={c.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition group">
-                    <td className="py-3 pr-3 w-6">
-                      <StatIcon status={c.status} />
-                    </td>
-                    <td className="py-3 pr-4 min-w-[140px]">
-                      <Link href={`/academy/admin/newsletter/campaigns/${c.id}`}
-                        className="font-crimson text-sm text-gray-200 hover:text-[#C5A059] transition">
-                        {c.name}
-                      </Link>
-                    </td>
-                    <td className="py-3 pr-4 max-w-[200px]">
-                      <span className="font-crimson text-sm text-gray-400 truncate block">{c.subject || "—"}</span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600">{c.template_kind}</span>
-                    </td>
-                    <td className="py-3 pr-4"><StatusBadge status={c.status} /></td>
-                    <td className="py-3 pr-4 whitespace-nowrap">
-                      <span className="font-crimson text-xs text-gray-500">
-                        {c.status === "sent" && c.sent_at
-                          ? new Date(c.sent_at).toLocaleDateString("es-ES", { day: "numeric", month: "short" })
-                          : c.scheduled_at
-                          ? new Date(c.scheduled_at).toLocaleDateString("es-ES", { day: "numeric", month: "short" })
-                          : new Date(c.created_at).toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
-                      </span>
-                    </td>
-                    <td className="py-3 whitespace-nowrap">
-                      {c.status === "sent" ? (
-                        <span className="font-crimson text-xs text-gray-400">
-                          {c.stats_cache?.sent ?? 0} / {c.stats_cache?.opened ?? 0}
-                        </span>
-                      ) : <span className="text-gray-700">—</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <CampaignsList initialCampaigns={campaigns} />
         )}
       </AcademyCard>
     </div>

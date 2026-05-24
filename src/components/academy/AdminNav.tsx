@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FileText, BarChart2, TrendingUp, Calendar, Mail, Send, UserCheck, LayoutTemplate, Zap, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Users, FileText, BarChart2, TrendingUp, Calendar, Mail, Send, LayoutTemplate, Zap, ChevronDown, LineChart } from "lucide-react";
 import { useState } from "react";
 
 const NEWSLETTER_SUBNAV = [
   { href: "/academy/admin/newsletter/campaigns", label: "Campañas", icon: Send },
+  { href: "/academy/admin/newsletter/envios", label: "Envíos", icon: LineChart },
   { href: "/academy/admin/newsletter/subscribers", label: "Suscriptores", icon: Users },
   { href: "/academy/admin/newsletter/templates", label: "Plantillas", icon: LayoutTemplate },
   { href: "/academy/admin/newsletter/automations", label: "Automatizaciones", icon: Zap },

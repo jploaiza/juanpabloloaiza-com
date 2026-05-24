@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/server";
-import { renderCampaignHtml } from "@/lib/newsletter/renderer";
+import { renderCampaignHtml, personalize } from "@/lib/newsletter/renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -39,14 +39,19 @@ export async function GET(req: NextRequest) {
           .eq("id", campaign.id);
 
         // Build subscriber query from segment
-        const segment = campaign.segment as { status?: string; tags?: string[] };
+        const segment = campaign.segment as { status?: string; tags?: string[]; subscriber_ids?: string[] };
         let query = supabase
           .from("newsletter_subscribers")
-          .select("id, email, name, apellido, unsubscribe_token")
-          .eq("status", segment?.status ?? "confirmed");
+          .select("id, email, name, apellido, unsubscribe_token");
 
-        if (segment?.tags?.length) {
-          query = query.overlaps("tags", segment.tags);
+        if (segment?.subscriber_ids?.length) {
+          // Targeted resend: specific subscribers only
+          query = query.in("id", segment.subscriber_ids).neq("status", "unsubscribed").neq("status", "bounced").neq("status", "deleted");
+        } else {
+          query = query.eq("status", segment?.status ?? "confirmed");
+          if (segment?.tags?.length) {
+            query = query.overlaps("tags", segment.tags);
+          }
         }
 
         const { data: subscribers } = await query;
@@ -65,7 +70,7 @@ export async function GET(req: NextRequest) {
           const messages = batch.map((sub) => ({
             from: `${campaign.sender_name} <${campaign.sender_email}>`,
             to: sub.email,
-            subject: campaign.subject,
+            subject: personalize(campaign.subject, sub),
             html: renderCampaignHtml(campaign.template_kind, campaign.template_data, sub),
             headers: {
               "List-Unsubscribe": `<${SITE_URL}/newsletter/baja/${sub.unsubscribe_token}>`,

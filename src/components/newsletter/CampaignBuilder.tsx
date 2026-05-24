@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sparkles, Send, Eye, TestTube, Clock, CheckCircle,
-  ChevronDown, ChevronUp, Loader2, Save, X, Copy, Settings2
+  ChevronDown, ChevronUp, ChevronRight, Loader2, Save, X, Copy, Settings2
 } from "lucide-react";
 import type { BlogPost } from "@/lib/blog-data";
 import ArticlePicker from "./ArticlePicker";
@@ -26,6 +26,13 @@ const STATUS_LABEL: Record<string, string> = {
   draft: "Borrador", scheduled: "Programada", sending: "Enviando",
   sent: "Enviada", canceled: "Cancelada", failed: "Fallida"
 };
+
+const TAG_HINTS = [
+  { tag: "{{nombre}}", desc: "Nombre completo" },
+  { tag: "{{primer_nombre}}", desc: "Primer nombre" },
+  { tag: "{{apellido}}", desc: "Apellido" },
+  { tag: "{{email}}", desc: "Email" },
+];
 
 function SectionHeader({ title, open, onToggle, done }: { title: string; open: boolean; onToggle: () => void; done?: boolean }) {
   return (
@@ -304,9 +311,15 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                   {aiLoading ? "Generando..." : aiDone ? "Regenerar" : "Generar con DeepSeek"}
                 </button>
                 {aiDone && (
-                  <p className="font-crimson text-sm text-emerald-400">
-                    ✓ Contenido generado — revisa y edita en la sección siguiente.
-                  </p>
+                  <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                    <p className="font-crimson text-sm text-emerald-400">
+                      ✓ Contenido generado
+                    </p>
+                    <button onClick={() => setOpen("review")}
+                      className="flex items-center gap-1.5 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/10 font-cinzel text-[9px] uppercase tracking-widest px-4 py-2 transition">
+                      Siguiente <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
                 )}
               </div>
             )}
@@ -343,7 +356,18 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                 <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={!isEditable}
                   placeholder="ej. Lo que encontré en tres regresiones esta semana"
                   className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 disabled:opacity-50" />
-                <p className="font-crimson text-xs text-gray-600 mt-1">{subject.length}/60 caracteres recomendados</p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="font-crimson text-xs text-gray-600">{subject.length}/60 caracteres recomendados</p>
+                  <div className="flex gap-1">
+                    {["{{primer_nombre}}", "{{nombre}}"].map((tag) => (
+                      <button key={tag} type="button" onClick={() => isEditable && setSubject((v) => v + tag)}
+                        disabled={!isEditable}
+                        className="font-mono text-[9px] px-1.5 py-0.5 bg-[#0a1628] border border-[#C5A059]/20 text-[#C5A059]/60 hover:text-[#C5A059] transition disabled:opacity-40">
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div>
                 <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Preencabezado</label>
@@ -352,13 +376,30 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                   className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 disabled:opacity-50" />
               </div>
               {campaign.template_kind === "editorial" && (
-                <div>
-                  <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Introducción</label>
+                <div className="space-y-2">
+                  <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500">Introducción</label>
                   <textarea value={intro} onChange={(e) => setIntro(e.target.value)} disabled={!isEditable} rows={5}
                     placeholder="Párrafo de introducción de la newsletter..."
                     className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 resize-none disabled:opacity-50" />
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <span className="font-cinzel text-[8px] uppercase tracking-widest text-gray-600 self-center">Variables:</span>
+                    {TAG_HINTS.map(({ tag, desc }) => (
+                      <button key={tag} type="button" onClick={() => isEditable && setIntro((v) => v + tag)}
+                        disabled={!isEditable}
+                        className="font-mono text-[10px] px-2 py-0.5 bg-[#0a1628] border border-[#C5A059]/20 text-[#C5A059]/70 hover:text-[#C5A059] hover:border-[#C5A059]/50 transition disabled:opacity-40"
+                        title={desc}>
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
+              <div className="flex justify-end pt-2 border-t border-white/5">
+                <button onClick={() => setOpen("preview")}
+                  className="flex items-center gap-1.5 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/10 font-cinzel text-[9px] uppercase tracking-widest px-4 py-2.5 transition">
+                  Siguiente <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -393,6 +434,14 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                   title="Email preview"
                   sandbox="allow-same-origin"
                 />
+              )}
+              {isEditable && (
+                <div className="flex justify-end mt-3 pt-3 border-t border-white/5">
+                  <button onClick={() => setOpen("schedule")}
+                    className="flex items-center gap-1.5 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/10 font-cinzel text-[9px] uppercase tracking-widest px-4 py-2.5 transition">
+                    Siguiente <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
               )}
               <div className="mt-4 flex items-end gap-3">
                 <div className="flex-1">
