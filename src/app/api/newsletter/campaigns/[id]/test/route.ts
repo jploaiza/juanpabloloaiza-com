@@ -10,7 +10,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const auth = await requireNewsletterAdmin();
   if ("error" in auth) return auth.error;
 
-  const { test_email } = await req.json();
+  const { test_email, test_name, test_apellido } = await req.json();
   if (!test_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(test_email)) {
     return NextResponse.json({ error: "Email de prueba inválido." }, { status: 400 });
   }
@@ -23,7 +23,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (!campaign) return NextResponse.json({ error: "No encontrada." }, { status: 404 });
 
-  const testSub = { id: "test", email: test_email, name: "Preview", apellido: "Test", unsubscribe_token: "test-token" };
+  const testSub = {
+    id: "test",
+    email: test_email,
+    name: String(test_name ?? "Juan Pablo").trim() || "Juan Pablo",
+    apellido: String(test_apellido ?? "Loaiza").trim() || "Loaiza",
+    unsubscribe_token: "test-token",
+  };
   const html = renderCampaignHtml(campaign.template_kind, campaign.template_data, testSub);
 
   const resend = new Resend(process.env.RESEND_API_KEY);

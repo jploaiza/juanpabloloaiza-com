@@ -72,20 +72,21 @@ export function emailShell(content: string, footer?: string): string {
                 </tr>
                 <!-- Author card -->
                 <tr>
-                  <td style="padding:20px 32px;background-color:#0e1b30;">
+                  <td style="padding:24px 32px 28px;background-color:#0e1b30;">
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td width="86" valign="top" style="padding-right:16px;">
-                          <img src="${PHOTO_URL}" width="70" height="70" alt="Juan Pablo Loaiza"
-                            style="display:block;width:70px;height:70px;object-fit:cover;border:1px solid rgba(197,160,89,0.4);"/>
+                        <td width="100" valign="top" style="padding-right:20px;">
+                          <img src="${PHOTO_URL}" width="80" height="80" alt="Juan Pablo Loaiza"
+                            style="display:block;width:80px;height:80px;object-fit:cover;border:1px solid rgba(197,160,89,0.4);"/>
                         </td>
-                        <td valign="middle">
-                          <p style="color:#C5A059;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin:0 0 3px;font-family:Georgia,serif;">Tu terapeuta</p>
-                          <p style="color:#ffffff;font-size:14px;margin:0 0 4px;font-family:Georgia,serif;font-weight:normal;">Juan Pablo Loaiza</p>
-                          <p style="color:#8a9bb5;font-size:12px;margin:0 0 12px;font-family:Georgia,serif;">Terapia de Regresión · Hipnoterapia · TRVP</p>
+                        <td valign="top">
+                          <p style="color:#C5A059;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin:0 0 4px;font-family:Georgia,serif;">Tu terapeuta</p>
+                          <p style="color:#ffffff;font-size:16px;margin:0 0 8px;font-family:Georgia,serif;font-weight:normal;letter-spacing:0.5px;">Juan Pablo Loaiza</p>
+                          <p style="color:#6b7f99;font-size:11px;line-height:1.55;margin:0 0 10px;font-family:Georgia,serif;">Terapeuta Holístico Certificado Internacionalmente en Hipnosis Clínica con Técnicas Regresivas y Liberación de Entidades Espirituales, con más de 18 años de experiencia.</p>
+                          <p style="color:#8a9bb5;font-size:12px;line-height:1.6;margin:0 0 16px;font-family:Georgia,serif;font-style:italic;">Si tienes dudas sobre tu sesión o tu proceso, contáctame directamente. Tu compromiso te llevará a la meta.</p>
                           <a href="${WHATSAPP_URL}"
-                            style="display:inline-block;padding:7px 20px;background-color:#C5A059;color:#020617;font-family:Georgia,serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">
-                            WhatsApp
+                            style="display:inline-block;padding:8px 22px;background-color:#C5A059;color:#020617;font-family:Georgia,serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">
+                            Contactar por WhatsApp
                           </a>
                         </td>
                       </tr>

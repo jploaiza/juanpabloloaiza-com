@@ -95,7 +95,9 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
   const [previewLoading, setPreviewLoading] = useState(false);
 
   // Test send
-  const [testEmail, setTestEmail] = useState("");
+  const [testName, setTestName] = useState("Juan Pablo");
+  const [testApellido, setTestApellido] = useState("Loaiza");
+  const [testEmail, setTestEmail] = useState("jploaiza@gmail.com");
   const [testLoading, setTestLoading] = useState(false);
   const [testMsg, setTestMsg] = useState("");
 
@@ -179,7 +181,7 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
     const res = await fetch(`/api/newsletter/campaigns/${campaign.id}/test`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ test_email: testEmail }),
+      body: JSON.stringify({ test_email: testEmail, test_name: testName, test_apellido: testApellido }),
     });
     setTestLoading(false);
     setTestMsg(res.ok ? "✓ Enviado" : "Error al enviar");
@@ -448,18 +450,34 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                   </button>
                 </div>
               )}
-              <div className="mt-4 flex items-end gap-3">
-                <div className="flex-1">
-                  <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Enviar prueba a</label>
-                  <input type="email" value={testEmail} onChange={(e) => setTestEmail(e.target.value)}
-                    placeholder="tu@email.com"
-                    className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600" />
+              <div className="mt-4 space-y-2 border-t border-white/5 pt-4">
+                <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500">Enviar test</p>
+                <p className="font-crimson text-xs text-gray-600">Nombre y apellido para que funcionen las etiquetas de personalización (&#123;&#123;primer_nombre&#125;&#125;, etc.)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-600 mb-1">Nombre</label>
+                    <input type="text" value={testName} onChange={(e) => setTestName(e.target.value)}
+                      className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2 text-sm focus:outline-none focus:border-[#C5A059]/50" />
+                  </div>
+                  <div>
+                    <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-600 mb-1">Apellido</label>
+                    <input type="text" value={testApellido} onChange={(e) => setTestApellido(e.target.value)}
+                      className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2 text-sm focus:outline-none focus:border-[#C5A059]/50" />
+                  </div>
                 </div>
-                <button onClick={sendTest} disabled={testLoading || !testEmail}
-                  className="flex items-center gap-1.5 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/10 font-cinzel text-[9px] uppercase tracking-widest px-4 py-2.5 transition disabled:opacity-50 whitespace-nowrap">
-                  {testLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />}
-                  {testMsg || "Enviar test"}
-                </button>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-600 mb-1">Email</label>
+                    <input type="email" value={testEmail} onChange={(e) => setTestEmail(e.target.value)}
+                      placeholder="tu@email.com"
+                      className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600" />
+                  </div>
+                  <button onClick={sendTest} disabled={testLoading || !testEmail}
+                    className="flex items-center gap-1.5 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/10 font-cinzel text-[9px] uppercase tracking-widest px-4 py-2.5 transition disabled:opacity-50 whitespace-nowrap">
+                    {testLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />}
+                    {testMsg || "Enviar test"}
+                  </button>
+                </div>
               </div>
             </div>
           )}
