@@ -37,10 +37,10 @@ export default function NewsletterForm() {
   if (status === "success") {
     return (
       <div className="flex flex-col items-center gap-3 py-8">
-        <CheckCircle className="w-10 h-10 text-emerald-400" />
-        <p className="font-cinzel text-sm text-white">¡Suscripción confirmada!</p>
+        <CheckCircle className="w-10 h-10 text-[#C5A059]" />
+        <p className="font-cinzel text-sm text-white">Revisa tu correo</p>
         <p className="font-crimson text-sm text-gray-400 text-center">
-          Recibirás artículos y recursos sobre regresión e hipnoterapia.
+          Te enviamos un enlace de confirmación. Un click y listo.
         </p>
       </div>
     );
