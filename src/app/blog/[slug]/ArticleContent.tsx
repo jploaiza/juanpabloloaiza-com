@@ -276,7 +276,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
             </p>
             <div className="flex flex-wrap gap-3">
               <a
-                href="https://wa.me/34611111111?text=Hola%20Juan%20Pablo%2C%20leí%20tu%20artículo%20y%20me%20gustaría%20hablar."
+                href="https://wa.me/56962081884?text=Hola%20Juan%20Pablo%2C%20leí%20tu%20artículo%20y%20me%20gustaría%20hablar."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-[#C5A059] hover:bg-[#d4b06a] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition"
@@ -284,13 +284,15 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
                 <MessageCircle className="w-3.5 h-3.5" />
                 Escribir por WhatsApp
               </a>
-              <Link
-                href="/#contacto"
+              <a
+                href="https://www.juanpabloloaiza.com/#ListaDeAdmision"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 border border-[#C5A059]/40 hover:border-[#C5A059] text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition"
               >
                 <Mail className="w-3.5 h-3.5" />
                 Formulario de contacto
-              </Link>
+              </a>
             </div>
           </motion.div>
 
