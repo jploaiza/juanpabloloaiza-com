@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sparkles, Send, Eye, TestTube, Clock, CheckCircle,
-  ChevronDown, ChevronUp, Loader2, Save, X, Copy
+  ChevronDown, ChevronUp, Loader2, Save, X, Copy, Settings2
 } from "lucide-react";
 import type { BlogPost } from "@/lib/blog-data";
 import ArticlePicker from "./ArticlePicker";
@@ -20,10 +20,11 @@ interface Campaign {
 
 interface Props { campaign: Campaign; posts: BlogPost[] }
 
-type Section = "setup" | "articles" | "ai" | "preview" | "schedule";
+type Section = "articles" | "ai" | "review" | "preview" | "schedule";
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: "Borrador", scheduled: "Programada", sending: "Enviando", sent: "Enviada", canceled: "Cancelada", failed: "Fallida"
+  draft: "Borrador", scheduled: "Programada", sending: "Enviando",
+  sent: "Enviada", canceled: "Cancelada", failed: "Fallida"
 };
 
 function SectionHeader({ title, open, onToggle, done }: { title: string; open: boolean; onToggle: () => void; done?: boolean }) {
@@ -31,7 +32,9 @@ function SectionHeader({ title, open, onToggle, done }: { title: string; open: b
     <button type="button" onClick={onToggle}
       className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition">
       <div className="flex items-center gap-3">
-        {done ? <CheckCircle className="w-4 h-4 text-[#C5A059]" /> : <div className="w-4 h-4 rounded-full border border-white/20" />}
+        {done
+          ? <CheckCircle className="w-4 h-4 text-[#C5A059]" />
+          : <div className="w-4 h-4 rounded-full border border-white/20" />}
         <span className="font-cinzel text-[10px] uppercase tracking-widest text-white">{title}</span>
       </div>
       {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
@@ -43,15 +46,19 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
   const router = useRouter();
   const isEditable = ["draft", "scheduled"].includes(campaign.status);
 
-  const [open, setOpen] = useState<Section>("setup");
+  const [open, setOpen] = useState<Section>(campaign.template_kind === "editorial" ? "articles" : "ai");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
-  // Setup fields
+  // Subject / preheader — filled by AI, then editable
   const [subject, setSubject] = useState(campaign.subject ?? "");
   const [preheader, setPreheader] = useState(campaign.preheader ?? "");
+  const [subjectOptions, setSubjectOptions] = useState<string[]>([]);
+
+  // Sender — advanced
   const [senderName, setSenderName] = useState(campaign.sender_name ?? "Juan Pablo Loaiza");
   const [senderEmail, setSenderEmail] = useState(campaign.sender_email ?? "newsletter@juanpabloloaiza.com");
+  const [showSender, setShowSender] = useState(false);
 
   // Articles (editorial template)
   const td = campaign.template_data as Record<string, unknown>;
@@ -66,15 +73,19 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
     String((td?.transitions as string[])?.[0] ?? ""),
     String((td?.transitions as string[])?.[1] ?? ""),
   ]);
-  const [cta, setCta] = useState({ text: String((td?.cta as Record<string,string>)?.text ?? "Explorar el blog"), url: String((td?.cta as Record<string,string>)?.url ?? "https://juanpabloloaiza.com/blog") });
+  const [cta, setCta] = useState({
+    text: String((td?.cta as Record<string, string>)?.text ?? "Explorar el blog"),
+    url: String((td?.cta as Record<string, string>)?.url ?? "https://juanpabloloaiza.com/blog"),
+  });
 
   // AI
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
-  const [subjectOptions, setSubjectOptions] = useState<string[]>([]);
+  const [aiDone, setAiDone] = useState(false);
 
-  // Preview
-  const [previewOpen, setPreviewOpen] = useState(false);
+  // Preview — use srcdoc to bypass X-Frame-Options/CSP
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Test send
   const [testEmail, setTestEmail] = useState("");
@@ -82,7 +93,9 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
   const [testMsg, setTestMsg] = useState("");
 
   // Schedule
-  const [scheduledAt, setScheduledAt] = useState(campaign.scheduled_at ? new Date(campaign.scheduled_at).toISOString().slice(0, 16) : "");
+  const [scheduledAt, setScheduledAt] = useState(
+    campaign.scheduled_at ? new Date(campaign.scheduled_at).toISOString().slice(0, 16) : ""
+  );
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [scheduleMsg, setScheduleMsg] = useState("");
 
@@ -90,7 +103,9 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
     if (campaign.template_kind === "editorial") {
       return {
         article_ids: articles.map((a) => a?.id ?? null),
-        articles: articles.map((a) => a ? { id: a.id, title: a.title, excerpt: a.excerpt ?? "", slug: a.slug, imageUrl: a.imageUrl, tags: a.tags ?? [] } : null),
+        articles: articles.map((a) =>
+          a ? { id: a.id, title: a.title, excerpt: a.excerpt ?? "", slug: a.slug, imageUrl: a.imageUrl, tags: a.tags ?? [] } : null
+        ),
         intro,
         transitions,
         cta,
@@ -104,7 +119,11 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
     const res = await fetch(`/api/newsletter/campaigns/${campaign.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subject, preheader, sender_name: senderName, sender_email: senderEmail, template_data: buildTemplateData() }),
+      body: JSON.stringify({
+        subject, preheader,
+        sender_name: senderName, sender_email: senderEmail,
+        template_data: buildTemplateData(),
+      }),
     });
     setSaving(false);
     if (res.ok) { setSaveMsg("Guardado"); setTimeout(() => setSaveMsg(""), 2000); }
@@ -112,8 +131,10 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
   }
 
   async function generateAI() {
-    setAiLoading(true); setAiError("");
-    const articleData = articles.filter(Boolean).map((a) => ({ title: a!.title, excerpt: a!.excerpt ?? "", tags: a!.tags ?? [] }));
+    setAiLoading(true); setAiError(""); setAiDone(false);
+    const articleData = articles.filter(Boolean).map((a) => ({
+      title: a!.title, excerpt: a!.excerpt ?? "", tags: a!.tags ?? []
+    }));
     const res = await fetch(`/api/newsletter/campaigns/${campaign.id}/ai`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -129,6 +150,19 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
     if (r.preheader) setPreheader(r.preheader);
     if (r.cta) setCta(r.cta);
     if (r.subject_options?.[0]) setSubject(r.subject_options[0]);
+    setAiDone(true);
+    setOpen("review");
+  }
+
+  async function openPreview() {
+    setPreviewLoading(true);
+    await save();
+    const res = await fetch(`/api/newsletter/campaigns/${campaign.id}/preview`);
+    if (res.ok) {
+      const html = await res.text();
+      setPreviewHtml(html);
+    }
+    setPreviewLoading(false);
   }
 
   async function sendTest() {
@@ -178,11 +212,13 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
   }
 
   const toggle = (s: Section) => setOpen((cur) => (cur === s ? ("" as Section) : s));
+  const hasArticles = articles.filter(Boolean).length >= 1;
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
-      {/* Left: editor */}
+      {/* Left: editor sections */}
       <div className="lg:col-span-2 space-y-4">
+
         {/* Status + actions bar */}
         <div className="flex items-center justify-between bg-[#16213e] border border-white/5 px-5 py-3">
           <div className="flex items-center gap-3">
@@ -212,55 +248,10 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
           </div>
         </div>
 
-        {/* SECTION: Setup */}
-        <div className="bg-[#16213e] border border-white/5">
-          <SectionHeader title="1 · Asunto y remitente" open={open === "setup"} onToggle={() => toggle("setup")} done={!!subject} />
-          {open === "setup" && (
-            <div className="px-5 pb-5 space-y-4 border-t border-white/5 pt-4">
-              <div>
-                <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Asunto *</label>
-                <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={!isEditable}
-                  placeholder="ej. Lo que encontré en tres regresiones esta semana"
-                  className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 disabled:opacity-50" />
-                <p className="font-crimson text-xs text-gray-600 mt-1">{subject.length}/60 caracteres recomendados</p>
-              </div>
-              {subjectOptions.length > 0 && (
-                <div className="space-y-2">
-                  <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/70">Opciones IA:</p>
-                  {subjectOptions.map((s, i) => (
-                    <button key={i} onClick={() => setSubject(s)}
-                      className="block w-full text-left font-crimson text-sm text-gray-400 hover:text-white px-3 py-2 bg-[#0a1628] border border-white/5 hover:border-[#C5A059]/30 transition">
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div>
-                <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Preencabezado</label>
-                <input value={preheader} onChange={(e) => setPreheader(e.target.value)} disabled={!isEditable}
-                  placeholder="Texto que aparece después del asunto en el inbox"
-                  className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 disabled:opacity-50" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Nombre remitente</label>
-                  <input value={senderName} onChange={(e) => setSenderName(e.target.value)} disabled={!isEditable}
-                    className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 disabled:opacity-50" />
-                </div>
-                <div>
-                  <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Email remitente</label>
-                  <input value={senderEmail} onChange={(e) => setSenderEmail(e.target.value)} disabled={!isEditable}
-                    className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 disabled:opacity-50" />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* SECTION: Articles (editorial only) */}
+        {/* SECTION 1: Artículos (editorial only) */}
         {campaign.template_kind === "editorial" && (
           <div className="bg-[#16213e] border border-white/5">
-            <SectionHeader title="2 · Artículos" open={open === "articles"} onToggle={() => toggle("articles")} done={articles.filter(Boolean).length >= 1} />
+            <SectionHeader title="1 · Artículos" open={open === "articles"} onToggle={() => toggle("articles")} done={hasArticles} />
             {open === "articles" && (
               <div className="px-5 pb-5 border-t border-white/5 pt-4 space-y-4">
                 {(["Principal", "Secundario", "Terciario"] as const).map((label, i) => (
@@ -275,62 +266,133 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                     }} disabled={!isEditable} />
                   </div>
                 ))}
+                {hasArticles && isEditable && (
+                  <button onClick={() => setOpen("ai")}
+                    className="flex items-center gap-2 bg-[#C5A059]/10 hover:bg-[#C5A059]/20 border border-[#C5A059]/30 text-[#C5A059] font-cinzel text-[9px] uppercase tracking-widest px-4 py-2.5 transition">
+                    <Sparkles className="w-3 h-3" /> Continuar → Generar con IA
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SECTION 2: Generar con IA */}
+        {isEditable && (
+          <div className="bg-[#16213e] border border-white/5">
+            <SectionHeader
+              title={campaign.template_kind === "editorial" ? "2 · Generar con IA" : "1 · Generar con IA"}
+              open={open === "ai"}
+              onToggle={() => toggle("ai")}
+              done={aiDone || !!subject}
+            />
+            {open === "ai" && (
+              <div className="px-5 pb-5 border-t border-white/5 pt-4 space-y-4">
+                <p className="font-crimson text-sm text-gray-400 leading-relaxed">
+                  DeepSeek redactará el asunto, preencabezado, introducción y transiciones en la voz de Juan Pablo (terapeuta TRVP).
+                  {campaign.template_kind === "editorial" && !hasArticles && (
+                    <span className="text-amber-400"> Selecciona al menos un artículo primero.</span>
+                  )}
+                </p>
+                {aiError && <p className="font-crimson text-sm text-red-400">{aiError}</p>}
+                <button
+                  onClick={generateAI}
+                  disabled={aiLoading || (campaign.template_kind === "editorial" && !hasArticles)}
+                  className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#d4b06a] disabled:opacity-60 text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition"
+                >
+                  {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {aiLoading ? "Generando..." : aiDone ? "Regenerar" : "Generar con DeepSeek"}
+                </button>
+                {aiDone && (
+                  <p className="font-crimson text-sm text-emerald-400">
+                    ✓ Contenido generado — revisa y edita en la sección siguiente.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SECTION 3: Asunto y contenido */}
+        <div className="bg-[#16213e] border border-white/5">
+          <SectionHeader
+            title={campaign.template_kind === "editorial" ? "3 · Asunto y contenido" : isEditable ? "2 · Asunto y contenido" : "1 · Asunto y contenido"}
+            open={open === "review"}
+            onToggle={() => toggle("review")}
+            done={!!subject}
+          />
+          {open === "review" && (
+            <div className="px-5 pb-5 space-y-4 border-t border-white/5 pt-4">
+              {subjectOptions.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/70">Opciones generadas:</p>
+                  {subjectOptions.map((s, i) => (
+                    <button key={i} onClick={() => isEditable && setSubject(s)} disabled={!isEditable}
+                      className={`block w-full text-left font-crimson text-sm px-3 py-2 border transition ${
+                        subject === s
+                          ? "text-white bg-[#C5A059]/10 border-[#C5A059]/40"
+                          : "text-gray-400 hover:text-white bg-[#0a1628] border-white/5 hover:border-[#C5A059]/30"
+                      }`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div>
+                <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Asunto *</label>
+                <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={!isEditable}
+                  placeholder="ej. Lo que encontré en tres regresiones esta semana"
+                  className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 disabled:opacity-50" />
+                <p className="font-crimson text-xs text-gray-600 mt-1">{subject.length}/60 caracteres recomendados</p>
+              </div>
+              <div>
+                <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Preencabezado</label>
+                <input value={preheader} onChange={(e) => setPreheader(e.target.value)} disabled={!isEditable}
+                  placeholder="Texto que aparece después del asunto en el inbox"
+                  className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 disabled:opacity-50" />
+              </div>
+              {campaign.template_kind === "editorial" && (
                 <div>
-                  <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Intro (se genera con IA)</label>
-                  <textarea value={intro} onChange={(e) => setIntro(e.target.value)} disabled={!isEditable} rows={4}
+                  <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Introducción</label>
+                  <textarea value={intro} onChange={(e) => setIntro(e.target.value)} disabled={!isEditable} rows={5}
                     placeholder="Párrafo de introducción de la newsletter..."
                     className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600 resize-none disabled:opacity-50" />
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
 
-        {/* SECTION: AI */}
-        {isEditable && (
-          <div className="bg-[#16213e] border border-white/5">
-            <SectionHeader title="3 · Generar con IA" open={open === "ai"} onToggle={() => toggle("ai")} />
-            {open === "ai" && (
-              <div className="px-5 pb-5 border-t border-white/5 pt-4">
-                <p className="font-crimson text-sm text-gray-400 mb-4 leading-relaxed">
-                  DeepSeek generará el asunto, preencabezado, introducción y transiciones en la voz de Juan Pablo (terapeuta TRVP).
-                  {campaign.template_kind === "editorial" && " Requiere al menos un artículo seleccionado."}
-                </p>
-                {aiError && <p className="font-crimson text-sm text-red-400 mb-3">{aiError}</p>}
-                <button onClick={generateAI} disabled={aiLoading}
-                  className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#d4b06a] disabled:opacity-60 text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition">
-                  {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  {aiLoading ? "Generando..." : "Generar con DeepSeek"}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* SECTION: Preview */}
+        {/* SECTION 4: Vista previa */}
         <div className="bg-[#16213e] border border-white/5">
-          <SectionHeader title="4 · Vista previa" open={open === "preview"} onToggle={() => toggle("preview")} />
+          <SectionHeader
+            title={campaign.template_kind === "editorial" ? "4 · Vista previa" : isEditable ? "3 · Vista previa" : "2 · Vista previa"}
+            open={open === "preview"}
+            onToggle={() => toggle("preview")}
+          />
           {open === "preview" && (
             <div className="px-5 pb-5 border-t border-white/5 pt-4">
               <div className="flex gap-3 mb-4">
-                <button onClick={async () => { await save(); setPreviewOpen(true); }}
-                  className="flex items-center gap-2 border border-[#C5A059]/40 text-[#C5A059] hover:bg-[#C5A059]/10 font-cinzel text-[10px] uppercase tracking-widest px-4 py-2.5 transition">
-                  <Eye className="w-3.5 h-3.5" /> Abrir preview
+                <button onClick={openPreview} disabled={previewLoading}
+                  className="flex items-center gap-2 border border-[#C5A059]/40 text-[#C5A059] hover:bg-[#C5A059]/10 font-cinzel text-[10px] uppercase tracking-widest px-4 py-2.5 transition disabled:opacity-50">
+                  {previewLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
+                  {previewLoading ? "Cargando..." : previewHtml ? "Actualizar preview" : "Ver preview"}
                 </button>
-              </div>
-              {previewOpen && (
-                <div className="relative">
-                  <button onClick={() => setPreviewOpen(false)}
-                    className="absolute top-2 right-2 z-10 p-1 bg-[#16213e] border border-white/10 text-gray-400 hover:text-white">
-                    <X className="w-4 h-4" />
+                {previewHtml && (
+                  <button onClick={() => setPreviewHtml("")}
+                    className="p-2 border border-white/10 text-gray-500 hover:text-white transition">
+                    <X className="w-3.5 h-3.5" />
                   </button>
-                  <iframe
-                    src={`/api/newsletter/campaigns/${campaign.id}/preview`}
-                    className="w-full border border-white/10"
-                    style={{ height: "600px" }}
-                    title="Email preview"
-                  />
-                </div>
+                )}
+              </div>
+              {previewHtml && (
+                <iframe
+                  srcDoc={previewHtml}
+                  className="w-full border border-white/10"
+                  style={{ height: "600px" }}
+                  title="Email preview"
+                  sandbox="allow-same-origin"
+                />
               )}
               <div className="mt-4 flex items-end gap-3">
                 <div className="flex-1">
@@ -349,10 +411,14 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
           )}
         </div>
 
-        {/* SECTION: Schedule */}
+        {/* SECTION 5: Programar envío */}
         {isEditable && (
           <div className="bg-[#16213e] border border-white/5">
-            <SectionHeader title="5 · Programar envío" open={open === "schedule"} onToggle={() => toggle("schedule")} />
+            <SectionHeader
+              title={campaign.template_kind === "editorial" ? "5 · Programar envío" : "4 · Programar envío"}
+              open={open === "schedule"}
+              onToggle={() => toggle("schedule")}
+            />
             {open === "schedule" && (
               <div className="px-5 pb-5 border-t border-white/5 pt-4 space-y-4">
                 {scheduleMsg && (
@@ -384,13 +450,36 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                     </button>
                   )}
                 </div>
+
+                {/* Advanced: sender settings */}
+                <div className="border-t border-white/5 pt-3">
+                  <button type="button" onClick={() => setShowSender((v) => !v)}
+                    className="flex items-center gap-1.5 font-cinzel text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition">
+                    <Settings2 className="w-3 h-3" />
+                    {showSender ? "Ocultar remitente" : "Cambiar remitente"}
+                  </button>
+                  {showSender && (
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div>
+                        <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Nombre</label>
+                        <input value={senderName} onChange={(e) => setSenderName(e.target.value)}
+                          className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50" />
+                      </div>
+                      <div>
+                        <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Email</label>
+                        <input value={senderEmail} onChange={(e) => setSenderEmail(e.target.value)}
+                          className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50" />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Right: quick stats sidebar */}
+      {/* Right sidebar */}
       <div className="lg:col-span-1 space-y-4">
         <div className="bg-[#16213e] border border-white/5 p-5">
           <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-4">Detalles</p>
@@ -398,7 +487,10 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
             {[
               ["Template", campaign.template_kind],
               ["Estado", STATUS_LABEL[campaign.status]],
-              ...(campaign.scheduled_at ? [["Programado", new Date(campaign.scheduled_at).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })]] : []),
+              ...(campaign.scheduled_at ? [[
+                "Programado",
+                new Date(campaign.scheduled_at).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+              ]] : []),
               ...(campaign.stats_cache?.sent ? [
                 ["Enviados", String(campaign.stats_cache.sent)],
                 ["Abiertos", String(campaign.stats_cache.opened ?? 0)],
