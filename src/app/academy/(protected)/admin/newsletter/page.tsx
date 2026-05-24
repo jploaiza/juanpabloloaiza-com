@@ -1,125 +1,114 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import AcademyCard from "@/components/academy/AcademyCard";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
-import { Mail, Users } from "lucide-react";
+import { Mail, Users, Send, CheckCircle, Clock, LayoutTemplate, Zap, Plus, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Newsletter — Admin" };
 export const dynamic = "force-dynamic";
 
-type Subscriber = {
-  id: string;
-  name: string;
-  apellido: string;
-  email: string;
-  created_at: string;
-};
-
-export default async function NewsletterAdminPage() {
+export default async function NewsletterDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/academy/login");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/academy/dashboard");
 
   const adminSb = await createAdminClient();
-  const { data: subscribers } = await adminSb
-    .from("newsletter_subscribers")
-    .select("id, name, apellido, email, created_at")
-    .order("created_at", { ascending: false });
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
-  const all = (subscribers ?? []) as Subscriber[];
+  const [subsResult, campaignsResult, automationsResult] = await Promise.all([
+    adminSb.from("newsletter_subscribers").select("id, status, created_at", { count: "exact" }),
+    adminSb.from("newsletter_campaigns").select("id, status, stats_cache"),
+    adminSb.from("newsletter_automations").select("kind, enabled"),
+  ]);
 
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const recentCount = all.filter((s) => new Date(s.created_at) > thirtyDaysAgo).length;
+  const subs = subsResult.data ?? [];
+  const campaigns = campaignsResult.data ?? [];
+  const automations = automationsResult.data ?? [];
+
+  const totalSubs = subsResult.count ?? 0;
+  const confirmedSubs = subs.filter((s) => s.status === "confirmed").length;
+  const recentSubs = subs.filter((s) => s.created_at > thirtyDaysAgo).length;
+  const sentCampaigns = campaigns.filter((c) => c.status === "sent").length;
+  const scheduledCampaigns = campaigns.filter((c) => c.status === "scheduled").length;
+  const totalSent = campaigns.reduce((acc, c) => acc + ((c.stats_cache as Record<string, number>)?.sent ?? 0), 0);
+  const welcomeEnabled = automations.find((a) => a.kind === "welcome")?.enabled ?? false;
+  const reengagementEnabled = automations.find((a) => a.kind === "reengagement")?.enabled ?? false;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-20">
-      <div className="mb-8">
-        <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">
-          Administración
-        </p>
-        <h1 className="font-cinzel text-2xl text-white">Newsletter</h1>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-20">
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Administración</p>
+          <h1 className="font-cinzel text-2xl text-white">Newsletter</h1>
+        </div>
+        <Link href="/academy/admin/newsletter/campaigns/nuevo"
+          className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#d4b06a] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-4 py-2.5 transition">
+          <Plus className="w-3.5 h-3.5" /> Nueva campaña
+        </Link>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Total suscriptores", value: all.length, icon: Users },
-          { label: "Últimos 30 días", value: recentCount, accent: "text-emerald-400" },
-        ].map(({ label, value, icon: Icon, accent }) => (
+          { label: "Confirmados", value: confirmedSubs, sub: `+${recentSubs} últimos 30d`, icon: Users, accent: "text-white" },
+          { label: "Campañas enviadas", value: sentCampaigns, sub: `${totalSent} emails totales`, icon: Send, accent: "text-emerald-400" },
+          { label: "Programadas", value: scheduledCampaigns, icon: Clock, accent: "text-amber-400" },
+          { label: "Total suscriptores", value: totalSubs, icon: Mail, accent: "text-gray-300" },
+        ].map(({ label, value, sub, icon: Icon, accent }) => (
           <div key={label} className="relative bg-[#16213e] border border-white/5 p-5 overflow-hidden">
             <ScrollworkCorners size={36} opacity={0.7} />
-            {Icon && <Icon className="w-4 h-4 text-[#C5A059] mb-3" />}
+            <Icon className="w-4 h-4 text-[#C5A059] mb-3" />
             <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">{label}</p>
-            <p className={`font-cinzel text-2xl ${accent ?? "text-white"}`}>{value}</p>
+            <p className={`font-cinzel text-2xl ${accent}`}>{value}</p>
+            {sub && <p className="font-crimson text-xs text-gray-600 mt-1">{sub}</p>}
           </div>
         ))}
       </div>
 
-      {/* Subscribers table */}
-      <AcademyCard>
-        <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-6">
-          Suscriptores
-          <span className="ml-3 font-crimson text-xs text-gray-500 normal-case">{all.length} registros</span>
-        </h2>
+      {/* Quick access */}
+      <div className="grid sm:grid-cols-2 gap-4 mb-6">
+        {[
+          { href: "/academy/admin/newsletter/campaigns", icon: Send, label: "Campañas", desc: `${campaigns.length} campañas · ${scheduledCampaigns} programadas` },
+          { href: "/academy/admin/newsletter/subscribers", icon: Users, label: "Suscriptores", desc: `${confirmedSubs} confirmados · ${recentSubs} nuevos este mes` },
+          { href: "/academy/admin/newsletter/templates", icon: LayoutTemplate, label: "Plantillas", desc: "4 plantillas disponibles: editorial, anuncio, bienvenida, re-engagement" },
+          { href: "/academy/admin/newsletter/automations", icon: Zap, label: "Automatizaciones", desc: `Bienvenida ${welcomeEnabled ? "✓" : "—"} · Re-engagement ${reengagementEnabled ? "✓" : "—"}` },
+        ].map(({ href, icon: Icon, label, desc }) => (
+          <Link key={href} href={href}
+            className="group flex items-center gap-4 bg-[#16213e] border border-white/5 hover:border-[#C5A059]/30 p-5 transition">
+            <Icon className="w-5 h-5 text-[#C5A059] flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="font-cinzel text-[10px] uppercase tracking-widest text-white mb-1">{label}</p>
+              <p className="font-crimson text-sm text-gray-500 truncate">{desc}</p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-[#C5A059] transition" />
+          </Link>
+        ))}
+      </div>
 
-        {all.length === 0 ? (
-          <div className="text-center py-16">
-            <Mail className="w-10 h-10 text-[#C5A059]/20 mx-auto mb-4" />
-            <p className="font-cinzel text-sm text-gray-600">No hay suscriptores aún</p>
-            <p className="font-crimson text-sm text-gray-700 mt-2">
-              Los formularios de newsletter en los artículos aparecerán aquí.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5">
-                  {["Nombre", "Apellido", "Email", "Fecha"].map((h) => (
-                    <th key={h} className="text-left font-cinzel text-[9px] uppercase tracking-widest text-gray-600 pb-3 pr-4 last:pr-0">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {all.map((s) => (
-                  <tr key={s.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition">
-                    <td className="py-3 pr-4">
-                      <span className="font-crimson text-sm text-gray-200">{s.name}</span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      <span className="font-crimson text-sm text-gray-200">{s.apellido}</span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      <a href={`mailto:${s.email}`} className="font-crimson text-sm text-[#C5A059]/70 hover:text-[#C5A059] transition">
-                        {s.email}
-                      </a>
-                    </td>
-                    <td className="py-3">
-                      <span className="font-crimson text-xs text-gray-500 whitespace-nowrap">
-                        {new Date(s.created_at).toLocaleDateString("es-ES", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {/* Automation status */}
+      <AcademyCard>
+        <h2 className="font-cinzel text-xs uppercase tracking-widest text-white mb-4">Estado de automatizaciones</h2>
+        <div className="space-y-3">
+          {[
+            { label: "Bienvenida automática", enabled: welcomeEnabled, desc: "Email al confirmar suscripción" },
+            { label: "Re-engagement inactivos", enabled: reengagementEnabled, desc: "Cron diario para suscriptores sin actividad 60+ días" },
+          ].map(({ label, enabled, desc }) => (
+            <div key={label} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
+              <div>
+                <p className="font-cinzel text-[10px] uppercase tracking-widest text-gray-300">{label}</p>
+                <p className="font-crimson text-xs text-gray-600 mt-0.5">{desc}</p>
+              </div>
+              <span className={`flex items-center gap-1.5 font-cinzel text-[8px] uppercase tracking-widest ${enabled ? "text-emerald-400" : "text-gray-600"}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${enabled ? "bg-emerald-400" : "bg-gray-600"}`} />
+                {enabled ? "Activa" : "Inactiva"}
+              </span>
+            </div>
+          ))}
+        </div>
       </AcademyCard>
     </div>
   );

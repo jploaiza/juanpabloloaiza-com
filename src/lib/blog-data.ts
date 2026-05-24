@@ -11,6 +11,7 @@ export interface BlogPost {
   date: string;
   author: string;
   url: string;
+  tags?: string[];
 }
 
 export const blogPosts: BlogPost[] = [

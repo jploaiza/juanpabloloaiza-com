@@ -41,6 +41,7 @@ export function toDisplayPost(p: SupabasePost) {
     date: p.published_at ?? p.created_at,
     author: "Juan Pablo Loaiza",
     url: `https://www.juanpabloloaiza.com/blog/${p.slug}`,
+    tags: p.tags ?? [],
   };
 }
 
