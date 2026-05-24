@@ -17,7 +17,7 @@ export default async function NewsletterDashboard() {
   if (profile?.role !== "admin") redirect("/academy/dashboard");
 
   const adminSb = await createAdminClient();
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const thirtyDaysAgo = new Date(new Date().getTime() - 30 * 86400000).toISOString();
 
   const [subsResult, campaignsResult, automationsResult] = await Promise.all([
     adminSb.from("newsletter_subscribers").select("id, status, created_at", { count: "exact" }),

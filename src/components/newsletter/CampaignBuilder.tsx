@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sparkles, Send, Eye, TestTube, Clock, CheckCircle,
@@ -220,6 +220,11 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
 
   const toggle = (s: Section) => setOpen((cur) => (cur === s ? ("" as Section) : s));
   const hasArticles = articles.filter(Boolean).length >= 1;
+  const minDateTime = useMemo(() => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() + 5);
+    return d.toISOString().slice(0, 16);
+  }, []);
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
@@ -478,7 +483,7 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
                 <div>
                   <label className="block font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-1">Fecha y hora</label>
                   <input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)}
-                    min={new Date(Date.now() + 300000).toISOString().slice(0, 16)}
+                    min={minDateTime}
                     className="bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50" />
                 </div>
                 <div className="flex flex-wrap gap-3">

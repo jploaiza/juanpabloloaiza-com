@@ -65,8 +65,6 @@ export async function POST(req: NextRequest) {
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  let inserted = 0;
-  let skipped = 0;
   const errors: Array<{ row: number; email: string; reason: string }> = [];
   const BATCH_SIZE = 500;
 

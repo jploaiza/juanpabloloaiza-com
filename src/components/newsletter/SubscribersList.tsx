@@ -49,6 +49,7 @@ export default function SubscribersList() {
     setLoading(false);
   }, [page, status, search]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [load]);
 
   function toggleSelect(id: string) {
