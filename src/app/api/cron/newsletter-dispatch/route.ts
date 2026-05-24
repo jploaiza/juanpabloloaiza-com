@@ -46,7 +46,11 @@ export async function GET(req: NextRequest) {
 
         if (segment?.subscriber_ids?.length) {
           // Targeted resend: specific subscribers only
-          query = query.in("id", segment.subscriber_ids).neq("status", "unsubscribed").neq("status", "bounced").neq("status", "deleted");
+          query = query.in("id", segment.subscriber_ids)
+            .neq("status", "unsubscribed")
+            .neq("status", "bounced")
+            .neq("status", "deleted")
+            .neq("status", "complained");
         } else {
           query = query.eq("status", segment?.status ?? "confirmed");
           if (segment?.tags?.length) {

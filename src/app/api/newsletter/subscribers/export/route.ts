@@ -39,9 +39,9 @@ export async function GET(req: NextRequest) {
         csvField(s.name ?? ""),
         csvField(s.apellido ?? ""),
         csvField(s.email),
-        s.status,
+        csvField(s.status),
         csvField((s.tags ?? []).join("|")),
-        s.source ?? "web",
+        csvField(s.source ?? "web"),
         s.confirmed_at ? new Date(s.confirmed_at).toISOString().split("T")[0] : "",
         new Date(s.created_at).toISOString().split("T")[0],
       ].join(",")

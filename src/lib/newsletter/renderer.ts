@@ -45,7 +45,7 @@ function renderEditorial(data: Record<string, unknown>, sub: Subscriber): string
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td style="padding:32px 32px 0;">
-          ${primary.imageUrl ? `<img src="${esc(primary.imageUrl)}" width="100%" style="display:block;width:100%;max-height:300px;object-fit:cover;border:0;margin-bottom:20px;" alt="${esc(primary.title ?? '')}"/>` : ""}
+          ${primary.imageUrl ? `<img src="${esc(safeUrl(primary.imageUrl, ""))}" width="100%" style="display:block;width:100%;max-height:300px;object-fit:cover;border:0;margin-bottom:20px;" alt="${esc(primary.title ?? '')}"/>` : ""}
           <p style="color:#C5A059;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 10px;">Artículo principal</p>
           <h2 style="color:#ffffff;font-size:22px;margin:0 0 12px;font-family:Georgia,serif;font-weight:normal;line-height:1.4;">${esc(primary.title ?? "")}</h2>
           <p style="color:#8a9bb5;font-size:14px;line-height:1.7;margin:0 0 20px;font-family:Georgia,serif;">${esc(primary.excerpt ?? "")}</p>
@@ -59,7 +59,7 @@ function renderEditorial(data: Record<string, unknown>, sub: Subscriber): string
       <tr>
         ${rest.map((a) => `
         <td width="50%" valign="top" style="padding:24px 16px;">
-          ${a.imageUrl ? `<img src="${esc(a.imageUrl)}" width="100%" style="display:block;width:100%;height:120px;object-fit:cover;border:0;margin-bottom:12px;" alt="${esc(a.title ?? '')}"/>` : ""}
+          ${a.imageUrl ? `<img src="${esc(safeUrl(a.imageUrl, ""))}" width="100%" style="display:block;width:100%;height:120px;object-fit:cover;border:0;margin-bottom:12px;" alt="${esc(a.title ?? '')}"/>` : ""}
           <h3 style="color:#ffffff;font-size:14px;margin:0 0 8px;font-family:Georgia,serif;font-weight:normal;line-height:1.4;">${esc(a.title ?? "")}</h3>
           <p style="color:#8a9bb5;font-size:12px;line-height:1.6;margin:0 0 12px;font-family:Georgia,serif;">${esc((a.excerpt ?? "").substring(0, 100))}…</p>
           <a href="${SITE_URL}/blog/${esc(a.slug ?? "")}" style="color:#C5A059;font-family:Georgia,serif;font-size:11px;text-decoration:none;letter-spacing:2px;text-transform:uppercase;">Leer →</a>
@@ -100,7 +100,7 @@ function renderAnnouncement(data: Record<string, unknown>, sub: Subscriber): str
   const content = `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding:32px 32px 28px;">
-        ${heroImage ? `<img src="${esc(heroImage)}" width="100%" style="display:block;width:100%;max-height:260px;object-fit:cover;border:0;margin-bottom:24px;" alt="${esc(title)}"/>` : ""}
+        ${heroImage ? `<img src="${esc(safeUrl(heroImage, ""))}" width="100%" style="display:block;width:100%;max-height:260px;object-fit:cover;border:0;margin-bottom:24px;" alt="${esc(title)}"/>` : ""}
         <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 12px;">Anuncio</p>
         <h1 style="color:#ffffff;font-size:26px;margin:0 0 16px;font-family:Georgia,serif;font-weight:normal;line-height:1.3;">${esc(title)}</h1>
         <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0 0 28px;font-family:Georgia,serif;">${esc(personalize(body, sub)).replace(/\n/g, "<br/>")}</p>
