@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import AcademyCard from "@/components/academy/AcademyCard";
-import { FileText, Plus, Pencil, Trash2 } from "lucide-react";
+import { FileText, Plus, Pencil, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = { title: "Blog Manager — Admin" };
 
@@ -198,7 +198,7 @@ export default async function BlogManagerPage() {
                       </div>
                     </td>
                     <td className="py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <Link
                           href={`/admin/blog/${post.id}/editar`}
                           className="flex items-center gap-1 font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059]/70 hover:text-[#C5A059] transition-colors"
@@ -206,6 +206,18 @@ export default async function BlogManagerPage() {
                           <Pencil className="w-3 h-3" />
                           Editar
                         </Link>
+                        {post.status === "published" && (
+                          <a
+                            href={`/blog/${post.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 font-cinzel text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
+                            title="Ver artículo publicado"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Ver
+                          </a>
+                        )}
                       </div>
                     </td>
                   </tr>

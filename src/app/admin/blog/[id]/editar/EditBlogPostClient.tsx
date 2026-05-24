@@ -6,7 +6,8 @@ import Link from "next/link";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
 import dynamic from "next/dynamic";
 const ContentEditor = dynamic(() => import("@/components/admin/ContentEditor"), { ssr: false });
-import { ArrowLeft, X, Plus, Trash2, Upload, Sparkles, ImagePlus } from "lucide-react";
+const ReactMarkdown = dynamic(() => import("react-markdown"), { ssr: false });
+import { ArrowLeft, X, Plus, Trash2, Upload, Sparkles, ImagePlus, ExternalLink, Eye, EyeOff } from "lucide-react";
 import PexelsSearch from "@/components/admin/PexelsSearch";
 
 type BlogPost = {
@@ -73,6 +74,7 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
   const [seoImproving, setSeoImproving] = useState(false);
   const [seoError, setSeoError] = useState("");
   const [showAiModal, setShowAiModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [aiFields, setAiFields] = useState<string[]>(["title", "excerpt", "content", "tags", "seoTitle", "seoDescription"]);
   const [aiImproving, setAiImproving] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -331,6 +333,28 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
         </div>
 
         <div className="flex items-center gap-3">
+          <a
+            href={`/blog/${post.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2.5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 font-cinzel text-[9px] uppercase tracking-widest transition-colors"
+            title={status === "draft" ? "Artículo en borrador — puede no estar visible" : "Ver artículo publicado"}
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Ver artículo
+          </a>
+          <button
+            type="button"
+            onClick={() => setShowPreview((v) => !v)}
+            className={`flex items-center gap-2 px-4 py-2.5 border font-cinzel text-[9px] uppercase tracking-widest transition-colors ${
+              showPreview
+                ? "border-[#C5A059]/50 bg-[#C5A059]/10 text-[#C5A059]"
+                : "border-white/10 text-gray-400 hover:text-white hover:border-white/20"
+            }`}
+          >
+            {showPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            Preview
+          </button>
           <button
             type="button"
             onClick={() => { setAiError(""); setShowAiModal(true); }}
@@ -711,6 +735,65 @@ export default function EditBlogPostClient({ post, basePath = "/admin/blog" }: P
             </div>
           </div>
         </div>
+
+        {/* Preview panel */}
+        {showPreview && (
+          <div className="relative bg-[#0a1628] border border-[#C5A059]/20 overflow-hidden">
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/5">
+              <div className="flex items-center gap-2">
+                <Eye className="w-3.5 h-3.5 text-[#C5A059]" />
+                <span className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059]">
+                  Preview del artículo
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className="text-gray-600 hover:text-gray-400 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {featuredImageUrl && (
+              <div className="w-full h-52 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={featuredImageUrl}
+                  alt={title}
+                  className="w-full h-full object-cover opacity-80"
+                  onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
+                />
+              </div>
+            )}
+            <div className="px-8 py-8 max-w-3xl">
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {tags.slice(0, 4).map((tag) => (
+                    <span key={tag} className="font-cinzel text-[8px] uppercase tracking-widest text-[#C5A059]/60 border border-[#C5A059]/20 px-2 py-0.5">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <h2 className="font-cinzel text-xl text-white leading-snug mb-3">{title || "Sin título"}</h2>
+              {excerpt && (
+                <p className="font-crimson text-base text-gray-400 leading-relaxed mb-6 border-l-2 border-[#C5A059]/30 pl-4">
+                  {excerpt}
+                </p>
+              )}
+              <div className="font-crimson text-base text-gray-300 leading-relaxed prose prose-invert prose-sm max-w-none
+                prose-headings:font-cinzel prose-headings:text-white prose-headings:tracking-wide
+                prose-h2:text-lg prose-h3:text-base
+                prose-strong:text-white prose-strong:font-semibold
+                prose-a:text-[#C5A059] prose-a:no-underline hover:prose-a:underline
+                prose-blockquote:border-[#C5A059]/40 prose-blockquote:text-gray-400
+                prose-code:text-[#C5A059]/80 prose-code:bg-white/5 prose-code:px-1
+                prose-hr:border-white/10">
+                <ReactMarkdown>{content || "*Sin contenido aún.*"}</ReactMarkdown>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Card: Status & Submit */}
         <div className="relative bg-[#16213e] border border-white/5 p-6 overflow-hidden">
