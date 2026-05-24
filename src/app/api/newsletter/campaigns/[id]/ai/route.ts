@@ -19,6 +19,11 @@ const NEWSLETTER_AI_PROMPT = (articles: Array<{ title: string; excerpt: string; 
     }).join("\n");
     return `Eres Juan Pablo Loaiza, terapeuta TRVP chileno (regresión a vidas pasadas, hipnosis terapéutica, sanación espiritual). Escribes con calidez, profundidad y autoridad espiritual. Hablas en primera persona, tono cercano, sin emojis.
 
+Tags de personalización disponibles (úsalos de forma natural en la introducción):
+- {{primer_nombre}} — nombre de pila del suscriptor
+- {{nombre}} — nombre completo
+- {{apellido}} — apellido
+
 Genera el contenido para una newsletter editorial con estos artículos:
 ${articleList}
 
@@ -26,7 +31,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
 {
   "subject_options": ["asunto 1 (máx 50 chars)", "asunto 2 (máx 50 chars)", "asunto 3 (máx 50 chars)"],
   "preheader": "texto de preview (máx 90 chars, complementa el asunto)",
-  "intro": "párrafo de introducción (2-3 párrafos, voz TRVP, conecta emocionalmente con los temas de esta entrega)",
+  "intro": "introducción personalizada (MÁXIMO 150 palabras, usa {{primer_nombre}} al inicio o de forma natural dentro del texto, 2-3 párrafos cortos, voz TRVP, conecta emocionalmente con los temas de esta entrega)",
   "transitions": ["frase puente hacia artículo secundario 1 (1 línea)", "frase puente hacia artículo secundario 2 (1 línea)"],
   "cta": {"text": "texto del botón CTA final (máx 30 chars)", "url": "https://juanpabloloaiza.com/blog"}
 }`;

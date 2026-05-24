@@ -81,7 +81,7 @@ function renderEditorial(data: Record<string, unknown>, sub: Subscriber): string
       </td></tr>
     </table>` : "";
 
-  const content = `${introHtml}${primaryHtml}${secondaryHtml}${ctaHtml}`;
+  const content = `<tr><td style="padding:0;">${introHtml}${primaryHtml}${secondaryHtml}${ctaHtml}</td></tr>`;
   return emailShell(content, unsubFooter(sub.unsubscribe_token));
 }
 
@@ -97,7 +97,7 @@ function renderAnnouncement(data: Record<string, unknown>, sub: Subscriber): str
   const ctaText = String(data.cta_text ?? "Ver más");
   const ctaUrl = safeUrl(data.cta_url, SITE_URL);
 
-  const content = `
+  const announcementHtml = `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding:32px 32px 28px;">
         ${heroImage ? `<img src="${esc(safeUrl(heroImage, ""))}" width="100%" style="display:block;width:100%;max-height:260px;object-fit:cover;border:0;margin-bottom:24px;" alt="${esc(title)}"/>` : ""}
@@ -111,12 +111,12 @@ function renderAnnouncement(data: Record<string, unknown>, sub: Subscriber): str
         </table>
       </td></tr>
     </table>`;
-  return emailShell(content, unsubFooter(sub.unsubscribe_token));
+  return emailShell(`<tr><td style="padding:0;">${announcementHtml}</td></tr>`, unsubFooter(sub.unsubscribe_token));
 }
 
 function renderWelcome(data: Record<string, unknown>, sub: Subscriber): string {
   const firstName = sub.name;
-  const content = `
+  const welcomeBody = `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding:40px 32px 32px;">
         <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 16px;">Bienvenido</p>
@@ -132,12 +132,12 @@ function renderWelcome(data: Record<string, unknown>, sub: Subscriber): string {
         </table>
       </td></tr>
     </table>`;
-  return emailShell(content, unsubFooter(sub.unsubscribe_token));
+  return emailShell(`<tr><td style="padding:0;">${welcomeBody}</td></tr>`, unsubFooter(sub.unsubscribe_token));
 }
 
 function renderReengagement(data: Record<string, unknown>, sub: Subscriber): string {
   const days = Number(data.last_engaged_days ?? 60);
-  const content = `
+  const reengBody = `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding:40px 32px 32px;">
         <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 16px;">¿Sigues aquí?</p>
@@ -155,7 +155,7 @@ function renderReengagement(data: Record<string, unknown>, sub: Subscriber): str
         </p>
       </td></tr>
     </table>`;
-  return emailShell(content, unsubFooter(sub.unsubscribe_token));
+  return emailShell(`<tr><td style="padding:0;">${reengBody}</td></tr>`, unsubFooter(sub.unsubscribe_token));
 }
 
 export function renderCampaignHtml(
