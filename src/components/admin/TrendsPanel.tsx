@@ -919,7 +919,7 @@ ${report.tags.map((t) => `\`${t}\``).join(" · ")}
               {(data?.risingQueries.length ?? 0) > 0 && (
                 <AcademyCard>
                   <h2 className="font-cinzel text-sm uppercase tracking-widest text-white mb-2">Queries relacionadas en auge</h2>
-                  <p className="font-crimson text-sm text-gray-600 mb-6">Related queries con tendencia "Rising" en los últimos 7 días.</p>
+                  <p className="font-crimson text-sm text-gray-600 mb-6">Related queries con tendencia &quot;Rising&quot; en los últimos 7 días.</p>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>

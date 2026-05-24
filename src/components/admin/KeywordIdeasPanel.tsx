@@ -179,7 +179,7 @@ export default function KeywordIdeasPanel({ keyword, geo, initialAngle }: Props)
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-4">{angle.formats.map((f) => <FormatBadge key={f} type={f} />)}</div>
                 <p className="font-crimson text-sm text-gray-300 leading-relaxed mb-3">{angle.perspective}</p>
-                <p className="font-crimson text-sm text-gray-500 italic mb-5">"{angle.hook}"</p>
+                <p className="font-crimson text-sm text-gray-500 italic mb-5">&quot;{angle.hook}&quot;</p>
                 <button onClick={() => handleDevelop(angle)} className="w-full flex items-center justify-center gap-2 py-2.5 font-cinzel text-[9px] uppercase tracking-widest bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/20 transition">
                   <Sparkles className="w-3 h-3" /> Desarrollar esta idea →
                 </button>
@@ -244,7 +244,7 @@ export default function KeywordIdeasPanel({ keyword, geo, initialAngle }: Props)
                       <h3 className="font-cinzel text-sm text-white mb-2 leading-snug">{developData.reelIdea.title}</h3>
                       <div className="bg-violet-500/5 border border-violet-500/10 p-3 mb-3">
                         <p className="font-cinzel text-[8px] uppercase tracking-widest text-violet-400 mb-1">Hook (3 seg)</p>
-                        <p className="font-crimson text-sm text-gray-300 italic">"{developData.reelIdea.hook}"</p>
+                        <p className="font-crimson text-sm text-gray-300 italic">&quot;{developData.reelIdea.hook}&quot;</p>
                       </div>
                       <ul className="space-y-1 mb-4 flex-1">
                         {developData.reelIdea.structure.map((s, i) => (
