@@ -2,10 +2,11 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Clock, ArrowLeft, Download, Loader2, X } from "lucide-react";
+import { Clock, ArrowLeft, Download, Loader2, X, MessageCircle, Mail } from "lucide-react";
 import type { BlogPost } from "@/lib/blog-data";
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
+import NewsletterForm from "@/components/NewsletterForm";
 
 interface Props {
   post: BlogPost;
@@ -65,7 +66,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
           <img
             src={post.imageUrl}
             alt={post.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-top"
           />
         ) : (
           <div className={`${post.image} w-full h-full`} />
@@ -256,6 +257,61 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
               )}
             </motion.div>
           )}
+          {/* ── Contact CTA ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.34 }}
+            className="mt-14 border border-[#C5A059]/20 bg-[#16213e] p-7"
+          >
+            <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-2">
+              ¿Esto resuena contigo?
+            </p>
+            <h3 className="font-cinzel text-xl text-white mb-3 leading-snug">
+              Hablemos sobre tu proceso
+            </h3>
+            <p className="font-crimson text-base text-gray-400 leading-relaxed mb-6">
+              Si algo de lo que leíste despertó algo en ti, la primera conversación es gratuita y sin compromiso.
+              Cuéntame qué está pasando.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="https://wa.me/34611111111?text=Hola%20Juan%20Pablo%2C%20leí%20tu%20artículo%20y%20me%20gustaría%20hablar."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#C5A059] hover:bg-[#d4b06a] text-[#020617] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                Escribir por WhatsApp
+              </a>
+              <Link
+                href="/#contacto"
+                className="inline-flex items-center gap-2 border border-[#C5A059]/40 hover:border-[#C5A059] text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                Formulario de contacto
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* ── Newsletter ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-6 border border-[#C5A059]/10 bg-[#0e1b30] p-7"
+          >
+            <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-2">
+              Newsletter
+            </p>
+            <h3 className="font-cinzel text-lg text-white mb-2 leading-snug">
+              Artículos como este, directo a tu correo
+            </h3>
+            <p className="font-crimson text-sm text-gray-400 mb-5 leading-relaxed">
+              Regresión, hipnoterapia y autoconocimiento — sin spam, solo contenido que vale la pena.
+            </p>
+            <NewsletterForm />
+          </motion.div>
         </div>
 
         {/* ── Sidebar ── */}

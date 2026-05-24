@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Clock, ArrowRight, Search } from "lucide-react";
+import { Clock, ArrowRight, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { BlogPost } from "@/lib/blog-data";
 
-const POSTS_PER_PAGE = 6;
+const POSTS_PER_PAGE = 10; // 1 featured + 9 grid
 
 interface Props {
   posts: BlogPost[];
@@ -17,18 +17,30 @@ export default function BlogContent({ posts }: Props) {
   const searchParams = useSearchParams();
   const page = parseInt(searchParams.get("page") || "1");
   const [activeCategory, setActiveCategory] = useState("Todos");
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
-  const categories = ["Todos", ...Array.from(new Set(posts.map((p) => p.category)))];
+  // Build frequency-sorted category list
+  const categoryCounts = posts.reduce((acc, p) => {
+    acc[p.category] = (acc[p.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const sortedCategories = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([cat]) => cat);
+  const TOP_N = 8;
+  const visibleCategories = showAllCategories ? sortedCategories : sortedCategories.slice(0, TOP_N);
+  const hiddenCount = sortedCategories.length - TOP_N;
 
   const filtered =
     activeCategory === "Todos" ? posts : posts.filter((p) => p.category === activeCategory);
 
   const totalPages = Math.ceil(filtered.length / POSTS_PER_PAGE);
   const start = (page - 1) * POSTS_PER_PAGE;
-  const pagePosts = filtered.slice(start, start + POSTS_PER_PAGE);
 
-  const featuredPost = page === 1 ? filtered[0] : null;
-  const gridPosts = page === 1 ? pagePosts.filter((p) => p.id !== filtered[0]?.id) : pagePosts;
+  // Featured rotates: first post of each page
+  const featuredPost = filtered[start] ?? null;
+  // Grid: next 9 posts after featured
+  const gridPosts = filtered.slice(start + 1, start + POSTS_PER_PAGE);
 
   return (
     <main className="min-h-screen bg-[#0a1628] pt-28">
@@ -46,7 +58,7 @@ export default function BlogContent({ posts }: Props) {
             <span className="text-[#C5A059] uppercase tracking-widest text-xs font-semibold font-cinzel">
               Sabiduría Compartida
             </span>
-            <h1 className="text-5xl md:text-6xl text-white mt-3 mb-5 font-cinzel font-bold leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-white mt-3 mb-5 font-cinzel font-bold leading-tight">
               Blog de Regresión a Vidas Pasadas
             </h1>
             <p className="font-crimson text-lg text-gray-400 mb-8 leading-relaxed max-w-md">
@@ -67,7 +79,19 @@ export default function BlogContent({ posts }: Props) {
 
             {/* Category filters */}
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
+              {/* "Todos" always first */}
+              <button
+                onClick={() => setActiveCategory("Todos")}
+                className={`font-cinzel text-[10px] uppercase tracking-widest px-3 py-1.5 border transition ${
+                  activeCategory === "Todos"
+                    ? "border-[#C5A059] text-[#C5A059] bg-[#C5A059]/10"
+                    : "border-[#C5A059]/20 text-gray-500 hover:border-[#C5A059]/50 hover:text-[#C5A059]"
+                }`}
+              >
+                Todos
+              </button>
+
+              {visibleCategories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
@@ -80,6 +104,19 @@ export default function BlogContent({ posts }: Props) {
                   {cat}
                 </button>
               ))}
+
+              {hiddenCount > 0 && (
+                <button
+                  onClick={() => setShowAllCategories((v) => !v)}
+                  className="flex items-center gap-1 font-cinzel text-[10px] uppercase tracking-widest px-3 py-1.5 border border-dashed border-[#C5A059]/20 text-gray-600 hover:text-[#C5A059] hover:border-[#C5A059]/40 transition"
+                >
+                  {showAllCategories ? (
+                    <>Menos <ChevronUp className="w-3 h-3" /></>
+                  ) : (
+                    <>+{hiddenCount} más <ChevronDown className="w-3 h-3" /></>
+                  )}
+                </button>
+              )}
             </div>
           </motion.div>
 
