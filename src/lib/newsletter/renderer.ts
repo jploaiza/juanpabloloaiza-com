@@ -22,8 +22,7 @@ export function personalize(text: string, sub: Subscriber): string {
 
 function unsubFooter(unsubToken: string): string {
   return `
-    <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 8px;">Juan Pablo Loaiza</p>
-    <p style="color:#2d4a6e;font-size:11px;margin:0 0 10px;font-family:Georgia,serif;">
+    <p style="color:#2d4a6e;font-size:11px;margin:0 0 6px;font-family:Georgia,serif;">
       Recibes este correo porque te suscribiste en juanpabloloaiza.com
     </p>
     <p style="color:#2d4a6e;font-size:11px;margin:0;font-family:Georgia,serif;">
