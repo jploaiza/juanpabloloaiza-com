@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
           subject: "¿Sigues por aquí? — Juan Pablo Loaiza",
           html: buildReengagementEmail(sub.name, days, sub.unsubscribe_token),
           headers: {
-            "List-Unsubscribe": `<${SITE_URL}/newsletter/baja/${sub.unsubscribe_token}>`,
+            "List-Unsubscribe": `<${SITE_URL}/api/newsletter/unsubscribe/${sub.unsubscribe_token}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
           },
         });

@@ -97,7 +97,7 @@ export async function GET(
           subject: "Bienvenido — Juan Pablo Loaiza",
           html: buildWelcomeEmail(subscriber.name, subscriber.unsubscribe_token),
           headers: {
-            "List-Unsubscribe": `<${SITE_URL}/newsletter/baja/${subscriber.unsubscribe_token}>`,
+            "List-Unsubscribe": `<${SITE_URL}/api/newsletter/unsubscribe/${subscriber.unsubscribe_token}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
           },
         }).catch((e) => console.error("[newsletter/confirm] welcome email failed", e));

@@ -24,7 +24,16 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
-  const { action } = await req.json().catch(() => ({ action: "total" }));
+
+  const contentType = req.headers.get("content-type") ?? "";
+  let action = "total";
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    // RFC 8058 one-click: body is "List-Unsubscribe=One-Click"
+    action = "total";
+  } else {
+    const body = await req.json().catch(() => ({ action: "total" }));
+    action = body.action ?? "total";
+  }
 
   if (!token || !UUID_RE.test(token)) {
     return NextResponse.json({ error: "Token inválido." }, { status: 400 });

@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
             subject: personalize(campaign.subject, sub),
             html: renderCampaignHtml(campaign.template_kind, campaign.template_data, sub),
             headers: {
-              "List-Unsubscribe": `<${SITE_URL}/newsletter/baja/${sub.unsubscribe_token}>`,
+              "List-Unsubscribe": `<${SITE_URL}/api/newsletter/unsubscribe/${sub.unsubscribe_token}>`,
               "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
             },
           }));

@@ -107,8 +107,12 @@ export default function NewsletterForm() {
         {status === "loading" ? "Suscribiendo..." : "Suscribirme"}
       </button>
 
-      <p className="font-crimson text-xs text-gray-600 text-center">
+      <p className="font-crimson text-xs text-gray-600 text-center leading-relaxed">
         Sin spam. Solo artículos y recursos sobre regresión e hipnoterapia.
+        Al suscribirte aceptas el tratamiento de tus datos para enviarte el newsletter.{" "}
+        <a href="/politicas-de-servicio" className="text-gray-500 underline underline-offset-2 hover:text-[#C5A059] transition">
+          Política de privacidad
+        </a>
       </p>
     </form>
   );
