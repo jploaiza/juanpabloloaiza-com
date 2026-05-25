@@ -92,10 +92,21 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Fetch existing suppressed emails (bounced, complained) to skip them
+  const allEmails = validRows.map((r) => String(r.record.email));
+  const { data: suppressed } = await auth.adminSb
+    .from("newsletter_subscribers")
+    .select("email, status")
+    .in("email", allEmails)
+    .in("status", ["bounced", "complained", "unsubscribed"]);
+  const suppressedEmails = new Set((suppressed ?? []).map((s) => s.email));
+
+  const importableRows = validRows.filter((r) => !suppressedEmails.has(String(r.record.email)));
+
   // Batch upserts (500 rows at a time) — counts rows written (insert OR update)
   let upserted = 0;
-  for (let i = 0; i < validRows.length; i += BATCH_SIZE) {
-    const batch = validRows.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < importableRows.length; i += BATCH_SIZE) {
+    const batch = importableRows.slice(i, i + BATCH_SIZE);
     const { error } = await auth.adminSb
       .from("newsletter_subscribers")
       .upsert(batch.map((r) => r.record), { onConflict: "email", ignoreDuplicates: false });
@@ -107,12 +118,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const skippedSuppressed = validRows.length - importableRows.length;
+
   // Log import
   await auth.adminSb.from("newsletter_imports").insert({
     filename: `import-${Date.now()}.csv`,
     total_rows: rows.length,
     inserted: upserted,
-    skipped_duplicates: 0,
+    skipped_duplicates: skippedSuppressed,
     errors,
     created_by: auth.userId,
   });

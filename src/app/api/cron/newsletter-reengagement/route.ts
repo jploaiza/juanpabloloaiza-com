@@ -53,9 +53,12 @@ function buildReengagementEmail(name: string, days: number, unsubToken: string):
 }
 
 export async function GET(req: NextRequest) {
-  const expected = Buffer.from(`Bearer ${process.env.CRON_SECRET ?? ""}`);
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: "Misconfigured" }, { status: 500 });
+  }
+  const expected = Buffer.from(`Bearer ${process.env.CRON_SECRET}`);
   const provided = Buffer.from(req.headers.get("authorization") ?? "");
-  if (expected.length === 0 || expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+  if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
