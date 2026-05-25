@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import AcademyCard from "@/components/academy/AcademyCard";
 import ScrollworkCorners from "@/components/academy/ScrollworkCorners";
-import { Mail, Users, Send, CheckCircle, Clock, LayoutTemplate, Zap, Plus, ArrowRight } from "lucide-react";
+import { Mail, Users, Send, Clock, LayoutTemplate, Zap, Plus, ArrowRight, List } from "lucide-react";
 
 export const metadata: Metadata = { title: "Newsletter — Admin" };
 export const dynamic = "force-dynamic";
@@ -74,6 +74,7 @@ export default async function NewsletterDashboard() {
         {[
           { href: "/academy/admin/newsletter/campaigns", icon: Send, label: "Campañas", desc: `${campaigns.length} campañas · ${scheduledCampaigns} programadas` },
           { href: "/academy/admin/newsletter/subscribers", icon: Users, label: "Suscriptores", desc: `${confirmedSubs} confirmados · ${recentSubs} nuevos este mes` },
+          { href: "/academy/admin/newsletter/lists", icon: List, label: "Listas de envío", desc: "Segmenta por frecuencia: semanal, mensual, trimestral o listas personalizadas" },
           { href: "/academy/admin/newsletter/templates", icon: LayoutTemplate, label: "Plantillas", desc: "4 plantillas disponibles: editorial, anuncio, bienvenida, re-engagement" },
           { href: "/academy/admin/newsletter/automations", icon: Zap, label: "Automatizaciones", desc: `Bienvenida ${welcomeEnabled ? "✓" : "—"} · Re-engagement ${reengagementEnabled ? "✓" : "—"}` },
         ].map(({ href, icon: Icon, label, desc }) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sparkles, Send, Eye, TestTube, Clock, CheckCircle,
@@ -14,8 +14,15 @@ interface Campaign {
   template_kind: string; template_data: Record<string, unknown>;
   status: string; scheduled_at: string | null;
   sender_name: string; sender_email: string;
-  segment: { status?: string; tags?: string[] };
+  segment: { status?: string; tags?: string[] } | null;
   stats_cache: Record<string, number>;
+}
+
+interface NLList {
+  slug: string;
+  label: string;
+  preset: boolean;
+  count: number;
 }
 
 interface Props { campaign: Campaign; posts: BlogPost[] }
@@ -108,6 +115,14 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [scheduleMsg, setScheduleMsg] = useState("");
 
+  // Segment / list targeting
+  const initialList = (campaign.segment?.tags ?? []).find((t) => t.startsWith("lista:"))?.slice(6) ?? "";
+  const [selectedList, setSelectedList] = useState(initialList);
+  const [lists, setLists] = useState<NLList[]>([]);
+  useEffect(() => {
+    fetch("/api/newsletter/lists").then((r) => r.json()).then((d) => setLists(d.lists ?? []));
+  }, []);
+
   const buildTemplateData = useCallback(() => {
     if (campaign.template_kind === "editorial") {
       return {
@@ -125,6 +140,9 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
 
   async function save() {
     setSaving(true); setSaveMsg("");
+    const segment = selectedList
+      ? { status: "confirmed", tags: [`lista:${selectedList}`] }
+      : { status: "confirmed" };
     const res = await fetch(`/api/newsletter/campaigns/${campaign.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -132,6 +150,7 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
         subject, preheader,
         sender_name: senderName, sender_email: senderEmail,
         template_data: buildTemplateData(),
+        segment,
       }),
     });
     setSaving(false);
@@ -575,6 +594,34 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
               </div>
             ))}
           </dl>
+        </div>
+
+        <div className="bg-[#16213e] border border-white/5 p-5">
+          <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-3">Segmento</p>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="segment" checked={!selectedList}
+                onChange={() => isEditable && setSelectedList("")}
+                disabled={!isEditable}
+                className="accent-[#C5A059]" />
+              <span className="font-crimson text-sm text-gray-300">Todos los confirmados</span>
+            </label>
+            {lists.map((l) => (
+              <label key={l.slug} className="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="segment" checked={selectedList === l.slug}
+                  onChange={() => isEditable && setSelectedList(l.slug)}
+                  disabled={!isEditable}
+                  className="accent-[#C5A059]" />
+                <span className="font-crimson text-sm text-gray-300">
+                  {l.label}
+                  <span className="text-gray-600 text-xs ml-1">({l.count})</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          {selectedList && (
+            <p className="font-mono text-[9px] text-gray-600 mt-3">lista:{selectedList}</p>
+          )}
         </div>
 
         <div className="bg-[#16213e] border border-white/5 p-5">
