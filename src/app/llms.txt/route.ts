@@ -7,7 +7,7 @@ export async function GET() {
   const posts = await getAllPublishedPosts().catch(() => []);
 
   const blogLines = posts
-    .map((p) => `- [${p.title}](https://www.juanpabloloaiza.com/blog/${p.slug}/): ${p.excerpt ?? ""}`)
+    .map((p) => `- [${p.title}](https://juanpabloloaiza.com/blog/${p.slug}/): ${p.excerpt ?? ""}`)
     .join("\n");
 
   const body = `# Juan Pablo Loaiza - Terapeuta de Regresión a Vidas Pasadas
@@ -16,14 +16,14 @@ export async function GET() {
 
 ## Páginas Principales
 
-- [Inicio](https://www.juanpabloloaiza.com/): Presentación del terapeuta y sus servicios de regresión a vidas pasadas e hipnosis.
-- [Blog](https://www.juanpabloloaiza.com/blog/): Artículos educativos sobre regresión a vidas pasadas, hipnosis y sanación holística.
-- [Videos](https://www.juanpabloloaiza.com/videos/): Contenido audiovisual educativo sobre terapia de regresión.
-- [Políticas de Servicio](https://www.juanpabloloaiza.com/politicas-de-servicio/): Términos, condiciones y políticas de las sesiones terapéuticas.
+- [Inicio](https://juanpabloloaiza.com/): Presentación del terapeuta y sus servicios de regresión a vidas pasadas e hipnosis.
+- [Blog](https://juanpabloloaiza.com/blog/): Artículos educativos sobre regresión a vidas pasadas, hipnosis y sanación holística.
+- [Videos](https://juanpabloloaiza.com/videos/): Contenido audiovisual educativo sobre terapia de regresión.
+- [Políticas de Servicio](https://juanpabloloaiza.com/politicas-de-servicio/): Términos, condiciones y políticas de las sesiones terapéuticas.
 
 ## Academy (Plataforma de Aprendizaje)
 
-- [JPL Academy](https://www.juanpabloloaiza.com/academy/): Plataforma de cursos en línea sobre preparación para regresión a vidas pasadas.
+- [JPL Academy](https://juanpabloloaiza.com/academy/): Plataforma de cursos en línea sobre preparación para regresión a vidas pasadas.
 - Curso principal: "Preparación para Hipnosis Regresiva" — disponible gratuitamente para nuevos estudiantes.
 
 ## Artículos del Blog
@@ -37,7 +37,7 @@ ${blogLines}
 - **Modalidad:** Sesiones individuales en línea (Zoom)
 - **Idioma:** Español
 - **Influencias terapéuticas:** Dr. Brian Weiss, Dolores Cannon
-- **Sitio web:** https://www.juanpabloloaiza.com
+- **Sitio web:** https://juanpabloloaiza.com
 
 ## Áreas Temáticas
 

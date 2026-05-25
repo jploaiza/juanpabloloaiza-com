@@ -12,11 +12,11 @@ export const metadata: Metadata = {
   title: "Blog — Regresión a Vidas Pasadas y Sanación Espiritual | Juan Pablo Loaiza",
   description: "Artículos sobre hipnosis terapéutica, regresión a vidas pasadas, liberación de entidades espirituales y sanación del alma. Aprende sobre el proceso terapéutico.",
   keywords: "blog vidas pasadas, artículos hipnosis terapéutica, sanación espiritual, karma, regresión, liberación entidades",
-  alternates: { canonical: "https://www.juanpabloloaiza.com/blog" },
+  alternates: { canonical: "https://juanpabloloaiza.com/blog" },
   openGraph: {
     title: "Blog — Regresión a Vidas Pasadas y Sanación Espiritual | Juan Pablo Loaiza",
     description: "Artículos sobre hipnosis terapéutica, regresión a vidas pasadas, sanación kármica y liberación espiritual.",
-    url: "https://www.juanpabloloaiza.com/blog",
+    url: "https://juanpabloloaiza.com/blog",
     siteName: "Juan Pablo Loaiza",
     locale: "es_ES",
     type: "website",

@@ -285,7 +285,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
                 Escribir por WhatsApp
               </a>
               <a
-                href="https://www.juanpabloloaiza.com/#ListaDeAdmision"
+                href="https://juanpabloloaiza.com/#ListaDeAdmision"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 border border-[#C5A059]/40 hover:border-[#C5A059] text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition"

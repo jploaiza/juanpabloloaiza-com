@@ -26,7 +26,7 @@ export const blogPosts: BlogPost[] = [
     slug: "sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud",
     date: "2024-10-12",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/10/12/sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud/",
+    url: "https://juanpabloloaiza.com/2024/10/12/sanacion-karmica-liberandote-de-contratos-antiguos-para-vivir-en-plenitud/",
     content: `¿Alguna vez has sentido que cargas con pesos del pasado que afectan tu vida actual sin una explicación lógica? La sanación kármica puede ser la clave para desentrañar estos misterios y liberarte de patrones recurrentes que limitan tu bienestar.
 
 La sanación kármica es un proceso espiritual que busca identificar y resolver las influencias de vidas pasadas en nuestra existencia actual. Según esta perspectiva, nuestras almas atraviesan múltiples vidas, acumulando experiencias que pueden dejar huellas profundas en nuestra psique y comportamiento.
@@ -64,7 +64,7 @@ La sanación kármica es más que un proceso de autoconocimiento; es una transfo
     slug: "como-la-regresion-a-vidas-pasadas-puede-transformar-tus-relaciones-actuales",
     date: "2024-10-12",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/10/12/como-la-regresion-a-vidas-pasadas-puede-transformar-tus-relaciones-actuales/",
+    url: "https://juanpabloloaiza.com/2024/10/12/como-la-regresion-a-vidas-pasadas-puede-transformar-tus-relaciones-actuales/",
     content: `Nuestras relaciones actuales están profundamente influenciadas por experiencias de vidas pasadas. El trabajo de regresión nos permite entender y sanar estos patrones.
 
 ## El Impacto de Vidas Pasadas en Relaciones Presentes
@@ -97,7 +97,7 @@ Trabajar con un profesional experimentado es crucial. Un terapeuta certificado t
     slug: "descubriendo-tu-proposito-de-vida-a-traves-de-la-regresion-a-vidas-pasadas",
     date: "2024-10-12",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/10/12/descubriendo-tu-proposito-de-vida-a-traves-de-la-regresion-a-vidas-pasadas/",
+    url: "https://juanpabloloaiza.com/2024/10/12/descubriendo-tu-proposito-de-vida-a-traves-de-la-regresion-a-vidas-pasadas/",
     content: `Una de las preguntas más profundas que nos hacemos es "¿Cuál es mi propósito en la vida?" La respuesta a menudo yace en nuestras vidas anteriores.
 
 ## La Continuidad del Alma
@@ -130,7 +130,7 @@ Tu propósito no es algo que debas buscar desesperadamente afuera; ya vive dentr
     slug: "rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/10/10/rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas/",
+    url: "https://juanpabloloaiza.com/2024/10/10/rompiendo-ciclos-de-adiccion-a-traves-de-la-sanacion-de-vidas-pasadas/",
     content: `Las adicciones que experimentamos hoy pueden tener raíces profundas en traumas de vidas anteriores. La sanación verdadera requiere ir más allá de los síntomas.
 
 ## Más Allá de los Síntomas
@@ -162,7 +162,7 @@ Este enfoque ha mostrado resultados extraordinarios en muchos casos donde los tr
     slug: "entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/10/10/entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser/",
+    url: "https://juanpabloloaiza.com/2024/10/10/entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser/",
     content: `Las posesiones espirituales son mucho más comunes de lo que la mayoría de las personas creen. No siempre se parecen a lo que vemos en las películas. A menudo son sutiles y se confunden con depresión, ansiedad o problemas de comportamiento.
 
 ## Tipos de Posesión
@@ -200,7 +200,7 @@ Este proceso es compasivo tanto para ti como para la entidad, permitiendo que am
     slug: "sanacion-de-traumas-a-traves-de-la-regresion-descubriendo-el-poder-curativo-de-las-vidas-pasadas",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/10/10/sanacion-de-traumas-a-traves-de-la-regresion-descubriendo-el-poder-curativo-de-las-vidas-pasadas/",
+    url: "https://juanpabloloaiza.com/2024/10/10/sanacion-de-traumas-a-traves-de-la-regresion-descubriendo-el-poder-curativo-de-las-vidas-pasadas/",
     content: `Los traumas que cargamos en nuestro cuerpo y psique a menudo tienen origen en eventos que no podemos recordar conscientemente porque ocurrieron antes de esta vida.
 
 ## El Trauma Corporal
@@ -239,7 +239,7 @@ La regresión ofrece acceso a una sanación que la terapia convencional a menudo
     slug: "la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores",
     date: "2024-10-10",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/10/10/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores/",
+    url: "https://juanpabloloaiza.com/2024/10/10/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores/",
     content: `¿Por qué tienes miedos que no puedes explicar? ¿Por qué ciertos estímulos desencadenan reacciones desproporcionadas? La respuesta podría estar en tus vidas pasadas.
 
 ## Fobias Inexplicables
@@ -277,7 +277,7 @@ La mayoría de las personas experimentan alivio inmediato después de la regresi
     slug: "superando-la-depresion-con-terapia-de-regresion-a-vidas-pasadas",
     date: "2024-07-15",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/07/15/superando-la-depresion-con-terapia-de-regresion-a-vidas-pasadas/",
+    url: "https://juanpabloloaiza.com/2024/07/15/superando-la-depresion-con-terapia-de-regresion-a-vidas-pasadas/",
     content: `La depresión es una de las condiciones mentales más debilitantes que afecta a millones de personas en el mundo. Si bien hay múltiples enfoques terapéuticos, la regresión a vidas pasadas ofrece una perspectiva única y profunda.
 
 ## Las Raíces Profundas de la Depresión
@@ -313,7 +313,7 @@ Muchos pacientes reportan una mejora significativa en su estado de ánimo despu�
     slug: "la-ciencia-detras-de-la-regresion-a-vidas-pasadas-explorando-evidencias-y-estudios",
     date: "2024-07-15",
     author: "Juan Pablo Loaiza",
-    url: "https://www.juanpabloloaiza.com/2024/07/15/la-ciencia-detras-de-la-regresion-a-vidas-pasadas-explorando-evidencias-y-estudios/",
+    url: "https://juanpabloloaiza.com/2024/07/15/la-ciencia-detras-de-la-regresion-a-vidas-pasadas-explorando-evidencias-y-estudios/",
     content: `Durante décadas, la regresión a vidas pasadas ha sido considerada principalmente un tema espiritual o paranormal. Sin embargo, neurocientíficos y psicólogos están comenzando a explorar seriamente los mecanismos detrás de estas experiencias.
 
 ## Pioneros de la Investigación

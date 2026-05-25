@@ -16,11 +16,11 @@ const videoList = [
 export const metadata: Metadata = {
   title: "Videos de Hipnosis Terapéutica y Regresión a Vidas Pasadas | Juan Pablo Loaiza",
   description: "Biblioteca de videos informativos sobre hipnosis terapéutica de regresión a vidas pasadas, liberación de entidades espirituales y preguntas frecuentes. Resuelve tus dudas antes de comenzar.",
-  alternates: { canonical: "https://www.juanpabloloaiza.com/videos" },
+  alternates: { canonical: "https://juanpabloloaiza.com/videos" },
   openGraph: {
     title: "Videos de Hipnosis Terapéutica y Regresión a Vidas Pasadas | Juan Pablo Loaiza",
     description: "Biblioteca de videos informativos sobre hipnosis terapéutica de regresión a vidas pasadas y liberación espiritual.",
-    url: "https://www.juanpabloloaiza.com/videos",
+    url: "https://juanpabloloaiza.com/videos",
     type: "website",
   },
 };
@@ -29,7 +29,7 @@ const videoSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   name: "Videos de Hipnosis Terapéutica y Regresión a Vidas Pasadas",
-  url: "https://www.juanpabloloaiza.com/videos",
+  url: "https://juanpabloloaiza.com/videos",
   numberOfItems: videoList.length,
   itemListElement: videoList.map((v, i) => ({
     "@type": "ListItem",
@@ -41,7 +41,7 @@ const videoSchema = {
       contentUrl: v.contentUrl,
       uploadDate: "2024-10-01",
       inLanguage: "es",
-      author: { "@type": "Person", name: "Juan Pablo Loaiza", url: "https://www.juanpabloloaiza.com" },
+      author: { "@type": "Person", name: "Juan Pablo Loaiza", url: "https://juanpabloloaiza.com" },
     },
   })),
 };

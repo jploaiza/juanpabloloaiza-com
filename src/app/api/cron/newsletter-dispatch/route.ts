@@ -6,7 +6,7 @@ import { renderCampaignHtml, personalize } from "@/lib/newsletter/renderer";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://juanpabloloaiza.com";
 const BATCH_SIZE = 100;
 
 export async function GET(req: NextRequest) {

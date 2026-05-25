@@ -33,11 +33,11 @@ const EXAMPLE_VARS: Record<string, string> = {
   booking_code: "TEST1234",
   event_link: "https://calendar.google.com/calendar/event",
   zoom_join_url: "https://zoom.us/j/123456789",
-  manage_url: "https://www.juanpabloloaiza.com/agenda/gestionar?code=TEST1234",
-  cancel_url: "https://www.juanpabloloaiza.com/agenda/gestionar?code=TEST1234&action=cancel",
-  reschedule_url: "https://www.juanpabloloaiza.com/agenda/gestionar?code=TEST1234&action=reschedule",
+  manage_url: "https://juanpabloloaiza.com/agenda/gestionar?code=TEST1234",
+  cancel_url: "https://juanpabloloaiza.com/agenda/gestionar?code=TEST1234&action=cancel",
+  reschedule_url: "https://juanpabloloaiza.com/agenda/gestionar?code=TEST1234&action=reschedule",
   therapist_name: "Juan Pablo Loaiza",
-  site_url: "https://www.juanpabloloaiza.com",
+  site_url: "https://juanpabloloaiza.com",
   logo_url: "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png",
 };
 

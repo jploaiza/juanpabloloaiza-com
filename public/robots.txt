@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /.next/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /panelcliente/
+Disallow: /formulario-de-admision/
+Disallow: /agenda/
+Disallow: /entrevista/
+Disallow: /academy/admin/
+Disallow: /template/
+Disallow: /*?et_blog
+Disallow: /*?et_core_page_resource
+Disallow: /*?et_
+
+Sitemap: https://juanpabloloaiza.com/sitemap.xml

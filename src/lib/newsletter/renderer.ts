@@ -1,6 +1,6 @@
 import { emailShell, esc } from "@/lib/email/shell";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://juanpabloloaiza.com";
 
 interface Subscriber {
   id: string;

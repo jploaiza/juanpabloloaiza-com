@@ -29,8 +29,8 @@ import {
 } from "@/lib/google-calendar";
 
 const FROM_EMAIL = "Juan Pablo Loaiza <academy@juanpabloloaiza.com>";
-const AGENDA_URL = "https://www.juanpabloloaiza.com/agenda";
-const SITE_URL = "https://www.juanpabloloaiza.com";
+const AGENDA_URL = "https://juanpabloloaiza.com/agenda";
+const SITE_URL = "https://juanpabloloaiza.com";
 
 const CALENDAR_FILTERS = [
   "without_appointment",

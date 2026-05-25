@@ -48,7 +48,7 @@ export default async function CompletadoPage({ searchParams }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const courseTitle = (enrollment?.courses as any)?.title ?? "Hipnosis Regresiva — Preparación";
   const certToken = token ?? certificate?.verify_token;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://juanpabloloaiza.com";
   const certUrl = certToken ? `${siteUrl}/academy/certificate/${certToken}` : null;
 
   return (

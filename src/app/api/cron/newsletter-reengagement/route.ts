@@ -6,7 +6,7 @@ import { emailShell, esc } from "@/lib/email/shell";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://juanpabloloaiza.com";
 
 function buildReengagementEmail(name: string, days: number, unsubToken: string): string {
   const body = `

@@ -6,7 +6,7 @@ import WhatsAppCta from "@/components/WhatsAppCta";
 export const metadata: Metadata = {
   title: "Políticas de Servicio | Juan Pablo Loaiza",
   description: "Políticas de servicio, cancelación, reembolsos, política de privacidad y eliminación de datos de Juan Pablo Loaiza — Hipnosis Terapéutica de Regresión a Vidas Pasadas.",
-  alternates: { canonical: "https://www.juanpabloloaiza.com/politicas-de-servicio" },
+  alternates: { canonical: "https://juanpabloloaiza.com/politicas-de-servicio" },
 };
 
 const sections = [

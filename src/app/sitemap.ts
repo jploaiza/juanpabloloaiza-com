@@ -4,7 +4,7 @@ import { getAllPublishedPosts } from "@/lib/supabase/blog";
 
 export const revalidate = 3600;
 
-const BASE = "https://www.juanpabloloaiza.com";
+const BASE = "https://juanpabloloaiza.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPosts = getAllBlogPosts();

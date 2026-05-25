@@ -13,15 +13,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
-      {
-        protocol: "https",
-        hostname: "www.juanpabloloaiza.com",
-      },
     ],
     formats: ["image/avif", "image/webp"],
   },
   async redirects() {
     return [
+      // www → non-www canonical redirect
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.juanpabloloaiza.com" }],
+        destination: "https://juanpabloloaiza.com/:path*",
+        permanent: true,
+      },
       // WordPress date-based post URLs → /blog/:slug
       {
         source: "/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug*",
@@ -46,9 +49,9 @@ const nextConfig: NextConfig = {
         destination: "/blog",
         permanent: true,
       },
-      // WordPress pagination (/slug/page/N)
+      // WordPress pagination (/slug/page/N or /slug/page/N/)
       {
-        source: "/:slug*/page/:page(\\d+)",
+        source: "/:slug*/page/:page(\\d+){/}?",
         destination: "/blog",
         permanent: true,
       },
@@ -77,6 +80,16 @@ const nextConfig: NextConfig = {
       {
         source: "/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores",
         destination: "/blog/la-conexion-entre-miedos-actuales-y-vidas-pasadas-un-viaje-al-origen-de-tus-temores",
+        permanent: true,
+      },
+      {
+        source: "/sanacion-de-traumas",
+        destination: "/blog/sanacion-de-traumas",
+        permanent: true,
+      },
+      {
+        source: "/entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser",
+        destination: "/blog/entendiendo-y-liberando-posesiones-espirituales-hacia-la-sanacion-y-la-libertad-del-ser",
         permanent: true,
       },
     ];
@@ -114,7 +127,7 @@ const nextConfig: NextConfig = {
       {
         source: "/(entrevista|agenda)(.*)",
         headers: [
-          { key: "Access-Control-Allow-Origin", value: "https://www.juanpabloloaiza.com" },
+          { key: "Access-Control-Allow-Origin", value: "https://juanpabloloaiza.com" },
         ],
       },
       {
