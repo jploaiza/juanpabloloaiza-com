@@ -17,6 +17,8 @@ const TRIGGERS = [
   { id: "confirmation", label: "Confirmación" },
   { id: "reminder_24h", label: "Recordatorio 24h" },
   { id: "reminder_1h", label: "Recordatorio 1h" },
+  { id: "followup_24h", label: "Seguimiento 24h" },
+  { id: "followup_72h", label: "Seguimiento 72h" },
   { id: "cancellation", label: "Cancelación" },
   { id: "reschedule", label: "Reprogramación" },
 ];

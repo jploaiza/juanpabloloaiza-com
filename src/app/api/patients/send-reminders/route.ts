@@ -219,11 +219,25 @@ export async function GET(req: NextRequest) {
   const results = [];
 
   for (const config of configs) {
-    // Dedup: skip if ran in last 30 min
-    if (config.last_run_at && Date.now() - new Date(config.last_run_at).getTime() < 30 * 60 * 1000) {
-      results.push({ config_id: config.id, skipped: true, reason: "recent_run" });
-      continue;
+    // Dedup: skip if already ran today (Chile time) — prevents duplicate sends
+    // even if cron fires multiple times within the same hour
+    if (config.last_run_at) {
+      const lastRunChileDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Santiago",
+        year: "numeric", month: "2-digit", day: "2-digit",
+      }).format(new Date(config.last_run_at));
+      if (lastRunChileDate === todayStr) {
+        results.push({ config_id: config.id, skipped: true, reason: "already_ran_today" });
+        continue;
+      }
     }
+
+    // Claim early: update last_run_at BEFORE processing to prevent race conditions
+    // when cron fires concurrent requests within the same minute
+    await adminSb
+      .from("reminder_configs")
+      .update({ last_run_at: new Date().toISOString() })
+      .eq("id", config.id);
 
     let patients: Patient[] = [];
 
@@ -350,11 +364,6 @@ export async function GET(req: NextRequest) {
         await sleep(delayMin + Math.random() * (delayMax - delayMin));
       }
     }
-
-    await adminSb
-      .from("reminder_configs")
-      .update({ last_run_at: new Date().toISOString() })
-      .eq("id", config.id);
 
     results.push({
       config_id: config.id,
