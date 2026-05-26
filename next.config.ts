@@ -18,13 +18,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // www → non-www canonical redirect
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.juanpabloloaiza.com" }],
-        destination: "https://juanpabloloaiza.com/:path*",
-        permanent: true,
-      },
       // WordPress date-based post URLs → /blog/:slug
       {
         source: "/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug*",
