@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
 
   const safeName = name.trim().slice(0, 100);
   const safeNotes = notes?.trim().slice(0, 500) ?? "";
-  const { duration_min: durationMin, label } = eventType;
+  const { duration_min: durationMin, buffer_after_min: bufferAfterMin = 0, label } = eventType;
 
   const adminSb = createAdminClient();
 
@@ -277,17 +277,29 @@ export async function POST(req: NextRequest) {
 
   let busy: BusySlot[] = [];
   try {
+    // Look back buffer_after_min minutes to catch events whose post-session buffer
+    // overlaps with the new slot (e.g. 19:00 session + 60 min buffer blocks until 21:30)
     busy = await getFreeBusy(
       accessToken,
       stored.calendar_id ?? "primary",
-      new Date(startDate.getTime() - 60000).toISOString(),
+      new Date(startDate.getTime() - Math.max(bufferAfterMin, 1) * 60000).toISOString(),
       new Date(endDate.getTime() + 60000).toISOString(),
     );
   } catch {
     return NextResponse.json({ error: "No se pudo verificar la disponibilidad" }, { status: 502 });
   }
 
-  if (slotsOverlap(startDate, endDate, busy)) {
+  // Expand existing events by buffer_after_min so their dead zone is respected.
+  // GCal stores only session duration (e.g. 19:00–20:30); expanding adds the 60 min
+  // buffer → 19:00–21:30. A booking at 21:00 correctly conflicts with this.
+  const expandedBusy = bufferAfterMin > 0
+    ? busy.map((b) => ({
+        start: b.start,
+        end: new Date(new Date(b.end).getTime() + bufferAfterMin * 60000).toISOString(),
+      }))
+    : busy;
+
+  if (slotsOverlap(startDate, endDate, expandedBusy)) {
     return NextResponse.json({ error: "Este horario ya no está disponible. Elige otro." }, { status: 409 });
   }
 

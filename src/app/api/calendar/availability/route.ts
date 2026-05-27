@@ -31,21 +31,32 @@ function toSantiagoMidnight(dateStr: string): Date {
 
 function generateSlots(
   dateStr: string,
-  sessionMin: number,   // session duration only — determines last valid slot start
-  busyMin: number,      // session + buffer — used for busy overlap check
+  sessionMin: number,     // session duration only — determines last valid slot start
+  busyMin: number,        // session + buffer — used for busy overlap check of new slot
+  bufferAfterMin: number, // buffer to expand existing busy events (their post-session dead zone)
   slotStepMin: number,
   workStart: number,
-  workEnd: number,      // 0 is treated as 24 (midnight)
+  workEnd: number,        // 0 is treated as 24 (midnight)
   busy: BusySlot[],
 ): string[] {
   const effectiveEnd = workEnd === 0 ? 24 : workEnd;
   const midnight = toSantiagoMidnight(dateStr);
   const slots: string[] = [];
   const totalMinutes = (effectiveEnd - workStart) * 60;
+
+  // Expand existing events by buffer_after_min: a session at 19:00 (90 min) with 60 min buffer
+  // blocks until 21:30, not just 20:30 as stored in Google Calendar.
+  const expandedBusy = bufferAfterMin > 0
+    ? busy.map((b) => ({
+        start: b.start,
+        end: new Date(new Date(b.end).getTime() + bufferAfterMin * 60000).toISOString(),
+      }))
+    : busy;
+
   for (let offset = workStart * 60; offset + sessionMin <= workStart * 60 + totalMinutes; offset += slotStepMin) {
     const slotStart = new Date(midnight.getTime() + offset * 60000);
     const slotEnd = new Date(slotStart.getTime() + busyMin * 60000);
-    const overlaps = busy.some((b) => {
+    const overlaps = expandedBusy.some((b) => {
       const bStart = new Date(b.start).getTime();
       const bEnd = new Date(b.end).getTime();
       return slotStart.getTime() < bEnd && slotEnd.getTime() > bStart;
@@ -158,8 +169,9 @@ export async function GET(req: NextRequest) {
   }
 
   const sessionMin = eventType.duration_min;
-  const busyMin = eventType.duration_min + eventType.buffer_after_min;
-  let slots = generateSlots(dateStr, sessionMin, busyMin, config.slot_step_min, workStart, workEnd, busy);
+  const bufferAfterMin = eventType.buffer_after_min ?? 0;
+  const busyMin = sessionMin + bufferAfterMin;
+  let slots = generateSlots(dateStr, sessionMin, busyMin, bufferAfterMin, config.slot_step_min, workStart, workEnd, busy);
 
   // Filter out slots within lead_time from now
   const nowMs = Date.now();
