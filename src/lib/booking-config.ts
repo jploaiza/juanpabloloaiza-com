@@ -67,8 +67,8 @@ const DEFAULT_CONFIG: CalendarConfig = {
 };
 
 const DEFAULT_EVENT_TYPES: EventType[] = [
-  { id: "", slug: "session", label: "Sesión TRVP", duration_min: 90, buffer_before_min: 0, buffer_after_min: 0, color: "#C5A059", description: null, sort_order: 1, is_active: true },
-  { id: "", slug: "entrevista", label: "Entrevista de Admisión", duration_min: 45, buffer_before_min: 0, buffer_after_min: 0, color: "#3b82f6", description: null, sort_order: 2, is_active: true },
+  { id: "", slug: "session", label: "Sesión TRVP", duration_min: 120, buffer_before_min: 0, buffer_after_min: 60, color: "#C5A059", description: null, sort_order: 1, is_active: true },
+  { id: "", slug: "entrevista", label: "Entrevista de Admisión", duration_min: 120, buffer_before_min: 0, buffer_after_min: 60, color: "#3b82f6", description: null, sort_order: 2, is_active: true },
 ];
 
 // In-memory cache (TTL 60s)
