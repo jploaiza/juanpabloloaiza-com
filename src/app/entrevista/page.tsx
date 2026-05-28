@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import EntrevistaContent from "./EntrevistaContent";
 
 export const metadata: Metadata = {
-  title: "Agenda de Entrevista — Juan Pablo Loaiza",
+  title: "Entrevista de Admisión — Juan Pablo Loaiza",
   robots: { index: false, follow: false },
 };
 

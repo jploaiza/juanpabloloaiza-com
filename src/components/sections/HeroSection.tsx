@@ -1,19 +1,24 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 export default function HeroSection() {
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0a1628]">
-      {/* Background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('https://res.cloudinary.com/dvudfdhoi/image/upload/f_auto,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu')",
-          opacity: 0.45,
-        }}
-      />
+      {/* Background image — Next.js Image con priority para LCP óptimo */}
+      <div className="absolute inset-0">
+        <Image
+          src="https://res.cloudinary.com/dvudfdhoi/image/upload/w_1920,f_webp,q_80/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"
+          alt="Juan Pablo Loaiza — Regresión a Vidas Pasadas"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center opacity-45"
+          fetchPriority="high"
+        />
+      </div>
 
       {/* Star dust pattern */}
       <div className="absolute inset-0 opacity-20" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='stardust' x='0' y='0' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='10' cy='10' r='1' fill='%23C5A059' opacity='0.2'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23stardust)'/%3E%3C/svg%3E\")"}} />

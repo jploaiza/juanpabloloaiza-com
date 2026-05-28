@@ -36,7 +36,7 @@ export default async function Home() {
       <link
         rel="preload"
         as="image"
-        href="https://res.cloudinary.com/dvudfdhoi/image/upload/f_auto,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"
+        href="https://res.cloudinary.com/dvudfdhoi/image/upload/w_1920,f_webp,q_80/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu"
         // @ts-expect-error fetchpriority valid HTML not yet in React types
         fetchpriority="high"
       />
