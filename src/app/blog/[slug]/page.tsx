@@ -5,7 +5,7 @@ import ArticleContent from "./ArticleContent";
 import { getPublishedPostBySlug, getAllPublishedPosts } from "@/lib/supabase/blog";
 import { SITE_URL } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const OG_FALLBACK = "https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu";
 
