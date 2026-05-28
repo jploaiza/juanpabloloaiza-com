@@ -53,7 +53,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     rows = body.rows ?? [];
   } else {
+    const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > MAX_BYTES) {
+      return NextResponse.json({ error: "Archivo demasiado grande (máx 5 MB)." }, { status: 413 });
+    }
     const text = await req.text();
+    if (text.length > MAX_BYTES) {
+      return NextResponse.json({ error: "Archivo demasiado grande (máx 5 MB)." }, { status: 413 });
+    }
     rows = parseCSV(text);
   }
 
@@ -77,13 +85,17 @@ export async function POST(req: NextRequest) {
       errors.push({ row: i + 2, email: row.email ?? "", reason: "Email inválido" });
       continue;
     }
-    const tags = row.tags ? row.tags.split(/[;|,]/).map((t) => t.trim()).filter(Boolean) : [];
+    // Strip leading formula-injection chars (=+-@) to prevent CSV injection in spreadsheet exports
+    const sanitizeName = (s: string) => s.replace(/^[=+\-@\t\r]+/, "").substring(0, 100);
+    const tags = row.tags
+      ? row.tags.split(/[;|,]/).map((t) => t.trim()).filter(Boolean).slice(0, 20).map((t) => t.substring(0, 50))
+      : [];
     validRows.push({
       rowNum: i + 2,
       record: {
         email: row.email,
-        name: row.name ?? row.email.split("@")[0],
-        apellido: row.apellido ?? "",
+        name: sanitizeName(row.name ?? row.email.split("@")[0]),
+        apellido: sanitizeName(row.apellido ?? ""),
         status: "confirmed",
         source: "import",
         tags,

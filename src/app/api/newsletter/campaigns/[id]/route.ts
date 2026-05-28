@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ALLOWED_SENDER_DOMAIN = "juanpabloloaiza.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,6 +20,7 @@ function validateSender(senderEmail?: unknown, senderName?: unknown): string | n
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: "ID inválido." }, { status: 400 });
   const auth = await requireNewsletterAdmin();
   if ("error" in auth) return auth.error;
 
@@ -34,6 +36,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PUT(req: NextRequest, { params }: Params) {
   const { id } = await params;
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: "ID inválido." }, { status: 400 });
   const auth = await requireNewsletterAdmin();
   if ("error" in auth) return auth.error;
 
@@ -76,6 +79,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const { id } = await params;
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: "ID inválido." }, { status: 400 });
   const auth = await requireNewsletterAdmin();
   if ("error" in auth) return auth.error;
 

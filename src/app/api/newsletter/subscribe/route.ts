@@ -89,7 +89,10 @@ function buildResubscribeEmail(name: string, confirmUrl: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  // x-real-ip is injected by Vercel's edge and cannot be spoofed; fall back to last XFF entry
+  const ip = req.headers.get("x-real-ip")
+    ?? req.headers.get("x-forwarded-for")?.split(",").pop()?.trim()
+    ?? "unknown";
   if (isRateLimited(ip)) {
     return NextResponse.json({ error: "Demasiados intentos. Espera un minuto." }, { status: 429 });
   }

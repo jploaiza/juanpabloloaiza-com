@@ -4,8 +4,14 @@ import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
 
 export const dynamic = "force-dynamic";
 
+// Strip Unicode bidi/zero-width control chars: U+200B-200F, U+202A-202E, U+2066-2069, U+FEFF
+const BIDI_RE = new RegExp("[​-‏‪-‮⁦-⁩﻿]", "g");
 function sanitizePromptField(value: unknown, maxLen: number): string {
-  return String(value ?? "").replace(/[\r\n<>]/g, " ").substring(0, maxLen).trim();
+  return String(value ?? "")
+    .replace(/[\r\n<>`]/g, " ")
+    .replace(BIDI_RE, "")
+    .substring(0, maxLen)
+    .trim();
 }
 
 const NEWSLETTER_AI_PROMPT = (articles: Array<{ title: string; excerpt: string; tags: string[] }>, templateKind: string) => {

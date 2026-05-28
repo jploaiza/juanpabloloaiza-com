@@ -10,14 +10,18 @@ interface Subscriber {
   unsubscribe_token: string;
 }
 
-/** Replace {{nombre}}, {{primer_nombre}}, {{apellido}}, {{email}} tokens with subscriber data. */
+/**
+ * Replace {{nombre}}, {{primer_nombre}}, {{apellido}}, {{email}} tokens with subscriber data.
+ * Expects `text` to already be HTML-escaped (template text). Subscriber values are escaped
+ * before substitution so this function is safe to use in HTML contexts without a second esc().
+ */
 export function personalize(text: string, sub: Subscriber): string {
   const firstName = (sub.name ?? "").split(" ")[0] || (sub.name ?? "");
   return (text ?? "")
-    .replace(/\{\{nombre\}\}/gi, sub.name ?? "")
-    .replace(/\{\{primer_nombre\}\}/gi, firstName)
-    .replace(/\{\{apellido\}\}/gi, sub.apellido ?? "")
-    .replace(/\{\{email\}\}/gi, sub.email ?? "");
+    .replace(/\{\{nombre\}\}/gi, esc(sub.name ?? ""))
+    .replace(/\{\{primer_nombre\}\}/gi, esc(firstName))
+    .replace(/\{\{apellido\}\}/gi, esc(sub.apellido ?? ""))
+    .replace(/\{\{email\}\}/gi, esc(sub.email ?? ""));
 }
 
 function unsubFooter(unsubToken: string): string {
@@ -70,7 +74,7 @@ function renderEditorial(data: Record<string, unknown>, sub: Subscriber): string
   const introHtml = intro ? `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding:28px 32px 0;">
-        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0;font-family:Georgia,serif;">${esc(personalize(intro, sub)).replace(/\n/g, "<br/>")}</p>
+        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0;font-family:Georgia,serif;">${personalize(esc(intro), sub).replace(/\n/g, "<br/>")}</p>
       </td></tr>
     </table>` : "";
 
@@ -103,7 +107,7 @@ function renderAnnouncement(data: Record<string, unknown>, sub: Subscriber): str
         ${heroImage ? `<img src="${esc(safeUrl(heroImage, ""))}" width="100%" style="display:block;width:100%;max-height:260px;object-fit:cover;border:0;margin-bottom:24px;" alt="${esc(title)}"/>` : ""}
         <p style="color:#C5A059;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,serif;margin:0 0 12px;">Anuncio</p>
         <h1 style="color:#ffffff;font-size:26px;margin:0 0 16px;font-family:Georgia,serif;font-weight:normal;line-height:1.3;">${esc(title)}</h1>
-        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0 0 28px;font-family:Georgia,serif;">${esc(personalize(body, sub)).replace(/\n/g, "<br/>")}</p>
+        <p style="color:#8a9bb5;font-size:15px;line-height:1.8;margin:0 0 28px;font-family:Georgia,serif;">${personalize(esc(body), sub).replace(/\n/g, "<br/>")}</p>
         <table cellpadding="0" cellspacing="0" border="0">
           <tr><td style="background-color:#C5A059;">
             <a href="${esc(ctaUrl)}" style="display:inline-block;padding:15px 40px;color:#020617;font-family:Georgia,serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">${esc(ctaText)}</a>

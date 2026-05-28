@@ -20,5 +20,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const testSub = { id: "preview", email: "preview@example.com", name: "Lector", apellido: "Ejemplo", unsubscribe_token: "preview-token" };
   const html = renderCampaignHtml(campaign.template_kind, campaign.template_data, testSub);
 
-  return new NextResponse(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+  return new NextResponse(html, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Security-Policy": "default-src 'none'; img-src https:; style-src 'unsafe-inline'; font-src https:;",
+    },
+  });
 }
