@@ -60,7 +60,7 @@ const DEFAULT_CONFIG: CalendarConfig = {
   lookahead_days: 60,
   max_bookings_per_day: 8,
   from_email: "Juan Pablo Loaiza <academy@juanpabloloaiza.com>",
-  site_url: "https://juanpabloloaiza.com",
+  site_url: "https://www.juanpabloloaiza.com",
   logo_url: "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png",
   zoom: { waiting_room: true, host_video: true, participant_video: true, mute_upon_entry: true, join_before_host: false, auto_recording: "none" },
   rate_limits: { availability: [30, 60], book: [5, 600] },

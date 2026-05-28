@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { SITE_URL } from "@/lib/site";
 
 export type SupabasePost = {
   id: string;
@@ -40,7 +41,7 @@ export function toDisplayPost(p: SupabasePost) {
     slug: p.slug,
     date: p.published_at ?? p.created_at,
     author: "Juan Pablo Loaiza",
-    url: `https://juanpabloloaiza.com/blog/${p.slug}`,
+    url: `${SITE_URL}/blog/${p.slug}`,
     tags: p.tags ?? [],
   };
 }

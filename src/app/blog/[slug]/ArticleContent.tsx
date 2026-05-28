@@ -16,7 +16,7 @@ interface Props {
 
 export default function ArticleContent({ post, previousPost, nextPost, relatedPosts }: Props & { relatedPosts: BlogPost[] }) {
 
-  const shareUrl = `https://juanpabloloaiza.com/blog/${post.slug}`;
+  const shareUrl = `https://www.juanpabloloaiza.com/blog/${post.slug}`;
   const [storyLoading, setStoryLoading] = useState(false);
   const [storyModal, setStoryModal] = useState(false);
   const [storyImageUrl, setStoryImageUrl] = useState("");
@@ -285,7 +285,7 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
                 Escribir por WhatsApp
               </a>
               <a
-                href="https://juanpabloloaiza.com/#ListaDeAdmision"
+                href="https://www.juanpabloloaiza.com/#ListaDeAdmision"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 border border-[#C5A059]/40 hover:border-[#C5A059] text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-5 py-3 transition"

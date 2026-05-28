@@ -46,7 +46,7 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 md:h-24">
           {/* Logo */}
-          <a href="https://juanpabloloaiza.com/" className="flex items-center gap-4 group cursor-pointer">
+          <a href="/" className="flex items-center gap-4 group cursor-pointer">
             <Image
               src="https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png"
               alt="Juan Pablo Loaiza"

@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import { notFound } from "next/navigation";
 import ArticleContent from "./ArticleContent";
 import { getPublishedPostBySlug, getAllPublishedPosts } from "@/lib/supabase/blog";
+import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -33,11 +34,11 @@ export async function generateMetadata({
     title: `${post.title} | Juan Pablo Loaiza`,
     description: post.excerpt,
     keywords: `${post.category}, regresión a vidas pasadas, hipnosis terapéutica, ${post.title.toLowerCase()}`,
-    alternates: { canonical: `https://juanpabloloaiza.com/blog/${slug}` },
+    alternates: { canonical: `${SITE_URL}/blog/${slug}` },
     openGraph: {
       title: post.title,
       description: post.excerpt,
-      url: `https://juanpabloloaiza.com/blog/${slug}`,
+      url: `${SITE_URL}/blog/${slug}`,
       siteName: "Juan Pablo Loaiza",
       locale: "es_ES",
       type: "article",
@@ -78,7 +79,7 @@ export default async function ArticlePage({
     headline: post.title,
     description: post.excerpt,
     image,
-    author: { "@type": "Person", name: post.author, url: "https://juanpabloloaiza.com" },
+    author: { "@type": "Person", name: post.author, url: SITE_URL },
     publisher: {
       "@type": "Organization",
       name: "Juan Pablo Loaiza",
@@ -86,8 +87,8 @@ export default async function ArticlePage({
     },
     datePublished: post.date,
     dateModified: post.date,
-    mainEntityOfPage: { "@type": "WebPage", "@id": `https://juanpabloloaiza.com/blog/${slug}` },
-    url: `https://juanpabloloaiza.com/blog/${slug}`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${slug}` },
+    url: `${SITE_URL}/blog/${slug}`,
     articleSection: post.category,
     inLanguage: "es",
   };
@@ -96,9 +97,9 @@ export default async function ArticlePage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Inicio", item: "https://juanpabloloaiza.com" },
-      { "@type": "ListItem", position: 2, name: "Blog", item: "https://juanpabloloaiza.com/blog" },
-      { "@type": "ListItem", position: 3, name: post.title, item: `https://juanpabloloaiza.com/blog/${slug}` },
+      { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+      { "@type": "ListItem", position: 3, name: post.title, item: `${SITE_URL}/blog/${slug}` },
     ],
   };
 

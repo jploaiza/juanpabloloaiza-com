@@ -271,7 +271,7 @@ export default function AcademyLandingPage() {
                 Este curso gratuito es el punto de partida para todos sus pacientes, diseñado para eliminar el miedo, responder las preguntas más frecuentes y preparar la mente y el espíritu para una experiencia de regresión profunda y transformadora.
               </p>
               <Link
-                href="https://juanpabloloaiza.com"
+                href="https://www.juanpabloloaiza.com"
                 target="_blank"
                 className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 px-4 py-2 hover:bg-[#C5A059]/10 transition"
               >
@@ -312,7 +312,7 @@ export default function AcademyLandingPage() {
       <footer className="border-t border-[#C5A059]/10 py-8 text-center">
         <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-600">
           © 2026 Juan Pablo Loaiza · Academy ·{" "}
-          <Link href="https://juanpabloloaiza.com" className="hover:text-[#C5A059] transition">
+          <Link href="https://www.juanpabloloaiza.com" className="hover:text-[#C5A059] transition">
             juanpabloloaiza.com
           </Link>
         </p>

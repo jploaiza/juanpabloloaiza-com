@@ -39,7 +39,7 @@ const mockPost: BlogPost = {
   imageUrl: "https://cdn.example.com/blog/test.jpg",
   date: "2026-01-15",
   author: "Juan Pablo Loaiza",
-  url: "https://juanpabloloaiza.com/blog/test-article",
+  url: "https://www.juanpabloloaiza.com/blog/test-article",
 };
 
 function makeFetch(ok = true) {

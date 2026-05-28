@@ -4,8 +4,8 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
 const FROM_EMAIL = "JPL Academy <academy@juanpabloloaiza.com>";
-const AGENDA_URL = "https://juanpabloloaiza.com/agenda";
-const SITE_URL = "https://juanpabloloaiza.com";
+const AGENDA_URL = "https://www.juanpabloloaiza.com/agenda";
+const SITE_URL = "https://www.juanpabloloaiza.com";
 
 export async function GET(req: NextRequest) {
   const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");

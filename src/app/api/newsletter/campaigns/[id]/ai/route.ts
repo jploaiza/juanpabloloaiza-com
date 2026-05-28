@@ -39,7 +39,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
   "preheader": "texto de preview (máx 90 chars, complementa el asunto)",
   "intro": "introducción personalizada (MÁXIMO 150 palabras, usa {{primer_nombre}} al inicio o de forma natural dentro del texto, 2-3 párrafos cortos, voz TRVP, conecta emocionalmente con los temas de esta entrega)",
   "transitions": ["frase puente hacia artículo secundario 1 (1 línea)", "frase puente hacia artículo secundario 2 (1 línea)"],
-  "cta": {"text": "texto del botón CTA final (máx 30 chars)", "url": "https://juanpabloloaiza.com/blog"}
+  "cta": {"text": "texto del botón CTA final (máx 30 chars)", "url": "https://www.juanpabloloaiza.com/blog"}
 }`;
   }
 
@@ -52,7 +52,7 @@ Devuelve ÚNICAMENTE un JSON válido:
   "preheader": "texto preview (máx 90 chars)",
   "title": "título del anuncio (máx 40 chars, impactante)",
   "body": "cuerpo del anuncio (3-4 párrafos, entusiasta pero sin exagerar, voz personal TRVP)",
-  "cta": {"text": "texto CTA (máx 30 chars)", "url": "https://juanpabloloaiza.com"}
+  "cta": {"text": "texto CTA (máx 30 chars)", "url": "https://www.juanpabloloaiza.com"}
 }`;
   }
 

@@ -1,10 +1,11 @@
 import { MetadataRoute } from "next";
 import { getAllBlogPosts } from "@/lib/blog-data";
 import { getAllPublishedPosts } from "@/lib/supabase/blog";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 3600;
 
-const BASE = "https://juanpabloloaiza.com";
+const BASE = SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPosts = getAllBlogPosts();

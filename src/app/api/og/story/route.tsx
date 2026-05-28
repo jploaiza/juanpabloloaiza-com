@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     ? `https://res.cloudinary.com/dvudfdhoi/image/fetch/w_1080,h_1920,c_fill,f_jpg,q_auto/${encodeURIComponent(rawImageUrl)}`
     : rawImageUrl;
   const slug = searchParams.get("slug") ?? "";
-  const siteUrl = slug ? "juanpabloloaiza.com/blog/" + slug : "juanpabloloaiza.com";
+  const siteUrl = slug ? "www.juanpabloloaiza.com/blog/" + slug : "www.juanpabloloaiza.com";
 
   const truncatedTitle = title.length > 80 ? title.slice(0, 77) + "..." : title;
   const truncatedExcerpt = excerpt.length > 150 ? excerpt.slice(0, 147) + "..." : excerpt;

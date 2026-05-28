@@ -89,7 +89,7 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
   ]);
   const [cta, setCta] = useState({
     text: String((td?.cta as Record<string, string>)?.text ?? "Explorar el blog"),
-    url: String((td?.cta as Record<string, string>)?.url ?? "https://juanpabloloaiza.com/blog"),
+    url: String((td?.cta as Record<string, string>)?.url ?? "https://www.juanpabloloaiza.com/blog"),
   });
 
   // AI

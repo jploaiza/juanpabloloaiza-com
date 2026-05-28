@@ -22,7 +22,7 @@ vi.mock("next/og", () => ({ ImageResponse: MockImageResponse }));
 import { GET } from "@/app/api/og/story/route";
 
 function makeRequest(params: Record<string, string> = {}) {
-  const url = new URL("https://juanpabloloaiza.com/api/og/story");
+  const url = new URL("https://www.juanpabloloaiza.com/api/og/story");
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   return new Request(url.toString());
 }
@@ -67,14 +67,14 @@ describe("GET /api/og/story", () => {
     const req = makeRequest({ title: "Test", slug: "my-article" });
     await GET(req as never);
     const element = MockImageResponse.lastElement;
-    expect(element).toContain("juanpabloloaiza.com/blog/my-article");
+    expect(element).toContain("www.juanpabloloaiza.com/blog/my-article");
   });
 
   it("uses base domain when no slug provided", async () => {
     const req = makeRequest({ title: "Test" });
     await GET(req as never);
     const element = MockImageResponse.lastElement;
-    expect(element).toContain("juanpabloloaiza.com");
+    expect(element).toContain("www.juanpabloloaiza.com");
     // Should not have /blog/ path without a slug
     const siteUrlMatch = element.match(/juanpabloloaiza\.com([^"'\s<]*)/);
     expect(siteUrlMatch?.[1] ?? "").not.toContain("blog/");

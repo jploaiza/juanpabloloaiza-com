@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
   if (!profile || !course) return NextResponse.json({ success: true, certificateToken });
 
   const firstName = esc(profile.full_name?.split(" ")[0] ?? "estudiante");
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://juanpabloloaiza.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
   const certUrl = certificateToken
     ? `${siteUrl}/academy/certificate/${certificateToken}`
     : null;

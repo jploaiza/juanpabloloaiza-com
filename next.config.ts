@@ -120,7 +120,7 @@ const nextConfig: NextConfig = {
       {
         source: "/(entrevista|agenda)(.*)",
         headers: [
-          { key: "Access-Control-Allow-Origin", value: "https://juanpabloloaiza.com" },
+          { key: "Access-Control-Allow-Origin", value: "https://www.juanpabloloaiza.com" },
         ],
       },
       {

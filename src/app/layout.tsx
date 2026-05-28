@@ -3,6 +3,7 @@ import { Source_Serif_4, DM_Sans, Libre_Baskerville } from "next/font/google";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import PageTracker from "@/components/PageTracker";
+import { SITE_URL } from "@/lib/site";
 
 const sourceSerif4 = Source_Serif_4({
   variable: "--font-crimson",
@@ -33,16 +34,16 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://juanpabloloaiza.com"),
+  metadataBase: new URL(SITE_URL),
   title: "Regresión a Vidas Pasadas Online | Juan Pablo Loaiza",
   description: "Hipnoterapeuta online especializado en regresión a vidas pasadas. Sesiones por Zoom para España, Chile y México. Sana el origen de tus patrones. Consulta gratuita.",
   keywords: "hipnoterapeuta online, hipnoterapeuta España, regresión a vidas pasadas online, hipnosis terapéutica, hipnoterapeuta Chile, hipnoterapeuta México, sesión de regresión online, terapia de regresión",
   robots: "index, follow, max-image-preview:large",
-  alternates: { canonical: "https://juanpabloloaiza.com/" },
+  alternates: { canonical: `${SITE_URL}/` },
   openGraph: {
     title: "Regresa a tus Vidas Pasadas — Hipnosis Terapéutica de Regresión | Juan Pablo Loaiza",
     description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas y liberación de entidades espirituales. Sesiones vía Zoom en todo el mundo.",
-    url: "https://juanpabloloaiza.com",
+    url: SITE_URL,
     siteName: "Juan Pablo Loaiza",
     locale: "es_ES",
     type: "website",
@@ -80,10 +81,10 @@ export default function RootLayout({
     {
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
-      "@id": "https://juanpabloloaiza.com/#service",
+      "@id": `${SITE_URL}/#service`,
       name: "Juan Pablo Loaiza — Hipnosis Terapéutica y Regresión a Vidas Pasadas Online",
       description: "Hipnosis Terapéutica especializada en regresión a vidas pasadas. Sesiones individuales online vía Zoom para España, Chile y México.",
-      url: "https://juanpabloloaiza.com",
+      url: SITE_URL,
       email: "contacto@juanpabloloaiza.com",
       availableChannel: {
         "@type": "ServiceChannel",
@@ -127,9 +128,9 @@ export default function RootLayout({
     {
       "@context": "https://schema.org",
       "@type": "Person",
-      "@id": "https://juanpabloloaiza.com/#person",
+      "@id": `${SITE_URL}/#person`,
       name: "Juan Pablo Loaiza",
-      url: "https://juanpabloloaiza.com",
+      url: SITE_URL,
       jobTitle: "Hipnoterapeuta y Terapeuta de Regresión a Vidas Pasadas",
       description: "Terapeuta especializado en hipnosis clínica y regresión a vidas pasadas. Sesiones individuales en línea para España, Chile y México.",
       knowsAbout: [
@@ -143,16 +144,16 @@ export default function RootLayout({
         "https://www.instagram.com/juanpabloloaizao/",
         "https://www.youtube.com/@JuanPabloLoaizaO",
       ],
-      worksFor: { "@id": "https://juanpabloloaiza.com/#service" },
+      worksFor: { "@id": `${SITE_URL}/#service` },
     },
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "@id": "https://juanpabloloaiza.com/#website",
+      "@id": `${SITE_URL}/#website`,
       name: "Juan Pablo Loaiza",
-      url: "https://juanpabloloaiza.com",
+      url: SITE_URL,
       inLanguage: "es",
-      publisher: { "@id": "https://juanpabloloaiza.com/#person" },
+      publisher: { "@id": `${SITE_URL}/#person` },
     },
   ];
 

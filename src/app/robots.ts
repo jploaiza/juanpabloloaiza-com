@@ -18,6 +18,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://juanpabloloaiza.com/sitemap.xml',
+    sitemap: 'https://www.juanpabloloaiza.com/sitemap.xml',
   }
 }

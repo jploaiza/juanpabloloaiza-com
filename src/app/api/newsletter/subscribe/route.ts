@@ -21,7 +21,7 @@ function isRateLimited(ip: string): boolean {
 
 const GENERIC_RESPONSE = { success: true, message: "Si tu correo es nuevo, recibirás un enlace de confirmación." };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://juanpabloloaiza.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
 
 function buildConfirmEmail(name: string, confirmUrl: string): string {
   const body = `

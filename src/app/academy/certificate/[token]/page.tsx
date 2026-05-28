@@ -39,7 +39,7 @@ export default async function CertificatePage({ params }: Props) {
       })
     : null;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://juanpabloloaiza.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.juanpabloloaiza.com";
   const verifyUrl = `${siteUrl}/academy/certificate/${token}`;
 
   return (

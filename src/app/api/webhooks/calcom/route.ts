@@ -7,7 +7,7 @@ const FROM_EMAIL = "Juan Pablo Loaiza <academy@juanpabloloaiza.com>";
 const LOGO_URL =
   "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png";
 const WHATSAPP_URL = "https://api.whatsapp.com/send?phone=56962081884";
-const SITE_URL = "https://juanpabloloaiza.com";
+const SITE_URL = "https://www.juanpabloloaiza.com";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

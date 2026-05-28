@@ -12,4 +12,4 @@ Disallow: /*?et_blog
 Disallow: /*?et_core_page_resource
 Disallow: /*?et_
 
-Sitemap: https://juanpabloloaiza.com/sitemap.xml
+Sitemap: https://www.juanpabloloaiza.com/sitemap.xml
