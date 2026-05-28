@@ -1,6 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = { title: "Enlace inválido — Juan Pablo Loaiza" };
+export const metadata: Metadata = {
+  title: "Enlace inválido — Juan Pablo Loaiza",
+  robots: { index: false, follow: false },
+};
 
 export default function InvalidoPage() {
   return (

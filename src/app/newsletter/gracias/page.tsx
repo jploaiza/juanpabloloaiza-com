@@ -1,6 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = { title: "Suscripción confirmada — Juan Pablo Loaiza" };
+export const metadata: Metadata = {
+  title: "Suscripción confirmada — Juan Pablo Loaiza",
+  robots: { index: false, follow: false },
+};
 
 export default async function GraciasPage({ searchParams }: { searchParams: Promise<{ already?: string }> }) {
   const { already } = await searchParams;
