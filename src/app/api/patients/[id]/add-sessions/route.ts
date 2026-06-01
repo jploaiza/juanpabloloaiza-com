@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!adminSb) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  const { quantity, notes, start_date } = body as { quantity?: number; notes?: string; start_date?: string };
+  const { quantity, notes, start_date, set_total } = body as { quantity?: number; notes?: string; start_date?: string; set_total?: boolean };
 
   if (!quantity || quantity < 1 || !Number.isInteger(quantity)) {
     return NextResponse.json({ error: "quantity debe ser un entero positivo" }, { status: 400 });
@@ -27,14 +27,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data: patient, error: fetchErr } = await adminSb
     .from("patients")
-    .select("total_sessions, pack_size, end_date")
+    .select("total_sessions, end_date")
     .eq("id", id)
     .single();
 
   if (fetchErr || !patient) return NextResponse.json({ error: "Paciente no encontrado" }, { status: 404 });
 
-  const currentTotal = patient.total_sessions || patient.pack_size;
-  const newTotal = currentTotal + quantity;
+  const currentTotal = patient.total_sessions ?? 0;
+  const newTotal = set_total ? quantity : currentTotal + quantity;
 
   // Calculate new end_date from the provided start_date (or today) + pack weeks for quantity
   const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(start_date ?? "")
@@ -60,15 +60,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     notes: notes?.trim() || null,
   });
 
-  // Log the purchase
+  // Log the purchase or correction
   const noteStr = notes?.trim() ? ` — ${notes.trim()}` : "";
-  const dateStr = baseDate !== new Date().toISOString().split("T")[0]
+  const dateStr = !set_total && baseDate !== new Date().toISOString().split("T")[0]
     ? ` Inicio: ${new Date(baseDate + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" })}.`
     : "";
+  const logContent = set_total
+    ? `Total de sesiones corregido a ${newTotal} (era ${currentTotal})${noteStr}.`
+    : `Compra de ${quantity} sesión${quantity === 1 ? "" : "es"} registrada.${dateStr} Total acumulado: ${newTotal} sesiones${noteStr}.`;
   await adminSb.from("patient_logs").insert({
     patient_id: id,
     type: "note_added",
-    content: `Compra de ${quantity} sesión${quantity === 1 ? "" : "es"} registrada.${dateStr} Total acumulado: ${newTotal} sesiones${noteStr}.`,
+    content: logContent,
   });
 
   return NextResponse.json({ patient: updated, added: quantity, total: newTotal });

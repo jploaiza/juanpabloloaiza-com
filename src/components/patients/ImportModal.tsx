@@ -211,43 +211,60 @@ export default function ImportModal({ onClose, onImported }: Props) {
 
                     {/* Pack config — only when selected */}
                     {sel && (
-                      <div className="ml-8 grid grid-cols-3 gap-2">
+                      <div className="ml-8 space-y-2">
+                        {/* Phone */}
                         <div>
-                          <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Pack</label>
-                          <select
-                            value={sel.pack_size}
-                            onChange={(e) => updateSelected(user.id, "pack_size", Number(e.target.value) as PackSize)}
-                            className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
-                          >
-                            {PACK_OPTIONS.map((p) => (
-                              <option key={p} value={p}>Pack {p} ({PACK_WEEKS[p]}s)</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Inicio</label>
+                          <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">
+                            Teléfono WhatsApp
+                            {!sel.phone && <span className="ml-1 text-yellow-500">⚠ sin teléfono</span>}
+                          </label>
                           <input
-                            type="date"
-                            value={sel.start_date}
-                            onChange={(e) => updateSelected(user.id, "start_date", e.target.value)}
-                            className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
+                            type="tel"
+                            value={sel.phone ?? ""}
+                            onChange={(e) => updateSelected(user.id, "phone", e.target.value)}
+                            placeholder="+56912345678"
+                            className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none placeholder:text-gray-600"
                           />
                         </div>
-                        <div>
-                          <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Día</label>
-                          <select
-                            value={sel.reminder_day}
-                            onChange={(e) => updateSelected(user.id, "reminder_day", Number(e.target.value))}
-                            className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
-                          >
-                            {REMINDER_DAYS.map((d, i) => (
-                              <option key={i} value={i}>{d}</option>
-                            ))}
-                          </select>
+                        {/* Pack / Inicio / Día */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Pack</label>
+                            <select
+                              value={sel.pack_size}
+                              onChange={(e) => updateSelected(user.id, "pack_size", Number(e.target.value) as PackSize)}
+                              className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
+                            >
+                              {PACK_OPTIONS.map((p) => (
+                                <option key={p} value={p}>Pack {p} ({PACK_WEEKS[p]}s)</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Inicio</label>
+                            <input
+                              type="date"
+                              value={sel.start_date}
+                              onChange={(e) => updateSelected(user.id, "start_date", e.target.value)}
+                              className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Día</label>
+                            <select
+                              value={sel.reminder_day}
+                              onChange={(e) => updateSelected(user.id, "reminder_day", Number(e.target.value))}
+                              className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-white px-2 py-1 text-xs font-crimson outline-none"
+                            >
+                              {REMINDER_DAYS.map((d, i) => (
+                                <option key={i} value={i}>{d}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <p className="col-span-3 text-[10px] text-gray-600 font-crimson">
+                            Vence: {new Date(calcEndDate(sel.start_date, sel.pack_size) + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" })}
+                          </p>
                         </div>
-                        <p className="col-span-3 text-[10px] text-gray-600 font-crimson">
-                          Vence: {new Date(calcEndDate(sel.start_date, sel.pack_size) + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" })}
-                        </p>
                       </div>
                     )}
                   </div>

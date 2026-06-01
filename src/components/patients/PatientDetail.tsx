@@ -40,6 +40,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
   const [addNotes, setAddNotes] = useState("");
   const [addStartDate, setAddStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [addingsessions, setAddingSessions] = useState(false);
+  const [addMode, setAddMode] = useState<"add" | "set">("add");
   const [showExtend, setShowExtend] = useState(false);
   const [extendDays, setExtendDays] = useState(7);
   const [extendingDeadline, setExtendingDeadline] = useState(false);
@@ -100,7 +101,12 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
       const res = await fetch(`/api/patients/${patient.id}/add-sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity: addQty, notes: addNotes, start_date: addStartDate }),
+        body: JSON.stringify({
+          quantity: addQty,
+          notes: addNotes,
+          start_date: addStartDate,
+          set_total: addMode === "set",
+        }),
       });
       if (!res.ok) {
         const j = await res.json();
@@ -110,6 +116,7 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
       setAddQty(5);
       setAddNotes("");
       setAddStartDate(new Date().toISOString().split("T")[0]);
+      setAddMode("add");
       await refresh();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error al agregar sesiones");
@@ -342,10 +349,38 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
         {/* Add sessions inline form */}
         {showAddSessions && (
           <div className="mt-4 p-4 bg-[#0a1628] border border-[#C5A059]/20 space-y-3">
-            <p className="text-[10px] font-cinzel text-[#C5A059] uppercase tracking-widest">Registrar compra de sesiones</p>
+            {/* Mode toggle */}
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-cinzel text-[#C5A059] uppercase tracking-widest">
+                {addMode === "add" ? "Registrar compra de sesiones" : "Corregir total de sesiones"}
+              </p>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => setAddMode("add")}
+                  className={`px-2 py-1 text-[10px] font-cinzel border transition ${addMode === "add" ? "border-[#C5A059] text-[#C5A059] bg-[#C5A059]/10" : "border-[#C5A059]/10 text-gray-500 hover:text-gray-300"}`}
+                >
+                  + Agregar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAddMode("set")}
+                  className={`px-2 py-1 text-[10px] font-cinzel border transition ${addMode === "set" ? "border-yellow-500 text-yellow-400 bg-yellow-950/40" : "border-[#C5A059]/10 text-gray-500 hover:text-gray-300"}`}
+                >
+                  = Corregir
+                </button>
+              </div>
+            </div>
+            {addMode === "set" && (
+              <p className="text-[10px] text-yellow-500/80 font-crimson">
+                Sobreescribe el total actual ({patient.total_sessions ?? 0} sesiones). Usar solo para correcciones.
+              </p>
+            )}
             <div className="flex gap-3 items-end">
               <div>
-                <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Cantidad</label>
+                <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">
+                  {addMode === "add" ? "Cantidad" : "Nuevo total"}
+                </label>
                 <input
                   type="number"
                   min={1}
@@ -369,22 +404,24 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
                 ))}
               </div>
             </div>
-            <div>
-              <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Fecha de inicio del pack</label>
-              <input
-                type="date"
-                value={addStartDate}
-                onChange={(e) => setAddStartDate(e.target.value)}
-                className="w-full bg-[#16213e] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
-              />
-            </div>
+            {addMode === "add" && (
+              <div>
+                <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Fecha de inicio del pack</label>
+                <input
+                  type="date"
+                  value={addStartDate}
+                  onChange={(e) => setAddStartDate(e.target.value)}
+                  className="w-full bg-[#16213e] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
+                />
+              </div>
+            )}
             <div>
               <label className="block text-[10px] font-cinzel text-gray-500 uppercase tracking-wide mb-1">Nota (opcional)</label>
               <input
                 type="text"
                 value={addNotes}
                 onChange={(e) => setAddNotes(e.target.value)}
-                placeholder="Ej: Compra sesión suelta, Pack renovado..."
+                placeholder={addMode === "add" ? "Ej: Compra sesión suelta, Pack renovado..." : "Ej: Corrección de sesiones duplicadas"}
                 className="w-full bg-[#16213e] border border-[#C5A059]/20 text-white px-3 py-2 text-sm font-crimson focus:border-[#C5A059]/40 outline-none"
               />
             </div>
@@ -392,13 +429,17 @@ export default function PatientDetail({ patient: initialPatient, logs: initialLo
               <button
                 onClick={handleAddSessions}
                 disabled={addingsessions}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#C5A059] text-[#020617] text-xs font-cinzel uppercase tracking-widest hover:bg-[#D4B06A] transition disabled:opacity-50"
+                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-cinzel uppercase tracking-widest transition disabled:opacity-50 ${
+                  addMode === "set"
+                    ? "bg-yellow-600/80 text-white hover:bg-yellow-600"
+                    : "bg-[#C5A059] text-[#020617] hover:bg-[#D4B06A]"
+                }`}
               >
                 {addingsessions ? <RefreshCw size={11} className="animate-spin" /> : <ShoppingBag size={11} />}
-                {addingsessions ? "Guardando..." : `Agregar ${addQty} sesión${addQty === 1 ? "" : "es"}`}
+                {addingsessions ? "Guardando..." : addMode === "set" ? `Corregir a ${addQty} sesión${addQty === 1 ? "" : "es"}` : `Agregar ${addQty} sesión${addQty === 1 ? "" : "es"}`}
               </button>
               <button
-                onClick={() => setShowAddSessions(false)}
+                onClick={() => { setShowAddSessions(false); setAddMode("add"); }}
                 className="px-4 py-2 border border-[#C5A059]/15 text-gray-500 text-xs font-cinzel uppercase tracking-widest hover:text-gray-300 transition"
               >
                 Cancelar
