@@ -52,6 +52,8 @@ export default function Header() {
               alt="Juan Pablo Loaiza"
               height={48}
               width={200}
+              priority
+              sizes="200px"
               className="h-10 md:h-12 w-auto object-contain opacity-90 group-hover:opacity-100 transition"
             />
           </a>

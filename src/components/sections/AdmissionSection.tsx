@@ -404,7 +404,7 @@ export default function AdmissionSection() {
 
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         onLoad={renderTurnstile}
         onError={() => setTurnstileError("No se pudo cargar el script de verificación. Revisa tu conexión y recarga la página.")}
         data-cfasync="false"

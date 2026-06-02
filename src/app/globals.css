@@ -4,6 +4,7 @@
   --font-cinzel: var(--font-cinzel);
   --font-crimson: var(--font-crimson);
   --font-dm-sans: var(--font-dm-sans);
+  --font-libre-baskerville: var(--font-cinzel);
 }
 
 :root {

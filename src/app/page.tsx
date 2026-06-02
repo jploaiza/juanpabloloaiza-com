@@ -1,16 +1,18 @@
 export const revalidate = 3600;
 
+import dynamic from "next/dynamic";
 import Header from "@/components/Header";
 import HeroSection from "@/components/sections/HeroSection";
-import ProcessSection from "@/components/sections/ProcessSection";
 import OriginSection from "@/components/sections/OriginSection";
-import TherapySection from "@/components/sections/TherapySection";
-import FAQSection from "@/components/sections/FAQSection";
-import EntityLiberationSection from "@/components/sections/EntityLiberationSection";
-import AdmissionSection from "@/components/sections/AdmissionSection";
-import BlogSection from "@/components/sections/BlogSection";
-import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/Footer";
+
+const ProcessSection = dynamic(() => import("@/components/sections/ProcessSection"));
+const TherapySection = dynamic(() => import("@/components/sections/TherapySection"));
+const FAQSection = dynamic(() => import("@/components/sections/FAQSection"));
+const EntityLiberationSection = dynamic(() => import("@/components/sections/EntityLiberationSection"));
+const AdmissionSection = dynamic(() => import("@/components/sections/AdmissionSection"));
+const BlogSection = dynamic(() => import("@/components/sections/BlogSection"));
+const ContactSection = dynamic(() => import("@/components/sections/ContactSection"));
 import { createClient } from "@/lib/supabase/server";
 import { toDisplayPost, type SupabasePost } from "@/lib/supabase/blog";
 

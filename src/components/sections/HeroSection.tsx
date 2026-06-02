@@ -48,35 +48,20 @@ export default function HeroSection() {
 
         {/* Main heading + emotional subtitle grouped */}
         <div className="flex flex-col items-center gap-3">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-            className="text-[2rem] sm:text-4xl md:text-5xl lg:text-6xl text-white leading-tight font-cinzel font-bold text-center"
-          >
+          <h1 className="text-[2rem] sm:text-4xl md:text-5xl lg:text-6xl text-white leading-tight font-cinzel font-bold text-center">
             <span className="block">Hipnoterapia de Regresión</span>
             <span className="block text-[#C5A059]">a Vidas Pasadas</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.9 }}
-            className="text-xl sm:text-2xl text-[#C5A059]/80 font-cinzel font-light tracking-wide"
-          >
+          <p className="text-xl sm:text-2xl text-[#C5A059]/80 font-cinzel font-light tracking-wide">
             Devuelve la Felicidad a tu Vida
-          </motion.p>
+          </p>
         </div>
 
         {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut", delay: 1 }}
-          className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl font-crimson leading-loose"
-        >
+        <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl font-crimson leading-loose">
           Un proceso terapéutico integral para quienes están decididos a sanar su pasado, liberar cargas ancestrales y vivir con plenitud y propósito.
-        </motion.p>
+        </p>
 
         {/* CTA Buttons */}
         <motion.div

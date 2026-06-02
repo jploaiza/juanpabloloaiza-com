@@ -26,13 +26,6 @@ const libreBaskervilleCinzel = Libre_Baskerville({
   style: ["normal", "italic"],
 });
 
-const libreBaskerville = Libre_Baskerville({
-  variable: "--font-libre-baskerville",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Regresión a Vidas Pasadas Online | Juan Pablo Loaiza",
@@ -160,7 +153,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${libreBaskervilleCinzel.variable} ${sourceSerif4.variable} ${dmSans.variable} ${libreBaskerville.variable} h-full antialiased scroll-smooth`}
+      className={`${libreBaskervilleCinzel.variable} ${sourceSerif4.variable} ${dmSans.variable} h-full antialiased scroll-smooth`}
     >
       <head>
         {/* Preconnect to external asset hosts */}
