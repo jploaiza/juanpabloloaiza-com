@@ -83,6 +83,7 @@ export default function EntityLiberationSection() {
               <video
                 src="https://media.juanpabloloaiza.com/SRT1-2.mp4"
                 controls
+                preload="none"
                 className="w-full h-full object-contain"
                 controlsList="nodownload"
                 disablePictureInPicture

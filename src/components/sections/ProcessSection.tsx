@@ -72,6 +72,7 @@ export default function ProcessSection() {
               <video
                 src="https://media.juanpabloloaiza.com/RVP1.m4v"
                 controls
+                preload="none"
                 className="w-full h-full object-contain"
                 controlsList="nodownload"
                 disablePictureInPicture

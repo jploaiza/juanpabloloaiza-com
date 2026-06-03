@@ -47,6 +47,7 @@ export default function TherapySection() {
                 <video
                   src="https://media.juanpabloloaiza.com/Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4"
                   controls
+                  preload="none"
                   className="w-full h-full object-contain"
                   controlsList="nodownload"
                   disablePictureInPicture
