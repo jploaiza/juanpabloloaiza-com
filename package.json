@@ -40,7 +40,8 @@
     "react-email": "^6.3.2",
     "react-markdown": "^10.1.0",
     "resend": "^6.10.0",
-    "tiptap-markdown": "^0.9.0"
+    "tiptap-markdown": "^0.9.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
