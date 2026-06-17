@@ -8,9 +8,10 @@ import {
   Loader2, Check, Eye, ExternalLink, GripVertical, Settings,
 } from "lucide-react";
 import {
-  type FormRow, type Question, type QuestionType, type Choice, type FormSchema,
+  type FormRow, type Question, type QuestionType, type Choice, type FormSchema, type LogicRule,
   QUESTION_TYPE_META,
 } from "@/lib/forms/types";
+import BranchingEditor from "./BranchingEditor";
 
 function mkChoice(label: string): Choice {
   return { id: crypto.randomUUID(), label, value: crypto.randomUUID().slice(0, 8) };
@@ -49,7 +50,7 @@ export default function FormBuilder({ initial }: { initial: FormRow }) {
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(initial.notify_whatsapp);
   const [isAdmission, setIsAdmission] = useState(initial.is_admission);
   const [questions, setQuestions] = useState<Question[]>(initial.schema?.questions ?? []);
-  const logic = initial.schema?.logic ?? []; // preservado intacto (se edita en fase 2)
+  const [logic, setLogic] = useState<LogicRule[]>(initial.schema?.logic ?? []);
   const [status, setStatus] = useState(initial.status);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -76,6 +77,12 @@ export default function FormBuilder({ initial }: { initial: FormRow }) {
   }
   function removeQuestion(id: string) {
     setQuestions((qs) => qs.filter((q) => q.id !== id));
+    // Limpia reglas que referencien la pregunta borrada (origen, destino o condición).
+    setLogic((l) =>
+      l.filter((r) => r.sourceQuestionId !== id && !(r.action.type === "jump" && r.action.targetQuestionId === id))
+        .map((r) => ({ ...r, conditions: r.conditions.filter((c) => c.questionId !== id) }))
+        .filter((r) => r.conditions.length > 0),
+    );
     if (editingId === id) setEditingId(null);
     markDirty();
   }
@@ -236,6 +243,7 @@ export default function FormBuilder({ initial }: { initial: FormRow }) {
             {editingId === q.id && (
               <div className="border-t border-white/5 p-4">
                 <QuestionEditor q={q} onChange={(patch) => patchQuestion(q.id, patch)} />
+                <BranchingEditor question={q} questions={questions} logic={logic} setLogic={setLogic} markDirty={markDirty} />
               </div>
             )}
           </div>

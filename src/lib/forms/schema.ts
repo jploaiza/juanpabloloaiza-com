@@ -77,17 +77,20 @@ export const patientMappingSchema = z.object({
  */
 export function parseFormSchema(input: unknown): FormSchema {
   const parsed = formSchemaSchema.parse(input) as FormSchema;
-  const ids = new Set(parsed.questions.map((q) => q.id));
-  if (ids.size !== parsed.questions.length) {
+  const index = new Map(parsed.questions.map((q, i) => [q.id, i]));
+  if (index.size !== parsed.questions.length) {
     throw new Error("Hay ids de pregunta duplicados.");
   }
   for (const rule of parsed.logic) {
-    if (!ids.has(rule.sourceQuestionId)) throw new Error("Regla con sourceQuestionId inexistente.");
+    const srcIdx = index.get(rule.sourceQuestionId);
+    if (srcIdx === undefined) throw new Error("Regla con sourceQuestionId inexistente.");
     for (const c of rule.conditions) {
-      if (!ids.has(c.questionId)) throw new Error("Condición con questionId inexistente.");
+      if (!index.has(c.questionId)) throw new Error("Condición con questionId inexistente.");
     }
-    if (rule.action.type === "jump" && !ids.has(rule.action.targetQuestionId)) {
-      throw new Error("Acción jump con targetQuestionId inexistente.");
+    if (rule.action.type === "jump") {
+      const tgtIdx = index.get(rule.action.targetQuestionId);
+      if (tgtIdx === undefined) throw new Error("Acción jump con targetQuestionId inexistente.");
+      if (tgtIdx <= srcIdx) throw new Error("Un salto solo puede ir hacia una pregunta posterior.");
     }
   }
   return parsed;

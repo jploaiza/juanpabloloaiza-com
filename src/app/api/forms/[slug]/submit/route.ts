@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/server";
 import { validateAnswers } from "@/lib/forms/schema";
+import { computePath } from "@/lib/forms/branching";
 import { answersToRows, resolveContact } from "@/lib/forms/format";
 import { emailShell, esc } from "@/lib/email/shell";
 import type { FormRow, Answers } from "@/lib/forms/types";
@@ -87,9 +88,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
   }
   const typedForm = form as FormRow;
 
-  // Validación server-side. (Fase 1 lineal: aplican todas las preguntas.)
+  // Validación server-side: solo las preguntas del camino legítimo según la
+  // ramificación (rechaza respuestas a preguntas que debieron saltarse).
   const answers = body.answers as Answers;
-  const applicable = typedForm.schema.questions;
+  const applicable = computePath(typedForm.schema, answers);
   const { ok, errors, cleaned } = validateAnswers(applicable, answers);
   if (!ok) {
     return NextResponse.json({ error: "Revisa las respuestas marcadas.", fieldErrors: errors }, { status: 400 });

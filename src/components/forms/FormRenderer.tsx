@@ -5,6 +5,7 @@ import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Check, Loader2, AlertCircle } from "lucide-react";
 import type { FormSchema, Question, Answers, AnswerValue } from "@/lib/forms/types";
+import { nextQuestionIndex, computePath } from "@/lib/forms/branching";
 
 declare global {
   interface Window {
@@ -98,9 +99,9 @@ export default function FormRenderer({ slug, title, description, schema, setting
       return;
     }
     setError(null);
-    const next = step + 1;
+    const next = nextQuestionIndex(schema, step, answers);
     setHistory((h) => [...h, step]);
-    setStep(next >= questions.length ? "submit" : next);
+    setStep(next);
   }
 
   function goBack() {
@@ -151,14 +152,10 @@ export default function FormRenderer({ slug, title, description, schema, setting
     }
   }
 
+  const path = computePath(schema, answers);
   const progress =
-    step === "done"
-      ? 100
-      : step === "submit"
-        ? 100
-        : questions.length
-          ? Math.round((step / questions.length) * 100)
-          : 0;
+    step === "done" || step === "submit" ? 100 : path.length ? Math.round((history.length / path.length) * 100) : 0;
+  const isLastQuestion = typeof step === "number" && nextQuestionIndex(schema, step, answers) === "submit";
 
   return (
     <div className="min-h-screen w-full bg-[#0a1628] text-white flex flex-col">
@@ -238,7 +235,7 @@ export default function FormRenderer({ slug, title, description, schema, setting
                     onClick={goNext}
                     className="inline-flex items-center gap-2 bg-[#C5A059] text-[#020617] font-cinzel text-sm font-semibold uppercase tracking-widest px-8 py-3.5 hover:bg-[#b8924d] transition"
                   >
-                    {questions[step].type === "statement" ? "Continuar" : step + 1 >= questions.length ? "Finalizar" : "Siguiente"}
+                    {questions[step].type === "statement" ? "Continuar" : isLastQuestion ? "Finalizar" : "Siguiente"}
                     <ChevronRight className="w-4 h-4" />
                   </button>
                   {questions[step].type !== "statement" && (
