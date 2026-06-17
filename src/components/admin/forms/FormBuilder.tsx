@@ -8,10 +8,11 @@ import {
   Loader2, Check, Eye, ExternalLink, GripVertical, Settings,
 } from "lucide-react";
 import {
-  type FormRow, type Question, type QuestionType, type Choice, type FormSchema, type LogicRule,
+  type FormRow, type Question, type QuestionType, type Choice, type FormSchema, type LogicRule, type PatientMapping,
   QUESTION_TYPE_META,
 } from "@/lib/forms/types";
 import BranchingEditor from "./BranchingEditor";
+import PatientMappingEditor from "./PatientMappingEditor";
 
 function mkChoice(label: string): Choice {
   return { id: crypto.randomUUID(), label, value: crypto.randomUUID().slice(0, 8) };
@@ -49,6 +50,7 @@ export default function FormBuilder({ initial }: { initial: FormRow }) {
   const [notifyEmail, setNotifyEmail] = useState(initial.notify_email);
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(initial.notify_whatsapp);
   const [isAdmission, setIsAdmission] = useState(initial.is_admission);
+  const [patientMapping, setPatientMapping] = useState<PatientMapping | null>(initial.patient_mapping ?? null);
   const [questions, setQuestions] = useState<Question[]>(initial.schema?.questions ?? []);
   const [logic, setLogic] = useState<LogicRule[]>(initial.schema?.logic ?? []);
   const [status, setStatus] = useState(initial.status);
@@ -123,6 +125,7 @@ export default function FormBuilder({ initial }: { initial: FormRow }) {
           notify_email: notifyEmail,
           notify_whatsapp: notifyWhatsapp,
           is_admission: isAdmission,
+          patient_mapping: patientMapping,
           schema: { questions, logic } as FormSchema,
         }),
       });
@@ -213,6 +216,9 @@ export default function FormBuilder({ initial }: { initial: FormRow }) {
             <Toggle label="Notificar por WhatsApp" checked={notifyWhatsapp} onChange={(v) => { setNotifyWhatsapp(v); markDirty(); }} />
             <Toggle label="Es el formulario de admisión" checked={isAdmission} onChange={(v) => { setIsAdmission(v); markDirty(); }} />
           </div>
+          {isAdmission && (
+            <PatientMappingEditor questions={questions} mapping={patientMapping} setMapping={setPatientMapping} markDirty={markDirty} />
+          )}
           <button onClick={del} className="font-cinzel text-[10px] uppercase tracking-widest text-red-400 hover:text-red-300 transition flex items-center gap-1 pt-2">
             <Trash2 className="w-3.5 h-3.5" /> Eliminar formulario
           </button>

@@ -6,9 +6,12 @@ import { validateAnswers } from "@/lib/forms/schema";
 import { computePath } from "@/lib/forms/branching";
 import { answersToRows, resolveContact } from "@/lib/forms/format";
 import { emailShell, esc } from "@/lib/email/shell";
+import { sendWhatsApp } from "@/lib/whatsapp";
+import { SITE_URL } from "@/lib/site";
 import type { FormRow, Answers } from "@/lib/forms/types";
 
 const THERAPIST_EMAIL = "contacto@juanpabloloaiza.com";
+const THERAPIST_PHONE = "+56962081884";
 
 async function verifyTurnstile(token: string | undefined, ip: string): Promise<boolean> {
   if (!process.env.TURNSTILE_SECRET_KEY) {
@@ -121,7 +124,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: "Error al guardar. Intenta de nuevo." }, { status: 500 });
   }
 
-  // ── Notificación: email al terapeuta (best-effort) ────────────────────────
+  // ── Fan-out de notificaciones (best-effort; resultado en notify_status) ────
+  let patientId: string | null = null;
+
+  // Email al terapeuta
   if (typedForm.notify_email) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -139,8 +145,42 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     }
   }
 
-  if (Object.keys(notifyStatus).length) {
-    await sb.from("form_submissions").update({ notify_status: notifyStatus }).eq("id", submission.id);
+  // WhatsApp al terapeuta
+  if (typedForm.notify_whatsapp) {
+    const summary =
+      `📋 Nueva respuesta — ${typedForm.title}\n` +
+      `${contact.full_name || contact.email || "Anónimo"}\n` +
+      `${SITE_URL}/academy/admin/formularios/${typedForm.id}/respuestas`;
+    const r = await sendWhatsApp({ to: THERAPIST_PHONE, body: summary });
+    notifyStatus.whatsapp = r.ok ? "sent" : `failed:${(r.error ?? "").slice(0, 50)}`;
+  }
+
+  // CRM: vincular a un paciente existente por email (no se crea uno nuevo —
+  // patients exige pack/fechas que un lead de admisión no tiene).
+  if (typedForm.is_admission || typedForm.patient_mapping) {
+    if (contact.email) {
+      try {
+        const { data: patient } = await sb.from("patients").select("id").ilike("email", contact.email).maybeSingle();
+        if (patient) {
+          patientId = patient.id;
+          notifyStatus.patient = "linked";
+        } else {
+          notifyStatus.patient = "no_match";
+        }
+      } catch (err) {
+        console.error("[forms-submit] patient-link", err);
+        notifyStatus.patient = "failed";
+      }
+    } else {
+      notifyStatus.patient = "no_email";
+    }
+  }
+
+  if (Object.keys(notifyStatus).length || patientId) {
+    await sb
+      .from("form_submissions")
+      .update({ notify_status: notifyStatus, ...(patientId ? { patient_id: patientId } : {}) })
+      .eq("id", submission.id);
   }
 
   return NextResponse.json({
