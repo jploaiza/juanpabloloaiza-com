@@ -76,6 +76,23 @@ export default function FormularioContent() {
             </div>
           </motion.div>
 
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="text-center mt-6 font-crimson text-base text-gray-400"
+          >
+            ¿El formulario no carga o no avanza en tu móvil?{" "}
+            <a
+              href="https://form.jotform.com/212815791546058"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#C5A059] underline underline-offset-4 hover:text-[#d4b06a] transition-colors font-semibold"
+            >
+              Ábrelo en pantalla completa →
+            </a>
+          </motion.p>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
