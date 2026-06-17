@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FileText, BarChart2, TrendingUp, Calendar, Mail, Send, LayoutTemplate, Zap, ChevronDown, LineChart, List } from "lucide-react";
+import { LayoutDashboard, Users, FileText, BarChart2, TrendingUp, Calendar, Mail, Send, LayoutTemplate, Zap, ChevronDown, LineChart, List, ClipboardList } from "lucide-react";
 import { useState } from "react";
 
 const NEWSLETTER_SUBNAV = [
@@ -19,6 +19,7 @@ const LINKS = [
   { href: "/academy/admin/crm", label: "CRM", icon: Users },
   { href: "/academy/admin/calendar", label: "Calendario", icon: Calendar },
   { href: "/academy/admin/blog", label: "Blog", icon: FileText },
+  { href: "/academy/admin/formularios", label: "Formularios", icon: ClipboardList },
   { href: "/academy/admin/newsletter", label: "Newsletter", icon: Mail, hasSubnav: true },
   { href: "/academy/admin/analytics", label: "Analíticas", icon: BarChart2 },
   { href: "/academy/admin/trends", label: "Tendencias", icon: TrendingUp },
