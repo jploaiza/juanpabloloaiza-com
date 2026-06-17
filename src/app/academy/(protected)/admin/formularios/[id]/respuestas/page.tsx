@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { ChevronLeft, Inbox } from "lucide-react";
+import { ChevronLeft, Inbox, Download, Mail, MessageCircle, UserCheck } from "lucide-react";
 import { answersToRows } from "@/lib/forms/format";
 import type { FormSchema, Answers } from "@/lib/forms/types";
 
@@ -13,7 +13,18 @@ interface SubmissionRow {
   full_name: string | null;
   phone: string | null;
   notify_status: Record<string, string>;
+  patient_id: string | null;
   created_at: string;
+}
+
+function NotifyBadges({ ns, patientId }: { ns: Record<string, string>; patientId: string | null }) {
+  return (
+    <div className="flex items-center gap-2 shrink-0">
+      {ns.email === "sent" && <Mail className="w-3.5 h-3.5 text-emerald-400" aria-label="Email enviado" />}
+      {ns.whatsapp === "sent" && <MessageCircle className="w-3.5 h-3.5 text-emerald-400" aria-label="WhatsApp enviado" />}
+      {patientId && <UserCheck className="w-3.5 h-3.5 text-[#C5A059]" aria-label="Vinculado a paciente" />}
+    </div>
+  );
 }
 
 export default async function RespuestasPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,7 +41,7 @@ export default async function RespuestasPage({ params }: { params: Promise<{ id:
 
   const { data: subs } = await sb
     .from("form_submissions")
-    .select("id, form_schema_snapshot, answers, email, full_name, phone, notify_status, created_at")
+    .select("id, form_schema_snapshot, answers, email, full_name, phone, notify_status, patient_id, created_at")
     .eq("form_id", id)
     .order("created_at", { ascending: false });
 
@@ -42,9 +53,19 @@ export default async function RespuestasPage({ params }: { params: Promise<{ id:
         <ChevronLeft className="w-4 h-4" /> Formularios
       </Link>
 
-      <div className="flex items-center gap-3 mb-2">
-        <Inbox className="w-5 h-5 text-[#C5A059]" />
-        <h1 className="font-cinzel text-2xl text-white">Respuestas</h1>
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <div className="flex items-center gap-3">
+          <Inbox className="w-5 h-5 text-[#C5A059]" />
+          <h1 className="font-cinzel text-2xl text-white">Respuestas</h1>
+        </div>
+        {submissions.length > 0 && (
+          <a
+            href={`/api/admin/forms/${id}/submissions?format=csv`}
+            className="inline-flex items-center gap-2 border border-[#C5A059]/40 text-[#C5A059] font-cinzel text-[10px] uppercase tracking-widest px-4 py-2 hover:bg-[#C5A059]/10 transition"
+          >
+            <Download className="w-3.5 h-3.5" /> Exportar CSV
+          </a>
+        )}
       </div>
       <p className="font-crimson text-sm text-gray-500 mb-8">{form.title} · {submissions.length} respuesta{submissions.length === 1 ? "" : "s"}</p>
 
@@ -64,6 +85,7 @@ export default async function RespuestasPage({ params }: { params: Promise<{ id:
                     <p className="font-crimson text-sm text-white truncate">{s.full_name || s.email || "Respuesta anónima"}</p>
                     <p className="font-crimson text-xs text-gray-500">{when}{s.email ? ` · ${s.email}` : ""}</p>
                   </div>
+                  <NotifyBadges ns={s.notify_status ?? {}} patientId={s.patient_id} />
                   <span className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 group-open:text-[#C5A059]">Ver</span>
                 </summary>
                 <div className="border-t border-white/5 px-5 py-4 space-y-3">
