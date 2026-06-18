@@ -60,7 +60,7 @@ export const formSettingsSchema = z.object({
   submitLabel: z.string().max(120).optional(),
   thankYouTitle: z.string().max(200).optional(),
   thankYouMessage: z.string().max(2000).optional(),
-  redirectUrl: z.string().url().max(500).optional(),
+  redirectUrl: z.string().max(500).regex(/^https?:\/\/.+/i, "La URL debe empezar con http:// o https://").optional(),
 });
 
 export const patientMappingSchema = z.object({
@@ -100,6 +100,12 @@ export function parseFormSchema(input: unknown): FormSchema {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Topes duros absolutos (anti abuso de almacenamiento), independientes del maxLength del builder.
+const MAX_SHORT = 5000;
+const MAX_LONG = 50000;
+const MAX_EMAIL = 320;
+const MAX_PHONE = 40;
+
 export interface AnswerValidationResult {
   ok: boolean;
   errors: Record<string, string>; // questionId → mensaje
@@ -132,17 +138,19 @@ export function validateAnswers(applicable: Question[], raw: Answers): AnswerVal
       case "short_text":
       case "long_text": {
         if (typeof value !== "string") { errors[q.id] = "Valor inválido."; break; }
+        const hardCap = q.type === "long_text" ? MAX_LONG : MAX_SHORT;
+        if (value.length > hardCap) { errors[q.id] = "Texto demasiado largo."; break; }
         if (q.maxLength && value.length > q.maxLength) { errors[q.id] = `Máximo ${q.maxLength} caracteres.`; break; }
         cleaned[q.id] = value;
         break;
       }
       case "email": {
-        if (typeof value !== "string" || !EMAIL_REGEX.test(value)) { errors[q.id] = "Correo inválido."; break; }
+        if (typeof value !== "string" || value.length > MAX_EMAIL || !EMAIL_REGEX.test(value)) { errors[q.id] = "Correo inválido."; break; }
         cleaned[q.id] = value.trim().toLowerCase();
         break;
       }
       case "phone": {
-        if (typeof value !== "string") { errors[q.id] = "Valor inválido."; break; }
+        if (typeof value !== "string" || value.length > MAX_PHONE) { errors[q.id] = "Teléfono inválido."; break; }
         cleaned[q.id] = value.trim();
         break;
       }

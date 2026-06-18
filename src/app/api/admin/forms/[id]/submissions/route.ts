@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { assertAdmin } from "@/lib/auth";
 import { dbErr } from "@/lib/db-error";
 import { formatAnswer } from "@/lib/forms/format";
+import { buildCsv } from "@/lib/forms/csv";
 import type { FormSchema, Question, Answers } from "@/lib/forms/types";
 
 interface SubRow {
@@ -14,11 +15,6 @@ interface SubRow {
   notify_status: Record<string, string>;
   patient_id: string | null;
   created_at: string;
-}
-
-function csvCell(v: string): string {
-  if (/[",\n\r]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
-  return v;
 }
 
 // GET /api/admin/forms/[id]/submissions[?format=csv]
@@ -48,11 +44,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const cols = schema.questions.filter((q) => q.type !== "statement");
   const header = ["Fecha", "Nombre", "Email", "Teléfono", ...cols.map((c) => c.title)];
 
-  const lines = [header.map(csvCell).join(",")];
+  const rows: string[][] = [header];
   for (const s of submissions) {
     // Resuelve cada respuesta con la pregunta del snapshot (para labels correctas).
     const snapById = new Map<string, Question>((s.form_schema_snapshot?.questions ?? []).map((q) => [q.id, q]));
-    const row = [
+    rows.push([
       new Date(s.created_at).toLocaleString("es-CL"),
       s.full_name ?? "",
       s.email ?? "",
@@ -61,11 +57,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         const q = snapById.get(c.id) ?? c;
         return formatAnswer(q, s.answers[c.id] ?? null);
       }),
-    ];
-    lines.push(row.map((v) => csvCell(String(v))).join(","));
+    ]);
   }
 
-  const csv = "﻿" + lines.join("\r\n"); // BOM para Excel
+  const csv = buildCsv(rows);
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",

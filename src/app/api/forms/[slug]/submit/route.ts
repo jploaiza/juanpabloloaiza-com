@@ -75,8 +75,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: "Demasiados envíos. Intenta en una hora." }, { status: 429 });
   }
 
+  // Guard de tamaño (primer filtro barato contra payloads abusivos).
+  if (Number(req.headers.get("content-length") ?? 0) > 262144) {
+    return NextResponse.json({ error: "Solicitud demasiado grande." }, { status: 413 });
+  }
+
   const body = await req.json().catch(() => null);
-  if (!body || typeof body.answers !== "object") {
+  if (!body || typeof body.answers !== "object" || body.answers === null || Array.isArray(body.answers)) {
     return NextResponse.json({ error: "Cuerpo inválido." }, { status: 400 });
   }
 
