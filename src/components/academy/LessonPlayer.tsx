@@ -128,6 +128,13 @@ export default function LessonPlayer({
   const playStartTimeRef = useRef<number | null>(null);
   const realPlaySecondsRef = useRef<number>(progressMap[lesson.id]?.real_play_seconds ?? 0);
 
+  // Mirrors `isCompleted` synchronously so event handlers never read a stale
+  // value from a closure that hasn't re-rendered yet (see onPause below).
+  const isCompletedRef = useRef(isCompleted);
+  useEffect(() => {
+    isCompletedRef.current = isCompleted;
+  }, [isCompleted]);
+
   // ── Autoplay on arrival (from autonext navigation) ────────────────────────
   useEffect(() => {
     if (searchParams.get("autoplay") !== "1") return;
@@ -273,29 +280,39 @@ export default function LessonPlayer({
       accumulatePlay();
     };
 
+    // Marks completion in both the ref (read synchronously by other handlers)
+    // and React state (drives the UI) in one place.
+    const markCompleted = (time: number) => {
+      isCompletedRef.current = true;
+      setIsCompleted(true);
+      saveProgress(time, true);
+    };
+
     const onTimeUpdate = () => {
       saveProgressRef.current.watchSeconds = Math.floor(video.currentTime);
       // Auto-complete only if enough real watch time (not just seeked)
       if (
-        !isCompleted &&
+        !isCompletedRef.current &&
         video.duration > 0 &&
         video.currentTime / video.duration >= COMPLETE_THRESHOLD &&
         realPlaySecondsRef.current / video.duration >= WATCH_INTEGRITY
       ) {
-        setIsCompleted(true);
-        saveProgress(Math.floor(video.currentTime), true);
+        markCompleted(Math.floor(video.currentTime));
       }
     };
 
     const onPause = () => {
+      // Reaching the end of the video fires `pause` right before `ended`
+      // (per the HTML5 spec). Skip this save so it can't race the `ended`
+      // handler's write and clobber is_completed back to false.
+      if (video.ended) return;
       accumulatePlay();
-      saveProgress(Math.floor(video.currentTime), isCompleted);
+      saveProgress(Math.floor(video.currentTime), isCompletedRef.current);
     };
 
     const onEnded = () => {
       accumulatePlay(); // capture final segment
-      setIsCompleted(true);
-      saveProgress(Math.floor(video.duration), true);
+      markCompleted(Math.floor(video.duration));
       triggerCourseComplete();
       // Auto-advance to next lesson if enabled
       if (autoAdvanceRef.current && nextLessonRef.current) {
@@ -312,7 +329,7 @@ export default function LessonPlayer({
     // Periodic save every 5s during playback
     const saveTimer = setInterval(() => {
       if (!video.paused && !video.ended) {
-        saveProgress(Math.floor(video.currentTime), isCompleted);
+        saveProgress(Math.floor(video.currentTime), isCompletedRef.current);
       }
     }, SAVE_INTERVAL_MS);
 
@@ -326,7 +343,7 @@ export default function LessonPlayer({
       if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lesson.id, isCompleted]);
+  }, [lesson.id]);
 
   // ── Manual mark complete ───────────────────────────────────────────────────
 
