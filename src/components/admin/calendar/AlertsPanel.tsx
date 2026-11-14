@@ -28,6 +28,7 @@ const TEMPLATE_VARS = [
   "{{duration}}", "{{date_long}}", "{{time}}", "{{booking_code}}",
   "{{zoom_join_url}}", "{{manage_url}}", "{{cancel_url}}", "{{reschedule_url}}",
   "{{site_url}}", "{{logo_url}}",
+  "{{time_patient}}", "{{time_chile}}", "{{date_chile}}", "{{timezone}}",
 ];
 
 interface AlertsPanelProps {

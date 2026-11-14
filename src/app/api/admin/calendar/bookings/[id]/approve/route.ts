@@ -16,6 +16,7 @@ import { createZoomMeeting } from "@/lib/zoom";
 import { BOOKING_TZ, getCalendarConfig, getEventTypes } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
+import { buildBookingTimeVars } from "@/lib/booking-time";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -47,7 +48,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   // Fetch booking
   const { data: booking, error: bookingError } = await adminSb
     .from("bookings")
-    .select("id, type, date, time_slot, patient_name, patient_email, patient_phone, notes, status, zoom_join_url, zoom_start_url")
+    .select("*") // includes user_tz once migration 018 is applied
     .eq("id", id)
     .single();
 
@@ -66,14 +67,6 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
   const startDate = slotToDate(booking.date as string, booking.time_slot as string);
   const endDate = new Date(startDate.getTime() + durationMin * 60000);
-
-  const dateLabel = startDate.toLocaleDateString("es-CL", {
-    timeZone: BOOKING_TZ,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
   // Load Google Calendar token
   const { data: stored } = await adminSb
@@ -181,8 +174,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     type_label: label,
     duration: String(durationMin),
     date: booking.date as string,
-    date_long: dateLabel,
-    time: booking.time_slot as string,
+    ...buildBookingTimeVars(booking.date as string, booking.time_slot as string, booking.user_tz as string | null | undefined),
     booking_code: bookingCode,
     event_link: eventLink,
     zoom_join_url: zoomJoinUrl,
@@ -207,10 +199,10 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     const resend = new Resend(process.env.RESEND_API_KEY);
     const subject = emailTpl?.subject
       ? renderTemplate(emailTpl.subject as string, templateVars)
-      : `Confirmación de ${label} — ${dateLabel} ${booking.time_slot}`;
+      : `Confirmación de ${label} — ${templateVars.date_long} ${templateVars.time}`;
     const html = emailTpl?.body
       ? renderTemplateHtml(emailTpl.body as string, templateVars)
-      : `<p>Tu ${label} ha sido confirmada para el ${dateLabel} a las ${booking.time_slot}. Código: ${bookingCode}</p>`;
+      : `<p>Tu ${label} ha sido confirmada para el ${templateVars.date_long} a las ${templateVars.time}. Código: ${bookingCode}</p>`;
     await resend.emails.send({
       from: config.from_email,
       to: (booking.patient_email as string).toLowerCase(),

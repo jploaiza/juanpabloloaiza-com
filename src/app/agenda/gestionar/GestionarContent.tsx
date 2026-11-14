@@ -4,6 +4,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { Loader2, AlertCircle, Check, Calendar, Clock, Video, ChevronLeft } from "lucide-react";
 import BookingWidget from "@/components/booking/BookingWidget";
+import { describeSlot, getBrowserTz } from "@/components/booking/booking-types";
+import { cityFromTz, tzOffsetLabel } from "@/lib/tz";
+import { readTzPref } from "@/lib/tz-preference";
 
 interface BookingData {
   id: string;
@@ -19,6 +22,8 @@ interface BookingData {
   google_event_link?: string;
   allow_cancellation?: boolean;
   allow_reschedule?: boolean;
+  /** Zona horaria del paciente al reservar (null si la reserva es anterior a la migración 018). */
+  user_tz?: string | null;
 }
 
 const TYPE_LABELS = { session: "Sesión TRVP", entrevista: "Entrevista de Admisión" };
@@ -30,6 +35,17 @@ function formatDate(dateStr: string): string {
   const date = new Date(y, m - 1, d);
   const days = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
   return `${days[date.getDay()]} ${d} de ${MONTHS_ES[m - 1]} de ${y}`;
+}
+
+/** Fecha y hora de la cita en la zona del visitante, con la hora de Chile entre paréntesis si difiere. */
+function slotView(b: BookingData, tz: string | null) {
+  if (!tz) return { date: formatDate(b.date), time: `${b.time_slot} (hora Chile)`, zoneLine: null as string | null };
+  const s = describeSlot(b.date, b.time_slot, tz, true);
+  return {
+    date: s.dateLabel,
+    time: s.chileNote ? `${s.timeLabel} (${s.chileNote})` : s.timeLabel,
+    zoneLine: `Hora en ${cityFromTz(tz)} (${tzOffsetLabel(tz, s.utc)})`,
+  };
 }
 
 export default function GestionarContent() {
@@ -45,6 +61,8 @@ export default function GestionarContent() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+  // Zona con la que se muestra la cita: la elegida en este dispositivo, si no la de la reserva, si no la del navegador.
+  const [viewerTz, setViewerTz] = useState<string | null>(null);
 
   const fetchBooking = useCallback(async () => {
     if (!code) { setError("Código de reserva no encontrado en la URL."); setLoading(false); return; }
@@ -59,6 +77,10 @@ export default function GestionarContent() {
   }, [code]);
 
   useEffect(() => { fetchBooking(); }, [fetchBooking]);
+
+  useEffect(() => {
+    setViewerTz(readTzPref()?.tz ?? booking?.user_tz ?? getBrowserTz());
+  }, [booking]);
 
   useEffect(() => {
     if (booking && actionParam === "cancel") setView("cancel-confirm");
@@ -115,7 +137,7 @@ export default function GestionarContent() {
         </div>
         <h2 className="font-cinzel text-white text-xl mb-2">Reserva cancelada</h2>
         <p className="font-crimson text-gray-400 mb-6">
-          Tu {TYPE_LABELS[booking.type]} del {formatDate(booking.date)} ha sido cancelada.
+          Tu {TYPE_LABELS[booking.type]} del {slotView(booking, viewerTz).date} ha sido cancelada.
         </p>
         <button onClick={() => router.push("/agenda")} className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 px-6 py-2.5 hover:bg-[#C5A059]/10 transition">
           Agendar nueva cita
@@ -134,7 +156,7 @@ export default function GestionarContent() {
         <div className="mb-8 text-center">
           <span className="font-baskerville text-xs font-semibold uppercase tracking-widest text-[#C5A059]">Reprogramando</span>
           <p className="font-baskerville text-gray-300 text-sm mt-2">
-            Elige una nueva fecha y hora. Tu cita actual ({formatDate(booking.date)} — {booking.time_slot}) será cancelada automáticamente.
+            Elige una nueva fecha y hora. Tu cita actual ({slotView(booking, viewerTz).date} — {slotView(booking, viewerTz).time}) será cancelada automáticamente.
           </p>
         </div>
 
@@ -169,7 +191,7 @@ export default function GestionarContent() {
         <p className="font-crimson text-gray-400 mb-6">Esta acción no se puede deshacer.</p>
         <div className="bg-[#0a1628] border border-white/10 p-5 mb-6">
           <p className="font-crimson text-white">{TYPE_LABELS[booking.type]}</p>
-          <p className="font-crimson text-[#C5A059] font-bold capitalize">{formatDate(booking.date)} — {booking.time_slot}</p>
+          <p className="font-crimson text-[#C5A059] font-bold capitalize">{slotView(booking, viewerTz).date} — {slotView(booking, viewerTz).time}</p>
         </div>
         <div className="mb-6">
           <label className="font-cinzel text-[9px] uppercase tracking-widest text-gray-400 block mb-1">¿Cuál es el motivo? (opcional)</label>
@@ -219,13 +241,18 @@ export default function GestionarContent() {
           <div className="flex items-start gap-3">
             <Calendar className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
             <div>
-              <p className="font-crimson text-white capitalize">{formatDate(booking.date)}</p>
+              <p className="font-crimson text-white capitalize">{slotView(booking, viewerTz).date}</p>
               <p className="font-crimson text-gray-400 text-sm">{TYPE_LABELS[booking.type]}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Clock className="w-4 h-4 text-[#C5A059] shrink-0" />
-            <p className="font-crimson text-[#C5A059] font-bold text-lg">{booking.time_slot} (hora Chile)</p>
+            <div>
+              <p className="font-crimson text-[#C5A059] font-bold text-lg">{slotView(booking, viewerTz).time}</p>
+              {slotView(booking, viewerTz).zoneLine && (
+                <p className="font-crimson text-gray-400 text-sm">{slotView(booking, viewerTz).zoneLine}</p>
+              )}
+            </div>
           </div>
           {booking.zoom_join_url && (
             <div className="flex items-center gap-3">

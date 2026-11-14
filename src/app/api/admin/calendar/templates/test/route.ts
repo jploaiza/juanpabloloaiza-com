@@ -9,6 +9,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCalendarConfig } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
+import { buildBookingTimeVars } from "@/lib/booking-time";
 
 async function assertAdminWithEmail() {
   const supabase = await createClient();
@@ -27,9 +28,8 @@ const EXAMPLE_VARS: Record<string, string> = {
   type_label: "Sesión TRVP",
   duration: "90",
   date: "2026-06-15",
-  date_long: "lunes 15 de junio de 2026",
-  time: "10:00",
-  user_tz: "America/Bogota",
+  // Ejemplo con paciente en Bogotá: hora del paciente primero y, entre paréntesis, la de Chile.
+  ...buildBookingTimeVars("2026-06-15", "10:00", "America/Bogota"),
   booking_code: "TEST1234",
   event_link: "https://calendar.google.com/calendar/event",
   zoom_join_url: "https://zoom.us/j/123456789",

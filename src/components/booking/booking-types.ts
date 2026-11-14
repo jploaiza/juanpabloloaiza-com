@@ -1,3 +1,7 @@
+import {
+  CHILE_TZ, formatDateLongInTz, formatDateShortInTz, formatTimeInTz, todayInChile, ymdInTz, zonedTimeToUtc,
+} from "@/lib/tz";
+
 export type BookingStep = "calendar" | "form" | "confirm";
 
 export interface DaySlot {
@@ -39,55 +43,46 @@ export function getBrowserTz(): string {
 
 /** Convert an America/Santiago HH:MM slot on a given YYYY-MM-DD to UTC ms */
 export function santiagoSlotToUtc(dateStr: string, timeStr: string): number {
-  // Build a reference date at noon UTC to extract Santiago offset reliably
-  const [h, m] = timeStr.split(":").map(Number);
-  const probe = new Date(`${dateStr}T12:00:00Z`);
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Santiago",
-    hour: "numeric",
-    hour12: false,
-    timeZoneName: "shortOffset",
-  }).formatToParts(probe);
-  const offsetStr = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT-4";
-  const offsetMatch = offsetStr.match(/GMT([+-]\d+)/);
-  const offsetH = offsetMatch ? parseInt(offsetMatch[1]) : -4;
-  const midnightUtc = new Date(`${dateStr}T${String(-offsetH).padStart(2, "0")}:00:00Z`).getTime();
-  return midnightUtc + (h * 60 + m) * 60_000;
-}
-
-/** Format a UTC-ms timestamp in a given IANA timezone, returning { date, time } */
-export function formatInTz(
-  utcMs: number,
-  tz: string,
-  use24h: boolean,
-): { dateLabel: string; timeLabel: string } {
-  const d = new Date(utcMs);
-  const dateLabel = d.toLocaleDateString("es-CL", {
-    timeZone: tz,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const timeLabel = d.toLocaleTimeString("es-CL", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: !use24h,
-  });
-  return { dateLabel, timeLabel };
+  return zonedTimeToUtc(dateStr, timeStr, CHILE_TZ);
 }
 
 /** Returns "HH:MM" in user timezone from a Santiago slot */
 export function slotTimeInUserTz(dateStr: string, timeStr: string, userTz: string, use24h: boolean): string {
-  const utcMs = santiagoSlotToUtc(dateStr, timeStr);
-  const d = new Date(utcMs);
-  return d.toLocaleTimeString("es-CL", {
-    timeZone: userTz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: !use24h,
-  });
+  return formatTimeInTz(santiagoSlotToUtc(dateStr, timeStr), userTz, use24h);
+}
+
+export interface SlotDescription {
+  utc: number;
+  /** Fecha larga en la zona del paciente. */
+  dateLabel: string;
+  /** Fecha corta en la zona del paciente. */
+  dateShort: string;
+  /** Hora en la zona del paciente. */
+  timeLabel: string;
+  /** Días de diferencia entre la fecha del paciente y la de Chile (-1, 0, +1…). */
+  dayShift: number;
+  /** "12:00 hora de Chile" si la hora o el día difieren de Chile; null si coinciden. */
+  chileNote: string | null;
+}
+
+/** Describe un horario de agenda (hora de Chile) tal como lo ve el paciente. */
+export function describeSlot(dateStr: string, timeStr: string, userTz: string, use24h: boolean): SlotDescription {
+  const utc = santiagoSlotToUtc(dateStr, timeStr);
+  const userDay = ymdInTz(utc, userTz);
+  const timeLabel = formatTimeInTz(utc, userTz, use24h);
+  const chileTime = formatTimeInTz(utc, CHILE_TZ, use24h);
+  const sameAsChile = userDay === dateStr && timeLabel === chileTime;
+  const dayShift = Math.round((Date.parse(`${userDay}T00:00:00Z`) - Date.parse(`${dateStr}T00:00:00Z`)) / 86_400_000);
+  return {
+    utc,
+    dateLabel: formatDateLongInTz(utc, userTz),
+    dateShort: formatDateShortInTz(utc, userTz),
+    timeLabel,
+    dayShift,
+    chileNote: sameAsChile
+      ? null
+      : `${chileTime}${userDay !== dateStr ? ` del ${formatDateShortInTz(utc, CHILE_TZ).replace(",", "")}` : ""} hora de Chile`,
+  };
 }
 
 // ── Calendar helpers ──────────────────────────────────────────────────────────
@@ -101,8 +96,9 @@ export interface CalendarDay {
 }
 
 export function getMonthDays(year: number, month: number): CalendarDay[] {
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
+  // Los días del calendario son fechas de Chile, así que "hoy" también lo es
+  // (toISOString() daba la fecha UTC, que de noche en América ya es "mañana").
+  const todayStr = todayInChile();
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   // Start week on Monday (ISO)
@@ -126,36 +122,41 @@ export function getMonthDays(year: number, month: number): CalendarDay[] {
 
 // ── Country codes (most common first) ────────────────────────────────────────
 
-export const COUNTRY_CODES: { code: string; country: string; flag: string }[] = [
-  { code: "+57", country: "Colombia", flag: "🇨🇴" },
-  { code: "+56", country: "Chile", flag: "🇨🇱" },
-  { code: "+52", country: "México", flag: "🇲🇽" },
-  { code: "+54", country: "Argentina", flag: "🇦🇷" },
-  { code: "+51", country: "Perú", flag: "🇵🇪" },
-  { code: "+58", country: "Venezuela", flag: "🇻🇪" },
-  { code: "+593", country: "Ecuador", flag: "🇪🇨" },
-  { code: "+502", country: "Guatemala", flag: "🇬🇹" },
-  { code: "+503", country: "El Salvador", flag: "🇸🇻" },
-  { code: "+504", country: "Honduras", flag: "🇭🇳" },
-  { code: "+505", country: "Nicaragua", flag: "🇳🇮" },
-  { code: "+506", country: "Costa Rica", flag: "🇨🇷" },
-  { code: "+507", country: "Panamá", flag: "🇵🇦" },
-  { code: "+591", country: "Bolivia", flag: "🇧🇴" },
-  { code: "+595", country: "Paraguay", flag: "🇵🇾" },
-  { code: "+598", country: "Uruguay", flag: "🇺🇾" },
-  { code: "+1", country: "EE.UU. / Canadá", flag: "🇺🇸" },
-  { code: "+34", country: "España", flag: "🇪🇸" },
-  { code: "+55", country: "Brasil", flag: "🇧🇷" },
-  { code: "+44", country: "Reino Unido", flag: "🇬🇧" },
-  { code: "+49", country: "Alemania", flag: "🇩🇪" },
-  { code: "+33", country: "Francia", flag: "🇫🇷" },
-  { code: "+39", country: "Italia", flag: "🇮🇹" },
-  { code: "+61", country: "Australia", flag: "🇦🇺" },
+export const COUNTRY_CODES: { code: string; country: string; iso: string; flag: string }[] = [
+  { code: "+57", country: "Colombia", iso: "CO", flag: "🇨🇴" },
+  { code: "+56", country: "Chile", iso: "CL", flag: "🇨🇱" },
+  { code: "+52", country: "México", iso: "MX", flag: "🇲🇽" },
+  { code: "+54", country: "Argentina", iso: "AR", flag: "🇦🇷" },
+  { code: "+51", country: "Perú", iso: "PE", flag: "🇵🇪" },
+  { code: "+58", country: "Venezuela", iso: "VE", flag: "🇻🇪" },
+  { code: "+593", country: "Ecuador", iso: "EC", flag: "🇪🇨" },
+  { code: "+502", country: "Guatemala", iso: "GT", flag: "🇬🇹" },
+  { code: "+503", country: "El Salvador", iso: "SV", flag: "🇸🇻" },
+  { code: "+504", country: "Honduras", iso: "HN", flag: "🇭🇳" },
+  { code: "+505", country: "Nicaragua", iso: "NI", flag: "🇳🇮" },
+  { code: "+506", country: "Costa Rica", iso: "CR", flag: "🇨🇷" },
+  { code: "+507", country: "Panamá", iso: "PA", flag: "🇵🇦" },
+  { code: "+591", country: "Bolivia", iso: "BO", flag: "🇧🇴" },
+  { code: "+595", country: "Paraguay", iso: "PY", flag: "🇵🇾" },
+  { code: "+598", country: "Uruguay", iso: "UY", flag: "🇺🇾" },
+  { code: "+1", country: "EE.UU. / Canadá", iso: "US", flag: "🇺🇸" },
+  { code: "+34", country: "España", iso: "ES", flag: "🇪🇸" },
+  { code: "+55", country: "Brasil", iso: "BR", flag: "🇧🇷" },
+  { code: "+44", country: "Reino Unido", iso: "GB", flag: "🇬🇧" },
+  { code: "+49", country: "Alemania", iso: "DE", flag: "🇩🇪" },
+  { code: "+33", country: "Francia", iso: "FR", flag: "🇫🇷" },
+  { code: "+39", country: "Italia", iso: "IT", flag: "🇮🇹" },
+  { code: "+61", country: "Australia", iso: "AU", flag: "🇦🇺" },
 ];
 
-/** Guess a country code from the browser timezone */
-export function detectCountryCode(tz: string): string {
-  if (tz.startsWith("America/Bogota") || tz === "America/Bogota") return "+57";
+/** Código telefónico a partir del país elegido (ISO) o, si no hay, de la zona horaria. */
+export function detectCountryCode(tz: string, iso?: string): string {
+  if (iso) {
+    const byIso = COUNTRY_CODES.find((c) => c.iso === iso);
+    if (byIso) return byIso.code;
+    if (iso === "CA" || iso === "PR" || iso === "DO") return "+1";
+  }
+  if (tz.startsWith("America/Bogota")) return "+57";
   if (tz.startsWith("America/Santiago")) return "+56";
   if (tz.startsWith("America/Mexico")) return "+52";
   if (tz.startsWith("America/Argentina")) return "+54";
@@ -169,27 +170,3 @@ export function detectCountryCode(tz: string): string {
   if (tz.startsWith("Europe/London")) return "+44";
   return "+57";
 }
-
-// ── Common IANA timezones for selector ────────────────────────────────────────
-
-export const TZ_OPTIONS: { label: string; value: string }[] = [
-  { label: "Colombia (UTC-5)", value: "America/Bogota" },
-  { label: "Chile (UTC-3/-4)", value: "America/Santiago" },
-  { label: "México (UTC-6)", value: "America/Mexico_City" },
-  { label: "Argentina (UTC-3)", value: "America/Argentina/Buenos_Aires" },
-  { label: "Perú (UTC-5)", value: "America/Lima" },
-  { label: "Venezuela (UTC-4)", value: "America/Caracas" },
-  { label: "Ecuador (UTC-5)", value: "America/Guayaquil" },
-  { label: "Costa Rica (UTC-6)", value: "America/Costa_Rica" },
-  { label: "Panamá (UTC-5)", value: "America/Panama" },
-  { label: "Bolivia (UTC-4)", value: "America/La_Paz" },
-  { label: "Paraguay (UTC-4)", value: "America/Asuncion" },
-  { label: "Uruguay (UTC-3)", value: "America/Montevideo" },
-  { label: "Nueva York (UTC-5/-4)", value: "America/New_York" },
-  { label: "Los Ángeles (UTC-8/-7)", value: "America/Los_Angeles" },
-  { label: "España (UTC+1/+2)", value: "Europe/Madrid" },
-  { label: "Reino Unido (UTC+0/+1)", value: "Europe/London" },
-  { label: "Alemania (UTC+1/+2)", value: "Europe/Berlin" },
-  { label: "Brasil (UTC-3)", value: "America/Sao_Paulo" },
-  { label: "Australia (UTC+10/+11)", value: "Australia/Sydney" },
-];

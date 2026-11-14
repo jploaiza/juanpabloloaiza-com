@@ -10,6 +10,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getCalendarConfig } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
+import { buildBookingTimeVars } from "@/lib/booking-time";
 
 export async function POST(req: NextRequest) {
   const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     // Fetch bookings in date range (rough filter — refine by UTC time below)
     const { data: bookings } = await sb
       .from("bookings")
-      .select("id, type, date, time_slot, patient_name, patient_email, patient_phone, zoom_join_url, zoom_meeting_id")
+      .select("*") // includes user_tz once migration 018 is applied
       .eq("status", "confirmed")
       .is(sentCol, null)
       .gte("date", windowStart.toISOString().slice(0, 10))
@@ -67,9 +68,6 @@ export async function POST(req: NextRequest) {
 
       if (!templates?.length) continue;
 
-      const dateLabel = new Date(`${booking.date}T12:00:00`).toLocaleDateString("es-CL", {
-        timeZone: BOOKING_TZ, weekday: "long", day: "numeric", month: "long", year: "numeric",
-      });
       const firstName = (booking.patient_name as string).split(" ")[0];
       const vars: Record<string, string> = {
         name: booking.patient_name as string,
@@ -77,8 +75,7 @@ export async function POST(req: NextRequest) {
         email: booking.patient_email as string,
         type_label: booking.type === "session" ? "Sesión TRVP" : "Entrevista de Admisión",
         date: booking.date as string,
-        date_long: dateLabel,
-        time: booking.time_slot as string,
+        ...buildBookingTimeVars(booking.date as string, booking.time_slot as string, booking.user_tz as string | null | undefined),
         duration: booking.type === "session" ? "90" : "45",
         zoom_join_url: (booking.zoom_join_url as string) ?? "",
         manage_url: `${config.site_url}/agenda/gestionar`,
@@ -120,7 +117,7 @@ export async function POST(req: NextRequest) {
 
     const { data: bookings } = await sb
       .from("bookings")
-      .select("id, type, date, time_slot, patient_name, patient_email, patient_phone, zoom_join_url")
+      .select("*") // includes user_tz once migration 018 is applied
       .eq("status", "confirmed")
       .is(sentCol, null)
       .gte("date", windowStart.toISOString().slice(0, 10))
@@ -143,9 +140,6 @@ export async function POST(req: NextRequest) {
 
       if (!templates?.length) continue;
 
-      const dateLabel = new Date(`${booking.date}T12:00:00`).toLocaleDateString("es-CL", {
-        timeZone: BOOKING_TZ, weekday: "long", day: "numeric", month: "long", year: "numeric",
-      });
       const firstName = (booking.patient_name as string).split(" ")[0];
       const vars: Record<string, string> = {
         name: booking.patient_name as string,
@@ -153,8 +147,7 @@ export async function POST(req: NextRequest) {
         email: booking.patient_email as string,
         type_label: booking.type === "session" ? "Sesión TRVP" : "Entrevista de Admisión",
         date: booking.date as string,
-        date_long: dateLabel,
-        time: booking.time_slot as string,
+        ...buildBookingTimeVars(booking.date as string, booking.time_slot as string, booking.user_tz as string | null | undefined),
         zoom_join_url: (booking.zoom_join_url as string) ?? "",
         site_url: config.site_url,
         logo_url: config.logo_url,

@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ChevronLeft, ChevronRight, Clock, Check, Loader2,
   AlertCircle, UserCheck, Globe, Copy, Video, Calendar, Link, Timer,
 } from "lucide-react";
 import {
-  getBrowserTz, detectCountryCode, slotTimeInUserTz, getMonthDays,
-  TZ_OPTIONS, COUNTRY_CODES,
+  getBrowserTz, detectCountryCode, describeSlot, getMonthDays, COUNTRY_CODES,
   type ConfirmationData,
 } from "./booking-types";
+import TimezonePicker from "./TimezonePicker";
+import Flag from "./Flag";
+import { cityFromTz, cityNameEs, todayInChile, tzOffsetLabel } from "@/lib/tz";
+import { readTzPref, saveTzPref, type TzPref } from "@/lib/tz-preference";
 
 type BookingType = "session" | "entrevista";
 
@@ -54,23 +57,35 @@ const inputCls = `w-full bg-white border border-gray-200 text-gray-900 px-4 py-3
 const labelCls = `block ${B} text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2`;
 
 export default function BookingWidget({ type, rescheduleCode, prefillEmail, prefillName, prefillPhone }: Props) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Los días del calendario son fechas de Chile (la agenda se publica en hora de Chile).
+  const todayStr = todayInChile();
+  const [todayY, todayM] = todayStr.split("-").map(Number);
 
   const [eventTypeConfig, setEventTypeConfig] = useState<EventTypeConfig | null>(null);
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | boolean>>({});
   const [isPending, setIsPending] = useState(false);
 
   const [userTz, setUserTz] = useState("America/Bogota");
+  const [tzPref, setTzPref] = useState<TzPref | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerMode, setPickerMode] = useState<"first" | "change">("first");
   const [use24h, setUse24h] = useState(true);
-  const [tzOpen, setTzOpen] = useState(false);
-  const tzRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const tz = getBrowserTz();
-    setUserTz(tz);
-    const def = detectCountryCode(tz);
-    setCountryCode(def);
+    // Preferencia guardada (cookie o sesión) > zona del navegador. Si no hay preferencia,
+    // es la primera visita: se abre el popup "¿Estás en …?".
+    const browserTz = getBrowserTz();
+    const pref = readTzPref();
+    if (pref) {
+      setTzPref(pref);
+      setUserTz(pref.tz);
+      setCountryCode(detectCountryCode(pref.tz, pref.country));
+    } else {
+      setUserTz(browserTz);
+      setCountryCode(detectCountryCode(browserTz));
+      setPickerMode("first");
+      setPickerOpen(true);
+    }
     fetch("/api/event-types")
       .then(r => r.json())
       .then(d => {
@@ -80,13 +95,18 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
       .catch(() => {});
   }, [type]);
 
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (tzRef.current && !tzRef.current.contains(e.target as Node)) setTzOpen(false);
-    }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  function handleTzSave(pref: TzPref, persist: boolean) {
+    saveTzPref(pref, persist);
+    setTzPref(pref);
+    setUserTz(pref.tz);
+    setCountryCode(detectCountryCode(pref.tz, pref.country));
+    setPickerOpen(false);
+  }
+
+  function openTzPicker() {
+    setPickerMode("change");
+    setPickerOpen(true);
+  }
 
   // Pre-fill form when rescheduling — skip email lookup entirely
   useEffect(() => {
@@ -105,8 +125,8 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
     setPatientFound(true);
   }, [prefillEmail, prefillName, prefillPhone]);
 
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [viewYear, setViewYear] = useState(todayY);
+  const [viewMonth, setViewMonth] = useState(todayM - 1);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const [slots, setSlots] = useState<string[]>([]);
@@ -152,10 +172,10 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
     else setViewMonth(m => m + 1);
   }
 
-  const isPrevDisabled = viewYear === today.getFullYear() && viewMonth === today.getMonth();
+  const isPrevDisabled = viewYear === todayY && viewMonth === todayM - 1;
 
   function handleDateClick(dateStr: string) {
-    if (!dateStr || dateStr < today.toISOString().slice(0, 10)) return;
+    if (!dateStr || dateStr < todayStr) return;
     setSelectedDate(dateStr);
     setSelectedTime(null);
   }
@@ -207,6 +227,7 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
           name, email: emailInput.trim().toLowerCase(),
           phone: fullPhone, notes, date: selectedDate,
           time: selectedTime, type,
+          user_tz: userTz,
           answers: questionAnswers,
           ...(rescheduleCode ? { reschedule_code: rescheduleCode } : {}),
         }),
@@ -258,30 +279,14 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
     setIsPending(false);
   }
 
-  const tzLabel = TZ_OPTIONS.find(t => t.value === userTz)?.label ?? userTz;
+  const tzCity = tzPref && tzPref.tz === userTz && tzPref.city ? cityNameEs(tzPref.city) : cityFromTz(userTz);
+  const tzLabel = `${tzCity} (${tzOffsetLabel(userTz)})`;
 
   // ── Confirmation ──────────────────────────────────────────────────────────
   if (step === "confirm" && confirmation) {
-    const utcMs = (() => {
-      const [h, m] = confirmation.time.split(":").map(Number);
-      const probe = new Date(`${confirmation.date}T12:00:00Z`);
-      const parts = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Santiago", hour: "numeric", hour12: false, timeZoneName: "shortOffset",
-      }).formatToParts(probe);
-      const offsetStr = parts.find(p => p.type === "timeZoneName")?.value ?? "GMT-4";
-      const offsetMatch = offsetStr.match(/GMT([+-]\d+)/);
-      const offsetH = offsetMatch ? parseInt(offsetMatch[1]) : -4;
-      const midnightUtc = new Date(`${confirmation.date}T${String(-offsetH).padStart(2, "0")}:00:00Z`).getTime();
-      return midnightUtc + (h * 60 + m) * 60_000;
-    })();
-
-    const dateLabel = new Date(utcMs).toLocaleDateString("es-CL", {
-      timeZone: confirmation.userTz, weekday: "long", day: "numeric",
-      month: "long", year: "numeric",
-    });
-    const timeLabel = new Date(utcMs).toLocaleTimeString("es-CL", {
-      timeZone: confirmation.userTz, hour: "2-digit", minute: "2-digit", hour12: !use24h,
-    });
+    const slot = describeSlot(confirmation.date, confirmation.time, confirmation.userTz, use24h);
+    const dateLabel = slot.dateLabel;
+    const timeLabel = slot.timeLabel;
 
     return (
       <div className={`max-w-md mx-auto ${B}`}>
@@ -309,7 +314,15 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
           {[
             { label: "Tipo", value: confirmation.type },
             { label: "Fecha", value: <span className="capitalize">{dateLabel}</span> },
-            { label: "Hora", value: <span className="text-[#C5A059] font-bold text-lg">{timeLabel}</span> },
+            {
+              label: "Hora",
+              value: (
+                <span className="text-[#C5A059] font-bold text-lg">
+                  {timeLabel}
+                  {slot.chileNote && <span className="block text-sm font-normal text-gray-400 text-right">({slot.chileNote})</span>}
+                </span>
+              ),
+            },
             { label: "Duración", value: `${confirmation.durationMin} min` },
             { label: "Zona horaria", value: <span className="text-sm">{confirmation.userTz}</span> },
           ].map(({ label, value }) => (
@@ -372,10 +385,9 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
 
   // ── Form step ─────────────────────────────────────────────────────────────
   if (step === "form" && selectedDate && selectedTime) {
-    const displayTime = slotTimeInUserTz(selectedDate, selectedTime, userTz, use24h);
-    const dateLabel = new Date(`${selectedDate}T12:00:00`).toLocaleDateString("es-CL", {
-      weekday: "long", day: "numeric", month: "long",
-    });
+    const slot = describeSlot(selectedDate, selectedTime, userTz, use24h);
+    const displayTime = slot.timeLabel;
+    const dateLabel = slot.dateShort;
 
     return (
       <div className={`grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-0 lg:gap-10 ${B}`}>
@@ -403,6 +415,9 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
             <p className={`${B} text-xs font-semibold uppercase tracking-widest text-[#C5A059] mb-2`}>Fecha seleccionada</p>
             <p className={`${B} text-base text-gray-700 capitalize`}>{dateLabel}</p>
             <p className={`${B} text-[#C5A059] font-bold text-2xl mt-1`}>{displayTime}</p>
+            {slot.chileNote && (
+              <p className={`${B} text-sm text-gray-400 mt-0.5`}>({slot.chileNote})</p>
+            )}
             <button
               onClick={() => setStep("calendar")}
               className={`mt-4 ${B} text-sm text-gray-400 hover:text-[#C5A059] transition flex items-center gap-1`}
@@ -556,6 +571,14 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
   // ── Calendar step ─────────────────────────────────────────────────────────
   return (
     <div className={`grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-0 lg:gap-10 ${B}`}>
+      <TimezonePicker
+        open={pickerOpen}
+        mode={pickerMode}
+        currentTz={userTz}
+        currentCountry={tzPref?.country}
+        onSave={handleTzSave}
+        onClose={() => setPickerOpen(false)}
+      />
 
       {/* Sidebar */}
       <div className="bg-gray-50 border border-gray-100 p-6 mb-6 lg:mb-0 rounded-sm">
@@ -573,32 +596,26 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
           </div>
         </div>
 
-        {/* Timezone selector */}
+        {/* Timezone */}
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className={`${B} text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2`}>Zona horaria</p>
-          <div className="relative" ref={tzRef}>
-            <button
-              onClick={() => setTzOpen(o => !o)}
-              className={`w-full flex items-center justify-between gap-2 bg-white border border-gray-200 px-3 py-2.5 text-left hover:border-[#C5A059]/50 transition rounded-sm`}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <Globe className="w-3.5 h-3.5 text-[#C5A059] shrink-0" />
-                <span className={`${B} text-sm text-gray-700 truncate`}>{tzLabel}</span>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform ${tzOpen ? "rotate-90" : ""}`} />
-            </button>
-            {tzOpen && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 max-h-48 overflow-y-auto shadow-lg rounded-sm">
-                {TZ_OPTIONS.map(opt => (
-                  <button key={opt.value} onClick={() => { setUserTz(opt.value); setTzOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 ${B} text-sm hover:bg-[#C5A059]/5 transition
-                      ${userTz === opt.value ? "text-[#C5A059] font-semibold bg-[#C5A059]/5" : "text-gray-700"}`}>
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={openTzPicker}
+            aria-label={`Zona horaria: ${tzLabel}. Cambiar`}
+            className="w-full bg-white border border-gray-200 px-3 py-2.5 text-left hover:border-[#C5A059]/50 transition rounded-sm"
+          >
+            <span className="flex items-start gap-2">
+              {tzPref ? <Flag code={tzPref.country} className="w-6 h-4 mt-0.5" /> : <Globe className="w-4 h-4 mt-0.5 text-[#C5A059] shrink-0" />}
+              <span className="min-w-0 flex-1 leading-tight">
+                <span className={`${B} block text-sm text-gray-800 break-words`}>{tzCity}</span>
+                <span className="mt-0.5 flex items-center justify-between gap-2">
+                  <span className={`${B} text-xs text-gray-400`}>{tzOffsetLabel(userTz)}</span>
+                  <span className={`${B} text-xs font-semibold text-[#C5A059]`}>Cambiar</span>
+                </span>
+              </span>
+            </span>
+          </button>
         </div>
 
         {/* 12/24h toggle */}
@@ -647,7 +664,6 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
         <div className="grid grid-cols-7 gap-1 mb-8">
           {calDays.map((day, idx) => {
             if (!day.dateStr) return <div key={`pad-${idx}`} />;
-            const todayStr = today.toISOString().slice(0, 10);
             const disabled = day.dateStr < todayStr;
             const isSelected = day.dateStr === selectedDate;
             const isToday = day.dateStr === todayStr;
@@ -691,7 +707,8 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 {slots.map(slot => {
-                  const displayTime = slotTimeInUserTz(selectedDate, slot, userTz, use24h);
+                  const desc = describeSlot(selectedDate, slot, userTz, use24h);
+                  const displayTime = desc.timeLabel;
                   const isSlotSelected = slot === selectedTime;
                   return (
                     <button key={slot} onClick={() => setSelectedTime(slot)}
@@ -700,6 +717,11 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
                           ? "bg-[#C5A059] border-[#C5A059] text-white font-bold shadow-sm"
                           : "bg-white border-gray-200 text-gray-700 hover:border-[#C5A059]/60 hover:text-[#C5A059] hover:bg-[#C5A059]/5"}`}>
                       {displayTime}
+                      {desc.dayShift !== 0 && (
+                        <sup className="ml-0.5 text-[10px] font-semibold opacity-80" title={desc.dayShift > 0 ? "Día siguiente en tu zona" : "Día anterior en tu zona"}>
+                          {desc.dayShift > 0 ? `+${desc.dayShift}` : desc.dayShift}
+                        </sup>
+                      )}
                     </button>
                   );
                 })}

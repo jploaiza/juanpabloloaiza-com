@@ -19,11 +19,13 @@ export async function GET(req: NextRequest) {
   }
 
   const sb = createAdminClient();
-  const { data } = await sb
-    .from("bookings")
-    .select("id, booking_code, type, date, time_slot, patient_name, patient_email, patient_phone, status, zoom_join_url, google_event_link")
-    .eq("booking_code", code)
-    .single();
+  const COLUMNS = "id, booking_code, type, date, time_slot, patient_name, patient_email, patient_phone, status, zoom_join_url, google_event_link";
+  // `user_tz` exists only after migration 018; fall back to the old column list until then.
+  const first = await sb.from("bookings").select(`${COLUMNS}, user_tz`).eq("booking_code", code).single();
+  const data =
+    first.error && /user_tz/i.test(first.error.message ?? "")
+      ? (await sb.from("bookings").select(COLUMNS).eq("booking_code", code).single()).data
+      : first.data;
 
   if (!data) return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
 

@@ -11,6 +11,7 @@ import { deleteZoomMeeting } from "@/lib/zoom";
 import { getCalendarConfig, getEventTypes } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
+import { buildBookingTimeVars } from "@/lib/booking-time";
 
 export async function POST(req: NextRequest) {
   const ip = getIp(req.headers);
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   const { data: booking } = await sb
     .from("bookings")
-    .select("id, status, type, date, time_slot, patient_name, patient_email, patient_phone, google_event_id, zoom_meeting_id, zoom_join_url")
+    .select("*") // includes user_tz once migration 018 is applied
     .eq("booking_code", code.trim().toUpperCase())
     .single();
 
@@ -103,14 +104,6 @@ export async function POST(req: NextRequest) {
         .eq("trigger", "cancellation")
         .eq("is_active", true);
 
-      const dateLabel = new Date(`${booking.date}T12:00:00`).toLocaleDateString("es-CL", {
-        timeZone: "America/Santiago",
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-
       const firstName = (booking.patient_name as string).split(" ")[0];
       const vars: Record<string, string> = {
         name: booking.patient_name as string,
@@ -118,8 +111,7 @@ export async function POST(req: NextRequest) {
         email: booking.patient_email as string,
         type_label: booking.type === "session" ? "Sesión TRVP" : "Entrevista de Admisión",
         date: booking.date as string,
-        date_long: dateLabel,
-        time: booking.time_slot as string,
+        ...buildBookingTimeVars(booking.date as string, booking.time_slot as string, booking.user_tz as string | null | undefined),
         site_url: config.site_url,
         logo_url: config.logo_url,
         zoom_join_url: (booking.zoom_join_url as string) ?? "",

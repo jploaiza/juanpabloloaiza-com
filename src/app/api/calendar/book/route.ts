@@ -4,7 +4,11 @@
  * Creates a Google Calendar event and sends a confirmation email + WhatsApp.
  * Public endpoint — uses the admin's stored credentials.
  *
- * Body: { name, email, phone, date, time, type, notes?, reschedule_code?, answers? }
+ * Body: { name, email, phone, date, time, type, notes?, reschedule_code?, answers?, user_tz? }
+ *
+ * `date`/`time` are always America/Santiago wall time. `user_tz` (IANA) is the patient's
+ * timezone: it is stored and used so confirmations show the patient's own time first,
+ * with Chile time in parentheses when it differs.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -23,6 +27,8 @@ import { rateLimit, getIp } from "@/lib/rate-limit";
 import { BOOKING_TZ, getCalendarConfig, getEventTypes } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
+import { buildBookingTimeVars } from "@/lib/booking-time";
+import { isValidTz } from "@/lib/tz";
 
 function slotsOverlap(start: Date, end: Date, busy: BusySlot[]): boolean {
   return busy.some((b) => {
@@ -48,6 +54,22 @@ function slotToDate(dateStr: string, timeStr: string): Date {
   return new Date(midnightUtcMs + (h * 60 + m) * 60000);
 }
 
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+/**
+ * Inserts a booking, storing the patient's timezone in `bookings.user_tz`.
+ * If that column has not been created yet (migration 018), retries without it so
+ * bookings never fail because of the timezone feature.
+ */
+async function insertBooking(sb: AdminClient, row: Record<string, unknown>, userTz: string | null) {
+  const first = await sb.from("bookings").insert(userTz ? { ...row, user_tz: userTz } : row).select("booking_code").single();
+  if (first.error && userTz && /user_tz/i.test(first.error.message ?? "")) {
+    const retry = await sb.from("bookings").insert(row).select("booking_code").single();
+    return retry.data;
+  }
+  return first.data;
+}
+
 export async function POST(req: NextRequest) {
   const ip = getIp(req.headers);
   if (!rateLimit(`cal-book:${ip}`, 5, 10 * 60 * 1000)) {
@@ -64,6 +86,7 @@ export async function POST(req: NextRequest) {
     notes?: string;
     reschedule_code?: string;
     answers?: Record<string, unknown>;
+    user_tz?: string;
   };
   try {
     body = await req.json();
@@ -72,6 +95,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { name, email, phone, date, time, type, notes, reschedule_code, answers = {} } = body;
+  const userTz: string | null = isValidTz(body.user_tz) ? body.user_tz : null;
 
   // Validate answers: must be a plain object, no nested objects, capped to prevent payload abuse
   if (typeof answers !== "object" || Array.isArray(answers) || answers === null) {
@@ -152,8 +176,7 @@ export async function POST(req: NextRequest) {
     type_label: label,
     duration: String(durationMin),
     date,
-    date_long: dateLabel,
-    time,
+    ...buildBookingTimeVars(date, time, userTz),
     booking_code: "",
     event_link: "",
     zoom_join_url: "",
@@ -167,21 +190,17 @@ export async function POST(req: NextRequest) {
 
   // --- PENDING flow (requires_confirmation) ---
   if (eventType.requires_confirmation === true) {
-    const { data: bookingRow } = await adminSb
-      .from("bookings")
-      .insert({
-        type,
-        date,
-        time_slot: time,
-        patient_name: safeName,
-        patient_email: email.trim().toLowerCase(),
-        patient_phone: phone.trim(),
-        notes: safeNotes,
-        status: "pending",
-        answers,
-      })
-      .select("booking_code")
-      .single();
+    const bookingRow = await insertBooking(adminSb, {
+      type,
+      date,
+      time_slot: time,
+      patient_name: safeName,
+      patient_email: email.trim().toLowerCase(),
+      patient_phone: phone.trim(),
+      notes: safeNotes,
+      status: "pending",
+      answers,
+    }, userTz);
 
     const bookingCode = bookingRow?.booking_code ?? "";
     const manageUrl = `${config.site_url}/agenda/gestionar?code=${bookingCode}`;
@@ -205,10 +224,10 @@ export async function POST(req: NextRequest) {
     try {
       const subject = pendingEmailTpl?.subject
         ? renderTemplate(pendingEmailTpl.subject as string, templateVars)
-        : `Solicitud recibida — ${label} ${dateLabel} ${time}`;
+        : `Solicitud recibida — ${label} ${templateVars.date_long} ${templateVars.time}`;
       const html = pendingEmailTpl?.body
         ? renderTemplateHtml(pendingEmailTpl.body as string, templateVars)
-        : `<p>Hemos recibido tu solicitud para ${label} el ${dateLabel} a las ${time}. Te notificaremos cuando sea confirmada. Código: ${bookingCode}</p>`;
+        : `<p>Hemos recibido tu solicitud para ${label} el ${templateVars.date_long} a las ${templateVars.time}. Te notificaremos cuando sea confirmada. Código: ${bookingCode}</p>`;
       await resend.emails.send({ from: config.from_email, to: email.trim().toLowerCase(), subject, html });
     } catch { /* non-critical */ }
 
@@ -229,7 +248,9 @@ export async function POST(req: NextRequest) {
     const approvalEmailTpl = approvalTpls?.find((t) => t.channel === "email");
     const therapistEmail = config.from_email.replace(/^.*</, "").replace(/>$/, "").trim() || config.from_email;
     const approveUrl = `${config.site_url}/academy/admin/calendar?tab=bookings`;
-    const approvalVars = { ...templateVars, approve_url: approveUrl };
+    // The therapist always sees Chile time first; the patient's local time stays available
+    // through {{time_patient}} / {{timezone}}.
+    const approvalVars = { ...templateVars, date_long: dateLabel, time, approve_url: approveUrl };
 
     try {
       const subject = approvalEmailTpl?.subject
@@ -328,6 +349,9 @@ export async function POST(req: NextRequest) {
     `Paciente: ${safeName}`,
     `Email: ${email.trim().toLowerCase()}`,
     `Teléfono: ${phone.trim()}`,
+    userTz && templateVars.time_patient !== time
+      ? `Zona del paciente: ${templateVars.timezone} — hora local ${templateVars.time_patient}`
+      : "",
     zoomJoinUrl ? `Zoom: ${zoomJoinUrl}` : "",
     safeNotes ? `Notas: ${safeNotes}` : "",
   ].filter(Boolean).join("\n");
@@ -374,26 +398,22 @@ export async function POST(req: NextRequest) {
   }
 
   // Persist new booking
-  const { data: bookingRow } = await adminSb
-    .from("bookings")
-    .insert({
-      type,
-      date,
-      time_slot: time,
-      patient_name: safeName,
-      patient_email: email.trim().toLowerCase(),
-      patient_phone: phone.trim(),
-      notes: safeNotes,
-      status: "confirmed",
-      google_event_id: googleEventId,
-      google_event_link: eventLink,
-      zoom_meeting_id: zoomMeetingId,
-      zoom_join_url: zoomJoinUrl,
-      zoom_start_url: zoomStartUrl,
-      answers,
-    })
-    .select("booking_code")
-    .single();
+  const bookingRow = await insertBooking(adminSb, {
+    type,
+    date,
+    time_slot: time,
+    patient_name: safeName,
+    patient_email: email.trim().toLowerCase(),
+    patient_phone: phone.trim(),
+    notes: safeNotes,
+    status: "confirmed",
+    google_event_id: googleEventId,
+    google_event_link: eventLink,
+    zoom_meeting_id: zoomMeetingId,
+    zoom_join_url: zoomJoinUrl,
+    zoom_start_url: zoomStartUrl,
+    answers,
+  }, userTz);
 
   const bookingCode = bookingRow?.booking_code ?? "";
   const manageUrl = `${config.site_url}/agenda/gestionar?code=${bookingCode}`;
@@ -421,10 +441,10 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const subject = emailTpl?.subject
       ? renderTemplate(emailTpl.subject as string, templateVars)
-      : `Confirmación de ${label} — ${dateLabel} ${time}`;
+      : `Confirmación de ${label} — ${templateVars.date_long} ${templateVars.time}`;
     const html = emailTpl?.body
       ? renderTemplateHtml(emailTpl.body as string, templateVars)
-      : `<p>Tu ${label} está confirmada para el ${dateLabel} a las ${time}. Código: ${bookingCode}</p>`;
+      : `<p>Tu ${label} está confirmada para el ${templateVars.date_long} a las ${templateVars.time}. Código: ${bookingCode}</p>`;
     const result = await resend.emails.send({ from: config.from_email, to: email.trim().toLowerCase(), subject, html });
     emailSent = !result.error;
     void adminSb.from("comms_log").insert({
