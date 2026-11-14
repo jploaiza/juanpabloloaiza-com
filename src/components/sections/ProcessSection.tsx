@@ -1,6 +1,8 @@
 "use client";
 import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
+import VideoPlayer from "@/components/VideoPlayer";
+import { mediaUrl } from "@/lib/videos";
 import { motion } from "framer-motion";
 import { Search, Scale, Gem, Star } from "lucide-react";
 
@@ -69,14 +71,7 @@ export default function ProcessSection() {
         >
           <HeraldFrame size={64} className="w-full max-w-xs">
             <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16" }}>
-              <video
-                src="https://media.juanpabloloaiza.com/RVP1.m4v"
-                controls
-                preload="none"
-                className="w-full h-full object-contain"
-                controlsList="nodownload"
-                disablePictureInPicture
-              />
+              <VideoPlayer src={mediaUrl("RVP1.m4v")} />
             </div>
           </HeraldFrame>
         </motion.div>

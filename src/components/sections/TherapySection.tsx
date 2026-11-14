@@ -1,6 +1,8 @@
 "use client";
 import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
+import VideoPlayer from "@/components/VideoPlayer";
+import { mediaUrl } from "@/lib/videos";
 import { motion } from "framer-motion";
 
 export default function TherapySection() {
@@ -44,14 +46,7 @@ export default function TherapySection() {
           <motion.div variants={itemVariants} className="flex justify-center">
             <HeraldFrame size={64} className="w-full max-w-xs">
               <div className="bg-black border border-[#C5A059]/20 overflow-hidden" style={{ aspectRatio: "9/16" }}>
-                <video
-                  src="https://media.juanpabloloaiza.com/Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4"
-                  controls
-                  preload="none"
-                  className="w-full h-full object-contain"
-                  controlsList="nodownload"
-                  disablePictureInPicture
-                />
+                <VideoPlayer src={mediaUrl("Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4")} />
               </div>
             </HeraldFrame>
           </motion.div>

@@ -3,8 +3,9 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
-
-const R2_BASE = "https://media.juanpabloloaiza.com";
+import Image from "next/image";
+import VideoPlayer from "@/components/VideoPlayer";
+import { MEDIA_BASE as R2_BASE, videoPoster } from "@/lib/videos";
 
 interface Video {
   id: string;
@@ -76,10 +77,19 @@ function VideoCard({ video }: { video: Video }) {
 
         <div className="relative bg-black aspect-video">
           {playing ? (
-            <video src={video.src} controls autoPlay className="w-full h-full object-contain" controlsList="nodownload" disablePictureInPicture />
+            <VideoPlayer src={video.src} autoPlay />
           ) : (
-            <button onClick={() => setPlaying(true)} className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#16213e] to-[#0a1628] group/play" aria-label={`Reproducir: ${video.title}`}>
-              <div className="w-16 h-16 rounded-full border-2 border-[#C5A059]/60 flex items-center justify-center group-hover/play:bg-[#C5A059] group-hover/play:border-[#C5A059] transition duration-300">
+            <button onClick={() => setPlaying(true)} className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-[#16213e] to-[#0a1628] group/play" aria-label={`Reproducir: ${video.title}`}>
+              {/* Los videos son verticales (9:16): se recorta la miniatura a 16:9 centrada en el rostro */}
+              <Image
+                src={videoPoster(video.src)}
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
+                className="object-cover object-[50%_30%]"
+              />
+              <div className="absolute inset-0 bg-[#020617]/35 group-hover/play:bg-[#020617]/15 transition duration-300" />
+              <div className="relative w-16 h-16 rounded-full border-2 border-[#C5A059]/80 bg-[#020617]/60 flex items-center justify-center group-hover/play:bg-[#C5A059] group-hover/play:border-[#C5A059] transition duration-300">
                 <svg className="w-6 h-6 text-[#C5A059] group-hover/play:text-[#020617] ml-1 transition duration-300" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>

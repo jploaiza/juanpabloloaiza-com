@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import HeraldFrame from "@/components/HeraldFrame";
+import VideoPlayer from "@/components/VideoPlayer";
+import { mediaUrl } from "@/lib/videos";
 import { Lightbulb, Heart, Zap, Handshake, Star, ChevronRight, Shield } from "lucide-react";
 
 export default function EntityLiberationSection() {
@@ -80,14 +82,7 @@ export default function EntityLiberationSection() {
         >
           <HeraldFrame size={64} className="w-full max-w-xs">
             <div className="bg-black border border-[#C5A059]/30 overflow-hidden" style={{ aspectRatio: "9/16" }}>
-              <video
-                src="https://media.juanpabloloaiza.com/SRT1-2.mp4"
-                controls
-                preload="none"
-                className="w-full h-full object-contain"
-                controlsList="nodownload"
-                disablePictureInPicture
-              />
+              <VideoPlayer src={mediaUrl("SRT1-2.mp4")} />
             </div>
           </HeraldFrame>
         </motion.div>

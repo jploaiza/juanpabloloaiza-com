@@ -1,15 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { Play, ChevronDown } from "lucide-react";
 import ScrollDivider from "@/components/ScrollDivider";
 import HeraldFrame from "@/components/HeraldFrame";
-
-const R2 = "https://media.juanpabloloaiza.com";
-
-// Static poster image shown before video plays (avoids black screen on iOS)
-const POSTER = "https://res.cloudinary.com/dvudfdhoi/image/upload/f_auto,q_auto,w_400/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu";
+import VideoPlayer from "@/components/VideoPlayer";
+import { MEDIA_BASE as R2 } from "@/lib/videos";
 
 const faqs = [
   {
@@ -80,23 +77,8 @@ const faqs = [
   },
 ];
 
-// Callback ref: plays the video as soon as it mounts — critical for iOS Safari
-// where autoplay must happen synchronously within the user-gesture call stack.
-function useVideoAutoplay(active: boolean) {
-  return useCallback(
-    (node: HTMLVideoElement | null) => {
-      if (node && active) {
-        node.play().catch(() => {});
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [active]
-  );
-}
-
 // Desktop: single video panel (shared, swaps content)
 function DesktopVideoPanel({ faq, index, autoplay }: { faq: typeof faqs[0]; index: number; autoplay: boolean }) {
-  const videoRef = useVideoAutoplay(autoplay);
   return (
     <div className="flex flex-col items-center w-full">
       <HeraldFrame size={64} className="w-full max-w-[280px] sm:max-w-[320px]">
@@ -104,18 +86,7 @@ function DesktopVideoPanel({ faq, index, autoplay }: { faq: typeof faqs[0]; inde
           className="border border-[#C5A059]/30 overflow-hidden w-full"
           style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #0a1628)" }}
         >
-          <video
-            ref={videoRef}
-            key={faq.src}
-            src={faq.src}
-            poster={POSTER}
-            controls
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-contain"
-            controlsList="nodownload"
-            disablePictureInPicture
-          />
+          <VideoPlayer key={faq.src} src={faq.src} autoPlay={autoplay} />
         </div>
       </HeraldFrame>
       <div className="mt-5 w-full max-w-[320px] px-1">
@@ -161,8 +132,6 @@ function MobileAccordionItem({
   isOpen: boolean;
   onToggle: () => void;
 }) {
-  const videoRef = useVideoAutoplay(isOpen);
-
   return (
     <div className={`border transition-all duration-300 ${isOpen ? "border-[#C5A059]/60 bg-[#16213e]" : "border-[#C5A059]/15 bg-[#16213e]/50"}`}>
       {/* Header button */}
@@ -202,18 +171,7 @@ function MobileAccordionItem({
                 className="w-full max-w-[260px] border border-[#C5A059]/30 overflow-hidden"
                 style={{ aspectRatio: "9/16", background: "linear-gradient(to bottom, #0a0f1e, #0a1628)" }}
               >
-                <video
-                  ref={videoRef}
-                  key={faq.src}
-                  src={faq.src}
-                  poster={POSTER}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-contain"
-                  controlsList="nodownload"
-                  disablePictureInPicture
-                />
+                <VideoPlayer key={faq.src} src={faq.src} autoPlay={isOpen} />
               </div>
 
               {/* Answer */}
