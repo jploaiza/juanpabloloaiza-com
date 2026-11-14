@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import VideoPlayer from "@/components/VideoPlayer";
-import { MEDIA_BASE as R2_BASE, videoPoster } from "@/lib/videos";
+import { MEDIA_BASE as R2_BASE, VIDEO_POSTER } from "@/lib/videos";
 
 interface Video {
   id: string;
@@ -82,7 +82,7 @@ function VideoCard({ video }: { video: Video }) {
             <button onClick={() => setPlaying(true)} className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-[#16213e] to-[#0a1628] group/play" aria-label={`Reproducir: ${video.title}`}>
               {/* Los videos son verticales (9:16): se recorta la miniatura a 16:9 centrada en el rostro */}
               <Image
-                src={videoPoster(video.src)}
+                src={VIDEO_POSTER}
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"

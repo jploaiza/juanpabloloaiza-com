@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { videoPoster } from "@/lib/videos";
+import { VIDEO_POSTER } from "@/lib/videos";
 
 interface VideoPlayerProps {
   src: string;
-  /** Si no se pasa, se deriva del nombre del archivo (ver lib/videos.ts). */
+  /** Por defecto usa la portada única (ver lib/videos.ts). */
   poster?: string;
   /** Reproduce apenas se monta (útil cuando el montaje viene de un clic del usuario). */
   autoPlay?: boolean;
@@ -30,7 +30,7 @@ export default function VideoPlayer({
   const [failedKey, setFailedKey] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
-  const posterUrl = poster ?? videoPoster(src);
+  const posterUrl = poster ?? VIDEO_POSTER;
   const key = `${src}#${attempt}`;
   const failed = failedKey === key;
 
