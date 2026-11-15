@@ -1,186 +1,207 @@
 /**
- * POST /api/cron/booking-reminders
- * Gated by CRON_SECRET. Runs every minute.
- * Sends reminder_24h and reminder_1h alerts for upcoming confirmed bookings.
+ * GET|POST /api/cron/booking-reminders
+ *
+ * Gated by CRON_SECRET (header `x-cron-secret` or `Authorization: Bearer`).
+ * Meant to run every 1-5 minutes from an external scheduler (cron-job.org): Vercel's Hobby
+ * plan only allows daily crons, so it is not in vercel.json.
+ *
+ * Sends the reminder_24h / reminder_1h (and, if enabled, followup_24h / followup_72h)
+ * alerts for confirmed bookings, by email (Resend) and WhatsApp (TextMeBot).
+ *
+ * Both GET and POST are accepted: cron-job.org defaults to GET, and a redirect from the
+ * apex domain (301) turns a POST into a GET.
  */
-import { timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/server";
-import { getCalendarConfig } from "@/lib/booking-config";
+import { getCalendarConfig, getEventTypes, type EventType } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
 import { buildBookingTimeVars } from "@/lib/booking-time";
+import { isCronAuthorized } from "@/lib/cron-auth";
+import { CHILE_TZ, zonedTimeToUtc } from "@/lib/tz";
 
-export async function POST(req: NextRequest) {
-  const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");
-  const expected = Buffer.from(process.env.CRON_SECRET ?? "");
-  if (secret.length === 0 || secret.length !== expected.length || !timingSafeEqual(secret, expected)) {
+export const maxDuration = 60;
+
+type Trigger = "reminder_24h" | "reminder_1h" | "followup_24h" | "followup_72h";
+type Row = Record<string, unknown>;
+
+const SENT_COLUMN: Record<Trigger, string> = {
+  reminder_24h: "reminder_24h_sent_at",
+  reminder_1h: "reminder_1h_sent_at",
+  followup_24h: "followup_24h_sent_at",
+  followup_72h: "followup_72h_sent_at",
+};
+
+const DEFAULT_SUBJECT: Record<Trigger, string> = {
+  reminder_24h: "Recordatorio",
+  reminder_1h: "Recordatorio",
+  followup_24h: "Seguimiento",
+  followup_72h: "Seguimiento",
+};
+
+const DAY_MS = 86_400_000;
+const ymd = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+
+async function handler(req: NextRequest) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const sb = createAdminClient();
-  const config = await getCalendarConfig();
+  const [config, eventTypes] = await Promise.all([getCalendarConfig(), getEventTypes(false)]);
+  const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
   const now = new Date();
-  const BOOKING_TZ = "America/Santiago";
 
-  function slotToUtcMs(dateStr: string, timeStr: string): number {
-    const [h, m] = timeStr.split(":").map(Number);
-    const probe = new Date(`${dateStr}T12:00:00Z`);
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: BOOKING_TZ, hour: "numeric", hour12: false, timeZoneName: "shortOffset",
-    }).formatToParts(probe);
-    const offsetStr = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT-4";
-    const offsetH = parseInt(offsetStr.match(/GMT([+-]\d+)/)?.[1] ?? "-4");
-    const midnightUtcMs = new Date(`${dateStr}T${String(-offsetH).padStart(2, "0")}:00:00Z`).getTime();
-    return midnightUtcMs + (h * 60 + m) * 60_000;
+  const eventTypeOf = (slug: string): EventType | undefined => eventTypes.find((e) => e.slug === slug);
+
+  /**
+   * Sends one alert (all channels with an active template) for one booking.
+   * Returns the per-channel outcome so the caller can decide whether to mark it as sent.
+   */
+  async function dispatch(trigger: Trigger, booking: Row): Promise<"sent" | "failed" | "skipped"> {
+    const type = booking.type as string;
+    const { data: templates } = await sb
+      .from("booking_alert_templates")
+      .select("channel, subject, body")
+      .eq("event_type_slug", type)
+      .eq("trigger", trigger)
+      .eq("is_active", true);
+
+    if (!templates?.length) return "skipped";
+
+    const eventType = eventTypeOf(type);
+    const typeLabel = eventType?.label ?? (type === "session" ? "Sesión TRVP" : "Entrevista de Admisión");
+    const email = booking.patient_email as string;
+    const phone = (booking.patient_phone as string | null) ?? "";
+    const code = (booking.booking_code as string | null) ?? "";
+    const manageUrl = `${config.site_url}/agenda/gestionar${code ? `?code=${code}` : ""}`;
+
+    const vars: Record<string, string> = {
+      name: booking.patient_name as string,
+      first_name: (booking.patient_name as string).split(" ")[0],
+      email,
+      type_label: typeLabel,
+      date: booking.date as string,
+      // date_long / time (+ time_patient, time_chile, timezone…) in the patient's own timezone
+      ...buildBookingTimeVars(booking.date as string, booking.time_slot as string, booking.user_tz as string | null | undefined),
+      duration: String(eventType?.duration_min ?? 120),
+      booking_code: code,
+      zoom_join_url: (booking.zoom_join_url as string | null) ?? "",
+      manage_url: manageUrl,
+      cancel_url: code ? `${manageUrl}&action=cancel` : manageUrl,
+      reschedule_url: code ? `${manageUrl}&action=reschedule` : manageUrl,
+      site_url: config.site_url,
+      logo_url: config.logo_url,
+      therapist_name: "Juan Pablo Loaiza",
+    };
+
+    const outcomes: { channel: string; ok: boolean; error?: string }[] = [];
+
+    for (const tpl of templates) {
+      if (tpl.channel === "email") {
+        if (!resend) {
+          outcomes.push({ channel: "email", ok: false, error: "RESEND_API_KEY no configurada" });
+          continue;
+        }
+        try {
+          const subject = tpl.subject
+            ? renderTemplate(tpl.subject as string, vars)
+            : `${DEFAULT_SUBJECT[trigger]}: ${typeLabel}`;
+          const html = renderTemplateHtml(tpl.body as string, vars);
+          const res = await resend.emails.send({ from: config.from_email, to: email, subject, html });
+          outcomes.push(res.error ? { channel: "email", ok: false, error: res.error.message } : { channel: "email", ok: true });
+        } catch (err) {
+          outcomes.push({ channel: "email", ok: false, error: err instanceof Error ? err.message : String(err) });
+        }
+      } else if (tpl.channel === "whatsapp") {
+        if (!phone) {
+          outcomes.push({ channel: "whatsapp", ok: false, error: "El paciente no tiene teléfono" });
+          continue;
+        }
+        const res = await sendWhatsApp({ to: phone, body: renderTemplate(tpl.body as string, vars) });
+        outcomes.push({ channel: "whatsapp", ok: res.ok, error: res.error });
+      }
+    }
+
+    const anyOk = outcomes.some((o) => o.ok);
+    const errors = outcomes.filter((o) => !o.ok).map((o) => `${o.channel}: ${o.error ?? "error"}`);
+
+    // Awaited on purpose: a Supabase query builder does nothing until it is awaited, so the old
+    // `void sb.from(...).insert(...)` never wrote a row to comms_log.
+    await sb.from("comms_log").insert({
+      type: trigger,
+      subject: `${trigger} booking ${booking.id}`,
+      status: anyOk ? "sent" : "error", // only the two values already used elsewhere in comms_log
+      sent_at: now.toISOString(),
+      body_preview: `${booking.date}:${booking.time_slot}:${type}:${email}${errors.length ? ` | ${errors.join("; ").slice(0, 300)}` : ""}`,
+    });
+
+    if (!anyOk) {
+      console.error(`[booking-reminders] ${trigger} falló para ${email}: ${errors.join("; ")}`);
+      return "failed";
+    }
+    return "sent";
   }
 
-  async function sendReminders(trigger: "reminder_24h" | "reminder_1h", windowMinStart: number, windowMinEnd: number) {
-    const sentCol = trigger === "reminder_24h" ? "reminder_24h_sent_at" : "reminder_1h_sent_at";
-    const windowStart = new Date(now.getTime() + windowMinStart * 60_000);
-    const windowEnd = new Date(now.getTime() + windowMinEnd * 60_000);
+  /** Alerts whose slot falls inside [now + startMin, now + endMin] (negative = in the past). */
+  async function run(trigger: Trigger, startMin: number, endMin: number) {
+    const sentCol = SENT_COLUMN[trigger];
+    const windowStart = now.getTime() + startMin * 60_000;
+    const windowEnd = now.getTime() + endMin * 60_000;
+    const lo = Math.min(windowStart, windowEnd);
+    const hi = Math.max(windowStart, windowEnd);
 
-    // Fetch bookings in date range (rough filter — refine by UTC time below)
-    const { data: bookings } = await sb
+    // `date` is a Chile calendar date while the window is computed in UTC, so widen the date
+    // filter by a day on each side; the exact check against the slot's UTC time follows.
+    const { data: bookings, error } = await sb
       .from("bookings")
-      .select("*") // includes user_tz once migration 018 is applied
+      .select("*")
       .eq("status", "confirmed")
       .is(sentCol, null)
-      .gte("date", windowStart.toISOString().slice(0, 10))
-      .lte("date", windowEnd.toISOString().slice(0, 10));
+      .gte("date", ymd(lo - DAY_MS))
+      .lte("date", ymd(hi + DAY_MS));
 
-    if (!bookings?.length) return 0;
+    if (error) {
+      console.error(`[booking-reminders] consulta ${trigger} falló: ${error.message}`);
+      return { sent: 0, failed: 0, error: error.message };
+    }
 
     let sent = 0;
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    let failed = 0;
+    for (const booking of bookings ?? []) {
+      const slotMs = zonedTimeToUtc(booking.date as string, booking.time_slot as string, CHILE_TZ);
+      if (slotMs < lo || slotMs > hi) continue;
 
-    for (const booking of bookings) {
-      const slotMs = slotToUtcMs(booking.date, booking.time_slot);
-      if (slotMs < windowStart.getTime() || slotMs > windowEnd.getTime()) continue;
-
-      const { data: templates } = await sb
-        .from("booking_alert_templates")
-        .select("channel, subject, body")
-        .eq("event_type_slug", booking.type)
-        .eq("trigger", trigger)
-        .eq("is_active", true);
-
-      if (!templates?.length) continue;
-
-      const firstName = (booking.patient_name as string).split(" ")[0];
-      const vars: Record<string, string> = {
-        name: booking.patient_name as string,
-        first_name: firstName,
-        email: booking.patient_email as string,
-        type_label: booking.type === "session" ? "Sesión TRVP" : "Entrevista de Admisión",
-        date: booking.date as string,
-        ...buildBookingTimeVars(booking.date as string, booking.time_slot as string, booking.user_tz as string | null | undefined),
-        duration: booking.type === "session" ? "90" : "45",
-        zoom_join_url: (booking.zoom_join_url as string) ?? "",
-        manage_url: `${config.site_url}/agenda/gestionar`,
-        site_url: config.site_url,
-        logo_url: config.logo_url,
-        therapist_name: "Juan Pablo Loaiza",
-      };
-
-      for (const tpl of templates) {
-        if (tpl.channel === "email") {
-          try {
-            const rendered = renderTemplateHtml(tpl.body as string, vars);
-            const subject = tpl.subject ? renderTemplate(tpl.subject as string, vars) : `Recordatorio: ${vars.type_label}`;
-            await resend.emails.send({ from: config.from_email, to: booking.patient_email as string, subject, html: rendered });
-          } catch { /* continue */ }
-        } else if (tpl.channel === "whatsapp" && booking.patient_phone) {
-          const rendered = renderTemplate(tpl.body as string, vars);
-          await sendWhatsApp({ to: booking.patient_phone as string, body: rendered });
-        }
+      const outcome = await dispatch(trigger, booking);
+      if (outcome === "sent") {
+        // Only mark as sent when at least one channel really went out; otherwise the next
+        // run (still inside the window) retries.
+        await sb.from("bookings").update({ [sentCol]: now.toISOString() }).eq("id", booking.id);
+        sent++;
+      } else if (outcome === "failed") {
+        failed++;
       }
-
-      await sb.from("bookings").update({ [sentCol]: now.toISOString() }).eq("id", booking.id);
-      void sb.from("comms_log").insert({
-        type: trigger,
-        subject: `${trigger} booking ${booking.id}`,
-        status: "sent",
-        sent_at: now.toISOString(),
-        body_preview: `${booking.date}:${booking.time_slot}:${booking.type}:${booking.patient_email}`,
-      });
-      sent++;
     }
-    return sent;
+    return { sent, failed };
   }
 
-  async function sendFollowups(trigger: "followup_24h" | "followup_72h", windowMinPast: number) {
-    const sentCol = trigger === "followup_24h" ? "followup_24h_sent_at" : "followup_72h_sent_at";
-    const windowStart = new Date(now.getTime() - (windowMinPast + 120) * 60_000);
-    const windowEnd = new Date(now.getTime() - (windowMinPast - 120) * 60_000);
+  const r24 = await run("reminder_24h", 23 * 60, 25 * 60);
+  const r1 = await run("reminder_1h", 50, 70);
+  const f24 = await run("followup_24h", -(24 * 60 + 120), -(24 * 60 - 120));
+  const f72 = await run("followup_72h", -(72 * 60 + 120), -(72 * 60 - 120));
 
-    const { data: bookings } = await sb
-      .from("bookings")
-      .select("*") // includes user_tz once migration 018 is applied
-      .eq("status", "confirmed")
-      .is(sentCol, null)
-      .gte("date", windowStart.toISOString().slice(0, 10))
-      .lte("date", windowEnd.toISOString().slice(0, 10));
-
-    if (!bookings?.length) return 0;
-    let sent = 0;
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    for (const booking of bookings) {
-      const slotMs = slotToUtcMs(booking.date, booking.time_slot);
-      if (slotMs < windowStart.getTime() || slotMs > windowEnd.getTime()) continue;
-
-      const { data: templates } = await sb
-        .from("booking_alert_templates")
-        .select("channel, subject, body")
-        .eq("event_type_slug", booking.type)
-        .eq("trigger", trigger)
-        .eq("is_active", true);
-
-      if (!templates?.length) continue;
-
-      const firstName = (booking.patient_name as string).split(" ")[0];
-      const vars: Record<string, string> = {
-        name: booking.patient_name as string,
-        first_name: firstName,
-        email: booking.patient_email as string,
-        type_label: booking.type === "session" ? "Sesión TRVP" : "Entrevista de Admisión",
-        date: booking.date as string,
-        ...buildBookingTimeVars(booking.date as string, booking.time_slot as string, booking.user_tz as string | null | undefined),
-        zoom_join_url: (booking.zoom_join_url as string) ?? "",
-        site_url: config.site_url,
-        logo_url: config.logo_url,
-        therapist_name: "Juan Pablo Loaiza",
-      };
-
-      for (const tpl of templates) {
-        if (tpl.channel === "email") {
-          try {
-            const rendered = renderTemplateHtml(tpl.body as string, vars);
-            const subject = tpl.subject ? renderTemplate(tpl.subject as string, vars) : `Seguimiento: ${vars.type_label}`;
-            await resend.emails.send({ from: config.from_email, to: booking.patient_email as string, subject, html: rendered });
-          } catch { /* continue */ }
-        } else if (tpl.channel === "whatsapp" && booking.patient_phone) {
-          await sendWhatsApp({ to: booking.patient_phone as string, body: renderTemplate(tpl.body as string, vars) });
-        }
-      }
-
-      await sb.from("bookings").update({ [sentCol]: now.toISOString() }).eq("id", booking.id);
-      sent++;
-    }
-    return sent;
-  }
-
-  const [sent24h, sent1h] = await Promise.all([
-    sendReminders("reminder_24h", 23 * 60, 25 * 60),
-    sendReminders("reminder_1h", 50, 70),
-  ]);
-
-  const [sentFollowup24h, sentFollowup72h] = await Promise.all([
-    sendFollowups("followup_24h", 24 * 60),
-    sendFollowups("followup_72h", 72 * 60),
-  ]);
-
-  return NextResponse.json({ ok: true, sent_24h: sent24h, sent_1h: sent1h, followup_24h: sentFollowup24h, followup_72h: sentFollowup72h });
+  const errors = [r24, r1, f24, f72].map((r) => ("error" in r ? r.error : null)).filter(Boolean);
+  return NextResponse.json({
+    ok: errors.length === 0,
+    sent_24h: r24.sent,
+    sent_1h: r1.sent,
+    followup_24h: f24.sent,
+    followup_72h: f72.sent,
+    failed: r24.failed + r1.failed + f24.failed + f72.failed,
+    ...(errors.length ? { errors } : {}),
+  });
 }
+
+export const GET = handler;
+export const POST = handler;

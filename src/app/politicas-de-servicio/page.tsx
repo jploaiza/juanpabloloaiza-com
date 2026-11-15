@@ -75,6 +75,10 @@ La determinación de si se configura alguna de estas causales queda a criterio e
     title: "13. Tratamiento de datos personales",
     content: `El cliente autoriza expresamente al terapeuta a almacenar y tratar sus datos personales con la finalidad exclusiva de gestionar el proceso terapéutico, incluyendo nombre, datos de contacto, historial de sesiones y medios de pago. Estos datos no serán compartidos con terceros salvo obligación legal. El cliente podrá solicitar en cualquier momento la eliminación de sus datos, lo cual implicará la finalización del proceso terapéutico y no generará derecho a reembolso. Lo anterior se enmarca en la Ley N°19.628 sobre Protección de la Vida Privada (Chile) y legislación equivalente aplicable según el país de residencia del cliente.`,
   },
+  {
+    title: "14. Cookie de zona horaria",
+    content: `Para mostrar los horarios de agenda en tu hora local, el sitio te pregunta en qué país y ciudad estás. Solo si lo aceptas expresamente ("Aceptar y guardar"), se guarda en tu dispositivo una cookie llamada "jpl_tz" con tu zona horaria, tu país y tu ciudad principal, por un plazo de 1 año, para no volver a preguntarte. Esta cookie no contiene datos personales ni se usa con fines publicitarios o de seguimiento. Si eliges "Solo esta vez", no se guarda ninguna cookie y la elección se olvida al cerrar la pestaña. Puedes eliminar la cookie en cualquier momento desde la configuración de tu navegador (por ejemplo, al borrar el historial); en ese caso, el sitio volverá a preguntarte tu ubicación. Si reservas una cita, la zona horaria que tenías elegida se guarda junto con la reserva para enviarte las confirmaciones y recordatorios en tu hora local.`,
+  },
 ];
 
 const disclaimer = [

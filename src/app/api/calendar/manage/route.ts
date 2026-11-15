@@ -2,7 +2,7 @@
  * POST /api/calendar/manage
  * Body: { code: string, action: "cancel" }
  */
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/server";
 import { rateLimit, getIp } from "@/lib/rate-limit";
@@ -12,6 +12,7 @@ import { getCalendarConfig, getEventTypes } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
 import { sendWhatsApp } from "@/lib/whatsapp";
 import { buildBookingTimeVars } from "@/lib/booking-time";
+import { CHILE_TZ, zonedTimeToUtc } from "@/lib/tz";
 
 export async function POST(req: NextRequest) {
   const ip = getIp(req.headers);
@@ -53,7 +54,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Este tipo de cita no permite cancelaciones" }, { status: 403 });
     }
     if ((eventType.cancellation_cutoff_hours ?? 0) > 0) {
-      const slotMs = new Date(`${booking.date}T${booking.time_slot}:00`).getTime();
+      // La hora de la cita es hora de Chile; sin zona, el servidor (UTC) la leía 3-4 h corrida.
+      const slotMs = zonedTimeToUtc(booking.date as string, booking.time_slot as string, CHILE_TZ);
       const hoursUntil = (slotMs - Date.now()) / 3_600_000;
       if (hoursUntil < (eventType.cancellation_cutoff_hours ?? 0)) {
         return NextResponse.json({
@@ -96,7 +98,8 @@ export async function POST(req: NextRequest) {
   }).eq("id", booking.id);
 
   // Fire cancellation alerts (non-blocking)
-  void (async () => {
+  // after(): keeps the function alive until the alerts are sent (a bare `void` IIFE can be frozen)
+  after(async () => {
     try {
       const { data: templates } = await sb.from("booking_alert_templates")
         .select("channel, subject, body")
@@ -132,7 +135,7 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch { /* non-critical */ }
-  })();
+  });
 
   return NextResponse.json({ ok: true });
 }

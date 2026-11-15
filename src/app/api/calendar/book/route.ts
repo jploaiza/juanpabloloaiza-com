@@ -12,6 +12,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
+import { sendWhatsAppAfter } from "@/lib/whatsapp-after";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
@@ -26,7 +28,6 @@ import { createZoomMeeting, deleteZoomMeeting } from "@/lib/zoom";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { BOOKING_TZ, getCalendarConfig, getEventTypes } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
-import { sendWhatsApp } from "@/lib/whatsapp";
 import { buildBookingTimeVars } from "@/lib/booking-time";
 import { isValidTz } from "@/lib/tz";
 
@@ -234,7 +235,7 @@ export async function POST(req: NextRequest) {
     // Send pending WhatsApp to patient
     const pendingWaTpl = pendingTpls?.find((t) => t.channel === "whatsapp");
     if (pendingWaTpl && phone.trim()) {
-      void sendWhatsApp({ to: phone.trim(), body: renderTemplate(pendingWaTpl.body as string, templateVars) });
+      sendWhatsAppAfter({ to: phone.trim(), body: renderTemplate(pendingWaTpl.body as string, templateVars), context: "booking_pending" });
     }
 
     // Load requires_approval template and notify therapist
@@ -371,7 +372,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
     console.error("[book] GCal event creation failed:", msg);
-    if (zoomMeetingId) void deleteZoomMeeting(zoomMeetingId, config.zoom_credentials);
+    if (zoomMeetingId) after(() => deleteZoomMeeting(zoomMeetingId, config.zoom_credentials));
     return NextResponse.json({ error: "No se pudo crear el evento en el calendario. Intenta de nuevo." }, { status: 502 });
   }
 
@@ -391,7 +392,7 @@ export async function POST(req: NextRequest) {
         }
       } catch { /* non-critical */ }
       if (oldBooking.zoom_meeting_id) {
-        void deleteZoomMeeting(Number(oldBooking.zoom_meeting_id), config.zoom_credentials);
+        after(() => deleteZoomMeeting(Number(oldBooking.zoom_meeting_id), config.zoom_credentials));
       }
       await adminSb.from("bookings").update({ status: "rescheduled" }).eq("id", oldBooking.id);
     }
@@ -447,7 +448,7 @@ export async function POST(req: NextRequest) {
       : `<p>Tu ${label} está confirmada para el ${templateVars.date_long} a las ${templateVars.time}. Código: ${bookingCode}</p>`;
     const result = await resend.emails.send({ from: config.from_email, to: email.trim().toLowerCase(), subject, html });
     emailSent = !result.error;
-    void adminSb.from("comms_log").insert({
+    await adminSb.from("comms_log").insert({
       type: "booking_confirmation",
       subject,
       status: result.error ? "error" : "sent",
@@ -455,7 +456,7 @@ export async function POST(req: NextRequest) {
       body_preview: `gcal:${date}:${time}:${type}:${email}`,
     });
   } catch {
-    void adminSb.from("comms_log").insert({
+    await adminSb.from("comms_log").insert({
       type: "booking_confirmation",
       subject: `Confirmación de ${label}`,
       status: "error",
@@ -467,7 +468,7 @@ export async function POST(req: NextRequest) {
   // Send WhatsApp confirmation (non-blocking)
   const waTpl = templates?.find((t) => t.channel === "whatsapp");
   if (waTpl && phone.trim()) {
-    void sendWhatsApp({ to: phone.trim(), body: renderTemplate(waTpl.body as string, templateVars) });
+    sendWhatsAppAfter({ to: phone.trim(), body: renderTemplate(waTpl.body as string, templateVars), context: "booking_confirmation" });
   }
 
   return NextResponse.json({

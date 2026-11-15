@@ -7,8 +7,8 @@
  * Auth: x-cron-secret header
  */
 
+import { isCronAuthorized } from "@/lib/cron-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import {
@@ -57,13 +57,18 @@ function renderTemplate(tpl: string, patient: Patient): string {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// The whole run must finish inside the function limit. In "human" mode each patient used to wait
+// 30-120 s, so with more than a handful of patients Vercel killed the function mid-run — and
+// because the config is claimed (last_run_at) before sending, the rest were never reminded.
+export const maxDuration = 300;
+const RUN_BUDGET_MS = 270_000; // leaves ~30 s of margin below maxDuration
+
 export async function GET(req: NextRequest) {
-  const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");
-  const expected = Buffer.from(process.env.CRON_SECRET ?? "");
-  if (secret.length === 0 || secret.length !== expected.length || !timingSafeEqual(secret, expected)) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const startedAt = Date.now();
   const adminSb = await createAdminClient();
 
   // Current Chile time — read directly from America/Santiago, no offset arithmetic
@@ -217,6 +222,7 @@ export async function GET(req: NextRequest) {
 
   const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
   const results = [];
+  let truncatedPatients = 0;
 
   for (const config of configs) {
     // Dedup: skip if already ran today (Chile time) — prevents duplicate sends
@@ -300,7 +306,13 @@ export async function GET(req: NextRequest) {
     let sent = 0;
     let failed = 0;
 
+    let truncated = 0;
     for (let i = 0; i < eligible.length; i++) {
+      // Out of time budget: stop cleanly and report it instead of being killed mid-send.
+      if (Date.now() - startedAt > RUN_BUDGET_MS) {
+        truncated = eligible.length - i;
+        break;
+      }
       const patient = eligible[i];
       const sl = sessionsLeft(patient);
       const isSin = sl === 0;
@@ -360,10 +372,15 @@ export async function GET(req: NextRequest) {
 
       if (emailOk || whatsappOk) sent++; else failed++;
 
-      if (sendMode === "human" && i < eligible.length - 1) {
-        await sleep(delayMin + Math.random() * (delayMax - delayMin));
+      const remaining = eligible.length - i - 1;
+      if (sendMode === "human" && remaining > 0) {
+        // Human-like pause, shrunk when needed so every patient fits in the time budget.
+        const timeLeft = RUN_BUDGET_MS - (Date.now() - startedAt);
+        const affordable = Math.max(0, timeLeft / (remaining + 1));
+        await sleep(Math.min(delayMin + Math.random() * (delayMax - delayMin), affordable));
       }
     }
+    truncatedPatients += truncated;
 
     results.push({
       config_id: config.id,
@@ -373,6 +390,7 @@ export async function GET(req: NextRequest) {
       sin_sesiones: sinSesiones.length,
       sent,
       failed,
+      ...(truncated ? { truncated } : {}),
     });
   }
 
@@ -380,7 +398,14 @@ export async function GET(req: NextRequest) {
     chile_day: chileDay, chile_hour: chileHour, chile_minute: chileMinute,
     configs_matched: results.length,
     results,
-    ...(calendarError ? { top_error: `calendar: ${calendarError}` } : {}),
+    ...(calendarError || truncatedPatients
+      ? {
+          top_error: [
+            calendarError ? `calendar: ${calendarError}` : "",
+            truncatedPatients ? `tiempo agotado: ${truncatedPatients} paciente(s) sin recordatorio` : "",
+          ].filter(Boolean).join(" | "),
+        }
+      : {}),
   });
 
   return NextResponse.json({ day: chileDay, hour: chileHour, minute: chileMinute, processed: results.length, results });

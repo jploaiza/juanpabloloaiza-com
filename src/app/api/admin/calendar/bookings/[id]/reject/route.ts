@@ -4,6 +4,7 @@
  * Body: { reason?: string }
  */
 import { NextRequest, NextResponse } from "next/server";
+import { sendWhatsAppAfter } from "@/lib/whatsapp-after";
 import { Resend } from "resend";
 import { assertAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -18,7 +19,6 @@ function escapeHtml(str: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-import { sendWhatsApp } from "@/lib/whatsapp";
 import { buildBookingTimeVars } from "@/lib/booking-time";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const waTpl = templates?.find((t) => t.channel === "whatsapp");
   if (waTpl && booking.patient_phone) {
-    void sendWhatsApp({ to: booking.patient_phone as string, body: renderTemplate(waTpl.body as string, templateVars) });
+    sendWhatsAppAfter({ to: booking.patient_phone as string, body: renderTemplate(waTpl.body as string, templateVars), context: "booking_rejected" });
   }
 
   return NextResponse.json({ ok: true });

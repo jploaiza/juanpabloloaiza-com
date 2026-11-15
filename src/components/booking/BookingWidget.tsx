@@ -10,6 +10,7 @@ import {
   type ConfirmationData,
 } from "./booking-types";
 import TimezonePicker from "./TimezonePicker";
+import PhoneCodePicker from "./PhoneCodePicker";
 import Flag from "./Flag";
 import { cityFromTz, cityNameEs, todayInChile, tzOffsetLabel } from "@/lib/tz";
 import { readTzPref, saveTzPref, type TzPref } from "@/lib/tz-preference";
@@ -481,14 +482,7 @@ export default function BookingWidget({ type, rescheduleCode, prefillEmail, pref
             <div>
               <label className={labelCls}>Teléfono / WhatsApp *</label>
               <div className="flex gap-0">
-                <select
-                  value={countryCode} onChange={e => setCountryCode(e.target.value)}
-                  className={`bg-white border border-r-0 border-gray-200 text-gray-900 px-3 py-3 ${B} text-sm focus:outline-none focus:border-[#C5A059] transition shrink-0 max-w-[130px] rounded-sm rounded-r-none`}
-                >
-                  {COUNTRY_CODES.map(c => (
-                    <option key={c.code + c.country} value={c.code}>{c.flag} {c.code}</option>
-                  ))}
-                </select>
+                <PhoneCodePicker value={countryCode} onChange={setCountryCode} />
                 <input
                   type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                   required placeholder="300 000 0000"

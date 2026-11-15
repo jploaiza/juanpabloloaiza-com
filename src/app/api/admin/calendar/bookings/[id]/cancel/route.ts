@@ -2,7 +2,7 @@
  * POST /api/admin/calendar/bookings/[id]/cancel
  * Admin-initiated cancellation: bypasses policy checks, deletes GCal + Zoom, notifies patient.
  */
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { assertAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -71,7 +71,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }).eq("id", id);
 
   // Send cancellation notifications (non-blocking)
-  void (async () => {
+  // after(): keeps the function alive until the alerts are sent (a bare `void` IIFE can be frozen)
+  after(async () => {
     try {
       const { data: templates } = await adminSb
         .from("booking_alert_templates")
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
       }
     } catch { /* non-critical */ }
-  })();
+  });
 
   return NextResponse.json({ ok: true });
 }

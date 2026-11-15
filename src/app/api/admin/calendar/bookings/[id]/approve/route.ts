@@ -4,6 +4,7 @@
  * updates status to confirmed, sends confirmation notifications to patient.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { sendWhatsAppAfter } from "@/lib/whatsapp-after";
 import { Resend } from "resend";
 import { assertAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -15,7 +16,6 @@ import {
 import { createZoomMeeting } from "@/lib/zoom";
 import { BOOKING_TZ, getCalendarConfig, getEventTypes } from "@/lib/booking-config";
 import { renderTemplate, renderTemplateHtml } from "@/lib/templates";
-import { sendWhatsApp } from "@/lib/whatsapp";
 import { buildBookingTimeVars } from "@/lib/booking-time";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -213,7 +213,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
   const waTpl = templates?.find((t) => t.channel === "whatsapp");
   if (waTpl && booking.patient_phone) {
-    void sendWhatsApp({ to: booking.patient_phone as string, body: renderTemplate(waTpl.body as string, templateVars) });
+    sendWhatsAppAfter({ to: booking.patient_phone as string, body: renderTemplate(waTpl.body as string, templateVars), context: "booking_approved" });
   }
 
   return NextResponse.json({ ok: true });

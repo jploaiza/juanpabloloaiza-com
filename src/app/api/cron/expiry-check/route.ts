@@ -1,5 +1,5 @@
+import { isCronAuthorized } from "@/lib/cron-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
@@ -24,9 +24,7 @@ interface Profile {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = Buffer.from(req.headers.get("x-cron-secret") ?? "");
-  const expected = Buffer.from(process.env.CRON_SECRET ?? "");
-  if (secret.length === 0 || secret.length !== expected.length || !timingSafeEqual(secret, expected)) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
