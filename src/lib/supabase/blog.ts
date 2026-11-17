@@ -43,6 +43,8 @@ export function toDisplayPost(p: SupabasePost) {
     author: "Juan Pablo Loaiza",
     url: `${SITE_URL}/blog/${p.slug}`,
     tags: p.tags ?? [],
+    seoTitle: p.seo_title?.trim() || undefined,
+    seoDescription: p.seo_description?.trim() || undefined,
   };
 }
 

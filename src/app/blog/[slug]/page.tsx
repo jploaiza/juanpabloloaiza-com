@@ -20,6 +20,18 @@ function toJpegUrl(url: string): string {
   return url;
 }
 
+const BRAND = " | Juan Pablo Loaiza";
+
+/**
+ * Antes la etiqueta <title> usaba siempre "título del artículo | marca" (hasta 108 caracteres,
+ * 75 de 95 artículos pasaban de 60 y Google los cortaba), e ignoraba el campo seo_title que ya
+ * está escrito para cada artículo. Ahora se usa seo_title y la marca solo si cabe en 65.
+ */
+function seoTitleFor(post: { title: string; seoTitle?: string }): string {
+  const base = post.seoTitle || post.title;
+  return base.length + BRAND.length <= 65 ? `${base}${BRAND}` : base;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -32,8 +44,8 @@ export async function generateMetadata({
   const image = toJpegUrl(post.imageUrl || OG_FALLBACK);
 
   return {
-    title: `${post.title} | Juan Pablo Loaiza`,
-    description: post.excerpt,
+    title: seoTitleFor(post),
+    description: post.seoDescription || post.excerpt,
     keywords: `${post.category}, regresión a vidas pasadas, hipnosis terapéutica, ${post.title.toLowerCase()}`,
     alternates: { canonical: `${SITE_URL}/blog/${slug}` },
     openGraph: {

@@ -12,6 +12,9 @@ export interface BlogPost {
   author: string;
   url: string;
   tags?: string[];
+  /** Título/descripción pensados para Google (≤60 / ≤160). Si faltan se usan title/excerpt. */
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export const blogPosts: BlogPost[] = [
