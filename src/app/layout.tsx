@@ -134,8 +134,9 @@ export default function RootLayout({
         "Hipnosis Clínica",
       ],
       sameAs: [
-        "https://www.instagram.com/juanpabloloaizao/",
-        "https://www.youtube.com/@JuanPabloLoaizaO",
+        "https://www.instagram.com/jploaizao",
+        "https://www.tiktok.com/@jploaizao",
+        "https://www.youtube.com/@jploaizao",
       ],
       worksFor: { "@id": `${SITE_URL}/#service` },
     },
