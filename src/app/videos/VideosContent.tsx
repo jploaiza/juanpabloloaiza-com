@@ -5,50 +5,24 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import VideoPlayer from "@/components/VideoPlayer";
-import { MEDIA_BASE as R2_BASE, VIDEO_POSTER } from "@/lib/videos";
+import { VIDEO_POSTER } from "@/lib/videos";
+import { videoItems, videoUrl, type VideoCategory } from "@/lib/videos-data";
 
 interface Video {
   id: string;
   title: string;
   description: string;
   src: string;
-  category: "liberation" | "rvp" | "qa";
+  category: VideoCategory;
 }
 
-const videos: Video[] = [
-  {
-    id: "liberation-1",
-    title: "Liberación de Entidades Espirituales",
-    description: "Conoce en qué consiste la Terapia de Liberación de Entidades Espirituales, sus raíces en los estudios del Dr. Carl Wickland y el Dr. William Baldwin, y cómo puede ayudarte a recuperar tu bienestar energético.",
-    src: `${R2_BASE}/SRT1-2.mp4`,
-    category: "liberation",
-  },
-  {
-    id: "rvp-1",
-    title: "¿Cómo funciona el proceso?",
-    description: "Juan Pablo explica el proceso terapéutico de la regresión a vidas pasadas: las tres etapas de Descubrir, Entender y Limpiar, y cómo funciona cada sesión.",
-    src: `${R2_BASE}/RVP1.m4v`,
-    category: "rvp",
-  },
-  {
-    id: "rvp-2",
-    title: "¿Qué es la Terapia de Regresión a Vidas Pasadas?",
-    description: "Conoce en qué consiste esta terapia, cómo el alma acumula información de vidas pasadas y cómo la hipnosis clínica permite acceder a ella para sanar.",
-    src: `${R2_BASE}/Que-es-la-terapia-de-Regresion-a-Vidas-Pasadas.mp4`,
-    category: "rvp",
-  },
-  { id: "qa-1", title: "¿Se puede realizar en línea?", description: "Por supuesto. La terapia es completamente segura en línea. Más de 200 procesos terapéuticos se han realizado via Zoom con resultados maravillosos.", src: `${R2_BASE}/QA1.m4v`, category: "qa" },
-  { id: "qa-2", title: "¿Puedo tomar solo una sesión?", description: "No es recomendable. Una sola sesión deja más preguntas que respuestas. El proceso básico siempre comprende tres sesiones: descubrir, entender y limpiar.", src: `${R2_BASE}/QA2.m4v`, category: "qa" },
-  { id: "qa-3", title: "¿Existen contraindicaciones?", description: "La única contraindicación es para personas con enfermedades mentales diagnosticadas bajo tratamiento farmacológico. Esta terapia es siempre complementaria.", src: `${R2_BASE}/QA3.m4v`, category: "qa" },
-  { id: "qa-4", title: "¿Podré entrar en hipnosis?", description: "Si puedes dormir en la noche, podrás entrar en hipnosis. Es el mismo proceso natural de relajación profunda, guiado conscientemente.", src: `${R2_BASE}/QA4.m4v`, category: "qa" },
-  { id: "qa-5", title: "¿Qué pasa si se corta la llamada?", description: "Podemos reconectarnos y retomar la sesión desde donde la dejamos. Puedes salir de hipnosis solo, igual que al despertar en la mañana.", src: `${R2_BASE}/QA5.m4v`, category: "qa" },
-  { id: "qa-6", title: "¿Qué pasa si no veo nada?", description: "Ver imágenes no es el objetivo. Lo que define una terapia exitosa es conectar con la emoción atrapada y liberarla, independiente de las imágenes.", src: `${R2_BASE}/QA6.m4v`, category: "qa" },
-  { id: "qa-7", title: "¿Y si me lo estuviera imaginando todo?", description: "La imaginación no tiene emoción. Los recuerdos de vidas pasadas vienen siempre acompañados de una emoción real que no puede ser fabricada.", src: `${R2_BASE}/QA7.m4v`, category: "qa" },
-  { id: "qa-8", title: "¿Voy a estar consciente durante la hipnosis?", description: "Siempre estarás consciente. Tu mente consciente se queda presente, mirando y entendiendo todo lo que sucede durante el proceso.", src: `${R2_BASE}/QA8.m4v`, category: "qa" },
-  { id: "qa-9", title: "¿Me acordaré de lo que viví en hipnosis?", description: "Sí. Nunca perderás la conciencia. Todo lo que aprendes y vives en estas sesiones quedará integrado en ti como un conocimiento adquirido.", src: `${R2_BASE}/QA9.m4v`, category: "qa" },
-  { id: "qa-10", title: "¿Las sesiones se graban?", description: "Sí. Todas las sesiones se graban en audio y video por Zoom, para mantener registros y para que puedas acceder a tu grabación si la necesitas.", src: `${R2_BASE}/QA10.m4v`, category: "qa" },
-  { id: "qa-11", title: "¿Quién puede tomar esta terapia?", description: "Todas las personas pueden tomar esta terapia, excepto menores de edad o personas con enfermedades mentales diagnosticadas bajo tratamiento farmacológico.", src: `${R2_BASE}/QA11.m4v`, category: "qa" },
-];
+const videos: Video[] = videoItems.map((v) => ({
+  id: v.id,
+  title: v.title,
+  description: v.description,
+  src: videoUrl(v),
+  category: v.category,
+}));
 
 const liberationVideos = videos.filter((v) => v.category === "liberation");
 const rvpVideos = videos.filter((v) => v.category === "rvp");
@@ -118,6 +92,12 @@ export default function VideosContent() {
           Accede a videos informativos sobre la terapia de regresión a vidas pasadas y resuelve todas tus dudas antes de comenzar tu proceso.
         </p>
         <div className="w-16 h-[1px] bg-[#C5A059] mt-6"></div>
+        <p className="font-crimson text-lg text-gray-400 max-w-3xl leading-relaxed mt-6">
+          Aquí encuentras {videoItems.length} videos breves de Juan Pablo Loaiza, terapeuta de regresión a vidas pasadas e hipnosis
+          terapéutica. Explican qué es la terapia, cómo se desarrolla en tres etapas (descubrir, entender y limpiar), cómo es una sesión
+          en línea por Zoom y responden las dudas más frecuentes antes de empezar. Si prefieres leer, también puedes
+          explorar el <Link href="/blog" className="text-[#C5A059] hover:text-[#F3E5AB] underline underline-offset-2">blog</Link>.
+        </p>
       </motion.div>
 
       {/* Liberation */}

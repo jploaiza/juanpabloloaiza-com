@@ -3,6 +3,8 @@ import { getAllBlogPosts } from "@/lib/blog-data";
 import { getAllPublishedPosts } from "@/lib/supabase/blog";
 import { getTopics } from "@/lib/blog-topics";
 import { SITE_URL } from "@/lib/site";
+import { VIDEO_POSTER } from "@/lib/videos";
+import { VIDEOS_UPLOAD_DATE, videoItems, videoUrl } from "@/lib/videos-data";
 
 export const revalidate = 3600;
 
@@ -44,7 +46,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: BASE, changeFrequency: "monthly", priority: 1.0 },
     { url: `${BASE}/blog`, lastModified: latest, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE}/videos`, changeFrequency: "monthly", priority: 0.8 },
+    {
+      url: `${BASE}/videos`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+      // Sitemap de video: describe cada video de la página para Google
+      videos: videoItems.map((v) => ({
+        title: v.title,
+        thumbnail_loc: `${BASE}${VIDEO_POSTER}`,
+        description: v.description.slice(0, 2000),
+        content_loc: videoUrl(v),
+        duration: v.durationSec,
+        publication_date: VIDEOS_UPLOAD_DATE,
+        family_friendly: "yes",
+      })),
+    },
     ...topicUrls,
     ...blogUrls,
   ];
