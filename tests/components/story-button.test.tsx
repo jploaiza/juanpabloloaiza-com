@@ -55,7 +55,7 @@ function renderContent(overrides: Partial<BlogPost> = {}) {
       post={{ ...mockPost, ...overrides }}
       previousPost={null}
       nextPost={null}
-      relatedPosts={[]}
+      relatedPosts={[]} topics={[]}
     />
   );
 }

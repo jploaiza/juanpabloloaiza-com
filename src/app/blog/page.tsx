@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { SITE_URL } from "@/lib/site";
-import { Suspense } from "react";
 import Header from "@/components/Header";
 import BlogContent from "./BlogContent";
 import { getAllPublishedPosts } from "@/lib/supabase/blog";
+import { getTopics } from "@/lib/blog-topics";
 
 export const dynamic = "force-dynamic";
 
 const OG_IMAGE = "https://media.juanpabloloaiza.com/blog/la-conexion-entre-miedos-actuales-y-vidas-pasadas.webp";
 
-export const metadata: Metadata = {
+type SearchParams = Promise<{ page?: string }>;
+
+function parsePage(raw: string | undefined): number {
+  const n = parseInt(raw ?? "1", 10);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+const BASE_METADATA: Metadata = {
   title: "Blog — Regresión a Vidas Pasadas y Sanación Espiritual | Juan Pablo Loaiza",
   description: "Artículos sobre hipnosis terapéutica, regresión a vidas pasadas, liberación de entidades espirituales y sanación del alma. Aprende sobre el proceso terapéutico.",
   keywords: "blog vidas pasadas, artículos hipnosis terapéutica, sanación espiritual, karma, regresión, liberación entidades",
@@ -31,15 +39,29 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function BlogPage() {
-  const posts = await getAllPublishedPosts();
+// Cada página de la paginación es una URL indexable con su propia canónica (antes todas
+// apuntaban a /blog y Google las trataba como duplicadas de la primera).
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const page = parsePage((await searchParams).page);
+  if (page <= 1) return BASE_METADATA;
+  return {
+    ...BASE_METADATA,
+    title: `Blog — Página ${page} | Juan Pablo Loaiza`,
+    alternates: { canonical: `${SITE_URL}/blog?page=${page}` },
+    openGraph: { ...BASE_METADATA.openGraph, url: `${SITE_URL}/blog?page=${page}` },
+  };
+}
 
+export default async function BlogPage({ searchParams }: { searchParams: SearchParams }) {
+  // /blog?page=1 se redirige en middleware.ts
+  const page = parsePage((await searchParams).page);
+
+  const posts = await getAllPublishedPosts();
+  if (page > Math.max(1, Math.ceil(posts.length / 10))) redirect("/blog");
   return (
     <>
       <Header />
-      <Suspense>
-        <BlogContent posts={posts} />
-      </Suspense>
+      <BlogContent posts={posts} page={page} topics={getTopics(posts)} />
     </>
   );
 }

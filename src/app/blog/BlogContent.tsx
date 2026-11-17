@@ -3,19 +3,19 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Clock, ArrowRight, Search, ChevronDown, ChevronUp } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { BlogPost } from "@/lib/blog-data";
+import type { Topic } from "@/lib/blog-topics";
 
 const POSTS_PER_PAGE = 10; // 1 featured + 9 grid
 
 interface Props {
   posts: BlogPost[];
+  page: number;
+  topics: Topic[];
 }
 
-export default function BlogContent({ posts }: Props) {
-  const searchParams = useSearchParams();
-  const page = parseInt(searchParams.get("page") || "1");
+export default function BlogContent({ posts, page, topics }: Props) {
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [showAllCategories, setShowAllCategories] = useState(false);
 
@@ -236,7 +236,7 @@ export default function BlogContent({ posts }: Props) {
           <div className="flex items-center justify-center gap-3 mt-14">
             {page > 1 && (
               <Link
-                href={`/blog?page=${page - 1}`}
+                href={page - 1 === 1 ? "/blog" : `/blog?page=${page - 1}`}
                 className="font-cinzel px-5 py-2.5 border border-[#C5A059]/30 hover:border-[#C5A059] text-[#C5A059] hover:bg-[#C5A059]/10 transition text-xs uppercase tracking-widest"
               >
                 ← Anterior
@@ -246,7 +246,7 @@ export default function BlogContent({ posts }: Props) {
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                 <Link
                   key={pageNum}
-                  href={`/blog?page=${pageNum}`}
+                  href={pageNum === 1 ? "/blog" : `/blog?page=${pageNum}`}
                   className={`px-3 py-2 font-cinzel text-xs transition ${
                     pageNum === page
                       ? "bg-[#C5A059] text-[#020617]"
@@ -268,6 +268,25 @@ export default function BlogContent({ posts }: Props) {
           </div>
         )}
       </div>
+
+      {topics.length > 0 && (
+        <nav aria-label="Explorar por tema" className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+          <h2 className="font-cinzel text-xs uppercase tracking-widest text-[#C5A059] mb-4 pb-3 border-b border-[#C5A059]/15">
+            Explorar por tema
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {topics.slice(0, 40).map((t) => (
+              <Link
+                key={t.slug}
+                href={`/blog/tema/${t.slug}`}
+                className="font-crimson text-sm text-gray-300 border border-[#C5A059]/25 px-3 py-1 hover:border-[#C5A059] hover:text-[#C5A059] transition"
+              >
+                {t.name} <span className="text-gray-500">({t.count})</span>
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
     </main>
   );
 }

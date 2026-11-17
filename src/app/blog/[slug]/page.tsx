@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import ArticleContent from "./ArticleContent";
 import { getPublishedPostBySlug, getAllPublishedPosts } from "@/lib/supabase/blog";
 import { SITE_URL } from "@/lib/site";
+import { getRelatedPosts, getTopics } from "@/lib/blog-topics";
 
 export const revalidate = 3600;
 
@@ -70,7 +71,8 @@ export default async function ArticlePage({
   const idx = allPosts.findIndex((p) => p.slug === slug);
   const previousPost = idx > 0 ? allPosts[idx - 1] : null;
   const nextPost = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
-  const relatedPosts = allPosts.filter((p) => p.slug !== slug).slice(0, 3);
+  const relatedPosts = getRelatedPosts(post, allPosts, 6);
+  const topics = getTopics(allPosts);
 
   const image = toJpegUrl(post.imageUrl || OG_FALLBACK);
   const structuredData = {
@@ -87,6 +89,8 @@ export default async function ArticlePage({
     },
     datePublished: post.date,
     dateModified: post.date,
+    wordCount: post.content.trim().split(/\s+/).length,
+    keywords: (post.tags ?? []).join(", "),
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${slug}` },
     url: `${SITE_URL}/blog/${slug}`,
     articleSection: post.category,
@@ -114,7 +118,7 @@ export default async function ArticlePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
       />
       <Header />
-      <ArticleContent post={post} previousPost={previousPost} nextPost={nextPost} relatedPosts={relatedPosts} />
+      <ArticleContent post={post} previousPost={previousPost} nextPost={nextPost} relatedPosts={relatedPosts} topics={topics} />
     </>
   );
 }

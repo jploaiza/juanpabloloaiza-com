@@ -37,7 +37,7 @@ export default function Footer() {
               { label: "El Origen", href: "/#origen" },
               { label: "Vidas Pasadas", href: "/#QueEsTRVP" },
               { label: "Preguntas Frecuentes", href: "/#PreguntasFrecuentes" },
-              { label: "Blog", href: "/#blog" },
+              { label: "Blog", href: "/blog" },
               { label: "Entidades Espirituales", href: "/#liberacion" },
               { label: "Políticas de Servicio", href: "/politicas-de-servicio" },
             ].map((link) => (

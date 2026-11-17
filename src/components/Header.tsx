@@ -12,7 +12,7 @@ const navItems = [
   { label: "VIDAS PASADAS", href: "/#QueEsTRVP" },
   { label: "ENTIDADES ESPIRITUALES", href: "/#liberacion" },
   { label: "PREGUNTAS", href: "/#PreguntasFrecuentes" },
-  { label: "BLOG", href: "/#blog" },
+  { label: "BLOG", href: "/blog" },
 ];
 
 export default function Header() {

@@ -7,6 +7,7 @@ import type { BlogPost } from "@/lib/blog-data";
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
 import NewsletterForm from "@/components/NewsletterForm";
+import { topicSlug, type Topic } from "@/lib/blog-topics";
 
 interface Props {
   post: BlogPost;
@@ -14,7 +15,9 @@ interface Props {
   nextPost: BlogPost | null;
 }
 
-export default function ArticleContent({ post, previousPost, nextPost, relatedPosts }: Props & { relatedPosts: BlogPost[] }) {
+export default function ArticleContent({ post, previousPost, nextPost, relatedPosts, topics }: Props & { relatedPosts: BlogPost[]; topics: Topic[] }) {
+  const topicSlugs = new Set(topics.map((t) => t.slug));
+  const postTopics = (post.tags ?? []).filter((t) => topicSlugs.has(topicSlug(t)));
 
   const shareUrl = `https://www.juanpabloloaiza.com/blog/${post.slug}`;
   const [storyLoading, setStoryLoading] = useState(false);
@@ -218,6 +221,23 @@ export default function ArticleContent({ post, previousPost, nextPost, relatedPo
               {post.content}
             </ReactMarkdown>
           </motion.article>
+
+          {postTopics.length > 0 && (
+            <nav aria-label="Temas del artículo" className="mt-10 pt-6 border-t border-[#C5A059]/10">
+              <p className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059] mb-3">Más sobre estos temas</p>
+              <div className="flex flex-wrap gap-2">
+                {postTopics.map((t) => (
+                  <Link
+                    key={t}
+                    href={`/blog/tema/${topicSlug(t)}`}
+                    className="font-crimson text-sm text-gray-300 border border-[#C5A059]/25 px-3 py-1 hover:border-[#C5A059] hover:text-[#C5A059] transition"
+                  >
+                    {t}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+          )}
 
           {/* Prev / Next navigation */}
           {(previousPost || nextPost) && (
