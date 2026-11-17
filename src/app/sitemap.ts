@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { getAllBlogPosts } from "@/lib/blog-data";
 import { getAllPublishedPosts } from "@/lib/supabase/blog";
-import { getTopics } from "@/lib/blog-topics";
+import { getTopics, MIN_POSTS_TO_INDEX } from "@/lib/blog-topics";
 import { SITE_URL } from "@/lib/site";
 import { VIDEO_POSTER } from "@/lib/videos";
 import { VIDEOS_UPLOAD_DATE, videoItems, videoUrl } from "@/lib/videos-data";
@@ -35,8 +35,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // lo que hace que Google deje de confiar en el campo).
   const latest = allPosts.map((p) => asDate(p.date)).filter((d): d is Date => !!d).sort((a, b) => b.getTime() - a.getTime())[0];
 
-  // Páginas de tema: solo etiquetas con suficientes artículos (las demás devuelven 404)
-  const topicUrls: MetadataRoute.Sitemap = getTopics(allPosts).map((t) => ({
+  // Páginas de tema indexables: solo las que tienen suficientes artículos (las demás llevan noindex)
+  const topicUrls: MetadataRoute.Sitemap = getTopics(allPosts).filter((t) => t.count >= MIN_POSTS_TO_INDEX).map((t) => ({
     url: `${BASE}/blog/tema/${t.slug}`,
     lastModified: latest,
     changeFrequency: "weekly",

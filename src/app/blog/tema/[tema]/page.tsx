@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getAllPublishedPosts } from "@/lib/supabase/blog";
-import { getPostsForTopic, getTopics } from "@/lib/blog-topics";
+import { getPostsForTopic, getTopics, MIN_POSTS_TO_INDEX } from "@/lib/blog-topics";
 import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title,
     description,
     alternates: { canonical: url },
+    robots: topic.count >= MIN_POSTS_TO_INDEX ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: { title, description, url, siteName: "Juan Pablo Loaiza", locale: "es_ES", type: "website" },
   };
 }

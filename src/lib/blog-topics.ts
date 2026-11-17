@@ -3,6 +3,13 @@ import type { BlogPost } from "@/lib/blog-data";
 /** Mínimo de artículos para que una etiqueta tenga página de tema propia (evita páginas delgadas). */
 export const MIN_POSTS_PER_TOPIC = 3;
 
+/**
+ * Mínimo para que la página de tema se indexe y entre al sitemap. Con 3 o 4 artículos la página
+ * es casi un listado delgado: sigue existiendo y enlazando (noindex, follow) pero no compite ni
+ * gasta rastreo, que en este sitio es de ~15 solicitudes al día.
+ */
+export const MIN_POSTS_TO_INDEX = 5;
+
 export interface Topic {
   slug: string;
   name: string;
