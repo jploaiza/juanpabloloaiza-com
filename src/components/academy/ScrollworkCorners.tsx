@@ -2,6 +2,7 @@
  * ScrollworkCorners
  * Decorative corner image placed at all 4 corners of the parent (must be `relative`).
  * Top-left is the original; the other three are flipped with CSS transforms.
+ * Rendered as CSS backgrounds so decorative art is not exposed to image crawlers.
  */
 const SRC = "https://media.juanpabloloaiza.com/images/esq-izq-decoracion.png";
 
@@ -20,18 +21,17 @@ export default function ScrollworkCorners({ size = 48, opacity = 1 }: Props) {
     pointerEvents: "none",
     userSelect: "none",
     opacity,
+    backgroundImage: `url("${SRC}")`,
+    backgroundSize: "contain",
+    backgroundRepeat: "no-repeat",
   };
 
   return (
     <>
-      {/* Top-left – original */}
-      <img src={SRC} alt="" aria-hidden="true" style={{ ...base, top: 0, left: 0 }} />
-      {/* Top-right – flip horizontal */}
-      <img src={SRC} alt="" aria-hidden="true" style={{ ...base, top: 0, right: 0, transform: "scaleX(-1)" }} />
-      {/* Bottom-left – flip vertical */}
-      <img src={SRC} alt="" aria-hidden="true" style={{ ...base, bottom: 0, left: 0, transform: "scaleY(-1)" }} />
-      {/* Bottom-right – flip both */}
-      <img src={SRC} alt="" aria-hidden="true" style={{ ...base, bottom: 0, right: 0, transform: "scale(-1,-1)" }} />
+      <span aria-hidden="true" style={{ ...base, top: 0, left: 0 }} />
+      <span aria-hidden="true" style={{ ...base, top: 0, right: 0, transform: "scaleX(-1)" }} />
+      <span aria-hidden="true" style={{ ...base, bottom: 0, left: 0, transform: "scaleY(-1)" }} />
+      <span aria-hidden="true" style={{ ...base, bottom: 0, right: 0, transform: "scale(-1,-1)" }} />
     </>
   );
 }

@@ -1,7 +1,3 @@
-"use client";
-
-import Image from "next/image";
-
 interface HeraldFrameProps {
   children: React.ReactNode;
   size?: number;
@@ -10,6 +6,13 @@ interface HeraldFrameProps {
 
 const CORNER = "/assets/ornaments/corner-scroll.png";
 
+const CORNER_POSITIONS: React.CSSProperties[] = [
+  { top: 0, left: 0 },
+  { top: 0, right: 0, transform: "scaleX(-1)" },
+  { bottom: 0, left: 0, transform: "scaleY(-1)" },
+  { bottom: 0, right: 0, transform: "scale(-1, -1)" },
+];
+
 export default function HeraldFrame({
   children,
   size = 88,
@@ -17,25 +20,19 @@ export default function HeraldFrame({
 }: HeraldFrameProps) {
   return (
     <div className={`relative ${className}`}>
-      {/* Top-left — original */}
-      <span className="absolute top-0 left-0 z-10 pointer-events-none block" style={{ width: size, height: size }}>
-        <Image src={CORNER} alt="" fill className="object-contain" />
-      </span>
-
-      {/* Top-right — mirrored horizontally */}
-      <span className="absolute top-0 right-0 z-10 pointer-events-none block" style={{ width: size, height: size, transform: "scaleX(-1)" }}>
-        <Image src={CORNER} alt="" fill className="object-contain" />
-      </span>
-
-      {/* Bottom-left — mirrored vertically */}
-      <span className="absolute bottom-0 left-0 z-10 pointer-events-none block" style={{ width: size, height: size, transform: "scaleY(-1)" }}>
-        <Image src={CORNER} alt="" fill className="object-contain" />
-      </span>
-
-      {/* Bottom-right — mirrored both axes */}
-      <span className="absolute bottom-0 right-0 z-10 pointer-events-none block" style={{ width: size, height: size, transform: "scale(-1, -1)" }}>
-        <Image src={CORNER} alt="" fill className="object-contain" />
-      </span>
+      {CORNER_POSITIONS.map((position, index) => (
+        <span
+          key={index}
+          aria-hidden="true"
+          className="absolute z-10 pointer-events-none block bg-contain bg-no-repeat"
+          style={{
+            width: size,
+            height: size,
+            backgroundImage: `url("${CORNER}")`,
+            ...position,
+          }}
+        />
+      ))}
 
       {children}
     </div>
