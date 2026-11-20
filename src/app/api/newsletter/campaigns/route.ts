@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
+import { ALLOWED_SENDER_DOMAINS, getBrand } from "@/lib/newsletter/brands";
 
 export const dynamic = "force-dynamic";
 
-const ALLOWED_SENDER_DOMAIN = "juanpabloloaiza.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateSender(senderEmail?: string, senderName?: string): string | null {
   if (senderEmail) {
-    if (!EMAIL_RE.test(senderEmail) || !senderEmail.endsWith(`@${ALLOWED_SENDER_DOMAIN}`)) {
+    if (!EMAIL_RE.test(senderEmail) || !ALLOWED_SENDER_DOMAINS.some((d) => senderEmail.toLowerCase().endsWith(`@${d}`))) {
       return "Email de remitente inválido.";
     }
   }
@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
   const { name, subject, preheader, template_kind, template_data, sender_name, sender_email, segment } = body;
+  // `brand` solo define los valores por defecto (remitente y lista); la marca real sale del remitente
+  const brand = getBrand(body.brand);
 
   if (!name?.trim()) return NextResponse.json({ error: "El nombre es obligatorio." }, { status: 400 });
 
@@ -56,9 +58,9 @@ export async function POST(req: NextRequest) {
       preheader: preheader?.trim() ?? "",
       template_kind: template_kind ?? "editorial",
       template_data: template_data ?? {},
-      sender_name: sender_name ?? "Juan Pablo Loaiza",
-      sender_email: sender_email ?? "newsletter@juanpabloloaiza.com",
-      segment: segment ?? { status: "confirmed", tags: [] },
+      sender_name: sender_name ?? brand.fromName,
+      sender_email: sender_email ?? brand.fromEmail,
+      segment: segment ?? { status: "confirmed", tags: brand.listTag ? [brand.listTag] : [] },
       created_by: userId,
     })
     .select("id")

@@ -1,4 +1,5 @@
-const LOGO_URL = "https://media.juanpabloloaiza.com/images/Logo%20transparente%20blanco.png";
+import { applyPalette, BRANDS, type Brand } from "@/lib/newsletter/brands";
+
 const PHOTO_URL = "https://media.juanpabloloaiza.com/images/jpl-newwsp.jpeg";
 const WHATSAPP_URL = "https://api.whatsapp.com/send?phone=56962081884";
 
@@ -17,20 +18,21 @@ export function esc(s: string): string {
  *                  Rendered below the social links row.
  *                  If omitted, shows just the contact email.
  */
-export function emailShell(content: string, footer?: string): string {
+export function emailShell(content: string, footer?: string, brand: Brand = BRANDS.jpl): string {
+  const supportMail = brand.key === "jpl" ? "contacto@juanpabloloaiza.com" : brand.supportEmail;
   const defaultFineprint = `
     <p style="color:#4a6a8a;font-size:11px;margin:0;font-family:Georgia,serif;">
-      <a href="mailto:contacto@juanpabloloaiza.com" style="color:#4a6a8a;text-decoration:none;">contacto@juanpabloloaiza.com</a>
+      <a href="mailto:${supportMail}" style="color:#4a6a8a;text-decoration:none;">${supportMail}</a>
       &nbsp;·&nbsp;
       <a href="${WHATSAPP_URL}" style="color:#4a6a8a;text-decoration:none;">+56 9 6208 1884</a>
     </p>`;
 
-  return `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Juan Pablo Loaiza</title>
+  <title>${esc(brand.emailTitle)}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#0a1628;font-family:Georgia,'Times New Roman',serif;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a1628;">
@@ -53,7 +55,7 @@ export function emailShell(content: string, footer?: string): string {
                 <!-- Logo header -->
                 <tr>
                   <td style="background-color:#0e1b30;padding:28px 32px 24px;text-align:center;border-bottom:1px solid rgba(197,160,89,0.2);">
-                    <img src="${LOGO_URL}" width="160" alt="Juan Pablo Loaiza" style="display:inline-block;max-width:160px;border:0;opacity:0.9;"/>
+                    <img src="${brand.logoUrl}" width="${brand.logoWidth}" alt="${esc(brand.logoAlt)}" style="display:inline-block;max-width:${brand.logoWidth}px;border:0;opacity:0.9;"/>
                   </td>
                 </tr>
                 <!-- Email body content -->
@@ -76,17 +78,17 @@ export function emailShell(content: string, footer?: string): string {
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td width="100" valign="top" style="padding-right:20px;">
-                          <img src="${PHOTO_URL}" width="80" height="80" alt="Juan Pablo Loaiza"
+                          <img src="${PHOTO_URL}" width="80" height="80" alt="${esc(brand.author.name)}"
                             style="display:block;width:80px;height:80px;object-fit:cover;border:1px solid rgba(197,160,89,0.4);"/>
                         </td>
                         <td valign="top">
-                          <p style="color:#C5A059;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin:0 0 4px;font-family:Georgia,serif;">Tu terapeuta</p>
-                          <p style="color:#ffffff;font-size:16px;margin:0 0 8px;font-family:Georgia,serif;font-weight:normal;letter-spacing:0.5px;">Juan Pablo Loaiza</p>
-                          <p style="color:#6b7f99;font-size:11px;line-height:1.55;margin:0 0 10px;font-family:Georgia,serif;">Terapeuta Holístico Certificado Internacionalmente en Hipnosis Clínica con Técnicas Regresivas y Liberación de Entidades Espirituales, con más de 18 años de experiencia.</p>
-                          <p style="color:#8a9bb5;font-size:12px;line-height:1.6;margin:0 0 16px;font-family:Georgia,serif;font-style:italic;">Si tienes dudas sobre tu sesión o tu proceso, contáctame directamente. Tu compromiso te llevará a la meta.</p>
+                          <p style="color:#C5A059;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin:0 0 4px;font-family:Georgia,serif;">${esc(brand.author.label)}</p>
+                          <p style="color:#ffffff;font-size:16px;margin:0 0 8px;font-family:Georgia,serif;font-weight:normal;letter-spacing:0.5px;">${esc(brand.author.name)}</p>
+                          <p style="color:#6b7f99;font-size:11px;line-height:1.55;margin:0 0 10px;font-family:Georgia,serif;">${esc(brand.author.bio)}</p>
+                          <p style="color:#8a9bb5;font-size:12px;line-height:1.6;margin:0 0 16px;font-family:Georgia,serif;font-style:italic;">${esc(brand.author.note)}</p>
                           <a href="${WHATSAPP_URL}"
                             style="display:inline-block;padding:8px 22px;background-color:#C5A059;color:#020617;font-family:Georgia,serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">
-                            Contactar por WhatsApp
+                            ${esc(brand.author.cta)}
                           </a>
                         </td>
                       </tr>
@@ -143,7 +145,7 @@ export function emailShell(content: string, footer?: string): string {
         <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
           <tr><td style="padding:14px;text-align:center;">
             <p style="color:#2d4a6e;font-size:11px;margin:0;font-family:Georgia,serif;letter-spacing:1px;">
-              © 2026 Juan Pablo Loaiza · Todos los derechos reservados
+              ${esc(brand.copyright)}
             </p>
           </td></tr>
         </table>
@@ -152,4 +154,5 @@ export function emailShell(content: string, footer?: string): string {
   </table>
 </body>
 </html>`;
+  return applyPalette(html, brand);
 }

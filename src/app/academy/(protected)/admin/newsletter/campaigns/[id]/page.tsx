@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import CampaignBuilder from "@/components/newsletter/CampaignBuilder";
 import { getAllPublishedPosts } from "@/lib/supabase/blog";
+import { BRANDS, brandFromSenderEmail } from "@/lib/newsletter/brands";
+import { getPortalArticles } from "@/lib/newsletter/portal-articles";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Editar Campaña — Newsletter" };
@@ -19,12 +21,14 @@ export default async function CampaignBuilderPage({ params }: { params: Promise<
   const { data: campaign } = await adminSb.from("newsletter_campaigns").select("*").eq("id", id).single();
   if (!campaign) notFound();
 
-  const posts = await getAllPublishedPosts();
+  // La marca sale del dominio del remitente: el portal usa sus propios artículos
+  const brand = brandFromSenderEmail(campaign.sender_email) ?? BRANDS.jpl;
+  const posts = brand.key === "rvp" ? await getPortalArticles() : await getAllPublishedPosts();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-20">
       <div className="mb-6">
-        <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Newsletter › Campañas</p>
+        <p className="font-cinzel text-[9px] uppercase tracking-widest text-[#C5A059] mb-1">Newsletter › Campañas · {brand.name}</p>
         <h1 className="font-cinzel text-2xl text-white truncate">{campaign.name}</h1>
       </div>
       <CampaignBuilder campaign={campaign} posts={posts} />

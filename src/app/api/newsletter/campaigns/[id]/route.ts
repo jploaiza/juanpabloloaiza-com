@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
+import { ALLOWED_SENDER_DOMAINS } from "@/lib/newsletter/brands";
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const ALLOWED_SENDER_DOMAIN = "juanpabloloaiza.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateSender(senderEmail?: unknown, senderName?: unknown): string | null {
   if (senderEmail) {
     const e = String(senderEmail);
-    if (!EMAIL_RE.test(e) || !e.endsWith(`@${ALLOWED_SENDER_DOMAIN}`)) return "Email de remitente inválido.";
+    if (!EMAIL_RE.test(e) || !ALLOWED_SENDER_DOMAINS.some((d) => e.toLowerCase().endsWith(`@${d}`))) return "Email de remitente inválido.";
   }
   if (senderName && /[\r\n]/.test(String(senderName))) return "Nombre de remitente inválido.";
   return null;
