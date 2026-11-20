@@ -11,6 +11,15 @@ export const revalidate = 3600;
 
 type Params = { tema: string };
 
+// Misma razón que en /blog/[slug]: sin esto la ruta se renderiza en cada petición.
+export async function generateStaticParams() {
+  try {
+    return getTopics(await getAllPublishedPosts()).map((t) => ({ tema: t.slug }));
+  } catch {
+    return [];
+  }
+}
+
 async function load(tema: string) {
   const all = await getAllPublishedPosts();
   const topics = getTopics(all);

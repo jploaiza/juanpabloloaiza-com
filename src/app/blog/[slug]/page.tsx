@@ -2,11 +2,23 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import { notFound } from "next/navigation";
 import ArticleContent from "./ArticleContent";
-import { getPublishedPostBySlug, getAllPublishedPosts } from "@/lib/supabase/blog";
+import { getPublishedPostBySlug, getAllPublishedPosts, getAllPublishedSlugs } from "@/lib/supabase/blog";
 import { SITE_URL } from "@/lib/site";
 import { getRelatedPosts, getTopics } from "@/lib/blog-topics";
+import { autoLinkContent } from "@/lib/internal-links";
 
 export const revalidate = 3600;
+
+// Sin generateStaticParams, Next trata esta ruta dinámica como renderizada en cada petición
+// (cache-control: private, no-store) aunque exista `revalidate`. Con la lista de slugs se
+// prerenderiza y se sirve desde el CDN con ISR; los slugs nuevos se generan bajo demanda.
+export async function generateStaticParams() {
+  try {
+    return (await getAllPublishedSlugs()).map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
+}
 
 const OG_FALLBACK = "https://res.cloudinary.com/dvudfdhoi/image/upload/w_1200,h_630,c_fill,f_jpg,q_auto/main-juanpabloloaiza-regresion-vidas-pasadas_u6gseu";
 
@@ -85,6 +97,8 @@ export default async function ArticlePage({
   const nextPost = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
   const relatedPosts = getRelatedPosts(post, allPosts, 6);
   const topics = getTopics(allPosts);
+  // Enlaces internos contextuales: solo 7 de 99 artículos enlazaban a otros dentro del texto.
+  const linkedPost = { ...post, content: autoLinkContent(post, allPosts).content };
 
   const image = toJpegUrl(post.imageUrl || OG_FALLBACK);
   const structuredData = {
@@ -130,7 +144,7 @@ export default async function ArticlePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
       />
       <Header />
-      <ArticleContent post={post} previousPost={previousPost} nextPost={nextPost} relatedPosts={relatedPosts} topics={topics} />
+      <ArticleContent post={linkedPost} previousPost={previousPost} nextPost={nextPost} relatedPosts={relatedPosts} topics={topics} />
     </>
   );
 }

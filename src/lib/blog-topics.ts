@@ -48,23 +48,66 @@ export function getPostsForTopic(posts: BlogPost[], slug: string): BlogPost[] {
 }
 
 /**
- * Artículos relacionados por etiquetas compartidas. Las etiquetas raras pesan más que las
- * genéricas ("hipnoterapia" está en más de la mitad de los artículos), y a igual puntaje
- * gana el más reciente. Si no alcanzan, se completa con los más recientes.
+ * Artículos relacionados por etiquetas compartidas, repartidos de forma global. Las etiquetas
+ * raras pesan más que las genéricas ("hipnoterapia" está en más de la mitad de los artículos).
+ * Antes cada artículo elegía por separado los 6 mejores, y unos pocos recibían 40-60 enlaces
+ * mientras que 13 no recibían ninguno (justo los que Google nunca llegó a rastrear). Ahora los
+ * enlaces se asignan en rondas penalizando a los destinos que ya reciben muchos, de modo que
+ * todos los artículos reciben enlaces entrantes sin perder la afinidad temática.
  */
-export function getRelatedPosts(post: BlogPost, all: BlogPost[], limit = 6): BlogPost[] {
+const BALANCE_POWER = 1.5;
+const SCORE_FLOOR = 0.02;
+
+let relatedKey = "";
+let relatedCache = new Map<string, BlogPost[]>();
+
+function buildRelatedPlan(all: BlogPost[], limit: number): Map<string, BlogPost[]> {
   const freq = new Map<string, number>();
   for (const p of all) for (const t of new Set(p.tags ?? [])) freq.set(t, (freq.get(t) ?? 0) + 1);
 
-  const mine = new Set(post.tags ?? []);
-  const scored = all
-    .filter((p) => p.slug !== post.slug)
-    .map((p) => {
-      let score = 0;
-      for (const t of new Set(p.tags ?? [])) if (mine.has(t)) score += 1 / (freq.get(t) ?? 1);
-      return { p, score };
-    });
+  const score = (a: BlogPost, b: BlogPost) => {
+    const mine = new Set(a.tags ?? []);
+    let s = 0;
+    for (const t of new Set(b.tags ?? [])) if (mine.has(t)) s += 1 / (freq.get(t) ?? 1);
+    return s;
+  };
 
-  scored.sort((a, b) => b.score - a.score || b.p.date.localeCompare(a.p.date));
-  return scored.slice(0, limit).map((s) => s.p);
+  const chosen = new Map<string, BlogPost[]>(all.map((p) => [p.slug, []]));
+  const inbound = new Map<string, number>(all.map((p) => [p.slug, 0]));
+  const rounds = Math.min(limit, Math.max(0, all.length - 1));
+
+  for (let round = 0; round < rounds; round++) {
+    // Se alterna el orden de recorrido para que ningún artículo elija siempre primero.
+    const order = round % 2 === 0 ? all : [...all].reverse();
+    for (const post of order) {
+      const mine = chosen.get(post.slug)!;
+      let best: BlogPost | null = null;
+      let bestValue = -1;
+      for (const c of all) {
+        if (c.slug === post.slug || mine.includes(c)) continue;
+        const value = (score(post, c) + SCORE_FLOOR) / Math.pow(1 + (inbound.get(c.slug) ?? 0), BALANCE_POWER);
+        if (value > bestValue || (value === bestValue && best && c.date.localeCompare(best.date) > 0)) {
+          best = c;
+          bestValue = value;
+        }
+      }
+      if (best) {
+        mine.push(best);
+        inbound.set(best.slug, (inbound.get(best.slug) ?? 0) + 1);
+      }
+    }
+  }
+
+  // Dentro de cada artículo, los más afines primero.
+  for (const post of all) chosen.get(post.slug)!.sort((a, b) => score(post, b) - score(post, a) || b.date.localeCompare(a.date));
+  return chosen;
+}
+
+export function getRelatedPosts(post: BlogPost, all: BlogPost[], limit = 6): BlogPost[] {
+  const key = `${limit}|${all.map((p) => `${p.slug}:${(p.tags ?? []).join(",")}`).join(";")}`;
+  if (key !== relatedKey) {
+    relatedCache = buildRelatedPlan(all, limit);
+    relatedKey = key;
+  }
+  return relatedCache.get(post.slug) ?? [];
 }
