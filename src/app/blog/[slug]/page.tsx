@@ -5,6 +5,7 @@ import ArticleContent from "./ArticleContent";
 import { getPublishedPostBySlug, getAllPublishedPosts, getAllPublishedSlugs } from "@/lib/supabase/blog";
 import { SITE_URL } from "@/lib/site";
 import { getRelatedPosts, getTopics } from "@/lib/blog-topics";
+import { autoLinkContent } from "@/lib/internal-links";
 
 export const revalidate = 3600;
 
@@ -96,6 +97,8 @@ export default async function ArticlePage({
   const nextPost = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
   const relatedPosts = getRelatedPosts(post, allPosts, 6);
   const topics = getTopics(allPosts);
+  // Enlaces internos contextuales: solo 7 de 99 artículos enlazaban a otros dentro del texto.
+  const linkedPost = { ...post, content: autoLinkContent(post, allPosts).content };
 
   const image = toJpegUrl(post.imageUrl || OG_FALLBACK);
   const structuredData = {
@@ -141,7 +144,7 @@ export default async function ArticlePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
       />
       <Header />
-      <ArticleContent post={post} previousPost={previousPost} nextPost={nextPost} relatedPosts={relatedPosts} topics={topics} />
+      <ArticleContent post={linkedPost} previousPost={previousPost} nextPost={nextPost} relatedPosts={relatedPosts} topics={topics} />
     </>
   );
 }
