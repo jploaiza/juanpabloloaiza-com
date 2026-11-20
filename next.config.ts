@@ -22,6 +22,18 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Artículos consolidados (mismo tema, competían entre sí en Google). Los originales
+      // quedan en borrador en la BD; su contenido útil se fusionó en el artículo destino.
+      {
+        source: "/blog/meditacion-vs-hipnosis",
+        destination: "/blog/diferencia-entre-hipnosis-y-meditacion",
+        permanent: true,
+      },
+      {
+        source: "/blog/psicologo-vs-coach-vs-hipnoterapeuta",
+        destination: "/blog/psicologo-vs-hipnoterapeuta",
+        permanent: true,
+      },
       // WordPress date-based post URLs → /blog/:slug
       {
         source: "/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug*",
