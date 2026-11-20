@@ -137,6 +137,7 @@ export default function RootLayout({
         "https://www.instagram.com/jploaizao",
         "https://www.tiktok.com/@jploaizao",
         "https://www.youtube.com/@jploaizao",
+        "https://www.regresionvidaspasadas.com",
       ],
       worksFor: { "@id": `${SITE_URL}/#service` },
     },

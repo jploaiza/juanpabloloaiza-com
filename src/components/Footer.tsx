@@ -38,6 +38,7 @@ export default function Footer() {
               { label: "Vidas Pasadas", href: "/#QueEsTRVP" },
               { label: "Preguntas Frecuentes", href: "/#PreguntasFrecuentes" },
               { label: "Blog", href: "/blog" },
+              { label: "Guía de Regresión a Vidas Pasadas", href: "https://www.regresionvidaspasadas.com/" },
               { label: "Entidades Espirituales", href: "/#liberacion" },
               { label: "Políticas de Servicio", href: "/politicas-de-servicio" },
             ].map((link) => (
