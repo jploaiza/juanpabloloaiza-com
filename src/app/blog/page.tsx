@@ -39,13 +39,15 @@ const BASE_METADATA: Metadata = {
   },
 };
 
-// Cada página de la paginación es una URL indexable con su propia canónica (antes todas
-// apuntaban a /blog y Google las trataba como duplicadas de la primera).
+// Las páginas 2+ del listado mantienen su propia canónica pero van en noindex,follow: en GSC
+// quedaban como "Rastreada: sin indexar" y ya recibían impresiones basura (?page=9, ?page=10).
+// Los artículos se descubren igual por el sitemap, los temas y los relacionados.
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const page = parsePage((await searchParams).page);
   if (page <= 1) return BASE_METADATA;
   return {
     ...BASE_METADATA,
+    robots: { index: false, follow: true },
     title: `Blog — Página ${page} | Juan Pablo Loaiza`,
     alternates: { canonical: `${SITE_URL}/blog?page=${page}` },
     openGraph: { ...BASE_METADATA.openGraph, url: `${SITE_URL}/blog?page=${page}` },
