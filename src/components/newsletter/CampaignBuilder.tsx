@@ -219,7 +219,7 @@ export default function CampaignBuilder({ campaign, posts }: Props) {
     const data = await res.json();
     setScheduleLoading(false);
     if (res.ok) {
-      setScheduleMsg(sendNow ? "Campaña en cola para envío" : "Campaña programada");
+      setScheduleMsg(sendNow ? (data.dispatched ? "Campaña enviada" : "Campaña en cola para envío") : "Campaña programada");
       setTimeout(() => router.push("/academy/admin/newsletter/campaigns"), 1500);
     } else {
       setScheduleMsg(data.error ?? "Error");

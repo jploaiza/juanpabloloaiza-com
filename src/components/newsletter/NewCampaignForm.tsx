@@ -11,10 +11,16 @@ const TEMPLATE_OPTIONS = [
   { kind: "reengagement", label: "Re-engagement",        desc: "Reactiva suscriptores inactivos" },
 ];
 
+const BRAND_OPTIONS: Array<{ key: "jpl" | "rvp"; label: string; desc: string }> = [
+  { key: "jpl", label: "Juan Pablo Loaiza", desc: "juanpabloloaiza.com · todos tus suscriptores" },
+  { key: "rvp", label: "Regresión a Vidas Pasadas", desc: "regresionvidaspasadas.com · solo la lista del portal" },
+];
+
 export default function NewCampaignForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [kind, setKind] = useState("editorial");
+  const [brand, setBrand] = useState<"jpl" | "rvp">("jpl");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,7 +32,7 @@ export default function NewCampaignForm() {
     const res = await fetch("/api/newsletter/campaigns", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), template_kind: kind }),
+      body: JSON.stringify({ name: name.trim(), template_kind: kind, brand }),
     });
     const data = await res.json();
     if (!res.ok) { setError(data.error ?? "Error al crear."); setLoading(false); return; }
@@ -48,6 +54,27 @@ export default function NewCampaignForm() {
           className="w-full bg-[#0a1628] border border-[#C5A059]/20 text-gray-200 font-crimson px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A059]/50 placeholder-gray-600"
         />
         <p className="font-crimson text-xs text-gray-600 mt-1">Solo visible en el admin, no se muestra al suscriptor.</p>
+      </div>
+
+      <div>
+        <p className="font-cinzel text-[9px] uppercase tracking-widest text-gray-500 mb-3">Sitio / marca del correo</p>
+        <div className="grid grid-cols-2 gap-3">
+          {BRAND_OPTIONS.map((b) => (
+            <button
+              key={b.key}
+              type="button"
+              onClick={() => setBrand(b.key)}
+              className={`text-left p-4 border transition ${
+                brand === b.key
+                  ? "border-[#C5A059] bg-[#C5A059]/8"
+                  : "border-white/10 bg-[#16213e] hover:border-[#C5A059]/30"
+              }`}
+            >
+              <p className="font-cinzel text-[10px] uppercase tracking-widest text-[#C5A059] mb-1">{b.label}</p>
+              <p className="font-crimson text-xs text-gray-500">{b.desc}</p>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div>

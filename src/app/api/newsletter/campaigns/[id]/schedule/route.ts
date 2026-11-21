@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
+import { dispatchScheduledCampaigns } from "@/lib/newsletter/dispatch";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,10 +28,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   if (send_now) {
-    // Schedule for immediate dispatch (set to 1 minute from now so cron picks it up)
-    const nowPlus1 = new Date(Date.now() + 60_000).toISOString();
-    await auth.adminSb.from("newsletter_campaigns").update({ status: "scheduled", scheduled_at: nowPlus1, updated_at: new Date().toISOString() }).eq("id", id);
-    return NextResponse.json({ ok: true, scheduled_at: nowPlus1, send_now: true });
+    // Envío inmediato: se marca como programada para ahora y se despacha en el acto.
+    // Si el despacho falla o se corta, el cron diario la recoge (sigue "scheduled").
+    const now = new Date().toISOString();
+    await auth.adminSb.from("newsletter_campaigns").update({ status: "scheduled", scheduled_at: now, updated_at: now }).eq("id", id);
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const { dispatched, errors } = await dispatchScheduledCampaigns(auth.adminSb, resend, { campaignId: id, limit: 1 });
+      return NextResponse.json({ ok: true, scheduled_at: now, send_now: true, dispatched: dispatched.length > 0, errors });
+    } catch (e) {
+      console.error("[newsletter/schedule] envío inmediato", e);
+      return NextResponse.json({ ok: true, scheduled_at: now, send_now: true, dispatched: false, queued: true });
+    }
   }
 
   if (!scheduled_at) return NextResponse.json({ error: "Fecha de envío requerida." }, { status: 400 });

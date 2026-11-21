@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
 import { renderCampaignHtml } from "@/lib/newsletter/renderer";
+import { BRANDS, brandFromSenderEmail } from "@/lib/newsletter/brands";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     apellido: String(test_apellido ?? "Loaiza").trim() || "Loaiza",
     unsubscribe_token: "test-token",
   };
-  const html = renderCampaignHtml(campaign.template_kind, campaign.template_data, testSub);
+  const brand = brandFromSenderEmail(campaign.sender_email) ?? BRANDS.jpl;
+  const html = renderCampaignHtml(campaign.template_kind, campaign.template_data, testSub, brand);
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { error } = await resend.emails.send({

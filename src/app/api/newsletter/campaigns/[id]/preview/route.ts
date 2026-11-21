@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireNewsletterAdmin } from "@/lib/newsletter/auth";
 import { renderCampaignHtml } from "@/lib/newsletter/renderer";
+import { BRANDS, brandFromSenderEmail } from "@/lib/newsletter/brands";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (!campaign) return new NextResponse("Not found", { status: 404 });
 
   const testSub = { id: "preview", email: "preview@example.com", name: "Lector", apellido: "Ejemplo", unsubscribe_token: "preview-token" };
-  const html = renderCampaignHtml(campaign.template_kind, campaign.template_data, testSub);
+  const brand = brandFromSenderEmail(campaign.sender_email) ?? BRANDS.jpl;
+  const html = renderCampaignHtml(campaign.template_kind, campaign.template_data, testSub, brand);
 
   return new NextResponse(html, {
     headers: {
