@@ -42,7 +42,7 @@ export interface Brand {
   logoAlt: string;
   emailTitle: string;
   copyright: string;
-  author: { label: string; name: string; bio: string; note: string; cta: string };
+  author?: { label: string; name: string; bio: string; note: string; cta: string };
   welcomeText: string;
   reengagementText: string;
   palette: BrandPalette;
@@ -125,13 +125,6 @@ export const BRANDS: Record<BrandKey, Brand> = {
     logoAlt: "Regresión a Vidas Pasadas",
     emailTitle: "Regresión a Vidas Pasadas",
     copyright: "© 2026 Regresión a Vidas Pasadas · Todos los derechos reservados",
-    author: {
-      label: "Autor del portal",
-      name: "Juan Pablo Loaiza",
-      bio: "Terapeuta de Regresión a Vidas Pasadas con más de 19 años de experiencia. Atiende sesiones online a personas de todo el mundo.",
-      note: "Si quieres conocer más sobre el proceso o tienes dudas, escríbeme directamente.",
-      cta: "Escríbeme por WhatsApp",
-    },
     welcomeText:
       "Recibirás artículos sobre regresión a vidas pasadas, hipnosis y liberación espiritual. Sin spam, solo lo que vale la pena leer.",
     reengagementText:
