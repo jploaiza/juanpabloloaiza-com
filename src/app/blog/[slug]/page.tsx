@@ -6,6 +6,7 @@ import { getPublishedPostBySlug, getAllPublishedPosts, getAllPublishedSlugs } fr
 import { SITE_URL } from "@/lib/site";
 import { getRelatedPosts, getTopics } from "@/lib/blog-topics";
 import { autoLinkContent } from "@/lib/internal-links";
+import { autoLinkPortal } from "@/lib/portal-links";
 
 export const revalidate = 3600;
 
@@ -98,7 +99,9 @@ export default async function ArticlePage({
   const relatedPosts = getRelatedPosts(post, allPosts, 6);
   const topics = getTopics(allPosts);
   // Enlaces internos contextuales: solo 7 de 99 artículos enlazaban a otros dentro del texto.
-  const linkedPost = { ...post, content: autoLinkContent(post, allPosts).content };
+  const internallyLinked = autoLinkContent(post, allPosts).content;
+  // Enlaces contextuales hacia las fichas de autores del portal regresionvidaspasadas.com.
+  const linkedPost = { ...post, content: autoLinkPortal(internallyLinked).content };
 
   const image = toJpegUrl(post.imageUrl || OG_FALLBACK);
   const structuredData = {
